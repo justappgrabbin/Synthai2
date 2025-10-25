@@ -71,11 +71,13 @@ const AI_BACKENDS: AIBackend[] = [
 export function AIBackendSelector() {
   const [selectedBackend, setSelectedBackend] = useState<AIBackend>(AI_BACKENDS[0]);
   const [apiKey, setApiKey] = useState("");
+  const [ollamaUrl, setOllamaUrl] = useState("http://localhost:11434");
   const [isConfigured, setIsConfigured] = useState(false);
 
   useEffect(() => {
     const savedBackendId = localStorage.getItem("ai_backend");
     const savedKey = localStorage.getItem(`ai_key_${selectedBackend.id}`);
+    const savedOllamaUrl = localStorage.getItem("ollama_url");
     
     if (savedBackendId) {
       const backend = AI_BACKENDS.find(b => b.id === savedBackendId);
@@ -87,6 +89,10 @@ export function AIBackendSelector() {
     if (savedKey) {
       setApiKey(savedKey);
       setIsConfigured(true);
+    }
+    
+    if (savedOllamaUrl) {
+      setOllamaUrl(savedOllamaUrl);
     }
   }, []);
 
@@ -111,6 +117,13 @@ export function AIBackendSelector() {
       console.log('API key saved for', selectedBackend.name);
     } else if (!selectedBackend.requiresKey) {
       setIsConfigured(true);
+    }
+  };
+
+  const handleSaveOllamaUrl = () => {
+    if (ollamaUrl) {
+      localStorage.setItem("ollama_url", ollamaUrl);
+      console.log('Ollama URL saved:', ollamaUrl);
     }
   };
 
@@ -187,11 +200,38 @@ export function AIBackendSelector() {
       )}
 
       {!selectedBackend.requiresKey && (
-        <div className="p-3 rounded-md bg-lavender/5 border border-lavender/20">
-          <p className="text-xs text-muted-foreground">
-            <strong>{selectedBackend.name}</strong> runs locally via Ollama.
-            Make sure Ollama is running on your machine.
-          </p>
+        <div className="space-y-3">
+          <div className="p-3 rounded-md bg-lavender/5 border border-lavender/20">
+            <p className="text-xs text-muted-foreground mb-3">
+              <strong>{selectedBackend.name}</strong> runs locally via Ollama.
+              Make sure Ollama is running on your machine.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="ollama-url" className="text-xs">Ollama Server URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="ollama-url"
+                  data-testid="input-ollama-url"
+                  type="text"
+                  value={ollamaUrl}
+                  onChange={(e) => setOllamaUrl(e.target.value)}
+                  placeholder="http://localhost:11434"
+                  className="font-mono text-xs"
+                />
+                <Button 
+                  data-testid="button-save-ollama-url"
+                  onClick={handleSaveOllamaUrl}
+                  size="sm"
+                  className="bg-lavender hover:bg-lavender-hover"
+                >
+                  Save
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                💡 Change if Ollama is running on a different machine or port
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

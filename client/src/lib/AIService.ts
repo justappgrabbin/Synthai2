@@ -121,9 +121,10 @@ export class AIService {
    * CodeLlama (Ollama Local) API
    */
   private static async callCodeLlama(messages: AIMessage[]): Promise<AIResponse> {
+    const ollamaUrl = localStorage.getItem("ollama_url") || "http://localhost:11434";
     const prompt = messages.map(m => `${m.role}: ${m.content}`).join("\n\n");
 
-    const response = await fetch("http://localhost:11434/api/generate", {
+    const response = await fetch(`${ollamaUrl}/api/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -136,7 +137,7 @@ export class AIService {
     });
 
     if (!response.ok) {
-      throw new Error("CodeLlama not available. Is Ollama running?");
+      throw new Error(`Ollama not available at ${ollamaUrl}. Is Ollama running?`);
     }
 
     const data = await response.json();
