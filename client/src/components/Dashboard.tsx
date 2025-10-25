@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Code2, Gamepad2, Play, Bot, Settings, Store } from "lucide-react";
+import { Code2, Gamepad2, Play, Bot, Settings, Store, Brain } from "lucide-react";
 
 export function Dashboard() {
   const [, setLocation] = useLocation();
@@ -16,7 +16,7 @@ export function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
         <PortalButton
           icon={Code2}
           title="Launch IDE"
@@ -32,6 +32,14 @@ export function Dashboard() {
           onClick={() => setLocation("/grove-store")}
           variant="primary"
           testId="button-portal-grove-store"
+        />
+        <PortalButton
+          icon={Brain}
+          title="GAN Trainer"
+          description="Train & deploy neural networks"
+          onClick={() => setLocation("/gan-trainer")}
+          variant="primary"
+          testId="button-portal-gan-trainer"
         />
         <PortalButton
           icon={Gamepad2}

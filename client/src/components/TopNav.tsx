@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Code2, Gamepad2, Play, Bot, Settings, Home, Store } from "lucide-react";
+import { Code2, Gamepad2, Play, Bot, Settings, Home, Store, Brain } from "lucide-react";
 
 export function TopNav() {
   const [location, setLocation] = useLocation();
@@ -10,6 +10,7 @@ export function TopNav() {
     { path: "/grove-store", label: "Grove Store", icon: Store },
     { path: "/ide", label: "IDE", icon: Code2 },
     { path: "/game-creator", label: "Games", icon: Gamepad2 },
+    { path: "/gan-trainer", label: "GAN Trainer", icon: Brain },
     { path: "/player", label: "Player", icon: Play },
     { path: "/agents", label: "Agents", icon: Bot },
     { path: "/settings", label: "Settings", icon: Settings },
