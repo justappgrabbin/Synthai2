@@ -150,3 +150,25 @@ Added professional export/publish features using Replit's built-in connectors:
 - Renamed to "AI Guard Dog 🐕"
 - Friendlier welcome messages and setup guidance
 - Explicitly lists all 5 backend options (Claude, GPT-4, DeepSeek, Grok, CodeLlama)
+
+### Mobile UX Improvements (Latest)
+Optimized mobile experience across the app:
+
+**AI Assistant Button Positioning**
+- Fixed positioning: Now at `bottom-4` on mobile (was `bottom-20`)
+- Button no longer off-screen on mobile devices
+- Properly accessible with thumb reach
+- Adjusted InstallPrompt positioning to match
+
+**IDE Mobile Menu** 📱
+- Desktop: Full menubar with File, Edit, View, Run, Snippets, Tools, Help
+- Mobile (<md): Compact dropdown menu with essential actions
+- Mobile menu includes: File Panel toggle, Terminal toggle, Preview toggle, New File, Save, Run, Code Snatcher, GitHub/Drive export, Download, Send to Store
+- Terminal is now viewable on phones without menubar obstruction
+- Space-efficient design for small screens
+
+**AgentPanel Touch Improvements**
+- Increased icon sizes from 12px to 16px for better visibility
+- Improved touch targets with `size="sm"` buttons
+- Minimum width added to icon-only buttons
+- All buttons properly sized for mobile interaction
