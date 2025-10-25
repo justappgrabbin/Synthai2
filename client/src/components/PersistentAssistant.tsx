@@ -53,11 +53,12 @@ export function PersistentAssistant() {
       ]);
 
       if (response.error) {
-        toast({
-          title: "AI Error",
-          description: response.error,
-          variant: "destructive"
-        });
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: `⚠️ ${response.error}\n\nPlease go to Settings and configure your AI backend with an API key.`,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
         return;
       }
 
@@ -69,11 +70,12 @@ export function PersistentAssistant() {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      toast({
-        title: "Connection Error",
-        description: "Failed to reach AI service. Check your settings.",
-        variant: "destructive"
-      });
+      const errorMessage: Message = {
+        role: "assistant",
+        content: "⚠️ Failed to reach AI service. Please go to Settings and configure your AI backend with an API key.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -150,10 +152,14 @@ export function PersistentAssistant() {
             <>
               <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                 {messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                  <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                     <Bot className="h-12 w-12 mb-3 opacity-20" />
-                    <p className="text-sm">I'm here to help and protect your work.</p>
-                    <p className="text-xs mt-1">Ask me anything!</p>
+                    <p className="text-sm font-medium mb-2">I'm here to help and protect your work.</p>
+                    <p className="text-xs mb-3">Ask me anything!</p>
+                    <div className="text-xs bg-lavender/10 p-3 rounded-md border border-lavender/20">
+                      <p className="text-lavender font-medium mb-1">💡 First time?</p>
+                      <p className="text-muted-foreground">Go to Settings and configure your AI backend (Claude, GPT, etc.) with your API key.</p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
