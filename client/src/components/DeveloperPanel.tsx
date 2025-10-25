@@ -12,6 +12,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -707,101 +710,135 @@ setupInfiniteScroll(async () => {
                 <span className="hidden sm:inline">Snippets</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 max-h-[500px] overflow-y-auto">
-              <DropdownMenuLabel>HTML</DropdownMenuLabel>
-              {codeSnippets.html.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`html-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-html-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
-              
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Code Snippets</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>CSS</DropdownMenuLabel>
-              {codeSnippets.css.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`css-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-css-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
               
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>HTML</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="max-h-[400px] overflow-y-auto">
+                  {codeSnippets.html.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`html-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-html-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>CSS</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.css.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`css-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-css-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>JavaScript</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.javascript.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`js-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-js-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>JavaScript</DropdownMenuLabel>
-              {codeSnippets.javascript.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`js-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-js-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
-              
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="text-lavender">
+                  PWA / APK Builder
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.pwa.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`pwa-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-pwa-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
               <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-lavender">PWA / APK Builder</DropdownMenuLabel>
-              {codeSnippets.pwa.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`pwa-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-pwa-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Utilities</DropdownMenuLabel>
-              {codeSnippets.utilities.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`util-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-util-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Forms</DropdownMenuLabel>
-              {codeSnippets.forms.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`form-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-form-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>API / Network</DropdownMenuLabel>
-              {codeSnippets.api.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`api-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-api-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
-              
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>UI Components</DropdownMenuLabel>
-              {codeSnippets.ui.map((snippet, idx) => (
-                <DropdownMenuItem
-                  key={`ui-${idx}`}
-                  onClick={() => insertSnippet(snippet.code)}
-                  data-testid={`snippet-ui-${idx}`}
-                >
-                  {snippet.name}
-                </DropdownMenuItem>
-              ))}
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Utilities</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.utilities.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`util-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-util-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Forms</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.forms.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`form-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-form-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>API / Network</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.api.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`api-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-api-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>UI Components</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.ui.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`ui-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-ui-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
             </DropdownMenuContent>
           </DropdownMenu>
 
