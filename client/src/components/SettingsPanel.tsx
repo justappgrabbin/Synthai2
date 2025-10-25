@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { AIBackendSelector } from "./AIBackendSelector";
 import { TopNav } from "@/components/TopNav";
+import { useTheme } from "@/components/ThemeProvider";
+import { Moon, Sun } from "lucide-react";
 
 export function SettingsPanel() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
@@ -25,14 +29,39 @@ export function SettingsPanel() {
           </p>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm">Dark Mode</span>
-              <Button variant="outline" size="sm" onClick={() => console.log('Toggle theme')}>
-                Toggle
+              <div className="flex items-center gap-2">
+                {theme === "dark" ? (
+                  <Moon className="h-4 w-4 text-lavender" />
+                ) : (
+                  <Sun className="h-4 w-4 text-lavender" />
+                )}
+                <span className="text-sm font-medium">
+                  {theme === "dark" ? "Dark Mode" : "Light Mode"}
+                </span>
+              </div>
+              <Button 
+                data-testid="button-toggle-theme"
+                variant="outline" 
+                size="sm" 
+                onClick={toggleTheme}
+                className="gap-2"
+              >
+                {theme === "dark" ? (
+                  <>
+                    <Sun className="h-4 w-4" />
+                    Switch to Light
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-4 w-4" />
+                    Switch to Dark
+                  </>
+                )}
               </Button>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Lavender Accent</span>
-              <div className="h-6 w-6 rounded-full bg-lavender border-2 border-border" />
+              <div className="h-6 w-6 rounded-full bg-lavender border-2 border-border shadow-sm" />
             </div>
           </div>
         </section>

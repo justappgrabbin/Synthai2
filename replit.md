@@ -1,222 +1,61 @@
 # YOU–N–I–VERSE Studio
 
 ## Overview
-
-YOU–N–I–VERSE Studio (The Indyverse) is a creative development environment that combines a browser-based IDE, game creation tools, and AI-powered assistance. The platform features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible through a central dashboard hub.
-
-**Core Features:**
-- Browser-based code editor with file system management (localStorage persistence)
-- Game template library with pre-built examples (platformer, space shooter, puzzle games)
-- Grove Store - Community marketplace for apps, agents, templates, and tools
-- ZIP file player for exploring bundled creative projects
-- Multi-backend AI assistant (Claude, GPT, CodeLlama, DeepSeek, Grok)
-- Global navigation menu for quick access to all panels
-- Portal-based dashboard with cosmic-themed interface
-- Lavender (#9b87f5) accent theme throughout
+YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform aims to be a community marketplace for creative tools and projects.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
+### Frontend
+- **Frameworks**: React 18 with TypeScript, Vite, Wouter for routing, TanStack Query for server state.
+- **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode), "New York" style variant, custom spacing, and specific typography (Inter/SF Pro, JetBrains Mono/Fira Code, Space Grotesk).
+- **Application Structure**: Central Dashboard with eight main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel). Global TopNav for navigation, and a persistent AI Assistant overlay.
+- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, and a GAN Trainer using TensorFlow.js.
+- **State Management**: Primarily localStorage for persistence (files, AI config, API keys) and in-memory for UI.
+- **Design Patterns**: Portal-based navigation, "cosmic professionalism" aesthetic, persistent and non-intrusive AI presence, component composition.
 
-**Framework Stack:**
-- React 18 with TypeScript
-- Vite for build tooling and development server
-- Wouter for lightweight client-side routing
-- TanStack Query for server state management
-- shadcn/ui component library (Radix UI primitives with Tailwind CSS)
+### Backend
+- **Server**: Express.js with TypeScript, HTTP-only (no WebSockets), middleware-based request handling.
+- **Database**: Drizzle ORM configured for PostgreSQL, with an in-memory storage fallback (MemStorage) currently in use.
+- **API**: RESTful pattern, storage interface abstraction for CRUD.
+- **File Organization**: `/server` (backend), `/client` (frontend), `/shared` (types/schemas).
 
-**Styling Approach:**
-- Tailwind CSS with custom design tokens
-- CSS variables for theme management (supports light/dark modes)
-- "New York" style variant from shadcn/ui
-- Custom spacing system (2, 4, 8, 12, 16 units)
-- Typography: Inter/SF Pro Display for UI, JetBrains Mono/Fira Code for code, Space Grotesk for headings
+### System Design Choices
+- File system persistence handled via localStorage.
+- AI conversations are client-side, direct to providers.
+- Game templates and Grove Store items are static data.
+- User authentication is not yet implemented.
+- The PostgreSQL database is configured but not actively used for current features.
+- Code Snatcher tool for extracting website HTML structures.
+- Enhanced code snippet library with nested categories and 50+ snippets.
+- Theme system with light/dark mode toggle and persistence.
+- Mobile-friendly IDE with responsive design and preview toggle.
 
-**Application Structure:**
-- Dashboard serves as central navigation hub (home world)
-- Eight main panels: Dashboard, GroveStore, IDE (DeveloperPanel), GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel
-- TopNav component provides global navigation across all panels (except Dashboard which uses portal cards)
-- Each panel is a full-page component accessed via routes
-- Persistent AI Assistant overlay available globally across all views
+## External Dependencies
 
-**Routes:**
-- `/` - Dashboard (portal gateway)
-- `/grove-store` - Grove Store (community marketplace)
-- `/ide` - Developer Panel (code editor with file management)
-- `/game-creator` - Game Creator (template browser)
-- `/gan-trainer` - GAN Trainer (neural network training with TensorFlow.js)
-- `/player` - Player Panel (ZIP file viewer with User Creations library)
-- `/agents` - Agent Panel (AI agent management)
-- `/settings` - Settings Panel (AI backend configuration)
+### AI Services
+- Anthropic Claude API
+- OpenAI GPT API
+- DeepSeek API
+- Grok API
+- CodeLlama (local via Ollama)
+- AIService router for managing API calls.
 
-**State Management:**
-- LocalStorage for file system persistence (IDE files)
-- LocalStorage for AI backend configuration and API keys
-- In-memory state for UI interactions
-- No global state management library (component-level state only)
+### UI/Development Libraries
+- Radix UI primitives, shadcn/ui components, Lucide React for icons.
+- date-fns for date manipulation.
+- Neon Database serverless driver, Drizzle Kit.
+- ESBuild for server bundling.
+- Replit-specific Vite plugins (cartographer, dev-banner, runtime-error-modal).
 
-**Key Design Patterns:**
-- Portal-based navigation (each section entry feels dimensional)
-- Cosmic professionalism aesthetic (technical precision + universe-inspired visuals)
-- Persistent AI presence (always accessible, never intrusive)
-- Component composition over configuration
+### Utility Libraries
+- clsx + tailwind-merge for CSS class management.
+- class-variance-authority for component variants.
+- react-hook-form + Zod resolvers for forms.
+- JSZip for handling .zip files.
+- nanoid for ID generation.
 
-### Backend Architecture
-
-**Server Framework:**
-- Express.js with TypeScript
-- HTTP-only server (no WebSocket implementation currently)
-- Middleware-based request handling
-- Custom logging for API routes
-
-**Development vs Production:**
-- Vite dev server in development mode with HMR
-- Static file serving in production
-- Replit-specific plugins for development tooling
-
-**Database Layer:**
-- Drizzle ORM configured for PostgreSQL
-- Schema definition in shared folder for type safety
-- Basic user table defined (username/password)
-- Currently using in-memory storage implementation (MemStorage class)
-- Database configured but not actively used in current features
-
-**API Design:**
-- RESTful pattern expected (routes prefixed with /api)
-- Storage interface abstraction for CRUD operations
-- No authentication/authorization implemented yet
-
-**File Organization:**
-- `/server` - Backend code (Express server, routes, storage)
-- `/client` - Frontend React application
-- `/shared` - Shared types and schemas (Drizzle schema, Zod validators)
-
-### External Dependencies
-
-**AI Services (Multi-Backend):**
-- Anthropic Claude API (requires API key)
-- OpenAI GPT API (requires API key)
-- DeepSeek API (requires API key)
-- Grok API (requires API key)
-- CodeLlama via Ollama (local, no key required - localhost:11434)
-- AIService router handles backend selection and API calls
-- API keys stored in localStorage with backend-specific prefixes
-
-**UI Component Library:**
-- Radix UI primitives (dialogs, dropdowns, tooltips, etc.)
-- Full shadcn/ui component suite installed
-- Lucide React for icons
-- date-fns for date manipulation
-
-**Development Tools:**
-- Neon Database serverless driver (@neondatabase/serverless)
-- Drizzle Kit for database migrations
-- ESBuild for production server bundling
-- Replit-specific Vite plugins (cartographer, dev-banner, runtime-error-modal)
-
-**Utility Libraries:**
-- clsx + tailwind-merge for className composition
-- class-variance-authority for component variants
-- react-hook-form + Zod resolvers for form handling
-- JSZip for handling .zip file uploads in PlayerPanel
-- nanoid for ID generation
-
-**Frontend Routing:**
-- Wouter (lightweight React router)
-- Client-side only (no SSR)
-
-**Notable Architecture Decisions:**
-- File system persistence uses localStorage (not server-side storage)
-- AI conversations happen client-side with direct API calls to providers
-- Game templates and Grove Store items stored as static data structures in code
-- Grove Store currently displays curated community items (static data, no backend API yet)
-- No user authentication currently implemented despite user schema existing
-- PostgreSQL configured but currently using in-memory storage fallback
-
-## Recent Changes (October 25, 2025)
-
-### Grove Store Launch
-Added community marketplace feature for discovering and downloading apps, agents, templates, and tools:
-- **Location**: `/grove-store` route, `client/src/components/GroveStore.tsx`
-- **Features**: Category filtering (All, Agents, Apps, Templates, Tools), search functionality, featured items section
-- **UI Elements**: Store item cards with ratings, download counts, tags, and author information
-- **Sample Content**: 10 curated items across all categories (currently static data)
-- **Future Enhancements**: Backend API for real submissions, user uploads, ratings system
-
-### Global Navigation Menu
-Replaced per-panel back buttons with unified TopNav component:
-- **Component**: `client/src/components/TopNav.tsx`
-- **Features**: Persistent navigation bar with icons and labels, active state highlighting, responsive design
-- **Navigation Items**: Dashboard, Grove Store, IDE, Games, GAN Trainer, Player, Agents, Settings
-- **Active Detection**: Uses wouter's useLocation() to highlight current page
-- **Design**: Lavender accent for active items, ghost variant for inactive items
-
-### GAN Trainer Panel
-Added neural network training capabilities with TensorFlow.js:
-- **Location**: `/gan-trainer` route, `client/src/components/GANTrainer.tsx`
-- **Features**: GAN template library, trainable and pre-trained model support
-- **Templates**: Simple GAN with TensorFlow.js implementation (generative adversarial network)
-- **Integration**: Templates load directly into IDE for modification and customization
-- **Technology**: Browser-based training using TensorFlow.js, no server required
-
-### User Creations Library
-Added tracking system for uploaded projects in Player Panel:
-- **Storage**: `client/src/lib/userCreations.ts` manages localStorage persistence
-- **Features**: Two-tab interface ("Current Project" and "User Creations")
-- **Functionality**: Automatically saves uploaded zip metadata, displays creation cards with file counts and dates
-- **Management**: Users can delete creations from their library
-- **Integration**: Works seamlessly with zip file upload system
-
-### Mobile-Friendly IDE
-Enhanced Developer Panel with responsive design similar to Replit's mobile interface:
-- **Slide-out File Panel**: Menu button toggles file tree on mobile devices with smooth animations
-- **Responsive Controls**: Buttons show icons only on mobile, full labels on desktop
-- **Preview Toggle**: Tablet users can switch between code editor and preview pane
-- **Dark Overlay**: Tap outside file panel to close on mobile
-- **Auto-close**: File panel automatically closes when selecting a file on mobile
-
-### Persistent AI Assistant ("Guard Dog")
-Integrated multi-backend AI chat assistant available globally across all panels:
-- **Component**: `client/src/components/PersistentAssistant.tsx`
-- **Location**: Floating chat button in bottom-right corner, always accessible
-- **Features**: Chat interface with conversation history, minimize/maximize, clear chat
-- **Backend Selection**: Users choose between Claude, GPT, CodeLlama, DeepSeek, or Grok
-- **Configuration**: AI backend settings managed in Settings Panel via AIBackendSelector
-- **Service Layer**: `client/src/lib/AIService.ts` routes messages to selected AI provider
-- **Storage**: API keys stored securely in localStorage with backend-specific prefixes
-- **Local Option**: CodeLlama runs locally via Ollama (no API key required)
-- **UI Design**: Lavender-accented chat bubble with Guard Dog branding
-
-### ZIP to IDE Integration
-Complete workflow for editing uploaded creative bundles:
-- **Feature**: "Edit in IDE" button in Player Panel loads ZIP contents directly into IDE
-- **Implementation**: `FileSystem.loadFromZipEntries()` converts ZIP entries to file tree
-- **Navigation**: Automatic redirect to IDE after successful load
-- **File Structure**: Preserves folder hierarchy from uploaded ZIP files
-- **Use Case**: Upload game template → inspect in Player → edit in IDE → customize and run
-
-### Code Snippet Inserter
-Quick-access menu for inserting common HTML/CSS/JavaScript code patterns:
-- **Component**: Dropdown menu in IDE header between Save and Run buttons
-- **Location**: IDE toolbar with sparkles (✨) icon
-- **Categories**: 
-  - HTML (boilerplate, PWA manifest, buttons, forms, cards)
-  - CSS (flexbox, button styles, cards, mobile-first responsive)
-  - JavaScript (event listeners, fetch API, local storage, canvas setup)
-  - **PWA/APK Builder** (manifest.json, service worker, APK export instructions, install button)
-- **Functionality**: One-click insertion of code snippets into current file
-- **Mobile**: Icon-only on mobile, label visible on desktop
-- **Snippets**: 18 pre-built templates including full PWA-to-APK conversion workflow
-- **APK Export**: Step-by-step instructions to convert web apps to Android APK using PWABuilder, Cordova, or Capacitor
-
-### Mobile Preview Toggle
-Enhanced mobile support for IDE preview pane:
-- **Feature**: Preview toggle button now available on all screen sizes (phones + tablets)
-- **Button**: Globe icon (🌐) in IDE header
-- **Behavior**: Switches view between code editor and preview pane on mobile devices
-- **Previous Issue**: Preview was inaccessible on phones - now fixed
-- **Integration**: Works seamlessly with existing Run functionality
+### Routing
+- Wouter (client-side only).

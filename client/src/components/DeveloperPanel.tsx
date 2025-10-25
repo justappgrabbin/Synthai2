@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download } from "lucide-react";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
@@ -17,6 +17,14 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function DeveloperPanel() {
   const [files, setFiles] = useState<FileNode[]>([]);
@@ -27,6 +35,9 @@ export function DeveloperPanel() {
   const [showNewFileInput, setShowNewFileInput] = useState(false);
   const [showFilePanel, setShowFilePanel] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [codeSnatcherOpen, setCodeSnatcherOpen] = useState(false);
+  const [snatchUrl, setSnatchUrl] = useState("");
+  const [isSnatchingCode, setIsSnatchingCode] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -154,6 +165,110 @@ export function DeveloperPanel() {
       title: "Snippet inserted!",
       description: "Code snippet added to file"
     });
+  };
+
+  const handleSnatchCode = async () => {
+    if (!snatchUrl.trim()) {
+      toast({
+        title: "URL Required",
+        description: "Enter a website URL to snatch code from",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSnatchingCode(true);
+
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(snatchUrl)}`;
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch website');
+      }
+
+      const html = await response.text();
+      
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      const extractStructure = (element: Element, depth = 0): string => {
+        if (depth > 5) return '';
+        
+        const tag = element.tagName.toLowerCase();
+        const classes = element.className ? ` class="${element.className}"` : '';
+        const id = element.id ? ` id="${element.id}"` : '';
+        
+        const skipTags = ['script', 'noscript', 'style', 'meta', 'link'];
+        if (skipTags.includes(tag)) return '';
+        
+        let result = '';
+        const indent = '  '.repeat(depth);
+        
+        if (tag === 'img') {
+          const src = element.getAttribute('src') || '';
+          const alt = element.getAttribute('alt') || '';
+          result = `${indent}<img src="${src}" alt="${alt}"${classes}${id}>\n`;
+        } else if (tag === 'input') {
+          const type = element.getAttribute('type') || 'text';
+          const placeholder = element.getAttribute('placeholder') || '';
+          result = `${indent}<input type="${type}" placeholder="${placeholder}"${classes}${id}>\n`;
+        } else if (tag === 'a') {
+          const href = element.getAttribute('href') || '#';
+          const text = element.textContent?.trim().slice(0, 50) || 'Link';
+          result = `${indent}<a href="${href}"${classes}${id}>${text}</a>\n`;
+        } else if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'button'].includes(tag)) {
+          const text = element.textContent?.trim().slice(0, 100) || '';
+          if (text) {
+            result = `${indent}<${tag}${classes}${id}>${text}</${tag}>\n`;
+          }
+        } else {
+          const children = Array.from(element.children);
+          if (children.length > 0) {
+            result = `${indent}<${tag}${classes}${id}>\n`;
+            children.forEach(child => {
+              result += extractStructure(child, depth + 1);
+            });
+            result += `${indent}</${tag}>\n`;
+          }
+        }
+        
+        return result;
+      };
+      
+      const body = doc.body;
+      let wireframe = '<!-- Extracted wireframe from: ' + snatchUrl + ' -->\n\n';
+      wireframe += extractStructure(body);
+      
+      wireframe = wireframe.replace(/\n{3,}/g, '\n\n');
+      
+      const fileName = 'snatched-' + new Date().getTime() + '.html';
+      FileSystem.createFile('', fileName, wireframe);
+      loadFiles();
+      
+      const newFile = FileSystem.findFile(fileName);
+      if (newFile) {
+        openFile(newFile);
+      }
+      
+      setCodeSnatcherOpen(false);
+      setSnatchUrl('');
+      
+      toast({
+        title: "Code Snatched! 🎣",
+        description: `Extracted wireframe saved to ${fileName}`
+      });
+      
+    } catch (error) {
+      console.error('Code snatcher error:', error);
+      toast({
+        title: "Snatch Failed",
+        description: "Couldn't fetch website. Try a different URL or check CORS settings.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSnatchingCode(false);
+    }
   };
 
   const codeSnippets = {
@@ -667,6 +782,759 @@ setupInfiniteScroll(async () => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   // Add your items here
 });` }
+    ],
+    game: [
+      { name: "Game Loop", code: `class Game {
+  constructor() {
+    this.running = false;
+    this.lastTime = 0;
+    this.deltaTime = 0;
+  }
+
+  start() {
+    this.running = true;
+    this.lastTime = performance.now();
+    this.loop();
+  }
+
+  loop = (currentTime) => {
+    if (!this.running) return;
+    
+    this.deltaTime = (currentTime - this.lastTime) / 1000;
+    this.lastTime = currentTime;
+    
+    this.update(this.deltaTime);
+    this.render();
+    
+    requestAnimationFrame(this.loop);
+  }
+
+  update(dt) {
+    // Game logic here
+  }
+
+  render() {
+    // Drawing code here
+  }
+
+  stop() {
+    this.running = false;
+  }
+}
+
+const game = new Game();
+game.start();` },
+      { name: "Collision Detection", code: `function checkCollision(rect1, rect2) {
+  return rect1.x < rect2.x + rect2.width &&
+         rect1.x + rect1.width > rect2.x &&
+         rect1.y < rect2.y + rect2.height &&
+         rect1.y + rect1.height > rect2.y;
+}
+
+// Circle collision
+function checkCircleCollision(circle1, circle2) {
+  const dx = circle1.x - circle2.x;
+  const dy = circle1.y - circle2.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < circle1.radius + circle2.radius;
+}
+
+// Usage:
+const player = { x: 10, y: 10, width: 32, height: 32 };
+const enemy = { x: 50, y: 50, width: 32, height: 32 };
+if (checkCollision(player, enemy)) {
+  console.log('Hit!');
+}` },
+      { name: "Keyboard Input", code: `class InputHandler {
+  constructor() {
+    this.keys = {};
+    window.addEventListener('keydown', (e) => this.keys[e.key] = true);
+    window.addEventListener('keyup', (e) => this.keys[e.key] = false);
+  }
+
+  isPressed(key) {
+    return !!this.keys[key];
+  }
+
+  reset() {
+    this.keys = {};
+  }
+}
+
+// Usage:
+const input = new InputHandler();
+
+function update() {
+  if (input.isPressed('ArrowLeft')) {
+    player.x -= 5;
+  }
+  if (input.isPressed('ArrowRight')) {
+    player.x += 5;
+  }
+  if (input.isPressed(' ')) {
+    player.jump();
+  }
+}` },
+      { name: "Sprite Animation", code: `class SpriteAnimator {
+  constructor(spriteSheet, frameWidth, frameHeight) {
+    this.image = new Image();
+    this.image.src = spriteSheet;
+    this.frameWidth = frameWidth;
+    this.frameHeight = frameHeight;
+    this.currentFrame = 0;
+    this.frameCount = 0;
+    this.frameDelay = 10;
+    this.frameCounter = 0;
+  }
+
+  update() {
+    this.frameCounter++;
+    if (this.frameCounter >= this.frameDelay) {
+      this.frameCounter = 0;
+      this.currentFrame = (this.currentFrame + 1) % this.frameCount;
+    }
+  }
+
+  draw(ctx, x, y) {
+    ctx.drawImage(
+      this.image,
+      this.currentFrame * this.frameWidth, 0,
+      this.frameWidth, this.frameHeight,
+      x, y,
+      this.frameWidth, this.frameHeight
+    );
+  }
+}
+
+// Usage:
+const sprite = new SpriteAnimator('player.png', 32, 32);
+sprite.frameCount = 4;` },
+      { name: "Physics Engine", code: `class PhysicsBody {
+  constructor(x, y, mass = 1) {
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.mass = mass;
+    this.gravity = 0.5;
+    this.friction = 0.9;
+  }
+
+  applyForce(fx, fy) {
+    this.vx += fx / this.mass;
+    this.vy += fy / this.mass;
+  }
+
+  update() {
+    this.vy += this.gravity;
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+
+  bounce(dampening = 0.7) {
+    this.vy *= -dampening;
+  }
+}
+
+// Usage:
+const ball = new PhysicsBody(100, 0, 1);
+ball.applyForce(10, 0); // Push right` }
+    ],
+    auth: [
+      { name: "Login Form Handler", code: `async function handleLogin(email, password) {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+
+    const { token, user } = await response.json();
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    
+    return { success: true, user };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Usage:
+const result = await handleLogin('user@example.com', 'password123');
+if (result.success) {
+  window.location.href = '/dashboard';
+}` },
+      { name: "JWT Token Manager", code: `class TokenManager {
+  static setToken(token) {
+    localStorage.setItem('jwt_token', token);
+  }
+
+  static getToken() {
+    return localStorage.getItem('jwt_token');
+  }
+
+  static removeToken() {
+    localStorage.removeItem('jwt_token');
+  }
+
+  static isExpired() {
+    const token = this.getToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  }
+
+  static getAuthHeader() {
+    const token = this.getToken();
+    return token ? { 'Authorization': \`Bearer \${token}\` } : {};
+  }
+}
+
+// Usage:
+const headers = {
+  ...TokenManager.getAuthHeader(),
+  'Content-Type': 'application/json'
+};` },
+      { name: "Session Manager", code: `class SessionManager {
+  static login(user, token) {
+    sessionStorage.setItem('user', JSON.stringify(user));
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('loginTime', Date.now().toString());
+  }
+
+  static logout() {
+    sessionStorage.clear();
+    window.location.href = '/login';
+  }
+
+  static getUser() {
+    const user = sessionStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  static isAuthenticated() {
+    return !!sessionStorage.getItem('token');
+  }
+
+  static getSessionDuration() {
+    const loginTime = sessionStorage.getItem('loginTime');
+    if (!loginTime) return 0;
+    return Date.now() - parseInt(loginTime);
+  }
+}
+
+// Usage:
+if (!SessionManager.isAuthenticated()) {
+  window.location.href = '/login';
+}` },
+      { name: "Protected Route", code: `function ProtectedRoute({ children }) {
+  const isAuthenticated = localStorage.getItem('authToken');
+
+  if (!isAuthenticated) {
+    window.location.href = '/login';
+    return null;
+  }
+
+  return children;
+}
+
+// Usage in routing:
+// <ProtectedRoute>
+//   <Dashboard />
+// </ProtectedRoute>` }
+    ],
+    animations: [
+      { name: "Fade In Animation", code: `@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* JavaScript version */
+function fadeIn(element, duration = 500) {
+  element.style.opacity = 0;
+  element.style.display = 'block';
+  
+  let start = null;
+  function animate(timestamp) {
+    if (!start) start = timestamp;
+    const progress = timestamp - start;
+    element.style.opacity = Math.min(progress / duration, 1);
+    
+    if (progress < duration) {
+      requestAnimationFrame(animate);
+    }
+  }
+  requestAnimationFrame(animate);
+}` },
+      { name: "Slide In Animation", code: `@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+/* Alternative directions */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}` },
+      { name: "Bounce Animation", code: `@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30px);
+  }
+  60% {
+    transform: translateY(-15px);
+  }
+}
+
+.bounce {
+  animation: bounce 2s infinite;
+}
+
+/* Usage */
+.notification {
+  animation: bounce 1s ease;
+}` },
+      { name: "Scroll Reveal", code: `function setupScrollReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1
+  });
+  
+  reveals.forEach(el => observer.observe(el));
+}
+
+/* CSS */
+.reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s ease;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+// Usage:
+setupScrollReveal();` },
+      { name: "Loading Spinner", code: `@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(155, 135, 245, 0.2);
+  border-top-color: #9b87f5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* HTML */
+<div class="spinner"></div>` }
+    ],
+    data: [
+      { name: "Sort Array", code: `// Sort by property
+function sortBy(array, key, order = 'asc') {
+  return [...array].sort((a, b) => {
+    const aVal = a[key];
+    const bVal = b[key];
+    if (order === 'asc') {
+      return aVal > bVal ? 1 : -1;
+    }
+    return aVal < bVal ? 1 : -1;
+  });
+}
+
+// Usage:
+const users = [
+  { name: 'John', age: 30 },
+  { name: 'Jane', age: 25 }
+];
+const sorted = sortBy(users, 'age', 'desc');` },
+      { name: "Filter & Map", code: `// Filter and transform data
+function filterAndMap(array, filterFn, mapFn) {
+  return array
+    .filter(filterFn)
+    .map(mapFn);
+}
+
+// Usage:
+const products = [
+  { name: 'Laptop', price: 1000, inStock: true },
+  { name: 'Mouse', price: 25, inStock: false },
+  { name: 'Keyboard', price: 75, inStock: true }
+];
+
+const availableNames = filterAndMap(
+  products,
+  p => p.inStock,
+  p => p.name
+);
+// Result: ['Laptop', 'Keyboard']` },
+      { name: "Group By", code: `function groupBy(array, key) {
+  return array.reduce((groups, item) => {
+    const group = item[key];
+    groups[group] = groups[group] || [];
+    groups[group].push(item);
+    return groups;
+  }, {});
+}
+
+// Usage:
+const items = [
+  { category: 'fruit', name: 'apple' },
+  { category: 'fruit', name: 'banana' },
+  { category: 'veggie', name: 'carrot' }
+];
+
+const grouped = groupBy(items, 'category');
+// { fruit: [...], veggie: [...] }` },
+      { name: "Pagination", code: `function paginate(array, page = 1, perPage = 10) {
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  
+  return {
+    data: array.slice(start, end),
+    page,
+    perPage,
+    total: array.length,
+    totalPages: Math.ceil(array.length / perPage),
+    hasNext: end < array.length,
+    hasPrev: page > 1
+  };
+}
+
+// Usage:
+const result = paginate(items, 2, 20);
+console.log(result.data); // Items 21-40` },
+      { name: "Deep Clone", code: `function deepClone(obj) {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+  
+  if (obj instanceof Array) {
+    return obj.map(item => deepClone(item));
+  }
+  
+  if (obj instanceof Object) {
+    const clonedObj = {};
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clonedObj[key] = deepClone(obj[key]);
+      }
+    }
+    return clonedObj;
+  }
+}
+
+// Usage:
+const original = { user: { name: 'John', settings: { theme: 'dark' } } };
+const copy = deepClone(original);` }
+    ],
+    mobile: [
+      { name: "Geolocation", code: `function getCurrentLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation not supported'));
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        });
+      },
+      (error) => reject(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
+  });
+}
+
+// Usage:
+const location = await getCurrentLocation();
+console.log(location.latitude, location.longitude);` },
+      { name: "Device Detection", code: `const DeviceDetector = {
+  isMobile() {
+    return /Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent);
+  },
+  
+  isTablet() {
+    return /iPad|Android/i.test(navigator.userAgent) && 
+           window.innerWidth >= 768;
+  },
+  
+  isIOS() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  },
+  
+  isAndroid() {
+    return /Android/i.test(navigator.userAgent);
+  },
+  
+  getOrientation() {
+    return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+  }
+};
+
+// Usage:
+if (DeviceDetector.isMobile()) {
+  console.log('Mobile device detected');
+}` },
+      { name: "Touch Events", code: `class TouchHandler {
+  constructor(element) {
+    this.element = element;
+    this.startX = 0;
+    this.startY = 0;
+    
+    element.addEventListener('touchstart', this.handleStart.bind(this));
+    element.addEventListener('touchmove', this.handleMove.bind(this));
+    element.addEventListener('touchend', this.handleEnd.bind(this));
+  }
+  
+  handleStart(e) {
+    const touch = e.touches[0];
+    this.startX = touch.clientX;
+    this.startY = touch.clientY;
+  }
+  
+  handleMove(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - this.startX;
+    const deltaY = touch.clientY - this.startY;
+    this.onSwipe(deltaX, deltaY);
+  }
+  
+  handleEnd(e) {
+    this.onSwipeEnd();
+  }
+  
+  onSwipe(deltaX, deltaY) {
+    // Override this
+  }
+  
+  onSwipeEnd() {
+    // Override this
+  }
+}
+
+// Usage:
+const handler = new TouchHandler(document.getElementById('swipeable'));` },
+      { name: "Vibration API", code: `function vibrate(pattern) {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(pattern);
+    return true;
+  }
+  return false;
+}
+
+// Usage examples:
+vibrate(200);           // Single vibration for 200ms
+vibrate([100, 50, 100]); // Pattern: vibrate-pause-vibrate
+vibrate(0);             // Stop vibration
+
+// Haptic feedback patterns
+const patterns = {
+  success: [50, 100, 50],
+  error: [100, 50, 100, 50, 100],
+  tap: 10,
+  longPress: [50, 100, 150]
+};
+
+vibrate(patterns.success);` }
+    ],
+    notifications: [
+      { name: "Push Notification", code: `async function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    console.log('Notifications not supported');
+    return false;
+  }
+  
+  const permission = await Notification.requestPermission();
+  return permission === 'granted';
+}
+
+function showNotification(title, options = {}) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, {
+      body: options.body || '',
+      icon: options.icon || '/icon.png',
+      badge: options.badge || '/badge.png',
+      vibrate: options.vibrate || [200, 100, 200],
+      data: options.data || {},
+      ...options
+    });
+  }
+}
+
+// Usage:
+await requestNotificationPermission();
+showNotification('New Message', {
+  body: 'You have a new message!',
+  icon: '/message-icon.png'
+});` },
+      { name: "Service Worker Notifications", code: `// In service worker (sw.js)
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon || '/icon.png',
+      badge: '/badge.png',
+      tag: data.tag,
+      data: data
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url || '/')
+  );
+});` },
+      { name: "In-App Badge", code: `function updateBadgeCount(count) {
+  // Browser notification badge
+  if ('setAppBadge' in navigator) {
+    if (count > 0) {
+      navigator.setAppBadge(count);
+    } else {
+      navigator.clearAppBadge();
+    }
+  }
+  
+  // UI badge
+  const badge = document.getElementById('notification-badge');
+  if (badge) {
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : count;
+      badge.style.display = 'block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+
+// Usage:
+updateBadgeCount(5); // Show "5"
+updateBadgeCount(0); // Clear badge` }
+    ],
+    payments: [
+      { name: "Stripe Checkout", code: `// Initialize Stripe
+const stripe = Stripe('pk_test_YOUR_KEY');
+
+async function createCheckoutSession(items) {
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items })
+  });
+  
+  const session = await response.json();
+  
+  // Redirect to Stripe Checkout
+  const result = await stripe.redirectToCheckout({
+    sessionId: session.id
+  });
+  
+  if (result.error) {
+    alert(result.error.message);
+  }
+}
+
+// Usage:
+document.querySelector('#checkout-btn').addEventListener('click', () => {
+  createCheckoutSession([
+    { price: 'price_xxx', quantity: 1 }
+  ]);
+});` },
+      { name: "Payment Form", code: `async function handlePayment(paymentDetails) {
+  try {
+    const response = await fetch('/api/process-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: paymentDetails.amount,
+        currency: 'usd',
+        paymentMethod: paymentDetails.paymentMethod,
+        description: paymentDetails.description
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      return { success: true, transactionId: result.transactionId };
+    } else {
+      throw new Error(result.error);
+    }
+  } catch (error) {
+    console.error('Payment failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Usage:
+const result = await handlePayment({
+  amount: 2999, // $29.99
+  paymentMethod: 'pm_card_visa',
+  description: 'Premium subscription'
+});` }
     ]
   };
 
@@ -839,8 +1707,169 @@ setupInfiniteScroll(async () => {
                   ))}
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Game Functions</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.game.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`game-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-game-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Authentication</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.auth.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`auth-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-auth-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Animations</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.animations.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`anim-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-anim-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Data Operations</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.data.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`data-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-data-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Mobile Features</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.mobile.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`mobile-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-mobile-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Notifications</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.notifications.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`notif-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-notif-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Payments</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {codeSnippets.payments.map((snippet, idx) => (
+                    <DropdownMenuItem
+                      key={`payment-${idx}`}
+                      onClick={() => insertSnippet(snippet.code)}
+                      data-testid={`snippet-payment-${idx}`}
+                    >
+                      {snippet.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Dialog open={codeSnatcherOpen} onOpenChange={setCodeSnatcherOpen}>
+            <DialogTrigger asChild>
+              <Button
+                data-testid="button-code-snatcher"
+                variant="outline"
+                size="sm"
+              >
+                <Download className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Snatch Code</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Code Snatcher 🎣</DialogTitle>
+                <DialogDescription>
+                  Extract the structure and wireframe from any website. Paste a URL below and we'll snatch the HTML layout for you to learn from!
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input
+                  data-testid="input-snatch-url"
+                  placeholder="https://example.com"
+                  value={snatchUrl}
+                  onChange={(e) => setSnatchUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isSnatchingCode) {
+                      handleSnatchCode();
+                    }
+                  }}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setCodeSnatcherOpen(false);
+                      setSnatchUrl('');
+                    }}
+                    data-testid="button-cancel-snatch"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSnatchCode}
+                    disabled={isSnatchingCode}
+                    data-testid="button-execute-snatch"
+                    className="bg-lavender hover:bg-lavender-hover"
+                  >
+                    {isSnatchingCode ? 'Snatching...' : 'Snatch! 🪝'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <Button
             data-testid="button-run-code"

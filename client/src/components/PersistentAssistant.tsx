@@ -122,8 +122,8 @@ export function PersistentAssistant() {
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">AI Guard</h3>
-                <p className="text-xs text-muted-foreground">Always watching</p>
+                <h3 className="font-semibold text-sm">AI Guard Dog 🐕</h3>
+                <p className="text-xs text-muted-foreground">Your creative companion</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -154,11 +154,12 @@ export function PersistentAssistant() {
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                     <Bot className="h-12 w-12 mb-3 opacity-20" />
-                    <p className="text-sm font-medium mb-2">I'm here to help and protect your work.</p>
-                    <p className="text-xs mb-3">Ask me anything!</p>
+                    <p className="text-sm font-medium mb-2">AI Guard Dog ready to assist! 🐕</p>
+                    <p className="text-xs mb-3">Ask me anything about code, design, or creativity</p>
                     <div className="text-xs bg-lavender/10 p-3 rounded-md border border-lavender/20">
-                      <p className="text-lavender font-medium mb-1">💡 First time?</p>
-                      <p className="text-muted-foreground">Go to Settings and configure your AI backend (Claude, GPT, etc.) with your API key.</p>
+                      <p className="text-lavender font-medium mb-1">💡 First time setup:</p>
+                      <p className="text-muted-foreground mb-2">Go to Settings → AI Configuration</p>
+                      <p className="text-muted-foreground">Choose your backend: Claude, GPT-4, DeepSeek, Grok, or local CodeLlama</p>
                     </div>
                   </div>
                 ) : (
