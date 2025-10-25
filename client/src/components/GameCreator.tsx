@@ -4,54 +4,37 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Gamepad2, Search, ArrowLeft, Play } from "lucide-react";
 import { useLocation } from "wouter";
-
-const GAME_TEMPLATES = [
-  {
-    id: 1,
-    title: "Platformer",
-    description: "Classic 2D platformer with physics",
-    tags: ["2D", "Physics", "Arcade"]
-  },
-  {
-    id: 2,
-    title: "Space Shooter",
-    description: "Top-down space combat game",
-    tags: ["2D", "Shooter", "Arcade"]
-  },
-  {
-    id: 3,
-    title: "Puzzle Game",
-    description: "Match-3 style puzzle mechanics",
-    tags: ["2D", "Puzzle", "Casual"]
-  },
-  {
-    id: 4,
-    title: "RPG Framework",
-    description: "Turn-based RPG battle system",
-    tags: ["RPG", "Turn-based"]
-  },
-  {
-    id: 5,
-    title: "Racing Game",
-    description: "Top-down racing with checkpoints",
-    tags: ["2D", "Racing", "Arcade"]
-  },
-  {
-    id: 6,
-    title: "Text Adventure",
-    description: "Interactive fiction engine",
-    tags: ["Text", "Story", "Adventure"]
-  }
-];
+import { GAME_TEMPLATES } from "@/lib/gameTemplates";
+import { FileSystem } from "@/lib/fileSystem";
+import { useToast } from "@/hooks/use-toast";
 
 export function GameCreator() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
 
   const filteredTemplates = GAME_TEMPLATES.filter(template =>
     template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleUseTemplate = (templateId: string) => {
+    const template = GAME_TEMPLATES.find(t => t.id === templateId);
+    if (!template) return;
+
+    if (confirm(`This will replace all current files with the ${template.title} template. Continue?`)) {
+      FileSystem.loadFileTree(template.files);
+
+      toast({
+        title: "Template Loaded!",
+        description: `${template.title} is ready in the IDE`,
+      });
+
+      setTimeout(() => {
+        setLocation('/ide');
+      }, 500);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,7 +94,7 @@ export function GameCreator() {
               <Button
                 data-testid={`button-use-template-${template.id}`}
                 className="w-full bg-lavender hover:bg-lavender-hover"
-                onClick={() => console.log('Using template:', template.title)}
+                onClick={() => handleUseTemplate(template.id)}
               >
                 <Play className="h-4 w-4 mr-2" />
                 Use Template

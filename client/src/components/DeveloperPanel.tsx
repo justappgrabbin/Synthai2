@@ -1,24 +1,129 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { FolderTree, Code2, Globe, Play, Save, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { FolderTree, Code2, Globe, Play, Save, ArrowLeft, Plus, Trash2, FolderPlus } from "lucide-react";
 import { useLocation } from "wouter";
+import { FileSystem, type FileNode } from "@/lib/fileSystem";
+import { useToast } from "@/hooks/use-toast";
 
 export function DeveloperPanel() {
   const [, setLocation] = useLocation();
-  const [code, setCode] = useState(`// Welcome to the YOU–N–I–VERSE IDE
-// Your creative coding environment
+  const [files, setFiles] = useState<FileNode[]>([]);
+  const [currentFile, setCurrentFile] = useState<FileNode | null>(null);
+  const [code, setCode] = useState("");
+  const [previewContent, setPreviewContent] = useState("");
+  const [newFileName, setNewFileName] = useState("");
+  const [showNewFileInput, setShowNewFileInput] = useState(false);
+  const { toast } = useToast();
 
-function hello() {
-  console.log("Hello from the Indyverse!");
-  return "✨ Start creating ✨";
-}
+  useEffect(() => {
+    loadFiles();
+  }, []);
 
-hello();`);
+  const loadFiles = () => {
+    const allFiles = FileSystem.getAllFiles();
+    setFiles(allFiles);
+    
+    if (!currentFile && allFiles.length > 0) {
+      const firstFile = findFirstFile(allFiles);
+      if (firstFile) {
+        openFile(firstFile);
+      }
+    }
+  };
 
-  const handleRunCode = () => {
-    console.log('Running code:', code);
-    alert('Code execution simulated! Check console.');
+  const findFirstFile = (nodes: FileNode[]): FileNode | null => {
+    for (const node of nodes) {
+      if (node.type === 'file') return node;
+      if (node.children) {
+        const found = findFirstFile(node.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const openFile = (file: FileNode) => {
+    if (file.type === 'file') {
+      setCurrentFile(file);
+      setCode(file.content || '');
+    }
+  };
+
+  const handleSave = () => {
+    if (currentFile) {
+      FileSystem.saveFile(currentFile.path, code);
+      toast({
+        title: "Saved",
+        description: `${currentFile.name} saved successfully`
+      });
+      loadFiles();
+    }
+  };
+
+  const handleRun = () => {
+    const htmlFile = FileSystem.findFile('index.html');
+    if (!htmlFile || !htmlFile.content) {
+      toast({
+        title: "No HTML file",
+        description: "Create an index.html file to preview",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    let html = htmlFile.content;
+    
+    html = html.replace(/<link\s+rel="stylesheet"\s+href="([^"]+)">/g, (match, href) => {
+      const cssFile = FileSystem.findFile(href);
+      if (cssFile && cssFile.content) {
+        return `<style>${cssFile.content}</style>`;
+      }
+      return match;
+    });
+    
+    html = html.replace(/<script\s+src="([^"]+)"><\/script>/g, (match, src) => {
+      const jsFile = FileSystem.findFile(src);
+      if (jsFile && jsFile.content) {
+        return `<script>${jsFile.content}</script>`;
+      }
+      return match;
+    });
+    
+    setPreviewContent(html);
+    toast({
+      title: "Running",
+      description: "Code executed in preview pane"
+    });
+  };
+
+  const handleCreateFile = () => {
+    if (!newFileName.trim()) return;
+    
+    FileSystem.createFile('', newFileName);
+    setNewFileName('');
+    setShowNewFileInput(false);
+    loadFiles();
+    toast({
+      title: "Created",
+      description: `${newFileName} created`
+    });
+  };
+
+  const handleDeleteFile = (file: FileNode) => {
+    if (confirm(`Delete ${file.name}?`)) {
+      FileSystem.deleteFile(file.path);
+      if (currentFile?.path === file.path) {
+        setCurrentFile(null);
+        setCode('');
+      }
+      loadFiles();
+      toast({
+        title: "Deleted",
+        description: `${file.name} deleted`
+      });
+    }
   };
 
   return (
@@ -41,7 +146,8 @@ hello();`);
             data-testid="button-save-code"
             variant="outline"
             size="sm"
-            onClick={() => console.log('Saving code...')}
+            onClick={handleSave}
+            disabled={!currentFile}
           >
             <Save className="h-4 w-4 mr-2" />
             Save
@@ -50,7 +156,7 @@ hello();`);
             data-testid="button-run-code"
             size="sm"
             className="bg-lavender hover:bg-lavender-hover"
-            onClick={handleRunCode}
+            onClick={handleRun}
           >
             <Play className="h-4 w-4 mr-2" />
             Run
@@ -59,23 +165,59 @@ hello();`);
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        <aside className="w-64 border-r p-4 space-y-2">
-          <div className="flex items-center gap-2 mb-4">
-            <FolderTree className="h-4 w-4 text-lavender" />
-            <h3 className="font-medium text-sm">Files</h3>
+        <aside className="w-64 border-r p-4 space-y-2 overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FolderTree className="h-4 w-4 text-lavender" />
+              <h3 className="font-medium text-sm">Files</h3>
+            </div>
+            <Button
+              data-testid="button-new-file"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowNewFileInput(!showNewFileInput)}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
           </div>
-          <FileTreeItem name="src" isFolder />
-          <FileTreeItem name="main.js" indent />
-          <FileTreeItem name="App.jsx" indent />
-          <FileTreeItem name="components" isFolder indent />
-          <FileTreeItem name="package.json" />
-          <FileTreeItem name="README.md" />
+          
+          {showNewFileInput && (
+            <div className="flex gap-1 mb-2">
+              <Input
+                data-testid="input-new-filename"
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                placeholder="filename.js"
+                className="h-7 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
+              />
+              <Button
+                data-testid="button-create-file"
+                size="sm"
+                className="h-7"
+                onClick={handleCreateFile}
+              >
+                Add
+              </Button>
+            </div>
+          )}
+          
+          {files.map((file, idx) => (
+            <FileTreeNode
+              key={idx}
+              file={file}
+              currentPath={currentFile?.path}
+              onOpen={openFile}
+              onDelete={handleDeleteFile}
+            />
+          ))}
         </aside>
 
         <div className="flex-1 flex flex-col">
           <div className="border-b p-2 flex items-center gap-2 text-sm text-muted-foreground">
             <Code2 className="h-3 w-3" />
-            <span>main.js</span>
+            <span>{currentFile?.name || 'No file selected'}</span>
           </div>
           <Textarea
             data-testid="textarea-code-editor"
@@ -83,6 +225,7 @@ hello();`);
             onChange={(e) => setCode(e.target.value)}
             className="flex-1 font-mono text-sm resize-none border-0 focus-visible:ring-0 rounded-none"
             placeholder="Start coding..."
+            disabled={!currentFile}
           />
         </div>
 
@@ -91,12 +234,23 @@ hello();`);
             <Globe className="h-4 w-4 text-lavender" />
             <span className="font-medium">Preview</span>
           </div>
-          <div className="flex-1 bg-muted/20 flex items-center justify-center p-8 text-center">
-            <div className="text-muted-foreground">
-              <Globe className="h-16 w-16 mx-auto mb-4 opacity-20" />
-              <p className="text-sm">Preview will appear here</p>
-              <p className="text-xs mt-2">Click "Run" to execute code</p>
-            </div>
+          <div className="flex-1 bg-white overflow-auto">
+            {previewContent ? (
+              <iframe
+                srcDoc={previewContent}
+                className="w-full h-full border-0"
+                sandbox="allow-scripts"
+                title="Preview"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full p-8 text-center bg-muted/20">
+                <div className="text-muted-foreground">
+                  <Globe className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-sm">Preview will appear here</p>
+                  <p className="text-xs mt-2">Click "Run" to execute code</p>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>
@@ -104,13 +258,72 @@ hello();`);
   );
 }
 
-function FileTreeItem({ name, isFolder, indent }: { name: string; isFolder?: boolean; indent?: boolean }) {
+function FileTreeNode({
+  file,
+  currentPath,
+  onOpen,
+  onDelete,
+  indent = 0
+}: {
+  file: FileNode;
+  currentPath?: string;
+  onOpen: (file: FileNode) => void;
+  onDelete: (file: FileNode) => void;
+  indent?: number;
+}) {
+  const [isOpen, setIsOpen] = useState(true);
+  const isActive = currentPath === file.path;
+
   return (
-    <div
-      className={`text-sm py-1 px-2 rounded hover:bg-accent cursor-pointer ${indent ? 'ml-4' : ''}`}
-      onClick={() => console.log('Opening file:', name)}
-    >
-      <span className="font-mono">{isFolder ? '📁' : '📄'} {name}</span>
+    <div>
+      <div
+        className={`text-sm py-1 px-2 rounded hover:bg-accent cursor-pointer flex items-center justify-between group ${
+          isActive ? 'bg-lavender/10 border border-lavender/30' : ''
+        }`}
+        style={{ marginLeft: `${indent * 12}px` }}
+      >
+        <div
+          className="flex items-center gap-1 flex-1"
+          onClick={() => {
+            if (file.type === 'folder') {
+              setIsOpen(!isOpen);
+            } else {
+              onOpen(file);
+            }
+          }}
+        >
+          <span className="font-mono text-xs">
+            {file.type === 'folder' ? (isOpen ? '📂' : '📁') : '📄'} {file.name}
+          </span>
+        </div>
+        {file.type === 'file' && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 opacity-0 group-hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(file);
+            }}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
+      {file.type === 'folder' && isOpen && file.children && (
+        <div>
+          {file.children.map((child, idx) => (
+            <FileTreeNode
+              key={idx}
+              file={child}
+              currentPath={currentPath}
+              onOpen={onOpen}
+              onDelete={onDelete}
+              indent={indent + 1}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
