@@ -5,11 +5,13 @@
 YOU–N–I–VERSE Studio (The Indyverse) is a creative development environment that combines a browser-based IDE, game creation tools, and AI-powered assistance. The platform features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible through a central dashboard hub.
 
 **Core Features:**
-- Browser-based code editor with file system management
-- Game template library with pre-built examples (platformer, RPG, puzzle games)
+- Browser-based code editor with file system management (localStorage persistence)
+- Game template library with pre-built examples (platformer, space shooter, puzzle games)
+- Grove Store - Community marketplace for apps, agents, templates, and tools
 - ZIP file player for exploring bundled creative projects
 - Multi-backend AI assistant (Claude, GPT, CodeLlama, DeepSeek, Grok)
-- Portal-based navigation system
+- Global navigation menu for quick access to all panels
+- Portal-based dashboard with cosmic-themed interface
 - Lavender (#9b87f5) accent theme throughout
 
 ## User Preferences
@@ -36,9 +38,19 @@ Preferred communication style: Simple, everyday language.
 
 **Application Structure:**
 - Dashboard serves as central navigation hub (home world)
-- Six main panels: Dashboard, IDE (DeveloperPanel), GameCreator, PlayerPanel, AgentPanel, SettingsPanel
+- Seven main panels: Dashboard, GroveStore, IDE (DeveloperPanel), GameCreator, PlayerPanel, AgentPanel, SettingsPanel
+- TopNav component provides global navigation across all panels (except Dashboard which uses portal cards)
 - Each panel is a full-page component accessed via routes
 - Persistent AI Assistant overlay available globally across all views
+
+**Routes:**
+- `/` - Dashboard (portal gateway)
+- `/grove-store` - Grove Store (community marketplace)
+- `/ide` - Developer Panel (code editor with file management)
+- `/game-creator` - Game Creator (template browser)
+- `/player` - Player Panel (ZIP file viewer)
+- `/agents` - Agent Panel (AI agent management)
+- `/settings` - Settings Panel (AI backend configuration)
 
 **State Management:**
 - LocalStorage for file system persistence (IDE files)
@@ -119,6 +131,25 @@ Preferred communication style: Simple, everyday language.
 **Notable Architecture Decisions:**
 - File system persistence uses localStorage (not server-side storage)
 - AI conversations happen client-side with direct API calls to providers
-- Game templates stored as static data structures in code
+- Game templates and Grove Store items stored as static data structures in code
+- Grove Store currently displays curated community items (static data, no backend API yet)
 - No user authentication currently implemented despite user schema existing
 - PostgreSQL configured but currently using in-memory storage fallback
+
+## Recent Changes (October 25, 2025)
+
+### Grove Store Launch
+Added community marketplace feature for discovering and downloading apps, agents, templates, and tools:
+- **Location**: `/grove-store` route, `client/src/components/GroveStore.tsx`
+- **Features**: Category filtering (All, Agents, Apps, Templates, Tools), search functionality, featured items section
+- **UI Elements**: Store item cards with ratings, download counts, tags, and author information
+- **Sample Content**: 10 curated items across all categories (currently static data)
+- **Future Enhancements**: Backend API for real submissions, user uploads, ratings system
+
+### Global Navigation Menu
+Replaced per-panel back buttons with unified TopNav component:
+- **Component**: `client/src/components/TopNav.tsx`
+- **Features**: Persistent navigation bar with icons and labels, active state highlighting, responsive design
+- **Navigation Items**: Dashboard, Grove Store, IDE, Games, Player, Agents, Settings
+- **Active Detection**: Uses wouter's useLocation() to highlight current page
+- **Design**: Lavender accent for active items, ghost variant for inactive items
