@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>YOU–N–I–VERSE Studio | The Indyverse</title>
     <meta name="description" content="A creative IDE with integrated AI consciousness. Code, create, and explore with the YOU–N–I–Versal Player and AI Guard." />
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#9b87f5" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Indyverse" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,5 +23,33 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('[PWA] Service Worker registered:', registration.scope);
+              
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('[PWA] New version available! Refresh to update.');
+                  }
+                });
+              });
+            })
+            .catch(err => console.log('[PWA] Service Worker registration failed:', err));
+        });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      }
+    </script>
   </body>
 </html>
