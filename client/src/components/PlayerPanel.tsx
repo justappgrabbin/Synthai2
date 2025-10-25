@@ -113,6 +113,19 @@ export function PlayerPanel() {
   const handleFileClick = (entry: ZipEntry) => {
     if (!entry.isFolder) {
       setSelectedFile(entry);
+      
+      // Check if this is the detected entry point file
+      // Compare by extracting basename from both paths to handle directory prefixes
+      const entryBasename = entry.name.split('/').pop() || entry.name;
+      const entryPointBasename = entryPoint?.file.split('/').pop();
+      
+      const isDetectedEntryPoint = entryPointBasename && entryBasename === entryPointBasename;
+      
+      if (isDetectedEntryPoint && executableContent) {
+        if (confirm(`Are you sure you want to play ${entry.name}?`)) {
+          handlePlayProject();
+        }
+      }
     }
   };
 
@@ -286,25 +299,28 @@ export function PlayerPanel() {
                       <span>{creation.fileCount} files</span>
                       <span>{new Date(creation.uploadedAt).toLocaleDateString()}</span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 text-xs justify-center">
                       <Button
                         data-testid={`button-play-${creation.id}`}
                         size="sm"
-                        className="flex-1 bg-lavender hover:bg-lavender-hover"
+                        variant="ghost"
+                        className="gap-1"
                         onClick={() => handlePlayCreation(creation)}
                       >
-                        <Play className="h-3 w-3 mr-2" />
-                        Play
+                        <Play className="h-3 w-3" />
+                        <span>|</span>
+                        <span>Play</span>
                       </Button>
                       <Button
                         data-testid={`button-edit-${creation.id}`}
                         size="sm"
-                        variant="outline"
-                        className="flex-1"
+                        variant="ghost"
+                        className="gap-1"
                         onClick={() => handleEditCreation(creation)}
                       >
-                        <File className="h-3 w-3 mr-2" />
-                        Edit
+                        <File className="h-3 w-3" />
+                        <span>|</span>
+                        <span>Edit</span>
                       </Button>
                     </div>
                   </Card>

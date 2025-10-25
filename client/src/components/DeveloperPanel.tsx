@@ -279,9 +279,10 @@ export function DeveloperPanel() {
           <div className="flex-1 bg-white overflow-auto">
             {previewContent ? (
               <iframe
+                data-testid="iframe-preview"
                 srcDoc={previewContent}
                 className="w-full h-full border-0"
-                sandbox="allow-scripts"
+                sandbox="allow-scripts allow-same-origin allow-forms"
                 title="Preview"
               />
             ) : (
