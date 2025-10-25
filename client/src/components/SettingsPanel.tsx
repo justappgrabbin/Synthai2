@@ -1,25 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Settings, ArrowLeft } from "lucide-react";
-import { useLocation } from "wouter";
 import { AIBackendSelector } from "./AIBackendSelector";
+import { TopNav } from "@/components/TopNav";
 
 export function SettingsPanel() {
-  const [, setLocation] = useLocation();
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b p-4 flex items-center gap-2">
-        <Button
-          data-testid="button-back-to-dashboard"
-          variant="ghost"
-          size="icon"
-          onClick={() => setLocation("/")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <Settings className="h-5 w-5 text-lavender" />
-        <h2 className="text-lg font-semibold">Settings</h2>
-      </header>
+      <TopNav />
 
       <div className="p-8 max-w-3xl mx-auto space-y-8">
         <div>

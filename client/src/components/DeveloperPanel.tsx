@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, ArrowLeft, Plus, Trash2, FolderPlus } from "lucide-react";
-import { useLocation } from "wouter";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2 } from "lucide-react";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
+import { TopNav } from "@/components/TopNav";
 
 export function DeveloperPanel() {
-  const [, setLocation] = useLocation();
   const [files, setFiles] = useState<FileNode[]>([]);
   const [currentFile, setCurrentFile] = useState<FileNode | null>(null);
   const [code, setCode] = useState("");
@@ -128,18 +127,11 @@ export function DeveloperPanel() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <header className="border-b p-4 flex items-center justify-between gap-4">
+      <TopNav />
+      <header className="border-b p-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Button
-            data-testid="button-back-to-dashboard"
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <Code2 className="h-5 w-5 text-lavender" />
-          <h2 className="text-lg font-semibold">IDE</h2>
+          <h2 className="text-lg font-semibold">Code Editor</h2>
         </div>
         <div className="flex items-center gap-2">
           <Button

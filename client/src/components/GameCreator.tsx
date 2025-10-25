@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Gamepad2, Search, ArrowLeft, Play } from "lucide-react";
+import { Gamepad2, Search, Play } from "lucide-react";
 import { useLocation } from "wouter";
 import { GAME_TEMPLATES } from "@/lib/gameTemplates";
 import { FileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
+import { TopNav } from "@/components/TopNav";
 
 export function GameCreator() {
   const [, setLocation] = useLocation();
@@ -38,20 +39,7 @@ export function GameCreator() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b p-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Button
-            data-testid="button-back-to-dashboard"
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <Gamepad2 className="h-5 w-5 text-lavender" />
-          <h2 className="text-lg font-semibold">Game Creator</h2>
-        </div>
-      </header>
+      <TopNav />
 
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">

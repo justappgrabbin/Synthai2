@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Code2, Gamepad2, Play, Bot, Settings } from "lucide-react";
+import { Code2, Gamepad2, Play, Bot, Settings, Store } from "lucide-react";
 
 export function Dashboard() {
   const [, setLocation] = useLocation();
@@ -24,6 +24,14 @@ export function Dashboard() {
           onClick={() => setLocation("/ide")}
           variant="primary"
           testId="button-portal-ide"
+        />
+        <PortalButton
+          icon={Store}
+          title="Grove Store"
+          description="Discover community apps, agents & templates"
+          onClick={() => setLocation("/grove-store")}
+          variant="primary"
+          testId="button-portal-grove-store"
         />
         <PortalButton
           icon={Gamepad2}

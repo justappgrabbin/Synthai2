@@ -1,35 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Bot, ArrowLeft, Plus } from "lucide-react";
-import { useLocation } from "wouter";
+import { Bot, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { TopNav } from "@/components/TopNav";
 
 export function AgentPanel() {
-  const [, setLocation] = useLocation();
-
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b p-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Button
-            data-testid="button-back-to-dashboard"
-            variant="ghost"
-            size="icon"
-            onClick={() => setLocation("/")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <Bot className="h-5 w-5 text-lavender" />
-          <h2 className="text-lg font-semibold">Agent Creator</h2>
-        </div>
-        <Button
-          data-testid="button-create-agent"
-          className="bg-lavender hover:bg-lavender-hover"
-          onClick={() => console.log('Creating new agent...')}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Agent
-        </Button>
-      </header>
+      <TopNav />
 
       <div className="p-8 max-w-6xl mx-auto">
         <div className="mb-8">

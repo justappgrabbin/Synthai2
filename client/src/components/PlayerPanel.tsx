@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Upload, ArrowLeft, FileArchive, File, Folder } from "lucide-react";
-import { useLocation } from "wouter";
+import { Play, Upload, FileArchive, File, Folder } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
+import { TopNav } from "@/components/TopNav";
 
 interface ZipEntry {
   name: string;
@@ -12,7 +12,6 @@ interface ZipEntry {
 }
 
 export function PlayerPanel() {
-  const [, setLocation] = useLocation();
   const [zipContents, setZipContents] = useState<ZipEntry[]>([]);
   const [selectedFile, setSelectedFile] = useState<ZipEntry | null>(null);
   const [zipName, setZipName] = useState<string>("");
@@ -74,18 +73,7 @@ export function PlayerPanel() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b p-4 flex items-center gap-2">
-        <Button
-          data-testid="button-back-to-dashboard"
-          variant="ghost"
-          size="icon"
-          onClick={() => setLocation("/")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <Play className="h-5 w-5 text-lavender" />
-        <h2 className="text-lg font-semibold">YOU–N–I–Versal Player</h2>
-      </header>
+      <TopNav />
 
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">

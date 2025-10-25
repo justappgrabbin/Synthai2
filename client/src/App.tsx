@@ -9,6 +9,7 @@ import { GameCreator } from "@/components/GameCreator";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { PlayerPanel } from "@/components/PlayerPanel";
 import { AgentPanel } from "@/components/AgentPanel";
+import { GroveStore } from "@/components/GroveStore";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import NotFound from "@/pages/not-found";
 
@@ -16,6 +17,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/grove-store" component={GroveStore} />
       <Route path="/ide" component={DeveloperPanel} />
       <Route path="/game-creator" component={GameCreator} />
       <Route path="/settings" component={SettingsPanel} />

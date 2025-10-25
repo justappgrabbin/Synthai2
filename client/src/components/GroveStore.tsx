@@ -1,0 +1,316 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Store, Search, Download, Star, Users, Sparkles } from "lucide-react";
+import { TopNav } from "@/components/TopNav";
+import { useToast } from "@/hooks/use-toast";
+
+interface StoreItem {
+  id: string;
+  name: string;
+  author: string;
+  description: string;
+  category: "app" | "agent" | "template" | "tool";
+  downloads: number;
+  rating: number;
+  tags: string[];
+  featured?: boolean;
+}
+
+const STORE_ITEMS: StoreItem[] = [
+  {
+    id: "cosmic-chat",
+    name: "Cosmic Chat Agent",
+    author: "YOU–N–I–VERSE Team",
+    description: "Advanced conversational AI agent with cosmic personality and deep creative knowledge",
+    category: "agent",
+    downloads: 1247,
+    rating: 4.9,
+    tags: ["AI", "Chat", "Creative"],
+    featured: true
+  },
+  {
+    id: "pixel-studio",
+    name: "Pixel Art Studio",
+    author: "PixelMaster",
+    description: "Full-featured pixel art editor with animation support and export tools",
+    category: "app",
+    downloads: 892,
+    rating: 4.7,
+    tags: ["Art", "Graphics", "Tools"],
+    featured: true
+  },
+  {
+    id: "rpg-template",
+    name: "RPG Adventure Template",
+    author: "GameDev Pro",
+    description: "Complete RPG game template with inventory, combat, and quest systems",
+    category: "template",
+    downloads: 2134,
+    rating: 4.8,
+    tags: ["Game", "RPG", "Template"],
+    featured: true
+  },
+  {
+    id: "code-mentor",
+    name: "Code Mentor Agent",
+    author: "DevHelper",
+    description: "AI coding assistant specialized in JavaScript, Python, and web development",
+    category: "agent",
+    downloads: 1876,
+    rating: 4.6,
+    tags: ["AI", "Coding", "Education"]
+  },
+  {
+    id: "music-sequencer",
+    name: "Cosmic Music Sequencer",
+    author: "SoundCraft",
+    description: "Create and sequence music with a cosmic-themed interface",
+    category: "app",
+    downloads: 654,
+    rating: 4.5,
+    tags: ["Music", "Audio", "Creative"]
+  },
+  {
+    id: "3d-viewer",
+    name: "3D Model Viewer",
+    author: "3D Universe",
+    description: "Interactive 3D model viewer with rotation, zoom, and texture controls",
+    category: "app",
+    downloads: 1123,
+    rating: 4.7,
+    tags: ["3D", "Graphics", "Viewer"]
+  },
+  {
+    id: "story-agent",
+    name: "Story Weaver Agent",
+    author: "NarrativeAI",
+    description: "Creative writing assistant that helps craft compelling stories and narratives",
+    category: "agent",
+    downloads: 987,
+    rating: 4.8,
+    tags: ["AI", "Writing", "Creative"]
+  },
+  {
+    id: "visual-novel",
+    name: "Visual Novel Engine",
+    author: "NovelCraft",
+    description: "Complete visual novel game engine with branching dialogue and save system",
+    category: "template",
+    downloads: 756,
+    rating: 4.6,
+    tags: ["Game", "Story", "Template"]
+  },
+  {
+    id: "data-viz",
+    name: "Data Visualization Tool",
+    author: "ChartMaster",
+    description: "Create beautiful charts and graphs from your data with interactive controls",
+    category: "tool",
+    downloads: 1432,
+    rating: 4.7,
+    tags: ["Data", "Charts", "Analytics"]
+  },
+  {
+    id: "shader-playground",
+    name: "Shader Playground",
+    author: "GraphicsGuru",
+    description: "Experiment with WebGL shaders and create stunning visual effects",
+    category: "app",
+    downloads: 543,
+    rating: 4.9,
+    tags: ["Graphics", "WebGL", "Effects"]
+  }
+];
+
+export function GroveStore() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const { toast } = useToast();
+
+  const categories = [
+    { id: "all", label: "All Items" },
+    { id: "agent", label: "Agents" },
+    { id: "app", label: "Apps" },
+    { id: "template", label: "Templates" },
+    { id: "tool", label: "Tools" }
+  ];
+
+  const filteredItems = STORE_ITEMS.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const featuredItems = filteredItems.filter(item => item.featured);
+  const regularItems = filteredItems.filter(item => !item.featured);
+
+  const handleDownload = (item: StoreItem) => {
+    toast({
+      title: "Downloaded!",
+      description: `${item.name} has been added to your workspace`,
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <TopNav />
+
+      <div className="p-8 max-w-7xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <Store className="h-8 w-8 text-lavender" />
+            <h1 className="text-3xl font-bold text-lavender">Grove Store</h1>
+            <Sparkles className="h-6 w-6 text-lavender/60" />
+          </div>
+          <p className="text-muted-foreground">
+            Discover apps, agents, templates, and tools created by the YOU–N–I–VERSE community
+          </p>
+        </div>
+
+        <div className="mb-6 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              data-testid="input-search-store"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search Grove Store..."
+              className="pl-10"
+            />
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                data-testid={`button-category-${category.id}`}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category.id)}
+                className={selectedCategory === category.id ? "bg-lavender hover:bg-lavender-hover" : ""}
+              >
+                {category.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {featuredItems.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-lavender" />
+              Featured
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredItems.map((item) => (
+                <StoreItemCard key={item.id} item={item} onDownload={handleDownload} featured />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section>
+          <h2 className="text-xl font-semibold mb-4">
+            {selectedCategory === "all" ? "All Items" : categories.find(c => c.id === selectedCategory)?.label}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {regularItems.map((item) => (
+              <StoreItemCard key={item.id} item={item} onDownload={handleDownload} />
+            ))}
+          </div>
+          
+          {filteredItems.length === 0 && (
+            <div className="text-center py-12">
+              <Store className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
+              <p className="text-muted-foreground">No items found matching your search</p>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+interface StoreItemCardProps {
+  item: StoreItem;
+  onDownload: (item: StoreItem) => void;
+  featured?: boolean;
+}
+
+function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
+  const categoryColors = {
+    app: "bg-blue-500/10 text-blue-500",
+    agent: "bg-purple-500/10 text-purple-500",
+    template: "bg-green-500/10 text-green-500",
+    tool: "bg-orange-500/10 text-orange-500"
+  };
+
+  const categoryIcons = {
+    app: "📱",
+    agent: "🤖",
+    template: "📋",
+    tool: "🛠️"
+  };
+
+  return (
+    <Card
+      className={`p-6 hover:border-lavender/50 transition-all hover:shadow-lg ${
+        featured ? "border-lavender/30 bg-lavender/5" : ""
+      }`}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">{categoryIcons[item.category]}</span>
+          <Badge className={categoryColors[item.category]}>
+            {item.category}
+          </Badge>
+        </div>
+        {featured && (
+          <Sparkles className="h-4 w-4 text-lavender" />
+        )}
+      </div>
+
+      <h3 className="text-lg font-semibold mb-1">{item.name}</h3>
+      <p className="text-xs text-muted-foreground mb-3">by {item.author}</p>
+      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{item.description}</p>
+
+      <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Star className="h-3 w-3 fill-lavender text-lavender" />
+          <span>{item.rating}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Users className="h-3 w-3" />
+          <span>{item.downloads.toLocaleString()}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {item.tags.map((tag) => (
+          <span
+            key={tag}
+            className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      <Button
+        data-testid={`button-download-${item.id}`}
+        className="w-full bg-lavender hover:bg-lavender-hover"
+        onClick={() => onDownload(item)}
+      >
+        <Download className="h-4 w-4 mr-2" />
+        Download
+      </Button>
+    </Card>
+  );
+}
