@@ -3,23 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Store, Search, Download, Star, Users, Sparkles } from "lucide-react";
+import { Store, Search, Download, Star, Users, Sparkles, Play } from "lucide-react";
 import { TopNav } from "@/components/TopNav";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+import { TEMPLATE_REGISTRY } from "@/lib/templateRegistry";
+import { FileSystem } from "@/lib/fileSystem";
 
 interface StoreItem {
   id: string;
   name: string;
   author: string;
   description: string;
-  category: "app" | "agent" | "template" | "tool";
+  category: "app" | "agent" | "template" | "tool" | "game" | "gan";
   downloads: number;
   rating: number;
   tags: string[];
+  icon?: string;
   featured?: boolean;
+  isTemplate?: boolean;
 }
 
-const STORE_ITEMS: StoreItem[] = [
+// Static community items
+const COMMUNITY_ITEMS: StoreItem[] = [
   {
     id: "cosmic-chat",
     name: "Cosmic Chat Agent",
@@ -125,9 +131,28 @@ const STORE_ITEMS: StoreItem[] = [
   }
 ];
 
+// Convert templates from registry to store items
+const TEMPLATE_ITEMS: StoreItem[] = TEMPLATE_REGISTRY.map(template => ({
+  id: template.id,
+  name: template.title,
+  author: template.author,
+  description: template.description,
+  category: template.category,
+  downloads: template.downloads,
+  rating: template.rating,
+  tags: template.tags,
+  icon: template.icon,
+  featured: template.featured,
+  isTemplate: true
+}));
+
+// Combine all store items
+const STORE_ITEMS: StoreItem[] = [...COMMUNITY_ITEMS, ...TEMPLATE_ITEMS];
+
 export function GroveStore() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const categories = [
@@ -135,6 +160,8 @@ export function GroveStore() {
     { id: "agent", label: "Agents" },
     { id: "app", label: "Apps" },
     { id: "template", label: "Templates" },
+    { id: "game", label: "Games" },
+    { id: "gan", label: "GANs" },
     { id: "tool", label: "Tools" }
   ];
 
@@ -152,10 +179,24 @@ export function GroveStore() {
   const regularItems = filteredItems.filter(item => !item.featured);
 
   const handleDownload = (item: StoreItem) => {
-    toast({
-      title: "Downloaded!",
-      description: `${item.name} has been added to your workspace`,
-    });
+    if (item.isTemplate) {
+      const template = TEMPLATE_REGISTRY.find(t => t.id === item.id);
+      if (!template) return;
+      
+      if (confirm(`Load ${item.name} template into IDE? This will replace current files.`)) {
+        FileSystem.loadFileTree(template.files);
+        toast({
+          title: "Template Loaded!",
+          description: `${item.name} is ready in the IDE`,
+        });
+        setTimeout(() => setLocation('/ide'), 500);
+      }
+    } else {
+      toast({
+        title: "Downloaded!",
+        description: `${item.name} has been added to your workspace`,
+      });
+    }
   };
 
   return (
@@ -245,17 +286,21 @@ interface StoreItemCardProps {
 }
 
 function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
-  const categoryColors = {
+  const categoryColors: Record<StoreItem['category'], string> = {
     app: "bg-blue-500/10 text-blue-500",
     agent: "bg-purple-500/10 text-purple-500",
     template: "bg-green-500/10 text-green-500",
+    game: "bg-pink-500/10 text-pink-500",
+    gan: "bg-indigo-500/10 text-indigo-500",
     tool: "bg-orange-500/10 text-orange-500"
   };
 
-  const categoryIcons = {
+  const categoryIcons: Record<StoreItem['category'], string> = {
     app: "📱",
     agent: "🤖",
     template: "📋",
+    game: "🎮",
+    gan: "🧠",
     tool: "🛠️"
   };
 
@@ -267,10 +312,16 @@ function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{categoryIcons[item.category]}</span>
+          <span className="text-2xl">{item.icon || categoryIcons[item.category]}</span>
           <Badge className={categoryColors[item.category]}>
             {item.category}
           </Badge>
+          {item.isTemplate && (
+            <Badge variant="outline" className="text-xs">
+              <Play className="h-3 w-3 mr-1" />
+              Template
+            </Badge>
+          )}
         </div>
         {featured && (
           <Sparkles className="h-4 w-4 text-lavender" />
@@ -308,8 +359,17 @@ function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
         className="w-full bg-lavender hover:bg-lavender-hover"
         onClick={() => onDownload(item)}
       >
-        <Download className="h-4 w-4 mr-2" />
-        Download
+        {item.isTemplate ? (
+          <>
+            <Play className="h-4 w-4 mr-2" />
+            Load Template
+          </>
+        ) : (
+          <>
+            <Download className="h-4 w-4 mr-2" />
+            Download
+          </>
+        )}
       </Button>
     </Card>
   );
