@@ -51,7 +51,7 @@ export function InstallPrompt() {
   if (!showPrompt || !deferredPrompt) return null;
 
   return (
-    <Card className="fixed bottom-24 right-4 z-50 p-4 w-80 max-w-[90vw] shadow-lg border-purple-500/30 bg-card/95 backdrop-blur">
+    <Card className="fixed bottom-[140px] right-4 z-[50000] p-4 w-80 max-w-[90vw] shadow-lg border-purple-500/30 bg-card/95 backdrop-blur">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">

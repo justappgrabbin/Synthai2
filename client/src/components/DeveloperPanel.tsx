@@ -2301,6 +2301,17 @@ const result = await handlePayment({
             <span className="hidden sm:inline">Run</span>
           </Button>
           <Button
+            data-testid="button-toggle-terminal"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTerminal(!showTerminal)}
+            className={showTerminal ? "bg-green-500/10 border-green-500/50" : ""}
+            title="Terminal"
+          >
+            <TerminalIcon className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Terminal</span>
+          </Button>
+          <Button
             data-testid="button-toggle-preview"
             variant="outline"
             size="sm"
@@ -2309,16 +2320,6 @@ const result = await handlePayment({
           >
             <Globe className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Preview</span>
-          </Button>
-          <Button
-            data-testid="button-toggle-terminal"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowTerminal(!showTerminal)}
-            className={showTerminal ? "bg-green-500/10 border-green-500/50" : ""}
-          >
-            <TerminalIcon className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Terminal</span>
           </Button>
         </div>
       </header>
