@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2 } from "lucide-react";
+import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2, Download } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
 import { UserCreations, type UserCreation } from "@/lib/userCreations";
 import { FileSystem } from "@/lib/fileSystem";
 import { Card } from "@/components/ui/card";
+import { autoFixZip, ZipAutoFix } from "@/lib/zipAutoFix";
 import { Badge } from "@/components/ui/badge";
 import { ZipAnalyzer, type EntryPoint, type CodeIssue } from "@/lib/zipAnalyzer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -29,6 +30,9 @@ export function PlayerPanel() {
   const [codeIssues, setCodeIssues] = useState<CodeIssue[]>([]);
   const [showIssues, setShowIssues] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [zipProblems, setZipProblems] = useState<{ fixes: string[]; warnings: string[]; errors: string[] } | null>(null);
+  const [canAutoFix, setCanAutoFix] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -50,8 +54,50 @@ export function PlayerPanel() {
     }
 
     try {
+      // First, validate the ZIP and check for problems
       const zip = new JSZip();
       const contents = await zip.loadAsync(file);
+      
+      const fixer = new ZipAutoFix();
+      const validation = await fixer.validateZip(contents);
+      
+      // Check if there are any issues
+      const hasIssues = validation.errors.length > 0 || validation.warnings.length > 0;
+      
+      if (hasIssues) {
+        // Store the file and show problems
+        setPendingFile(file);
+        setZipProblems({
+          fixes: [],
+          warnings: validation.warnings,
+          errors: validation.errors
+        });
+        
+        // Determine if auto-fix can help
+        const canFix = validation.errors.length === 0 || 
+                       validation.errors.some(err => 
+                         err.includes('empty') || 
+                         err.includes('entry point') ||
+                         err.includes('system file')
+                       );
+        setCanAutoFix(canFix);
+        return;
+      }
+      
+      // No issues, proceed normally
+      await processZipFile(contents, file.name);
+
+    } catch (error: any) {
+      toast({
+        title: "Error loading ZIP",
+        description: error.message || "Failed to load ZIP file",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const processZipFile = async (contents: JSZip, fileName: string) => {
+    try {
       const entries: ZipEntry[] = [];
 
       for (const [path, zipEntry] of Object.entries(contents.files)) {
@@ -64,8 +110,11 @@ export function PlayerPanel() {
       }
 
       setZipContents(entries);
-      setZipName(file.name);
+      setZipName(fileName);
       setIsPlaying(false);
+      setZipProblems(null);
+      setCanAutoFix(false);
+      setPendingFile(null);
       
       // Detect entry point intelligently
       const detectedEntry = ZipAnalyzer.detectEntryPoint(entries);
@@ -85,7 +134,7 @@ export function PlayerPanel() {
       
       // Save to user creations
       UserCreations.add({
-        name: file.name,
+        name: fileName,
         type: 'zip',
         fileCount: entries.length,
         description: `Uploaded ${new Date().toLocaleDateString()}`
@@ -95,7 +144,7 @@ export function PlayerPanel() {
       const issueWarning = issues.length > 0 ? ` (${issues.length} issues detected)` : '';
       toast({
         title: "Success!",
-        description: `Loaded ${entries.length} items from ${file.name}${issueWarning}`
+        description: `Loaded ${entries.length} items from ${fileName}${issueWarning}`
       });
     } catch (error) {
       toast({
@@ -105,6 +154,50 @@ export function PlayerPanel() {
       });
       console.error('Zip reading error:', error);
     }
+  };
+
+  const handleAutoFix = async () => {
+    if (!pendingFile) return;
+
+    try {
+      toast({
+        title: "Fixing ZIP...",
+        description: "Applying automatic fixes to your project"
+      });
+
+      const { zip: fixedZip, result } = await autoFixZip(pendingFile);
+
+      if (result.success) {
+        // Show what was fixed
+        if (result.fixes.length > 0) {
+          toast({
+            title: "Auto-Fix Complete!",
+            description: `Applied ${result.fixes.length} fixes to your ZIP file`
+          });
+        }
+
+        // Process the fixed ZIP
+        await processZipFile(fixedZip, pendingFile.name);
+      } else {
+        toast({
+          title: "Auto-Fix Failed",
+          description: "Could not automatically fix all issues. Please see the agent for help.",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Auto-Fix Error",
+        description: error.message || "Failed to fix ZIP file",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDismissProblems = () => {
+    setZipProblems(null);
+    setCanAutoFix(false);
+    setPendingFile(null);
   };
 
   const handleUploadClick = () => {
@@ -148,6 +241,35 @@ export function PlayerPanel() {
     });
     setActiveTab('current');
     // Note: In a full implementation, we'd reload the zip file from storage
+  };
+
+  const handleDownloadCreation = async (creation: UserCreation) => {
+    try {
+      // Create a simple zip with the creation data
+      const zip = new JSZip();
+      
+      // Add glyph manifest
+      if (creation.glyph) {
+        zip.file('glyph-manifest.json', JSON.stringify(creation.glyph, null, 2));
+      }
+      
+      // Generate zip blob
+      const blob = await zip.generateAsync({ type: 'blob' });
+      
+      // Use the UserCreations download method with glyph tagging
+      UserCreations.downloadWithGlyph(creation, blob);
+      
+      toast({
+        title: "Download Started",
+        description: `${creation.name} tagged with glyph ${creation.glyph?.glyph_id || 'signature'}`
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Could not prepare download",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleEditCreation = (creation: UserCreation) => {
@@ -234,6 +356,62 @@ export function PlayerPanel() {
             <AlertCircle className="h-5 w-5 text-lavender" />
           </Button>
         </div>
+
+        {zipProblems && (
+          <Alert className="mb-6 bg-destructive/10 border-destructive/30">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <AlertTitle className="text-destructive">ZIP Problems Detected</AlertTitle>
+            <AlertDescription className="mt-3 space-y-3 text-sm">
+              {zipProblems.errors.length > 0 && (
+                <div>
+                  <p className="font-semibold mb-2">Errors:</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    {zipProblems.errors.map((error, idx) => (
+                      <li key={idx}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {zipProblems.warnings.length > 0 && (
+                <div>
+                  <p className="font-semibold mb-2">Warnings:</p>
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    {zipProblems.warnings.map((warning, idx) => (
+                      <li key={idx}>{warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="flex gap-2 mt-4">
+                {canAutoFix ? (
+                  <Button
+                    onClick={handleAutoFix}
+                    className="bg-lavender hover:bg-lavender-hover"
+                    data-testid="button-autofix-zip"
+                  >
+                    <Wrench className="h-4 w-4 mr-2" />
+                    Auto-Fix
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => window.open('https://replit.com', '_blank')}
+                    variant="outline"
+                    data-testid="button-see-agent"
+                  >
+                    See Agent for Help
+                  </Button>
+                )}
+                <Button
+                  onClick={handleDismissProblems}
+                  variant="outline"
+                  data-testid="button-dismiss-problems"
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {showHelp && (
           <Alert className="mb-6 bg-lavender/5 border-lavender/20">
@@ -348,6 +526,17 @@ export function PlayerPanel() {
                         <Play className="h-3 w-3" />
                         <span>|</span>
                         <span>Play</span>
+                      </Button>
+                      <Button
+                        data-testid={`button-download-${creation.id}`}
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1"
+                        onClick={() => handleDownloadCreation(creation)}
+                      >
+                        <Download className="h-3 w-3" />
+                        <span>|</span>
+                        <span>Download</span>
                       </Button>
                       <Button
                         data-testid={`button-edit-${creation.id}`}

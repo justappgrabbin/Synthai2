@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store } from "lucide-react";
+import { GlyphGenerator, detectDimension } from "@/lib/glyphGenerator";
+import JSZip from "jszip";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
@@ -42,7 +44,10 @@ export function DeveloperPanel() {
   const [isPushingToGitHub, setIsPushingToGitHub] = useState(false);
   const [githubDialogOpen, setGithubDialogOpen] = useState(false);
   const [repoName, setRepoName] = useState("");
-  const { toast } = useToast();
+  const [importRepoUrl, setImportRepoUrl] = useState("");
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const { toast} = useToast();
 
   useEffect(() => {
     loadFiles();
@@ -345,6 +350,117 @@ export function DeveloperPanel() {
       });
     } finally {
       setIsExportingToDrive(false);
+    }
+  };
+
+  const handleDownloadProject = async () => {
+    try {
+      const zip = new JSZip();
+      const allFiles = FileSystem.getAllFiles();
+
+      // Generate glyph for this project
+      const glyphGenerator = new GlyphGenerator({
+        name: "IDE Project",
+        dimension: "Design",
+        state: 'active',
+        repo: 'YOU-N-I-VERSE Studio',
+        path: '/ide',
+        coherence: 0.95
+      });
+      const glyph = glyphGenerator.generate();
+
+      // Add glyph manifest
+      zip.file('glyph-manifest.json', JSON.stringify(glyph.json, null, 2));
+
+      // Add all files recursively
+      const addFilesToZip = (nodes: FileNode[], currentPath = '') => {
+        nodes.forEach(node => {
+          const path = currentPath ? `${currentPath}/${node.name}` : node.name;
+          if (node.type === 'file' && node.content !== undefined) {
+            zip.file(path, node.content);
+          } else if (node.type === 'folder' && node.children) {
+            addFilesToZip(node.children, path);
+          }
+        });
+      };
+
+      addFilesToZip(allFiles);
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `ide-project-${glyph.json.glyph_id}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      toast({
+        title: "Download Started",
+        description: `Project tagged with glyph ${glyph.json.glyph_id}`
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Could not prepare download",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSendToStore = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Send to Grove Store feature is under development"
+    });
+  };
+
+  const handleImportFromGitHub = async () => {
+    setIsImporting(true);
+    try {
+      const response = await fetch('/api/import/github', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoUrl: importRepoUrl })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.notConnected) {
+          toast({
+            title: "GitHub Not Connected",
+            description: "Please connect your GitHub account first",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Import Failed",
+            description: data.message || "Could not import from GitHub",
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+
+      setImportDialogOpen(false);
+      setImportRepoUrl('');
+
+      toast({
+        title: "Imported from GitHub! 🎉",
+        description: `${data.fileCount} files loaded into IDE`
+      });
+
+      loadFiles();
+    } catch (error: any) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: error.message || "Could not import from GitHub",
+        variant: "destructive"
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -2035,30 +2151,50 @@ const result = await handlePayment({
             </DialogContent>
           </Dialog>
 
-          <Button
-            data-testid="button-export-google-drive"
-            variant="outline"
-            size="sm"
-            onClick={handleExportToGoogleDrive}
-            disabled={isExportingToDrive}
-            title="Export to Google Drive"
-          >
-            <Cloud className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">{isExportingToDrive ? 'Exporting...' : 'Drive'}</span>
-          </Button>
-
-          <Dialog open={githubDialogOpen} onOpenChange={setGithubDialogOpen}>
-            <DialogTrigger asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
-                data-testid="button-push-github"
+                data-testid="button-export-menu"
                 variant="outline"
                 size="sm"
-                title="Push to GitHub"
               >
-                <Github className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">GitHub</span>
+                <MoreVertical className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Export/Import</span>
               </Button>
-            </DialogTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Project Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDownloadProject} data-testid="menu-download-project">
+                <Download className="h-4 w-4 mr-2" />
+                Download Project
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSendToStore} data-testid="menu-send-to-store">
+                <Store className="h-4 w-4 mr-2" />
+                Send to Grove Store
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setGithubDialogOpen(true)} data-testid="menu-push-github">
+                <Github className="h-4 w-4 mr-2" />
+                Push to GitHub
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setImportDialogOpen(true)} data-testid="menu-import-github">
+                <Upload className="h-4 w-4 mr-2" />
+                Import from GitHub
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleExportToGoogleDrive} 
+                disabled={isExportingToDrive}
+                data-testid="menu-export-drive"
+              >
+                <Cloud className="h-4 w-4 mr-2" />
+                {isExportingToDrive ? 'Exporting...' : 'Export to Google Drive'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Dialog open={githubDialogOpen} onOpenChange={setGithubDialogOpen}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Push to GitHub 🚀</DialogTitle>
@@ -2099,6 +2235,53 @@ const result = await handlePayment({
                     className="bg-lavender hover:bg-lavender-hover"
                   >
                     {isPushingToGitHub ? 'Pushing...' : 'Push to GitHub 🚀'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import from GitHub 📥</DialogTitle>
+                <DialogDescription>
+                  Import a GitHub repository into your IDE. Paste the repository URL below.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input
+                  data-testid="input-import-repo-url"
+                  placeholder="https://github.com/username/repo"
+                  value={importRepoUrl}
+                  onChange={(e) => setImportRepoUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isImporting) {
+                      handleImportFromGitHub();
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Files will be loaded into your IDE workspace
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setImportDialogOpen(false);
+                      setImportRepoUrl('');
+                    }}
+                    data-testid="button-cancel-import"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleImportFromGitHub}
+                    disabled={isImporting || !importRepoUrl.trim()}
+                    data-testid="button-execute-import"
+                    className="bg-lavender hover:bg-lavender-hover"
+                  >
+                    {isImporting ? 'Importing...' : 'Import 📥'}
                   </Button>
                 </div>
               </div>

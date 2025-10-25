@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌌 Glyph Generator - YOU-N-I-VERSE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cosmic: {
+              dark: '#0a0e27',
+              purple: '#6B46C1',
+              pink: '#D946A6',
+              blue: '#3B82F6',
+              gold: '#F59E0B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1438 100%);
+    }
+    
+    .glyph-container {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .field-bar {
+      transition: width 0.3s ease;
+      background: linear-gradient(90deg, #D946A6, #6B46C1);
+    }
+    
+    .glyph-preview {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.2;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(107, 70, 193, 0.5);
+    }
+    
+    .dimension-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .dimension-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(107, 70, 193, 0.3);
+    }
+    
+    .dimension-card.selected {
+      border-color: #D946A6;
+      background: rgba(217, 70, 166, 0.1);
+    }
+    
+    .sparkle {
+      animation: sparkle 2s infinite;
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white p-8">
+  
+  <!-- Header -->
+  <div class="max-w-7xl mx-auto mb-12">
+    <div class="text-center">
+      <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-cosmic-pink via-cosmic-purple to-cosmic-blue bg-clip-text text-transparent">
+        🌌 Glyph Generator
+      </h1>
+      <p class="text-gray-400 text-lg">YOU-N-I-VERSE Dimensional Fingerprint System</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- Left Panel: Configuration -->
+    <div class="space-y-6">
+      
+      <!-- Basic Info -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">✨</span> Basic Information
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Module Name</label>
+            <input 
+              type="text" 
+              id="moduleName"
+              placeholder="Sentence Compiler"
+              class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-cosmic-purple"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Repository</label>
+            <input 
+              type="text" 
+              id="repo"
+              placeholder="YOUNIVERSE-0"
+              class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-cosmic-purple"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Path</label>
+            <input 
+              type="text" 
+              id="path"
+              placeholder="/backend/engines/sentence"
+              class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-cosmic-purple"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Dimension Selection -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">🔺</span> Dimensional Alignment
+        </h2>
+        
+        <div id="dimensionCards" class="grid grid-cols-1 gap-3">
+          <!-- Dynamically generated -->
+        </div>
+      </div>
+
+      <!-- Crystal Alignment -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">💎</span> Crystal Configuration
+        </h2>
+        
+        <div class="space-y-3">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="personality" class="w-5 h-5 rounded border-cosmic-purple">
+            <span>▲ Personality Crystal (Witness)</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="design" class="w-5 h-5 rounded border-cosmic-purple">
+            <span>▼ Design Crystal (Vehicle)</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="monopole" class="w-5 h-5 rounded border-cosmic-purple">
+            <span>◆ Magnetic Monopole (Attractor)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Field Resonance -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">⚡</span> Field Resonance
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm">Mind (Evolution)</label>
+              <span id="mindValue" class="text-sm text-cosmic-purple font-bold">50%</span>
+            </div>
+            <input type="range" id="mind" min="0" max="100" value="50" class="w-full">
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm">Body (Being)</label>
+              <span id="bodyValue" class="text-sm text-cosmic-purple font-bold">50%</span>
+            </div>
+            <input type="range" id="body" min="0" max="100" value="50" class="w-full">
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm">Heart (Space)</label>
+              <span id="heartValue" class="text-sm text-cosmic-purple font-bold">50%</span>
+            </div>
+            <input type="range" id="heart" min="0" max="100" value="50" class="w-full">
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm">Spirit (Movement)</label>
+              <span id="spiritValue" class="text-sm text-cosmic-purple font-bold">50%</span>
+            </div>
+            <input type="range" id="spirit" min="0" max="100" value="50" class="w-full">
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm">Soul (Design)</label>
+              <span id="soulValue" class="text-sm text-cosmic-purple font-bold">50%</span>
+            </div>
+            <input type="range" id="soul" min="0" max="100" value="50" class="w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadata -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">🎯</span> Metadata
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Connections (comma-separated IDs)</label>
+            <input 
+              type="text" 
+              id="connections"
+              placeholder="CHART-001, GAN-001, SYNTH-001"
+              class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-cosmic-purple"
+            />
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-2">
+              <label class="text-sm">Coherence Level</label>
+              <span id="coherenceValue" class="text-sm text-cosmic-gold font-bold">100%</span>
+            </div>
+            <input type="range" id="coherence" min="0" max="100" value="100" class="w-full">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">State</label>
+            <select id="state" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-cosmic-purple">
+              <option value="prototype">🔬 Prototype</option>
+              <option value="active">⚡ Active</option>
+              <option value="deprecated">⏸️ Deprecated</option>
+              <option value="broken">⚠️ Broken</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Panel: Preview & Export -->
+    <div class="space-y-6 lg:sticky lg:top-8 lg:h-fit">
+      
+      <!-- Live Preview -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">👁️</span> Live Preview
+        </h2>
+        
+        <div class="bg-black/40 rounded-lg p-4 overflow-x-auto">
+          <pre id="glyphPreview" class="glyph-preview whitespace-pre">Waiting for input...</pre>
+        </div>
+      </div>
+
+      <!-- File Header -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">📄</span> File Header
+        </h2>
+        
+        <div class="bg-black/40 rounded-lg p-4 overflow-x-auto">
+          <pre id="headerPreview" class="glyph-preview whitespace-pre">Waiting for input...</pre>
+        </div>
+        
+        <button onclick="copyHeader()" class="mt-4 w-full bg-cosmic-purple hover:bg-cosmic-pink transition-colors py-2 rounded-lg font-semibold">
+          📋 Copy Header
+        </button>
+      </div>
+
+      <!-- JSON Export -->
+      <div class="glyph-container rounded-2xl p-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="sparkle">📊</span> JSON Fingerprint
+        </h2>
+        
+        <div class="bg-black/40 rounded-lg p-4 overflow-x-auto max-h-64">
+          <pre id="jsonPreview" class="text-xs text-gray-300 whitespace-pre">{}</pre>
+        </div>
+        
+        <button onclick="downloadJSON()" class="mt-4 w-full bg-cosmic-blue hover:bg-cosmic-purple transition-colors py-2 rounded-lg font-semibold">
+          💾 Download JSON
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // DIMENSIONAL ARCHITECTURE
+    const DIMENSIONS = {
+      Movement: {
+        symbol: '⟡',
+        nature: 'Energy → Creation → Seeing',
+        component: 'Magnetic Monopole',
+        keynote: 'I Define',
+        field: 'Spirit',
+        color: 'from-red-500 to-orange-500'
+      },
+      Evolution: {
+        symbol: '⟁',
+        nature: 'Gravity → Memory → Taste',
+        component: 'Personality Crystal',
+        keynote: 'I Remember',
+        field: 'Mind',
+        color: 'from-purple-500 to-pink-500'
+      },
+      Being: {
+        symbol: '⬢',
+        nature: 'Matter → Touch → Sex',
+        component: 'The Atom',
+        keynote: 'I Am',
+        field: 'Body',
+        color: 'from-green-500 to-emerald-500'
+      },
+      Design: {
+        symbol: '◇',
+        nature: 'Structure → Progress → Smell',
+        component: 'Design Crystal',
+        keynote: 'I Design',
+        field: 'Soul',
+        color: 'from-blue-500 to-cyan-500'
+      },
+      Space: {
+        symbol: '◉',
+        nature: 'Form → Illusion → Hearing',
+        component: 'Personality Crystal',
+        keynote: 'I Think',
+        field: 'Heart',
+        color: 'from-yellow-500 to-amber-500'
+      }
+    };
+
+    let selectedDimension = 'Evolution';
+
+    // Initialize dimension cards
+    function initDimensionCards() {
+      const container = document.getElementById('dimensionCards');
+      container.innerHTML = Object.entries(DIMENSIONS).map(([name, data]) => `
+        <div 
+          class="dimension-card border border-white/10 rounded-lg p-4 ${name === selectedDimension ? 'selected' : ''}"
+          onclick="selectDimension('${name}')"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">${data.symbol}</span>
+              <div>
+                <div class="font-bold">${name}</div>
+                <div class="text-xs text-gray-400">${data.field} · ${data.keynote}</div>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500 mt-2">${data.nature}</div>
+          <div class="text-xs text-gray-600 mt-1">${data.component}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectDimension(name) {
+      selectedDimension = name;
+      initDimensionCards();
+      updateGlyph();
+    }
+
+    // Update field value displays
+    ['mind', 'body', 'heart', 'spirit', 'soul'].forEach(field => {
+      document.getElementById(field).addEventListener('input', (e) => {
+        document.getElementById(field + 'Value').textContent = e.target.value + '%';
+        updateGlyph();
+      });
+    });
+
+    document.getElementById('coherence').addEventListener('input', (e) => {
+      document.getElementById('coherenceValue').textContent = e.target.value + '%';
+      updateGlyph();
+    });
+
+    // Update glyph on any input change
+    ['moduleName', 'repo', 'path', 'connections', 'state', 'personality', 'design', 'monopole'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateGlyph);
+      document.getElementById(id).addEventListener('change', updateGlyph);
+    });
+
+    function generateID() {
+      const dim = DIMENSIONS[selectedDimension];
+      const keynoteWord = dim.keynote.split(' ')[1].toUpperCase();
+      const counter = String(Math.floor(Math.random() * 999)).padStart(3, '0');
+      return `${dim.symbol}-${keynoteWord}-${counter}`;
+    }
+
+    function updateGlyph() {
+      const name = document.getElementById('moduleName').value || 'Unnamed Module';
+      const repo = document.getElementById('repo').value || 'unknown';
+      const path = document.getElementById('path').value || '/';
+      const connections = document.getElementById('connections').value
+        .split(',')
+        .map(c => c.trim())
+        .filter(c => c);
+      
+      const personality = document.getElementById('personality').checked;
+      const design = document.getElementById('design').checked;
+      const monopole = document.getElementById('monopole').checked;
+
+      const fieldResonance = {
+        mind: parseInt(document.getElementById('mind').value) / 100,
+        body: parseInt(document.getElementById('body').value) / 100,
+        heart: parseInt(document.getElementById('heart').value) / 100,
+        spirit: parseInt(document.getElementById('spirit').value) / 100,
+        soul: parseInt(document.getElementById('soul').value) / 100
+      };
+
+      const coherence = parseInt(document.getElementById('coherence').value) / 100;
+      const state = document.getElementById('state').value;
+
+      const dim = DIMENSIONS[selectedDimension];
+      const id = generateID();
+
+      const stateEmoji = {
+        active: '⚡',
+        prototype: '🔬',
+        deprecated: '⏸️',
+        broken: '⚠️'
+      }[state];
+
+      const coherenceBar = '◉'.repeat(Math.floor(coherence * 10)) + '○'.repeat(10 - Math.floor(coherence * 10));
+
+      // Generate visual glyph
+      const visual = `
+╭─────────────────────────────────╮
+│   ${personality ? '▲' : '△'} ${name.toUpperCase().padEnd(25).slice(0, 25)} │
+│  ╱ ╲         ${id.padEnd(17).slice(0, 17)} │
+│ ╱   ╲                           │
+│╱─────╲   ${dim.component.padEnd(21).slice(0, 21)} │
+││ ${dim.symbol}  ││   ${(dim.field + ' Field').padEnd(21).slice(0, 21)} │
+│╲     ╱                           │
+│ ╲   ╱    ${dim.keynote.padEnd(21).slice(0, 21)} │
+│  ╲ ╱     ${dim.nature.split('→')[0].trim().padEnd(21).slice(0, 21)} │
+│   ${design ? '▼' : '▽'}      ${monopole ? '◆' : '◇'} Monopole              │
+│                                 │
+│  Field Resonance:               │
+│  Mind   ${'█'.repeat(Math.floor(fieldResonance.mind * 10))}${'░'.repeat(10 - Math.floor(fieldResonance.mind * 10))} ${Math.floor(fieldResonance.mind * 100)}%   │
+│  Soul   ${'█'.repeat(Math.floor(fieldResonance.soul * 10))}${'░'.repeat(10 - Math.floor(fieldResonance.soul * 10))} ${Math.floor(fieldResonance.soul * 100)}%   │
+│  Heart  ${'█'.repeat(Math.floor(fieldResonance.heart * 10))}${'░'.repeat(10 - Math.floor(fieldResonance.heart * 10))} ${Math.floor(fieldResonance.heart * 100)}%   │
+│  Spirit ${'█'.repeat(Math.floor(fieldResonance.spirit * 10))}${'░'.repeat(10 - Math.floor(fieldResonance.spirit * 10))} ${Math.floor(fieldResonance.spirit * 100)}%   │
+│  Body   ${'█'.repeat(Math.floor(fieldResonance.body * 10))}${'░'.repeat(10 - Math.floor(fieldResonance.body * 10))} ${Math.floor(fieldResonance.body * 100)}%   │
+│                                 │
+${connections.length > 0 ? `│  Connections:                   │\n${connections.map(c => `│  → ${c.padEnd(29).slice(0, 29)} │`).join('\n')}\n│                                 │` : ''}
+│  ${stateEmoji} ${state.toUpperCase()} | Coherence: ${Math.floor(coherence * 100)}% ${coherenceBar} │
+│                                 │
+│  Repo: ${repo.padEnd(24).slice(0, 24)} │
+│  Path: ${path.padEnd(24).slice(0, 24)} │
+╰─────────────────────────────────╯`;
+
+      // Generate file header
+      const header = `/**
+ * ╔═══════════════════════════════════════╗
+ * ║  ${personality ? '▲' : '△'} ${name.toUpperCase().padEnd(33).slice(0, 33)} ║
+ * ║ ╱ ╲    ${id.padEnd(30).slice(0, 30)} ║
+ * ║╱───╲   ${(dim.field + ' · ' + dim.component).padEnd(30).slice(0, 30)} ║
+ * ║│ ${dim.symbol} │   ${dim.nature.split('→').slice(0, 2).join(' → ').padEnd(30).slice(0, 30)} ║
+ * ║╲───╱   ${dim.keynote.padEnd(30).slice(0, 30)} ║
+ * ║  ${design ? '▼' : '▽'}                                   ║
+ * ╠═══════════════════════════════════════╣
+ * ║ Repository: ${repo.padEnd(26).slice(0, 26)} ║
+ * ║ Path: ${path.padEnd(32).slice(0, 32)} ║
+ * ║ State: ${state.toUpperCase().padEnd(31).slice(0, 31)} ║
+ * ║ Coherence: ${Math.floor(coherence * 100)}%${' '.repeat(27)} ║
+ * ╚═══════════════════════════════════════╝
+ */`;
+
+      // Generate JSON
+      const json = {
+        glyph_id: id,
+        name: name,
+        symbol: dim.symbol,
+        dimension: {
+          name: selectedDimension,
+          symbol: dim.symbol,
+          keynote: dim.keynote,
+          nature_chain: dim.nature.split(' → '),
+          component: dim.component,
+          field: dim.field
+        },
+        crystal_alignment: { personality, design, monopole },
+        field_resonance: fieldResonance,
+        connections: connections,
+        coherence: coherence,
+        state: state,
+        repo: repo,
+        path: path,
+        generated_at: new Date().toISOString()
+      };
+
+      document.getElementById('glyphPreview').textContent = visual;
+      document.getElementById('headerPreview').textContent = header;
+      document.getElementById('jsonPreview').textContent = JSON.stringify(json, null, 2);
+
+      // Store for export
+      window.currentGlyph = { visual, header, json };
+    }
+
+    function copyHeader() {
+      navigator.clipboard.writeText(window.currentGlyph.header);
+      alert('✨ File header copied to clipboard!');
+    }
+
+    function downloadJSON() {
+      const blob = new Blob([JSON.stringify(window.currentGlyph.json, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `glyph-${window.currentGlyph.json.glyph_id}.json`;
+      a.click();
+    }
+
+    // Initialize
+    initDimensionCards();
+    updateGlyph();
+  </script>
+
+</body>
+</html>

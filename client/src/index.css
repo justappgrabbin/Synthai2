@@ -348,4 +348,39 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* Mobile Touch Optimization - Ensure all buttons work well on mobile */
+  button, 
+  [role="button"], 
+  [type="button"],
+  [type="submit"],
+  a[href] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Ensure minimum touch target size on mobile (44x44px recommended) */
+  @media (max-width: 640px) {
+    button:not([class*="min-h"]):not([class*="h-"]),
+    [role="button"]:not([class*="min-h"]):not([class*="h-"]) {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Prevent double-tap zoom on buttons */
+  button,
+  [role="button"] {
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+  }
+
+  /* Improve click/touch response */
+  button:active,
+  [role="button"]:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
 }

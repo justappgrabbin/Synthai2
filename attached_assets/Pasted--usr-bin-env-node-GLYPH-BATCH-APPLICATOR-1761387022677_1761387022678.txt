@@ -1,0 +1,217 @@
+#!/usr/bin/env node
+
+/**
+ * ╔═══════════════════════════════════════╗
+ * ║  ▲ GLYPH BATCH APPLICATOR             ║
+ * ║ ╱ ╲    ◇-DESIGN-002                   ║
+ * ║╱───╲   Soul · Design Crystal          ║
+ * ║│ ◇ │   Structure → Progress           ║
+ * ║╲───╱   I Design                       ║
+ * ║  ▼     Automated Header Insertion     ║
+ * ╠═══════════════════════════════════════╣
+ * ║ Purpose: Apply glyph headers to files ║
+ * ║          from registry automatically  ║
+ * ║ State:   ACTIVE | Coherence: 100%    ║
+ * ╚═══════════════════════════════════════╝
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { GlyphGenerator } = require('./glyph-generator.js');
+
+class GlyphApplicator {
+  constructor(options = {}) {
+    this.registryPath = options.registryPath || './glyph-registry.json';
+    this.workDir = options.workDir || './scanned-repos';
+    this.dryRun = options.dryRun || false;
+    this.backup = options.backup !== false; // Default true
+    this.applied = 0;
+    this.skipped = 0;
+    this.errors = 0;
+  }
+
+  loadRegistry() {
+    if (!fs.existsSync(this.registryPath)) {
+      throw new Error(`Registry not found: ${this.registryPath}`);
+    }
+
+    const data = JSON.parse(fs.readFileSync(this.registryPath, 'utf8'));
+    return data.glyphs || data; // Handle both formats
+  }
+
+  getFileExtension(filePath) {
+    return path.extname(filePath).toLowerCase();
+  }
+
+  getCommentStyle(ext) {
+    const styles = {
+      '.js': { start: '/**', line: ' * ', end: ' */' },
+      '.jsx': { start: '/**', line: ' * ', end: ' */' },
+      '.ts': { start: '/**', line: ' * ', end: ' */' },
+      '.tsx': { start: '/**', line: ' * ', end: ' */' },
+      '.py': { start: '"""', line: '', end: '"""' },
+      '.html': { start: '<!--', line: '  ', end: '-->' },
+      '.css': { start: '/**', line: ' * ', end: ' */' },
+      '.md': { start: '<!--', line: '  ', end: '-->' }
+    };
+
+    return styles[ext] || styles['.js']; // Default to JS style
+  }
+
+  generateGlyphHeader(glyph) {
+    const generator = new GlyphGenerator({
+      name: glyph.name,
+      dimension: glyph.dimension.name,
+      crystalAlignment: glyph.crystal_alignment,
+      fieldResonance: glyph.field_resonance,
+      connections: glyph.connections,
+      coherence: glyph.coherence,
+      state: glyph.state,
+      repo: glyph.repo,
+      path: glyph.path,
+      id: glyph.glyph_id
+    });
+
+    return generator.generateFileHeader();
+  }
+
+  hasGlyphHeader(content) {
+    return content.includes('╔═══════════════════════════════════════╗') ||
+           content.includes('GLYPH:') ||
+           content.includes('glyph_id');
+  }
+
+  insertHeader(filePath, header) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+
+      // Skip if already has glyph
+      if (this.hasGlyphHeader(content)) {
+        this.skipped++;
+        console.log(`   ⏭️  Skipped (already has glyph): ${path.basename(filePath)}`);
+        return false;
+      }
+
+      // Backup original file
+      if (this.backup && !this.dryRun) {
+        fs.writeFileSync(`${filePath}.backup`, content);
+      }
+
+      // Insert header at top
+      const newContent = `${header}\n\n${content}`;
+
+      if (!this.dryRun) {
+        fs.writeFileSync(filePath, newContent);
+      }
+
+      this.applied++;
+      console.log(`   ✅ Applied glyph: ${path.basename(filePath)}`);
+      return true;
+
+    } catch (error) {
+      this.errors++;
+      console.error(`   ❌ Error: ${path.basename(filePath)} - ${error.message}`);
+      return false;
+    }
+  }
+
+  async applyGlyph(glyph) {
+    const fullPath = path.join(this.workDir, glyph.repo, glyph.path);
+
+    if (!fs.existsSync(fullPath)) {
+      console.log(`   ⚠️  File not found: ${glyph.path}`);
+      this.skipped++;
+      return;
+    }
+
+    const header = this.generateGlyphHeader(glyph);
+    this.insertHeader(fullPath, header);
+  }
+
+  async run() {
+    console.log('\n🌌 GLYPH BATCH APPLICATOR\n');
+    console.log(`Mode: ${this.dryRun ? '🔬 DRY RUN' : '⚡ LIVE'}`);
+    console.log(`Backup: ${this.backup ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`Registry: ${this.registryPath}\n`);
+
+    const glyphs = this.loadRegistry();
+    console.log(`Found ${glyphs.length} glyphs in registry\n`);
+
+    console.log(${'='.repeat(60)}\n`);
+
+    for (const glyph of glyphs) {
+      console.log(`\n📄 ${glyph.glyph_id} - ${glyph.name}`);
+      console.log(`   Repo: ${glyph.repo}`);
+      console.log(`   Path: ${glyph.path}`);
+
+      await this.applyGlyph(glyph);
+    }
+
+    console.log(`\n${'='.repeat(60)}`);
+    console.log('\n📊 SUMMARY\n');
+    console.log(`   ✅ Applied: ${this.applied}`);
+    console.log(`   ⏭️  Skipped: ${this.skipped}`);
+    console.log(`   ❌ Errors: ${this.errors}`);
+    console.log(`   📝 Total: ${glyphs.length}\n`);
+
+    if (this.dryRun) {
+      console.log('💡 This was a dry run. No files were modified.');
+      console.log('   Run with --live to apply changes.\n');
+    } else {
+      console.log('✨ Glyph headers applied successfully!\n');
+      if (this.backup) {
+        console.log('💾 Backups saved with .backup extension\n');
+      }
+    }
+  }
+}
+
+// CLI INTERFACE
+if (require.main === module) {
+  const args = process.argv.slice(2);
+
+  const options = {
+    dryRun: !args.includes('--live'),
+    backup: !args.includes('--no-backup'),
+    registryPath: args.find(a => a.startsWith('--registry='))?.split('=')[1] || './glyph-registry.json',
+    workDir: args.find(a => a.startsWith('--workdir='))?.split('=')[1] || './scanned-repos'
+  };
+
+  if (args.includes('--help')) {
+    console.log(`
+🌌 GLYPH BATCH APPLICATOR
+
+Usage:
+  node batch-apply-glyphs.js [options]
+
+Options:
+  --live              Apply changes (default: dry run)
+  --no-backup         Don't create backup files (default: create backups)
+  --registry=<path>   Path to glyph registry JSON (default: ./glyph-registry.json)
+  --workdir=<path>    Path to scanned repos (default: ./scanned-repos)
+  --help              Show this help
+
+Examples:
+  # Dry run (safe, shows what would happen)
+  node batch-apply-glyphs.js
+
+  # Apply glyphs for real
+  node batch-apply-glyphs.js --live
+
+  # Apply without creating backups
+  node batch-apply-glyphs.js --live --no-backup
+
+  # Use custom registry
+  node batch-apply-glyphs.js --live --registry=./custom-registry.json
+`);
+    process.exit(0);
+  }
+
+  const applicator = new GlyphApplicator(options);
+  applicator.run().catch(error => {
+    console.error('\n❌ Application failed:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { GlyphApplicator };

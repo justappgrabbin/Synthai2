@@ -1,0 +1,491 @@
+#!/usr/bin/env node
+
+/**
+ * ╔═══════════════════════════════════════╗
+ * ║  ▲ GLYPH REPO SCANNER                 ║
+ * ║ ╱ ╲    ⟡-DEFINE-001                   ║
+ * ║╱───╲   Spirit · Magnetic Monopole     ║
+ * ║│ ⟡ │   Energy → Creation → Seeing     ║
+ * ║╲───╱   I Define                       ║
+ * ║  ▼     YOU-N-I-VERSE Registry Builder ║
+ * ╠═══════════════════════════════════════╣
+ * ║ Purpose: Scan repos, detect modules,  ║
+ * ║          assign glyphs, build registry║
+ * ║ State:   ACTIVE | Coherence: 95%     ║
+ * ╚═══════════════════════════════════════╝
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
+
+// Import the glyph generator
+const { GlyphGenerator, DIMENSIONS } = require('./glyph-generator.js');
+
+// REPO LIST FROM YOUR GITHUB
+const REPOS = [
+  'YOUNIVERSE-0',
+  'SynthAIPrime',
+  'GGP',
+  'Resonance-app',
+  'Guaganapp',
+  'Whimcycle',
+  '-Synthia-The-Synthesis-Intelligence-Field',
+  'Synthaigangain',
+  'GUAGANBROWSER',
+  'Fairyganmatterbuilder',
+  'Fairyganmatter',
+  'Bissssssssshcorrector',
+  'SynthAI-Builds',
+  'you-tellarsynth',
+  'S.G.A.N.-R.U.D.E.',
+  'trinity-wheel',
+  'trinitymodelappwheel',
+  'Cynthia',
+  'SynthiaLite',
+  'Officially-Introducing-SYNTHAI-',
+  'Synthai',
+  'SynthAIPrime-AS-YOU-N-I-VERSE'
+];
+
+const GITHUB_ORG = 'Stellar-proximology';
+
+// MODULE DETECTION PATTERNS
+const MODULE_PATTERNS = {
+  // Backend/API patterns
+  api: {
+    patterns: ['/api/', '/routes/', '/controllers/', '/services/', 'server.js', 'app.js'],
+    dimension: 'Being',
+    field: 'Body',
+    keynote: 'I Am'
+  },
+  
+  // AI/ML patterns
+  ai: {
+    patterns: ['/models/', '/gan/', '/neural/', 'synthia', 'synth', '.pth', '.h5', 'torch', 'tensorflow'],
+    dimension: 'Movement',
+    field: 'Spirit',
+    keynote: 'I Define'
+  },
+  
+  // Data/Processing patterns
+  data: {
+    patterns: ['/data/', '/parsers/', '/compilers/', '/engines/', 'sentence', 'field'],
+    dimension: 'Evolution',
+    field: 'Mind',
+    keynote: 'I Remember'
+  },
+  
+  // UI/Frontend patterns
+  ui: {
+    patterns: ['/components/', '/pages/', '/views/', 'react', 'vue', 'chart', 'dashboard'],
+    dimension: 'Space',
+    field: 'Heart',
+    keynote: 'I Think'
+  },
+  
+  // Design/Architecture patterns
+  architecture: {
+    patterns: ['/schemas/', '/models/', '/types/', 'resonance', 'coherence', 'crystal'],
+    dimension: 'Design',
+    field: 'Soul',
+    keynote: 'I Design'
+  }
+};
+
+class RepoScanner {
+  constructor(options = {}) {
+    this.workDir = options.workDir || './scanned-repos';
+    this.registryPath = options.registryPath || './glyph-registry.json';
+    this.registry = [];
+    this.scannedModules = [];
+  }
+
+  async init() {
+    // Create work directory
+    if (!fs.existsSync(this.workDir)) {
+      fs.mkdirSync(this.workDir, { recursive: true });
+    }
+    
+    // Load existing registry if available
+    if (fs.existsSync(this.registryPath)) {
+      this.registry = JSON.parse(fs.readFileSync(this.registryPath, 'utf8'));
+      console.log(`📚 Loaded existing registry: ${this.registry.length} glyphs`);
+    }
+  }
+
+  async cloneRepo(repoName) {
+    const repoUrl = `https://github.com/${GITHUB_ORG}/${repoName}.git`;
+    const targetPath = path.join(this.workDir, repoName);
+
+    try {
+      if (fs.existsSync(targetPath)) {
+        console.log(`📦 ${repoName} already exists, pulling latest...`);
+        await execAsync(`cd ${targetPath} && git pull`);
+      } else {
+        console.log(`📥 Cloning ${repoName}...`);
+        await execAsync(`git clone ${repoUrl} ${targetPath}`);
+      }
+      return targetPath;
+    } catch (error) {
+      console.error(`❌ Failed to clone ${repoName}:`, error.message);
+      return null;
+    }
+  }
+
+  detectModuleType(filePath, content) {
+    const lowerPath = filePath.toLowerCase();
+    const lowerContent = content.toLowerCase();
+
+    for (const [type, config] of Object.entries(MODULE_PATTERNS)) {
+      const matches = config.patterns.filter(pattern => 
+        lowerPath.includes(pattern.toLowerCase()) || 
+        lowerContent.includes(pattern.toLowerCase())
+      );
+      
+      if (matches.length > 0) {
+        return config;
+      }
+    }
+
+    return MODULE_PATTERNS.data; // Default fallback
+  }
+
+  async scanFile(filePath, repoName) {
+    const ext = path.extname(filePath);
+    const validExts = ['.js', '.jsx', '.ts', '.tsx', '.py', '.json'];
+    
+    if (!validExts.includes(ext)) return null;
+
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const relativePath = filePath.replace(path.join(this.workDir, repoName), '');
+      
+      // Skip if already has glyph header
+      if (content.includes('╔═══════════════════════════════════════╗')) {
+        return null;
+      }
+
+      const moduleType = this.detectModuleType(relativePath, content);
+      const fileName = path.basename(filePath, ext);
+
+      return {
+        filePath: relativePath,
+        fileName,
+        repoName,
+        suggestedDimension: moduleType.dimension,
+        suggestedField: moduleType.field,
+        content: content.slice(0, 500) // Preview
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async scanDirectory(dirPath, repoName) {
+    const modules = [];
+    
+    try {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+
+        // Skip common ignore patterns
+        if (entry.name.startsWith('.') || 
+            entry.name === 'node_modules' || 
+            entry.name === '__pycache__' ||
+            entry.name === 'dist' ||
+            entry.name === 'build') {
+          continue;
+        }
+
+        if (entry.isDirectory()) {
+          const subModules = await this.scanDirectory(fullPath, repoName);
+          modules.push(...subModules);
+        } else {
+          const module = await this.scanFile(fullPath, repoName);
+          if (module) modules.push(module);
+        }
+      }
+    } catch (error) {
+      console.error(`Error scanning ${dirPath}:`, error.message);
+    }
+
+    return modules;
+  }
+
+  inferFieldResonance(filePath, content) {
+    const resonance = {
+      mind: 0.5,
+      body: 0.5,
+      heart: 0.5,
+      spirit: 0.5,
+      soul: 0.5
+    };
+
+    // AI/ML heavy
+    if (content.includes('torch') || content.includes('tensorflow') || content.includes('gan')) {
+      resonance.spirit = 0.9;
+      resonance.mind = 0.7;
+    }
+
+    // Data processing
+    if (content.includes('parse') || content.includes('compile') || content.includes('transform')) {
+      resonance.mind = 0.8;
+      resonance.soul = 0.6;
+    }
+
+    // UI/Frontend
+    if (content.includes('component') || content.includes('render') || content.includes('useState')) {
+      resonance.heart = 0.9;
+      resonance.spirit = 0.4;
+    }
+
+    // Backend/API
+    if (content.includes('express') || content.includes('router') || content.includes('controller')) {
+      resonance.body = 0.9;
+      resonance.soul = 0.6;
+    }
+
+    // Schema/Architecture
+    if (content.includes('schema') || content.includes('interface') || content.includes('type')) {
+      resonance.soul = 0.9;
+      resonance.mind = 0.7;
+    }
+
+    return resonance;
+  }
+
+  generateGlyphForModule(module) {
+    const fieldResonance = this.inferFieldResonance(module.filePath, module.content);
+    
+    // Infer crystal alignment based on module type
+    const crystalAlignment = {
+      personality: module.suggestedDimension === 'Evolution' || module.suggestedDimension === 'Space',
+      design: module.suggestedDimension === 'Design' || module.suggestedDimension === 'Being',
+      monopole: module.suggestedDimension === 'Movement'
+    };
+
+    const config = {
+      name: module.fileName,
+      dimension: module.suggestedDimension,
+      crystalAlignment,
+      fieldResonance,
+      coherence: 0.85, // Default coherence
+      state: 'active',
+      repo: module.repoName,
+      path: module.filePath,
+      connections: [] // Will be populated in relationship mapping phase
+    };
+
+    const generator = new GlyphGenerator(config);
+    return generator.generate();
+  }
+
+  async scanAllRepos() {
+    console.log('\n🌌 YOU-N-I-VERSE GLYPH REPO SCANNER\n');
+    console.log(`Scanning ${REPOS.length} repositories...\n`);
+
+    for (const repoName of REPOS) {
+      console.log(`\n${'='.repeat(50)}`);
+      console.log(`📂 Repository: ${repoName}`);
+      console.log(${'='.repeat(50)}\n`);
+
+      const repoPath = await this.cloneRepo(repoName);
+      if (!repoPath) continue;
+
+      const modules = await this.scanDirectory(repoPath, repoName);
+      console.log(`   Found ${modules.length} potential modules\n`);
+
+      for (const module of modules.slice(0, 10)) { // Limit to 10 per repo for initial scan
+        const glyph = this.generateGlyphForModule(module);
+        
+        this.scannedModules.push({
+          ...module,
+          glyph: glyph.json
+        });
+
+        this.registry.push(glyph.json);
+
+        console.log(`   ✨ ${glyph.json.glyph_id} - ${module.fileName}`);
+        console.log(`      Dimension: ${glyph.json.dimension.name} (${glyph.json.dimension.keynote})`);
+        console.log(`      Path: ${module.filePath}`);
+      }
+
+      if (modules.length > 10) {
+        console.log(`\n   ... and ${modules.length - 10} more modules`);
+      }
+    }
+
+    console.log(`\n${'='.repeat(50)}`);
+    console.log(`\n✅ Scan complete!`);
+    console.log(`   Total glyphs generated: ${this.registry.length}`);
+    console.log(`   Registry path: ${this.registryPath}\n`);
+  }
+
+  async buildRelationshipMap() {
+    console.log('\n🔗 Building relationship map...\n');
+
+    for (const module of this.scannedModules) {
+      const connections = [];
+      
+      // Analyze imports/requires in content
+      const importMatches = module.content.match(/(?:import|require)\s*\(?['"](.+?)['"]\)?/g) || [];
+      
+      for (const match of importMatches) {
+        const imported = match.match(/['"](.+?)['"]/)?.[1];
+        if (!imported) continue;
+
+        // Find matching modules
+        const relatedModules = this.scannedModules.filter(m => 
+          m.filePath.includes(imported) || m.fileName.includes(imported)
+        );
+
+        for (const related of relatedModules) {
+          if (related.glyph.glyph_id !== module.glyph.glyph_id) {
+            connections.push(related.glyph.glyph_id);
+          }
+        }
+      }
+
+      // Update glyph connections
+      module.glyph.connections = [...new Set(connections)];
+    }
+
+    console.log('   ✅ Relationship map complete\n');
+  }
+
+  async saveRegistry() {
+    const registryData = {
+      version: '1.0.0',
+      generated_at: new Date().toISOString(),
+      total_glyphs: this.registry.length,
+      repositories: REPOS.length,
+      glyphs: this.registry,
+      statistics: this.generateStatistics()
+    };
+
+    fs.writeFileSync(
+      this.registryPath, 
+      JSON.stringify(registryData, null, 2)
+    );
+
+    console.log(`\n💾 Registry saved to: ${this.registryPath}`);
+  }
+
+  generateStatistics() {
+    const stats = {
+      by_dimension: {},
+      by_field: {},
+      by_state: {},
+      by_repo: {},
+      average_coherence: 0,
+      total_connections: 0
+    };
+
+    for (const glyph of this.registry) {
+      // Dimension stats
+      const dim = glyph.dimension.name;
+      stats.by_dimension[dim] = (stats.by_dimension[dim] || 0) + 1;
+
+      // Field stats
+      const field = glyph.dimension.field;
+      stats.by_field[field] = (stats.by_field[field] || 0) + 1;
+
+      // State stats
+      stats.by_state[glyph.state] = (stats.by_state[glyph.state] || 0) + 1;
+
+      // Repo stats
+      stats.by_repo[glyph.repo] = (stats.by_repo[glyph.repo] || 0) + 1;
+
+      // Coherence average
+      stats.average_coherence += glyph.coherence;
+
+      // Connections
+      stats.total_connections += glyph.connections.length;
+    }
+
+    stats.average_coherence = (stats.average_coherence / this.registry.length).toFixed(2);
+
+    return stats;
+  }
+
+  async generateReport() {
+    const stats = this.generateStatistics();
+    
+    const report = `
+╔═══════════════════════════════════════════════════════════════╗
+║                  🌌 GLYPH REGISTRY REPORT                     ║
+╠═══════════════════════════════════════════════════════════════╣
+║ Generated: ${new Date().toISOString().slice(0, 19)}                       ║
+║ Total Glyphs: ${String(this.registry.length).padStart(3)} modules                                  ║
+║ Repositories: ${String(REPOS.length).padStart(3)} scanned                                 ║
+║ Average Coherence: ${(stats.average_coherence * 100).toFixed(0)}%                               ║
+║ Total Connections: ${String(stats.total_connections).padStart(3)} relationships                       ║
+╠═══════════════════════════════════════════════════════════════╣
+║ DISTRIBUTION BY DIMENSION                                     ║
+╠═══════════════════════════════════════════════════════════════╣
+${Object.entries(stats.by_dimension).map(([dim, count]) => {
+  const symbol = DIMENSIONS[dim].symbol;
+  const bar = '█'.repeat(Math.floor(count / this.registry.length * 20));
+  return `║ ${symbol} ${dim.padEnd(12)} ${String(count).padStart(3)} ${bar.padEnd(20)} ║`;
+}).join('\n')}
+╠═══════════════════════════════════════════════════════════════╣
+║ DISTRIBUTION BY FIELD                                         ║
+╠═══════════════════════════════════════════════════════════════╣
+${Object.entries(stats.by_field).map(([field, count]) => {
+  const bar = '█'.repeat(Math.floor(count / this.registry.length * 20));
+  return `║ ${field.padEnd(12)} ${String(count).padStart(3)} ${bar.padEnd(20)} ║`;
+}).join('\n')}
+╠═══════════════════════════════════════════════════════════════╣
+║ TOP REPOSITORIES                                              ║
+╠═══════════════════════════════════════════════════════════════╣
+${Object.entries(stats.by_repo)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10)
+  .map(([repo, count]) => {
+    return `║ ${repo.slice(0, 35).padEnd(35)} ${String(count).padStart(3)} modules    ║`;
+  }).join('\n')}
+╚═══════════════════════════════════════════════════════════════╝
+`;
+
+    console.log(report);
+
+    // Save report
+    fs.writeFileSync(
+      path.join(path.dirname(this.registryPath), 'glyph-report.txt'),
+      report
+    );
+  }
+
+  async run() {
+    await this.init();
+    await this.scanAllRepos();
+    await this.buildRelationshipMap();
+    await this.saveRegistry();
+    await this.generateReport();
+
+    console.log('\n✨ All done! Next steps:');
+    console.log('   1. Review glyph-registry.json');
+    console.log('   2. Adjust any incorrect dimensional assignments');
+    console.log('   3. Run batch-apply-glyphs.js to insert headers into files\n');
+  }
+}
+
+// CLI EXECUTION
+if (require.main === module) {
+  const scanner = new RepoScanner({
+    workDir: './scanned-repos',
+    registryPath: './glyph-registry.json'
+  });
+
+  scanner.run().catch(error => {
+    console.error('\n❌ Scanner failed:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { RepoScanner, MODULE_PATTERNS };

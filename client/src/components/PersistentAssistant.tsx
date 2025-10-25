@@ -102,18 +102,19 @@ export function PersistentAssistant() {
         <Button
           data-testid="button-open-assistant"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-lavender hover:bg-lavender-hover z-50"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-lg bg-lavender hover:bg-lavender-hover z-[9999] touch-manipulation"
           size="icon"
         >
-          <Bot className="h-6 w-6" />
+          <Bot className="h-6 w-6 sm:h-7 sm:w-7" />
         </Button>
       )}
 
       {isOpen && (
         <div 
-          className={`fixed bottom-6 right-6 bg-card border-2 border-lavender/20 rounded-lg shadow-2xl z-50 flex flex-col transition-all ${
-            isMinimized ? 'w-80 h-14' : 'w-96 h-[600px]'
-          }`}
+          className={`fixed bg-card border-2 border-lavender/20 rounded-lg shadow-2xl z-[9999] flex flex-col transition-all
+            ${isMinimized ? 'w-[90vw] sm:w-80 h-14' : 'w-[95vw] sm:w-96 h-[85vh] sm:h-[600px]'}
+            bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-6 md:right-6
+          `}
           data-testid="panel-assistant"
         >
           <div className="flex items-center justify-between p-3 border-b border-lavender/20 bg-gradient-to-r from-lavender/10 to-transparent">
@@ -131,19 +132,19 @@ export function PersistentAssistant() {
                 data-testid="button-minimize-assistant"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-9 w-9 sm:h-7 sm:w-7 touch-manipulation"
                 onClick={() => setIsMinimized(!isMinimized)}
               >
-                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                {isMinimized ? <Maximize2 className="h-5 w-5 sm:h-4 sm:w-4" /> : <Minimize2 className="h-5 w-5 sm:h-4 sm:w-4" />}
               </Button>
               <Button
                 data-testid="button-close-assistant"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-9 w-9 sm:h-7 sm:w-7 touch-manipulation"
                 onClick={() => setIsOpen(false)}
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
@@ -220,7 +221,7 @@ export function PersistentAssistant() {
                       data-testid="button-send-message"
                       onClick={handleSend}
                       disabled={!input.trim() || isLoading}
-                      className="bg-lavender hover:bg-lavender-hover"
+                      className="bg-lavender hover:bg-lavender-hover touch-manipulation min-h-[44px] min-w-[44px]"
                       size="icon"
                     >
                       <Send className="h-4 w-4" />
@@ -231,7 +232,7 @@ export function PersistentAssistant() {
                         onClick={clearChat}
                         variant="outline"
                         size="icon"
-                        className="border-lavender/20"
+                        className="border-lavender/20 touch-manipulation min-h-[44px] min-w-[44px]"
                       >
                         <X className="h-4 w-4" />
                       </Button>

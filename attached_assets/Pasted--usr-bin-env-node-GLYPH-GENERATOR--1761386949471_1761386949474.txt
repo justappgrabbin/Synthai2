@@ -1,0 +1,280 @@
+#!/usr/bin/env node
+
+/**
+ * ╔═══════════════════════════════════════╗
+ * ║  ▲ GLYPH GENERATOR                    ║
+ * ║ ╱ ╲    ⟡-DEFINE-000                   ║
+ * ║╱───╲   Movement · Spirit · Monopole   ║
+ * ║│ ⟡ │   Energy → Creation → Seeing     ║
+ * ║╲───╱   I Define                       ║
+ * ║  ▼     YOU-N-I-VERSE Core Tool        ║
+ * ╠═══════════════════════════════════════╣
+ * ║ Purpose: Generate dimensional glyphs  ║
+ * ║          for all system modules       ║
+ * ║ State:   GENESIS | Coherence: 100%   ║
+ * ╚═══════════════════════════════════════╝
+ */
+
+// DIMENSIONAL ARCHITECTURE
+const DIMENSIONS = {
+  Movement: {
+    symbol: '⟡',
+    code: '3',
+    nature: 'Energy → Creation → Seeing → Landscape → Environment',
+    component: 'Magnetic Monopole',
+    keynote: 'I Define',
+    field: 'Spirit'
+  },
+  Evolution: {
+    symbol: '⟁',
+    code: 'E',
+    nature: 'Gravity → Memory → Taste → Love → Light',
+    component: 'Personality Crystal',
+    keynote: 'I Remember',
+    field: 'Mind'
+  },
+  Being: {
+    symbol: '⬢',
+    code: 'M',
+    nature: 'Matter → Touch → Sex → Survival',
+    component: 'The Atom',
+    keynote: 'I Am',
+    field: 'Body'
+  },
+  Design: {
+    symbol: '◇',
+    code: 'A',
+    nature: 'Structure → Progress → Smell → Life → Art',
+    component: 'Design Crystal',
+    keynote: 'I Design',
+    field: 'Soul'
+  },
+  Space: {
+    symbol: '◉',
+    code: 'S',
+    nature: 'Form → Illusion → Hearing → Music → Freedom',
+    component: 'Personality Crystal',
+    keynote: 'I Think',
+    field: 'Heart'
+  }
+};
+
+// GLYPH GENERATOR CLASS
+class GlyphGenerator {
+  constructor(config) {
+    this.name = config.name;
+    this.dimension = DIMENSIONS[config.dimension];
+    this.crystalAlignment = config.crystalAlignment || {
+      personality: false,
+      design: false,
+      monopole: false
+    };
+    this.fieldResonance = config.fieldResonance || {
+      mind: 0.5,
+      body: 0.5,
+      heart: 0.5,
+      spirit: 0.5,
+      soul: 0.5
+    };
+    this.connections = config.connections || [];
+    this.coherence = config.coherence || 1.0;
+    this.state = config.state || 'prototype';
+    this.repo = config.repo || 'unknown';
+    this.path = config.path || '/';
+    this.id = config.id || this.generateID();
+  }
+
+  generateID() {
+    const dimCode = this.dimension.symbol;
+    const keynoteWord = this.dimension.keynote.split(' ')[1].toUpperCase();
+    const counter = String(Math.floor(Math.random() * 999)).padStart(3, '0');
+    return `${dimCode}-${keynoteWord}-${counter}`;
+  }
+
+  // Generate visual glyph (Unicode art)
+  generateVisualGlyph() {
+    const crystalTop = this.crystalAlignment.personality ? '▲' : '△';
+    const crystalBottom = this.crystalAlignment.design ? '▼' : '▽';
+    const monopoleSymbol = this.crystalAlignment.monopole ? '◆' : '◇';
+    
+    const stateEmoji = {
+      active: '⚡',
+      prototype: '🔬',
+      deprecated: '⏸️',
+      broken: '⚠️'
+    }[this.state] || '❓';
+
+    const coherenceBar = '◉'.repeat(Math.floor(this.coherence * 10)) + 
+                         '○'.repeat(10 - Math.floor(this.coherence * 10));
+
+    return `
+╭─────────────────────────────────╮
+│   ${crystalTop} ${this.name.toUpperCase().padEnd(25)} │
+│  ╱ ╲         ${this.id.padEnd(17)} │
+│ ╱   ╲                           │
+│╱─────╲   ${this.dimension.component.padEnd(21)} │
+││ ${this.dimension.symbol}  ││   ${this.dimension.field} Field${' '.repeat(14)} │
+│╲     ╱                           │
+│ ╲   ╱    ${this.dimension.keynote.padEnd(21)} │
+│  ╲ ╱     ${this.dimension.nature.split('→')[0].trim().padEnd(21)} │
+│   ${crystalBottom}      ${monopoleSymbol} Monopole${' '.repeat(14)} │
+│                                 │
+│  Field Resonance:               │
+│  Mind   ${'█'.repeat(Math.floor(this.fieldResonance.mind * 10))}${'░'.repeat(10 - Math.floor(this.fieldResonance.mind * 10))} ${Math.floor(this.fieldResonance.mind * 100)}%${' '.repeat(3)} │
+│  Soul   ${'█'.repeat(Math.floor(this.fieldResonance.soul * 10))}${'░'.repeat(10 - Math.floor(this.fieldResonance.soul * 10))} ${Math.floor(this.fieldResonance.soul * 100)}%${' '.repeat(3)} │
+│  Heart  ${'█'.repeat(Math.floor(this.fieldResonance.heart * 10))}${'░'.repeat(10 - Math.floor(this.fieldResonance.heart * 10))} ${Math.floor(this.fieldResonance.heart * 100)}%${' '.repeat(3)} │
+│  Spirit ${'█'.repeat(Math.floor(this.fieldResonance.spirit * 10))}${'░'.repeat(10 - Math.floor(this.fieldResonance.spirit * 10))} ${Math.floor(this.fieldResonance.spirit * 100)}%${' '.repeat(3)} │
+│  Body   ${'█'.repeat(Math.floor(this.fieldResonance.body * 10))}${'░'.repeat(10 - Math.floor(this.fieldResonance.body * 10))} ${Math.floor(this.fieldResonance.body * 100)}%${' '.repeat(3)} │
+│                                 │
+${this.connections.length > 0 ? `│  Connections:                   │\n${this.connections.map(c => `│  → ${c.padEnd(29)} │`).join('\n')}\n│                                 │` : ''}
+│  ${stateEmoji} ${this.state.toUpperCase()} | Coherence: ${Math.floor(this.coherence * 100)}% ${coherenceBar} │
+│                                 │
+│  Repo: ${this.repo.padEnd(24)} │
+│  Path: ${this.path.padEnd(24)} │
+╰─────────────────────────────────╯`;
+  }
+
+  // Generate file header comment
+  generateFileHeader() {
+    return `/**
+ * ╔═══════════════════════════════════════╗
+ * ║  ${this.crystalAlignment.personality ? '▲' : '△'} ${this.name.toUpperCase().padEnd(33)} ║
+ * ║ ╱ ╲    ${this.id.padEnd(30)} ║
+ * ║╱───╲   ${(this.dimension.field + ' · ' + this.dimension.component).padEnd(30)} ║
+ * ║│ ${this.dimension.symbol} │   ${this.dimension.nature.split('→').slice(0, 2).join(' → ').padEnd(30)} ║
+ * ║╲───╱   ${this.dimension.keynote.padEnd(30)} ║
+ * ║  ${this.crystalAlignment.design ? '▼' : '▽'}                                   ║
+ * ╠═══════════════════════════════════════╣
+ * ║ Repository: ${this.repo.padEnd(26)} ║
+ * ║ Path: ${this.path.padEnd(32)} ║
+ * ║ State: ${this.state.toUpperCase().padEnd(31)} ║
+ * ║ Coherence: ${Math.floor(this.coherence * 100)}%${' '.repeat(27)} ║
+ * ╚═══════════════════════════════════════╝
+ */`;
+  }
+
+  // Generate JSON fingerprint
+  generateJSON() {
+    return {
+      glyph_id: this.id,
+      name: this.name,
+      symbol: this.dimension.symbol,
+      dimension: {
+        name: Object.keys(DIMENSIONS).find(k => DIMENSIONS[k] === this.dimension),
+        symbol: this.dimension.symbol,
+        keynote: this.dimension.keynote,
+        nature_chain: this.dimension.nature.split(' → '),
+        component: this.dimension.component,
+        field: this.dimension.field
+      },
+      crystal_alignment: this.crystalAlignment,
+      field_resonance: this.fieldResonance,
+      connections: this.connections,
+      coherence: this.coherence,
+      state: this.state,
+      repo: this.repo,
+      path: this.path,
+      generated_at: new Date().toISOString()
+    };
+  }
+
+  // Generate all formats
+  generate() {
+    return {
+      visual: this.generateVisualGlyph(),
+      header: this.generateFileHeader(),
+      json: this.generateJSON()
+    };
+  }
+}
+
+// CLI INTERFACE
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  
+  // Example usage
+  if (args.length === 0) {
+    console.log(`
+🌌 YOU-N-I-VERSE GLYPH GENERATOR
+
+Usage:
+  node glyph-generator.js --name "Module Name" --dimension Evolution [options]
+
+Required:
+  --name          Module/component name
+  --dimension     Movement | Evolution | Being | Design | Space
+
+Optional:
+  --personality   Include personality crystal (default: false)
+  --design        Include design crystal (default: false)
+  --monopole      Include magnetic monopole (default: false)
+  --mind          Mind field resonance 0-1 (default: 0.5)
+  --body          Body field resonance 0-1 (default: 0.5)
+  --heart         Heart field resonance 0-1 (default: 0.5)
+  --spirit        Spirit field resonance 0-1 (default: 0.5)
+  --soul          Soul field resonance 0-1 (default: 0.5)
+  --connections   Comma-separated list of connected modules
+  --coherence     Coherence level 0-1 (default: 1.0)
+  --state         active | prototype | deprecated | broken (default: prototype)
+  --repo          Repository name
+  --path          Module path in repo
+
+Example:
+  node glyph-generator.js \\
+    --name "Sentence Compiler" \\
+    --dimension Evolution \\
+    --personality \\
+    --mind 0.8 \\
+    --soul 0.6 \\
+    --heart 0.5 \\
+    --connections "CHART-001,GAN-001,SYNTH-001" \\
+    --coherence 0.87 \\
+    --state active \\
+    --repo "YOUNIVERSE-0" \\
+    --path "/backend/engines/sentence"
+`);
+    process.exit(0);
+  }
+
+  // Parse arguments
+  const config = {
+    crystalAlignment: {},
+    fieldResonance: {},
+    connections: []
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    const next = args[i + 1];
+
+    if (arg === '--name') config.name = next;
+    if (arg === '--dimension') config.dimension = next;
+    if (arg === '--personality') config.crystalAlignment.personality = true;
+    if (arg === '--design') config.crystalAlignment.design = true;
+    if (arg === '--monopole') config.crystalAlignment.monopole = true;
+    if (arg === '--mind') config.fieldResonance.mind = parseFloat(next);
+    if (arg === '--body') config.fieldResonance.body = parseFloat(next);
+    if (arg === '--heart') config.fieldResonance.heart = parseFloat(next);
+    if (arg === '--spirit') config.fieldResonance.spirit = parseFloat(next);
+    if (arg === '--soul') config.fieldResonance.soul = parseFloat(next);
+    if (arg === '--connections') config.connections = next.split(',');
+    if (arg === '--coherence') config.coherence = parseFloat(next);
+    if (arg === '--state') config.state = next;
+    if (arg === '--repo') config.repo = next;
+    if (arg === '--path') config.path = next;
+  }
+
+  // Generate glyph
+  const generator = new GlyphGenerator(config);
+  const glyph = generator.generate();
+
+  console.log('\n🌌 GLYPH GENERATED\n');
+  console.log(glyph.visual);
+  console.log('\n📄 FILE HEADER:\n');
+  console.log(glyph.header);
+  console.log('\n📊 JSON FINGERPRINT:\n');
+  console.log(JSON.stringify(glyph.json, null, 2));
+}
+
+// Export for use as module
+module.exports = { GlyphGenerator, DIMENSIONS };
