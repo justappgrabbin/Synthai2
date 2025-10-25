@@ -19,6 +19,8 @@ export function PlayerPanel() {
   const [zipName, setZipName] = useState<string>("");
   const [activeTab, setActiveTab] = useState<'current' | 'creations'>('current');
   const [userCreations, setUserCreations] = useState<UserCreation[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [indexHtmlContent, setIndexHtmlContent] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -55,6 +57,15 @@ export function PlayerPanel() {
 
       setZipContents(entries);
       setZipName(file.name);
+      setIsPlaying(false);
+      
+      // Find index.html
+      const indexEntry = entries.find(e => e.name.toLowerCase().endsWith('index.html'));
+      if (indexEntry?.content) {
+        setIndexHtmlContent(indexEntry.content);
+      } else {
+        setIndexHtmlContent("");
+      }
       
       // Save to user creations
       UserCreations.add({
@@ -98,6 +109,22 @@ export function PlayerPanel() {
         description: "Creation removed from library"
       });
     }
+  };
+
+  const handlePlayProject = () => {
+    if (!indexHtmlContent) {
+      toast({
+        title: "No index.html found",
+        description: "This bundle doesn't contain an index.html file to play",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsPlaying(true);
+  };
+
+  const handleStopPlaying = () => {
+    setIsPlaying(false);
   };
 
   return (
@@ -213,13 +240,27 @@ export function PlayerPanel() {
                   <FileArchive className="h-4 w-4 text-lavender" />
                   {zipName}
                 </h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUploadClick}
-                >
-                  Load New
-                </Button>
+                <div className="flex gap-2">
+                  {indexHtmlContent && (
+                    <Button
+                      data-testid="button-play-project"
+                      variant={isPlaying ? "outline" : "default"}
+                      size="sm"
+                      onClick={isPlaying ? handleStopPlaying : handlePlayProject}
+                      className={!isPlaying ? "bg-lavender hover:bg-lavender-hover" : ""}
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      {isPlaying ? "Stop" : "Play"}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUploadClick}
+                  >
+                    Load New
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1 max-h-[500px] overflow-y-auto">
                 {zipContents.map((entry, idx) => (
@@ -243,8 +284,20 @@ export function PlayerPanel() {
             </div>
 
             <div className="border rounded-lg bg-card p-4">
-              <h3 className="font-semibold mb-4">Preview</h3>
-              {selectedFile ? (
+              <h3 className="font-semibold mb-4">
+                {isPlaying ? "Running Project" : "Preview"}
+              </h3>
+              {isPlaying ? (
+                <div className="bg-white rounded overflow-hidden">
+                  <iframe
+                    data-testid="iframe-project-player"
+                    srcDoc={indexHtmlContent}
+                    className="w-full h-[500px] border-0"
+                    sandbox="allow-scripts allow-same-origin"
+                    title="Project Preview"
+                  />
+                </div>
+              ) : selectedFile ? (
                 <div>
                   <div className="mb-2 text-sm text-muted-foreground font-mono">
                     {selectedFile.name}
@@ -257,7 +310,11 @@ export function PlayerPanel() {
                 <div className="flex items-center justify-center h-64 text-muted-foreground">
                   <div className="text-center">
                     <File className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                    <p className="text-sm">Select a file to preview</p>
+                    <p className="text-sm">
+                      {indexHtmlContent 
+                        ? "Click Play to run the project" 
+                        : "Select a file to preview"}
+                    </p>
                   </div>
                 </div>
               )}
