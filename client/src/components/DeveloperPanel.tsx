@@ -309,6 +309,361 @@ document.getElementById('installBtn').addEventListener('click', async () => {
       { name: "Install Button HTML", code: `<button id="installBtn" style="display: none;">
   Install App
 </button>` }
+    ],
+    utilities: [
+      { name: "Debounce Function", code: `// Delay function execution until user stops typing
+function debounce(func, delay = 300) {
+  let timeoutId;
+  return function(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// Usage:
+const searchInput = document.querySelector('#search');
+searchInput.addEventListener('input', debounce((e) => {
+  console.log('Searching for:', e.target.value);
+}, 300));` },
+      { name: "Throttle Function", code: `// Limit function execution rate
+function throttle(func, limit = 100) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+
+// Usage: Limit scroll events
+window.addEventListener('scroll', throttle(() => {
+  console.log('Scrolled!');
+}, 100));` },
+      { name: "Copy to Clipboard", code: `async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    console.log('Copied to clipboard!');
+    return true;
+  } catch (err) {
+    console.error('Failed to copy:', err);
+    return false;
+  }
+}
+
+// Usage:
+document.querySelector('.copy-btn').addEventListener('click', () => {
+  copyToClipboard('Text to copy');
+});` },
+      { name: "Dark Mode Toggle", code: `// Dark mode with localStorage persistence
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+// Load saved theme on page load
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+  document.documentElement.classList.add('dark');
+}
+
+// Usage:
+document.querySelector('#theme-toggle').addEventListener('click', toggleDarkMode);` },
+      { name: "UUID Generator", code: `// Generate unique IDs
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Usage:
+const uniqueId = generateUUID();
+console.log(uniqueId); // e.g., "a1b2c3d4-e5f6-4g7h-8i9j-0k1l2m3n4o5p"` }
+    ],
+    forms: [
+      { name: "Email Validation", code: `function isValidEmail(email) {
+  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Usage:
+const emailInput = document.querySelector('#email');
+emailInput.addEventListener('blur', (e) => {
+  if (!isValidEmail(e.target.value)) {
+    alert('Please enter a valid email');
+  }
+});` },
+      { name: "Password Strength", code: `function getPasswordStrength(password) {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+  if (/\\d/.test(password)) strength++;
+  if (/[^a-zA-Z\\d]/.test(password)) strength++;
+  
+  const levels = ['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+  return { score: strength, level: levels[strength] || 'Weak' };
+}
+
+// Usage:
+const result = getPasswordStrength('MyP@ssw0rd!');
+console.log(result); // { score: 5, level: 'Very Strong' }` },
+      { name: "File Upload Preview", code: `function previewImage(input, previewElement) {
+  const file = input.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewElement.src = e.target.result;
+      previewElement.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Usage:
+document.querySelector('#file-input').addEventListener('change', (e) => {
+  const preview = document.querySelector('#preview-img');
+  previewImage(e.target, preview);
+});` },
+      { name: "Form Data to JSON", code: `function formToJSON(formElement) {
+  const formData = new FormData(formElement);
+  const json = {};
+  for (let [key, value] of formData.entries()) {
+    json[key] = value;
+  }
+  return json;
+}
+
+// Usage:
+document.querySelector('form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const data = formToJSON(e.target);
+  console.log(data);
+});` }
+    ],
+    api: [
+      { name: "Async Error Handler", code: `async function apiRequest(url, options = {}) {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(\`HTTP error! status: \${response.status}\`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
+
+// Usage:
+apiRequest('https://api.example.com/data')
+  .then(data => console.log(data))
+  .catch(err => alert('Failed to load data'));` },
+      { name: "Retry Logic", code: `async function fetchWithRetry(url, options = {}, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) return await response.json();
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+
+// Usage:
+fetchWithRetry('https://api.example.com/data', {}, 3)
+  .then(data => console.log(data))
+  .catch(err => console.error('Failed after 3 retries'));` },
+      { name: "WebSocket Setup", code: `class WebSocketClient {
+  constructor(url) {
+    this.url = url;
+    this.ws = null;
+    this.reconnectInterval = 5000;
+  }
+
+  connect() {
+    this.ws = new WebSocket(this.url);
+    
+    this.ws.onopen = () => console.log('WebSocket connected');
+    this.ws.onclose = () => {
+      console.log('WebSocket disconnected, reconnecting...');
+      setTimeout(() => this.connect(), this.reconnectInterval);
+    };
+    this.ws.onmessage = (event) => this.handleMessage(JSON.parse(event.data));
+    this.ws.onerror = (error) => console.error('WebSocket error:', error);
+  }
+
+  send(data) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    }
+  }
+
+  handleMessage(data) {
+    console.log('Received:', data);
+  }
+}
+
+// Usage:
+const client = new WebSocketClient('wss://example.com/socket');
+client.connect();` },
+      { name: "POST with JSON", code: `async function postJSON(url, data) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  });
+  
+  if (!response.ok) {
+    throw new Error(\`HTTP error! status: \${response.status}\`);
+  }
+  
+  return await response.json();
+}
+
+// Usage:
+postJSON('https://api.example.com/users', {
+  name: 'John Doe',
+  email: 'john@example.com'
+})
+.then(result => console.log('Created:', result))
+.catch(error => console.error('Error:', error));` }
+    ],
+    ui: [
+      { name: "Toast Notification", code: `function showToast(message, duration = 3000, type = 'info') {
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.cssText = \`
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: \${type === 'error' ? '#ef4444' : '#9b87f5'};
+    color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 9999;
+    animation: slideIn 0.3s ease;
+  \`;
+  
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Usage:
+showToast('Success!', 3000, 'success');
+showToast('Error occurred', 3000, 'error');` },
+      { name: "Modal Dialog", code: `function createModal(content, onClose) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = \`
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  \`;
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = \`
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    max-width: 500px;
+    width: 90%;
+  \`;
+  modal.innerHTML = content;
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'Close';
+  closeBtn.onclick = () => {
+    overlay.remove();
+    if (onClose) onClose();
+  };
+  
+  modal.appendChild(closeBtn);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
+}
+
+// Usage:
+createModal('<h2>Welcome!</h2><p>This is a modal.</p>');` },
+      { name: "Smooth Scroll", code: `function smoothScrollTo(elementId, offset = 0) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    const targetPosition = element.offsetTop - offset;
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth'
+    });
+  }
+}
+
+// Usage:
+document.querySelector('.scroll-btn').addEventListener('click', () => {
+  smoothScrollTo('section-2', 80);
+});` },
+      { name: "Lazy Load Images", code: `// Lazy load images when they enter viewport
+function lazyLoadImages() {
+  const images = document.querySelectorAll('img[data-src]');
+  
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+        imageObserver.unobserve(img);
+      }
+    });
+  });
+  
+  images.forEach(img => imageObserver.observe(img));
+}
+
+// Usage:
+// HTML: <img data-src="image.jpg" alt="Lazy loaded">
+lazyLoadImages();` },
+      { name: "Infinite Scroll", code: `function setupInfiniteScroll(loadMoreCallback) {
+  let loading = false;
+  
+  window.addEventListener('scroll', () => {
+    if (loading) return;
+    
+    const scrollTop = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    
+    if (scrollTop + windowHeight >= documentHeight - 100) {
+      loading = true;
+      loadMoreCallback().then(() => {
+        loading = false;
+      });
+    }
+  });
+}
+
+// Usage:
+setupInfiniteScroll(async () => {
+  console.log('Loading more items...');
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Add your items here
+});` }
     ]
   };
 
@@ -352,7 +707,7 @@ document.getElementById('installBtn').addEventListener('click', async () => {
                 <span className="hidden sm:inline">Snippets</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 max-h-[400px] overflow-y-auto">
+            <DropdownMenuContent align="end" className="w-64 max-h-[500px] overflow-y-auto">
               <DropdownMenuLabel>HTML</DropdownMenuLabel>
               {codeSnippets.html.map((snippet, idx) => (
                 <DropdownMenuItem
@@ -363,6 +718,7 @@ document.getElementById('installBtn').addEventListener('click', async () => {
                   {snippet.name}
                 </DropdownMenuItem>
               ))}
+              
               <DropdownMenuSeparator />
               <DropdownMenuLabel>CSS</DropdownMenuLabel>
               {codeSnippets.css.map((snippet, idx) => (
@@ -374,6 +730,7 @@ document.getElementById('installBtn').addEventListener('click', async () => {
                   {snippet.name}
                 </DropdownMenuItem>
               ))}
+              
               <DropdownMenuSeparator />
               <DropdownMenuLabel>JavaScript</DropdownMenuLabel>
               {codeSnippets.javascript.map((snippet, idx) => (
@@ -385,14 +742,62 @@ document.getElementById('installBtn').addEventListener('click', async () => {
                   {snippet.name}
                 </DropdownMenuItem>
               ))}
+              
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>PWA / APK Builder</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-lavender">PWA / APK Builder</DropdownMenuLabel>
               {codeSnippets.pwa.map((snippet, idx) => (
                 <DropdownMenuItem
                   key={`pwa-${idx}`}
                   onClick={() => insertSnippet(snippet.code)}
                   data-testid={`snippet-pwa-${idx}`}
-                  className="text-lavender"
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Utilities</DropdownMenuLabel>
+              {codeSnippets.utilities.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`util-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-util-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Forms</DropdownMenuLabel>
+              {codeSnippets.forms.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`form-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-form-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>API / Network</DropdownMenuLabel>
+              {codeSnippets.api.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`api-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-api-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>UI Components</DropdownMenuLabel>
+              {codeSnippets.ui.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`ui-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-ui-${idx}`}
                 >
                   {snippet.name}
                 </DropdownMenuItem>
