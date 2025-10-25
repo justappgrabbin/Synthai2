@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2, Download } from "lucide-react";
+import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2, Download, ChevronDown } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
@@ -11,6 +11,12 @@ import { autoFixZip, ZipAutoFix } from "@/lib/zipAutoFix";
 import { Badge } from "@/components/ui/badge";
 import { ZipAnalyzer, type EntryPoint, type CodeIssue } from "@/lib/zipAnalyzer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface ZipEntry {
   name: string;
@@ -334,6 +340,14 @@ export function PlayerPanel() {
     setIsPlaying(false);
   };
 
+  const handleDownloadAs = (format: 'exe' | 'apk' | 'pwa') => {
+    toast({
+      title: `${format.toUpperCase()} Export`,
+      description: `Exporting as ${format.toUpperCase()} - Coming in the next update!`,
+    });
+    // TODO: Implement EXE, APK, PWA export
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
@@ -386,25 +400,33 @@ export function PlayerPanel() {
                 {canAutoFix ? (
                   <Button
                     onClick={handleAutoFix}
-                    className="bg-lavender hover:bg-lavender-hover"
+                    className="bg-lavender hover:bg-lavender-hover touch-manipulation"
                     data-testid="button-autofix-zip"
                   >
                     <Wrench className="h-4 w-4 mr-2" />
-                    Auto-Fix
+                    Fix Automatically
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => window.open('https://replit.com', '_blank')}
+                    onClick={() => {
+                      toast({
+                        title: "Need Help?",
+                        description: "Open the AI Guard Dog assistant (bottom right) for help fixing these issues"
+                      });
+                    }}
                     variant="outline"
                     data-testid="button-see-agent"
+                    className="touch-manipulation"
                   >
-                    See Agent for Help
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Ask Guard Dog
                   </Button>
                 )}
                 <Button
                   onClick={handleDismissProblems}
                   variant="outline"
                   data-testid="button-dismiss-problems"
+                  className="touch-manipulation"
                 >
                   Dismiss
                 </Button>
@@ -612,6 +634,33 @@ export function PlayerPanel() {
                     <Code2 className="h-4 w-4 mr-2" />
                     Edit in IDE
                   </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        data-testid="button-download-as"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download As
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleDownloadAs('pwa')}>
+                        <Download className="h-3 w-3 mr-2" />
+                        PWA (Progressive Web App)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDownloadAs('apk')}>
+                        <Download className="h-3 w-3 mr-2" />
+                        APK (Android App)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDownloadAs('exe')}>
+                        <Download className="h-3 w-3 mr-2" />
+                        EXE (Windows App)
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <Button
                     variant="outline"
                     size="sm"
@@ -670,15 +719,16 @@ export function PlayerPanel() {
                         size="sm"
                         variant="outline"
                         className="mt-3"
+                        data-testid="button-open-guard-dog"
                         onClick={() => {
                           toast({
-                            title: "AI Fix Coming Soon",
-                            description: "AI-powered code fixing will be available in the next update"
+                            title: "AI Guard Dog Ready",
+                            description: "Open the AI Assistant to get help fixing these issues"
                           });
                         }}
                       >
                         <Wrench className="h-3 w-3 mr-2" />
-                        Fix Issues with AI
+                        Ask Guard Dog for Help
                       </Button>
                     </AlertDescription>
                   </Alert>
