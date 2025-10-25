@@ -1838,8 +1838,8 @@ const result = await handlePayment({
       <TopNav />
       
       {/* VS Code-style Menu Bar */}
-      <div className="border-b bg-background/95">
-        <Menubar className="border-0 rounded-none h-9 px-2">
+      <div className="border-b bg-background/95 overflow-x-auto">
+        <Menubar className="border-0 rounded-none h-9 px-2 flex-nowrap min-w-max">
           {/* File Menu */}
           <MenubarMenu>
             <MenubarTrigger className="text-sm cursor-pointer">File</MenubarTrigger>
