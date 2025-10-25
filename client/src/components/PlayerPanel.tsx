@@ -596,12 +596,12 @@ export function PlayerPanel() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="border rounded-lg bg-card p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold flex items-center gap-2">
+              <div className="mb-4">
+                <h3 className="font-semibold flex items-center gap-2 mb-3">
                   <FileArchive className="h-4 w-4 text-lavender" />
                   {zipName}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {executableContent && (
                     <Button
                       data-testid="button-play-project"
