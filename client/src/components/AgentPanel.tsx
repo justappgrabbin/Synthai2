@@ -66,9 +66,7 @@ export function AgentPanel() {
 
   // Save agents to localStorage
   useEffect(() => {
-    if (agents.length > 0) {
-      localStorage.setItem(AGENT_STORAGE_KEY, JSON.stringify(agents));
-    }
+    localStorage.setItem(AGENT_STORAGE_KEY, JSON.stringify(agents));
   }, [agents]);
 
   const handleCreateAgent = () => {

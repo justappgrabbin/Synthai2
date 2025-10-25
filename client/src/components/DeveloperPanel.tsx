@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon } from "lucide-react";
 import { GlyphGenerator, detectDimension } from "@/lib/glyphGenerator";
 import JSZip from "jszip";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
+import { Terminal } from "@/components/Terminal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,7 @@ export function DeveloperPanel() {
   const [importRepoUrl, setImportRepoUrl] = useState("");
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
   const { toast} = useToast();
 
   useEffect(() => {
@@ -2308,6 +2310,16 @@ const result = await handlePayment({
             <Globe className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Preview</span>
           </Button>
+          <Button
+            data-testid="button-toggle-terminal"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTerminal(!showTerminal)}
+            className={showTerminal ? "bg-green-500/10 border-green-500/50" : ""}
+          >
+            <TerminalIcon className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Terminal</span>
+          </Button>
         </div>
       </header>
 
@@ -2430,6 +2442,12 @@ const result = await handlePayment({
           </div>
         </aside>
       </div>
+
+      {showTerminal && (
+        <div className="h-64 border-t">
+          <Terminal onClose={() => setShowTerminal(false)} />
+        </div>
+      )}
     </div>
   );
 }
