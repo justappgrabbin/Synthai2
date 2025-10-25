@@ -1837,8 +1837,8 @@ const result = await handlePayment({
     <div className="h-screen flex flex-col bg-background">
       <TopNav />
       
-      {/* VS Code-style Menu Bar */}
-      <div className="border-b bg-background/95">
+      {/* VS Code-style Menu Bar - Hidden on mobile */}
+      <div className="border-b bg-background/95 hidden md:block">
         <Menubar className="border-0 rounded-none h-9 px-2">
           {/* File Menu */}
           <MenubarMenu>
@@ -2169,15 +2169,72 @@ const result = await handlePayment({
 
       <header className="border-b p-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Button
-            data-testid="button-toggle-files"
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setShowFilePanel(!showFilePanel)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          {/* Mobile Menu - Shows on screens smaller than md */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                data-testid="button-mobile-menu"
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>IDE Menu</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowFilePanel(!showFilePanel)}>
+                <FolderTree className="h-4 w-4 mr-2" />
+                {showFilePanel ? 'Hide' : 'Show'} File Panel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowTerminal(!showTerminal)}>
+                <TerminalIcon className="h-4 w-4 mr-2" />
+                {showTerminal ? 'Hide' : 'Show'} Terminal
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowPreview(!showPreview)}>
+                <Globe className="h-4 w-4 mr-2" />
+                {showPreview ? 'Hide' : 'Show'} Preview
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowNewFileInput(true)}>
+                <FileText className="h-4 w-4 mr-2" />
+                New File
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSave} disabled={!currentFile}>
+                <Save className="h-4 w-4 mr-2" />
+                Save File
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleRun}>
+                <Play className="h-4 w-4 mr-2" />
+                Run Code
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setCodeSnatcherOpen(true)}>
+                <Download className="h-4 w-4 mr-2" />
+                Code Snatcher
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setGithubDialogOpen(true)}>
+                <Github className="h-4 w-4 mr-2" />
+                Push to GitHub
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportToGoogleDrive} disabled={isExportingToDrive}>
+                <Cloud className="h-4 w-4 mr-2" />
+                Export to Drive
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDownloadProject}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Project
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSendToStore}>
+                <Store className="h-4 w-4 mr-2" />
+                Send to Store
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <Code2 className="h-5 w-5 text-lavender" />
           <h2 className="text-lg font-semibold hidden sm:block">Code Editor</h2>
         </div>
