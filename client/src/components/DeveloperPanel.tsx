@@ -252,7 +252,8 @@ export function DeveloperPanel() {
       wireframe = wireframe.replace(/\n{3,}/g, '\n\n');
       
       const fileName = 'snatched-' + new Date().getTime() + '.html';
-      FileSystem.createFile('', fileName, wireframe);
+      FileSystem.createFile('', fileName);
+      FileSystem.saveFile(fileName, wireframe);
       loadFiles();
       
       const newFile = FileSystem.findFile(fileName);
@@ -294,7 +295,7 @@ export function DeveloperPanel() {
               path: prefix + node.name,
               content: node.content || '' // Include empty files
             });
-          } else if (node.type === 'directory' && node.children) {
+          } else if (node.type === 'folder' && node.children) {
             flatten(node.children, prefix + node.name + '/');
           }
         });
@@ -487,7 +488,7 @@ export function DeveloperPanel() {
               path: prefix + node.name,
               content: node.content || '' // Include empty files
             });
-          } else if (node.type === 'directory' && node.children) {
+          } else if (node.type === 'folder' && node.children) {
             flatten(node.children, prefix + node.name + '/');
           }
         });
@@ -2473,15 +2474,16 @@ function FileTreeNode({
         </div>
         {file.type === 'file' && (
           <Button
+            data-testid={`button-delete-file-${file.name}`}
             variant="ghost"
             size="icon"
-            className="h-5 w-5 opacity-0 group-hover:opacity-100"
+            className="h-7 w-7 sm:h-5 sm:w-5 sm:opacity-0 sm:group-hover:opacity-100 touch-manipulation"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(file);
             }}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-4 w-4 sm:h-3 sm:w-3 text-destructive" />
           </Button>
         )}
       </div>
