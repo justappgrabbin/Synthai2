@@ -75,6 +75,13 @@ export function SettingsPanel() {
             Creative IDE with integrated AI consciousness
           </p>
         </section>
+
+        <section className="p-6 border rounded-lg bg-card/50">
+          <h2 className="text-lg font-semibold mb-3 text-lavender">Special Thanks</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            This project was made possible with the incredible assistance of <span className="text-foreground font-medium">ChatGPT</span>, <span className="text-foreground font-medium">Claude</span>, and the amazing <span className="text-foreground font-medium">Replit</span> platform. Thank you for empowering creators to build the future! 🌌
+          </p>
+        </section>
       </div>
     </div>
   );
