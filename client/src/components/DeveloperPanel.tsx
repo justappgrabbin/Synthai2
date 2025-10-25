@@ -169,7 +169,7 @@ export function DeveloperPanel() {
             data-testid="button-toggle-preview"
             variant="outline"
             size="sm"
-            className="hidden sm:flex lg:hidden"
+            className="lg:hidden"
             onClick={() => setShowPreview(!showPreview)}
           >
             <Globe className="h-4 w-4 sm:mr-2" />
