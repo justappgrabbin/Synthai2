@@ -203,10 +203,15 @@ Complete workflow for editing uploaded creative bundles:
 Quick-access menu for inserting common HTML/CSS/JavaScript code patterns:
 - **Component**: Dropdown menu in IDE header between Save and Run buttons
 - **Location**: IDE toolbar with sparkles (✨) icon
-- **Categories**: HTML (boilerplate, buttons, forms, cards), CSS (flexbox, button styles, cards), JavaScript (event listeners, fetch API, canvas setup)
+- **Categories**: 
+  - HTML (boilerplate, PWA manifest, buttons, forms, cards)
+  - CSS (flexbox, button styles, cards, mobile-first responsive)
+  - JavaScript (event listeners, fetch API, local storage, canvas setup)
+  - **PWA/APK Builder** (manifest.json, service worker, APK export instructions, install button)
 - **Functionality**: One-click insertion of code snippets into current file
 - **Mobile**: Icon-only on mobile, label visible on desktop
-- **Snippets**: 11 pre-built templates for rapid prototyping
+- **Snippets**: 18 pre-built templates including full PWA-to-APK conversion workflow
+- **APK Export**: Step-by-step instructions to convert web apps to Android APK using PWABuilder, Cordova, or Capacitor
 
 ### Mobile Preview Toggle
 Enhanced mobile support for IDE preview pane:

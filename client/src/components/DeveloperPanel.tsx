@@ -166,6 +166,9 @@ export function DeveloperPanel() {
   
 </body>
 </html>` },
+      { name: "PWA Manifest", code: `<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9b87f5">
+<link rel="apple-touch-icon" href="icon-192.png">` },
       { name: "Button", code: `<button class="btn">Click Me</button>` },
       { name: "Form", code: `<form>
   <input type="text" placeholder="Enter text">
@@ -201,6 +204,24 @@ export function DeveloperPanel() {
   background: white;
   border-radius: 0.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}` },
+      { name: "Mobile First", code: `/* Mobile styles (default) */
+.container {
+  padding: 1rem;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .container {
+    padding: 2rem;
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .container {
+    padding: 3rem;
+  }
 }` }
     ],
     javascript: [
@@ -211,9 +232,14 @@ export function DeveloperPanel() {
   .then(response => response.json())
   .then(data => console.log(data))
   .catch(error => console.error('Error:', error));` },
-      { name: "Arrow Function", code: `const myFunction = (param) => {
-  return param * 2;
-};` },
+      { name: "Local Storage", code: `// Save data
+localStorage.setItem('key', JSON.stringify({ data: 'value' }));
+
+// Load data
+const data = JSON.parse(localStorage.getItem('key'));
+
+// Remove data
+localStorage.removeItem('key');` },
       { name: "Canvas Setup", code: `const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -224,6 +250,65 @@ function draw() {
 }
 
 draw();` }
+    ],
+    pwa: [
+      { name: "PWA Manifest.json", code: `{
+  "name": "My App",
+  "short_name": "App",
+  "description": "My awesome app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9b87f5",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}` },
+      { name: "Service Worker", code: `// Register service worker for offline support
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => console.log('Service Worker registered:', reg))
+    .catch(err => console.error('Service Worker error:', err));
+}` },
+      { name: "APK Export Setup", code: `// Instructions to convert your web app to APK:
+// 1. Add manifest.json (use PWA Manifest snippet)
+// 2. Add service worker for offline support
+// 3. Use tools like:
+//    - PWABuilder.com (easiest - just paste your URL)
+//    - Apache Cordova
+//    - Capacitor by Ionic
+// 4. Test as PWA first: chrome://flags enable "Desktop PWAs"
+
+// Add to home screen prompt:
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show your install button
+  document.getElementById('installBtn').style.display = 'block';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('Install outcome:', outcome);
+    deferredPrompt = null;
+  }
+});` },
+      { name: "Install Button HTML", code: `<button id="installBtn" style="display: none;">
+  Install App
+</button>` }
     ]
   };
 
@@ -267,7 +352,7 @@ draw();` }
                 <span className="hidden sm:inline">Snippets</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 max-h-[400px] overflow-y-auto">
               <DropdownMenuLabel>HTML</DropdownMenuLabel>
               {codeSnippets.html.map((snippet, idx) => (
                 <DropdownMenuItem
@@ -296,6 +381,18 @@ draw();` }
                   key={`js-${idx}`}
                   onClick={() => insertSnippet(snippet.code)}
                   data-testid={`snippet-js-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>PWA / APK Builder</DropdownMenuLabel>
+              {codeSnippets.pwa.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`pwa-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-pwa-${idx}`}
+                  className="text-lavender"
                 >
                   {snippet.name}
                 </DropdownMenuItem>
