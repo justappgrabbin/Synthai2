@@ -71,7 +71,7 @@ export class AIService {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 1024,
+        max_tokens: 4096,
         messages: messages.map(m => ({
           role: m.role === "system" ? "user" : m.role,
           content: m.content
