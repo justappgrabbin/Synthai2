@@ -178,3 +178,15 @@ Enhanced Developer Panel with responsive design similar to Replit's mobile inter
 - **Preview Toggle**: Tablet users can switch between code editor and preview pane
 - **Dark Overlay**: Tap outside file panel to close on mobile
 - **Auto-close**: File panel automatically closes when selecting a file on mobile
+
+### Persistent AI Assistant ("Guard Dog")
+Integrated multi-backend AI chat assistant available globally across all panels:
+- **Component**: `client/src/components/PersistentAssistant.tsx`
+- **Location**: Floating chat button in bottom-right corner, always accessible
+- **Features**: Chat interface with conversation history, minimize/maximize, clear chat
+- **Backend Selection**: Users choose between Claude, GPT, CodeLlama, DeepSeek, or Grok
+- **Configuration**: AI backend settings managed in Settings Panel via AIBackendSelector
+- **Service Layer**: `client/src/lib/AIService.ts` routes messages to selected AI provider
+- **Storage**: API keys stored securely in localStorage with backend-specific prefixes
+- **Local Option**: CodeLlama runs locally via Ollama (no API key required)
+- **UI Design**: Lavender-accented chat bubble with Guard Dog branding
