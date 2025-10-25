@@ -1,9 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Upload, FileArchive, File, Folder } from "lucide-react";
+import { Play, Upload, FileArchive, File, Folder, Trash2, History } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
+import { UserCreations, type UserCreation } from "@/lib/userCreations";
+import { Card } from "@/components/ui/card";
 
 interface ZipEntry {
   name: string;
@@ -15,8 +17,14 @@ export function PlayerPanel() {
   const [zipContents, setZipContents] = useState<ZipEntry[]>([]);
   const [selectedFile, setSelectedFile] = useState<ZipEntry | null>(null);
   const [zipName, setZipName] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<'current' | 'creations'>('current');
+  const [userCreations, setUserCreations] = useState<UserCreation[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setUserCreations(UserCreations.getAll());
+  }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -47,6 +55,16 @@ export function PlayerPanel() {
 
       setZipContents(entries);
       setZipName(file.name);
+      
+      // Save to user creations
+      UserCreations.add({
+        name: file.name,
+        type: 'zip',
+        fileCount: entries.length,
+        description: `Uploaded ${new Date().toLocaleDateString()}`
+      });
+      setUserCreations(UserCreations.getAll());
+      
       toast({
         title: "Success!",
         description: `Loaded ${entries.length} items from ${file.name}`
@@ -71,6 +89,17 @@ export function PlayerPanel() {
     }
   };
 
+  const handleDeleteCreation = (id: string) => {
+    if (confirm('Delete this creation from your library?')) {
+      UserCreations.remove(id);
+      setUserCreations(UserCreations.getAll());
+      toast({
+        title: "Deleted",
+        description: "Creation removed from library"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
@@ -83,6 +112,27 @@ export function PlayerPanel() {
           </p>
         </div>
 
+        <div className="flex gap-2 mb-6">
+          <Button
+            data-testid="button-tab-current"
+            variant={activeTab === 'current' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('current')}
+            className={activeTab === 'current' ? 'bg-lavender hover:bg-lavender-hover' : ''}
+          >
+            <Play className="h-4 w-4 mr-2" />
+            Current Project
+          </Button>
+          <Button
+            data-testid="button-tab-creations"
+            variant={activeTab === 'creations' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('creations')}
+            className={activeTab === 'creations' ? 'bg-lavender hover:bg-lavender-hover' : ''}
+          >
+            <History className="h-4 w-4 mr-2" />
+            User Creations ({userCreations.length})
+          </Button>
+        </div>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -92,7 +142,54 @@ export function PlayerPanel() {
           data-testid="input-zip-file"
         />
 
-        {zipContents.length === 0 ? (
+        {activeTab === 'creations' ? (
+          <div>
+            {userCreations.length === 0 ? (
+              <div className="border-2 border-dashed border-lavender/30 rounded-lg p-12 text-center bg-card">
+                <History className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+                <h3 className="text-lg font-semibold mb-2">No creations yet</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Upload zip files to build your creation library
+                </p>
+                <Button
+                  onClick={() => setActiveTab('current')}
+                  variant="outline"
+                >
+                  Upload Your First Creation
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userCreations.map((creation) => (
+                  <Card key={creation.id} className="p-6 hover:border-lavender/50 transition-all">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <FileArchive className="h-5 w-5 text-lavender" />
+                        <span className="text-xs px-2 py-1 rounded-full bg-lavender/10 text-lavender">
+                          {creation.type}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleDeleteCreation(creation.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <h3 className="font-semibold mb-1 truncate">{creation.name}</h3>
+                    <p className="text-xs text-muted-foreground mb-3">{creation.description}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>{creation.fileCount} files</span>
+                      <span>{new Date(creation.uploadedAt).toLocaleDateString()}</span>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : zipContents.length === 0 ? (
           <div className="border-2 border-dashed border-lavender/30 rounded-lg p-12 text-center bg-card">
             <FileArchive className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
             <h3 className="text-lg font-semibold mb-2">Drop a .zip file to play</h3>
