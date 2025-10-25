@@ -27,6 +27,7 @@ export function PlayerPanel() {
   const [entryPoint, setEntryPoint] = useState<EntryPoint | null>(null);
   const [codeIssues, setCodeIssues] = useState<CodeIssue[]>([]);
   const [showIssues, setShowIssues] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -165,12 +166,52 @@ export function PlayerPanel() {
       <TopNav />
 
       <div className="p-8 max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-lavender mb-2">Creative Bundle Player</h1>
-          <p className="text-muted-foreground">
-            Upload and explore zipped creative universes
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-lavender mb-2">Creative Bundle Player</h1>
+            <p className="text-muted-foreground">
+              Upload and explore zipped creative universes
+            </p>
+          </div>
+          <Button
+            data-testid="button-help"
+            variant="outline"
+            size="icon"
+            onClick={() => setShowHelp(!showHelp)}
+            className="border-lavender/30 hover:bg-lavender/10"
+          >
+            <AlertCircle className="h-5 w-5 text-lavender" />
+          </Button>
         </div>
+
+        {showHelp && (
+          <Alert className="mb-6 bg-lavender/5 border-lavender/20">
+            <AlertCircle className="h-4 w-4 text-lavender" />
+            <AlertTitle className="text-lavender">How to Use the Creative Bundle Player</AlertTitle>
+            <AlertDescription className="mt-3 space-y-3 text-sm">
+              <div>
+                <p className="font-semibold mb-1">📦 Uploading Projects</p>
+                <p className="text-muted-foreground">Click "Upload Zip Bundle" and select a .zip file containing your project. The player will automatically detect the entry point (index.html, main.js, etc.).</p>
+              </div>
+              <div>
+                <p className="font-semibold mb-1">▶️ Playing Projects</p>
+                <p className="text-muted-foreground">Once uploaded, click the "Play" button to run your project in the preview window. The system supports HTML/CSS/JavaScript projects.</p>
+              </div>
+              <div>
+                <p className="font-semibold mb-1">🔍 Code Analysis</p>
+                <p className="text-muted-foreground">The player automatically scans your code for issues. Click "Issues" to view detected problems and get suggestions for fixes.</p>
+              </div>
+              <div>
+                <p className="font-semibold mb-1">💾 User Creations</p>
+                <p className="text-muted-foreground">All uploaded projects are saved to your library. Switch to the "User Creations" tab to Play, Edit, or Delete saved projects.</p>
+              </div>
+              <div>
+                <p className="font-semibold mb-1">🐛 Debug Mode</p>
+                <p className="text-muted-foreground">If a project doesn't display correctly, click "Debug: View generated HTML" to see the exact code being executed.</p>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex gap-2 mb-6">
           <Button
@@ -446,6 +487,13 @@ export function PlayerPanel() {
                           {executableContent}
                         </pre>
                       </details>
+                      <div className="mt-4 p-4 border rounded-lg bg-lavender/5 border-lavender/20">
+                        <h4 className="text-sm font-semibold mb-1 text-lavender">What is a Creative Bundle?</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Creative bundles are .zip files containing complete projects, games, or interactive experiences.
+                          The YOU–N–I–Versal Player extracts and displays their contents in a safe environment.
+                        </p>
+                      </div>
                     </>
                   )}
                 </div>
