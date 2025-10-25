@@ -418,14 +418,36 @@ export function PlayerPanel() {
                 {isPlaying ? "Running Project" : "Preview"}
               </h3>
               {isPlaying ? (
-                <div className="bg-white rounded overflow-hidden">
-                  <iframe
-                    data-testid="iframe-project-player"
-                    srcDoc={executableContent}
-                    className="w-full h-[500px] border-0"
-                    sandbox="allow-scripts allow-same-origin"
-                    title="Project Preview"
-                  />
+                <div className="space-y-2">
+                  {!executableContent ? (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Cannot Run Project</AlertTitle>
+                      <AlertDescription>
+                        No executable content generated. The zip may be missing an entry point file.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <>
+                      <div className="bg-white rounded overflow-hidden border-2 border-lavender/20">
+                        <iframe
+                          data-testid="iframe-project-player"
+                          srcDoc={executableContent}
+                          className="w-full h-[500px] border-0"
+                          sandbox="allow-scripts allow-same-origin allow-forms"
+                          title="Project Preview"
+                        />
+                      </div>
+                      <details className="text-xs">
+                        <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                          Debug: View generated HTML
+                        </summary>
+                        <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto max-h-[200px] overflow-y-auto">
+                          {executableContent}
+                        </pre>
+                      </details>
+                    </>
+                  )}
                 </div>
               ) : selectedFile ? (
                 <div>
