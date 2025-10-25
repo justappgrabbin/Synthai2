@@ -102,7 +102,7 @@ export function PersistentAssistant() {
         <Button
           data-testid="button-open-assistant"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl bg-lavender hover:bg-lavender-hover z-[99999] touch-manipulation border-2 border-white/20"
+          className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl bg-lavender hover:bg-lavender-hover z-[100] touch-manipulation border-2 border-white/20 backdrop-blur-sm"
           size="icon"
           title="AI Guard Dog 🐕"
         >
@@ -112,7 +112,7 @@ export function PersistentAssistant() {
 
       {isOpen && (
         <div 
-          className={`fixed bg-card border-2 border-lavender/20 rounded-lg shadow-2xl z-[99999] flex flex-col transition-all
+          className={`fixed bg-card/95 backdrop-blur-sm border-2 border-lavender/20 rounded-lg shadow-2xl z-[100] flex flex-col transition-all
             ${isMinimized ? 'w-[90vw] sm:w-80 h-14' : 'w-[95vw] sm:w-96 h-[85vh] sm:h-[600px]'}
             bottom-6 right-6
           `}
