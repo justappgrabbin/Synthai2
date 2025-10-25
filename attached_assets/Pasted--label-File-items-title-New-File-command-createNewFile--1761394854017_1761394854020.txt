@@ -1,0 +1,93 @@
+[
+  {
+    "label": "File",
+    "items": [
+      { "title": "New File", "command": "createNewFile" },
+      { "title": "Open File", "command": "openFileDialog" },
+      { "title": "Save", "command": "saveCurrentFile" },
+      { "title": "Save As...", "command": "saveFileAs" },
+      { "title": "Close File", "command": "closeFile" }
+    ]
+  },
+  {
+    "label": "Edit",
+    "items": [
+      { "title": "Undo", "command": "undoAction" },
+      { "title": "Redo", "command": "redoAction" },
+      { "title": "Cut", "command": "cutSelection" },
+      { "title": "Copy", "command": "copySelection" },
+      { "title": "Paste", "command": "pasteClipboard" },
+      { "title": "Find", "command": "openFind" },
+      { "title": "Replace", "command": "openReplace" }
+    ]
+  },
+  {
+    "label": "View",
+    "items": [
+      { "title": "Toggle Sidebar", "command": "toggleSidebar" },
+      { "title": "Add Tab", "command": "addTab" },
+      { "title": "Close Tab", "command": "closeTab" },
+      { "title": "Split View", "command": "toggleSplitView" },
+      { "title": "Fullscreen", "command": "toggleFullscreen" },
+      { "title": "Dark Mode", "command": "toggleTheme" }
+    ]
+  },
+  {
+    "label": "Run",
+    "items": [
+      { "title": "Run Code", "command": "runCode" },
+      { "title": "Preview", "command": "togglePreview" },
+      { "title": "Stop Execution", "command": "stopRun" },
+      { "title": "Clear Console", "command": "clearConsole" }
+    ]
+  },
+  {
+    "label": "Code Snippets",
+    "submenus": [
+      {
+        "category": "HTML",
+        "snippets": ["Boilerplate", "Meta Tags", "Canvas", "Audio/Video"]
+      },
+      {
+        "category": "CSS",
+        "snippets": ["Flex Layout", "Grid Layout", "Animations", "Variables"]
+      },
+      {
+        "category": "JavaScript",
+        "snippets": ["Fetch API", "Async/Await", "Local Storage", "Event Listener"]
+      },
+      {
+        "category": "PWA / APK Builder",
+        "snippets": ["Register Service Worker", "Generate Manifest", "Build APK"]
+      },
+      {
+        "category": "Utilities",
+        "snippets": ["UUID Generator", "Date Formatter", "Debounce", "Throttle"]
+      },
+      {
+        "category": "Game Functions",
+        "snippets": ["Create Player", "Physics Loop", "Spawn Enemy"]
+      },
+      {
+        "category": "AI Integration",
+        "snippets": ["Send Message to LLaMA", "AI Response Handler"]
+      }
+    ]
+  },
+  {
+    "label": "Tools",
+    "items": [
+      { "title": "Open Terminal", "command": "openTerminal" },
+      { "title": "Database Browser", "command": "openDatabaseView" },
+      { "title": "Logs", "command": "openLogs" }
+    ]
+  },
+  {
+    "label": "Help",
+    "items": [
+      { "title": "Documentation", "command": "openDocs" },
+      { "title": "Keyboard Shortcuts", "command": "showShortcuts" },
+      { "title": "About Indyverse", "command": "showAbout" }
+    ]
+  }
+]

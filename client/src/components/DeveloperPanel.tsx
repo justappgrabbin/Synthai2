@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon, FileText, FolderOpen, Copy, Scissors, ClipboardPaste, Search, RotateCcw, RotateCw, Maximize, Moon, Sun } from "lucide-react";
 import { GlyphGenerator, detectDimension } from "@/lib/glyphGenerator";
 import JSZip from "jszip";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
@@ -20,6 +20,18 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
+} from "@/components/ui/menubar";
 import {
   Dialog,
   DialogContent,
@@ -1824,6 +1836,337 @@ const result = await handlePayment({
   return (
     <div className="h-screen flex flex-col bg-background">
       <TopNav />
+      
+      {/* VS Code-style Menu Bar */}
+      <div className="border-b bg-background/95">
+        <Menubar className="border-0 rounded-none h-9 px-2">
+          {/* File Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">File</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem onClick={() => setShowNewFileInput(true)}>
+                <FileText className="h-4 w-4 mr-2" />
+                New File
+                <MenubarShortcut>Ctrl+N</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem onClick={handleSave} disabled={!currentFile}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+                <MenubarShortcut>Ctrl+S</MenubarShortcut>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={handleDownloadProject}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Project
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          {/* Edit Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">Edit</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem disabled>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Undo
+                <MenubarShortcut>Ctrl+Z</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem disabled>
+                <RotateCw className="h-4 w-4 mr-2" />
+                Redo
+                <MenubarShortcut>Ctrl+Y</MenubarShortcut>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem disabled>
+                <Scissors className="h-4 w-4 mr-2" />
+                Cut
+                <MenubarShortcut>Ctrl+X</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem disabled>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy
+                <MenubarShortcut>Ctrl+C</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem disabled>
+                <ClipboardPaste className="h-4 w-4 mr-2" />
+                Paste
+                <MenubarShortcut>Ctrl+V</MenubarShortcut>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem disabled>
+                <Search className="h-4 w-4 mr-2" />
+                Find
+                <MenubarShortcut>Ctrl+F</MenubarShortcut>
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          {/* View Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">View</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem onClick={() => setShowFilePanel(!showFilePanel)}>
+                <FolderTree className="h-4 w-4 mr-2" />
+                Toggle Sidebar
+              </MenubarItem>
+              <MenubarItem onClick={() => setShowTerminal(!showTerminal)}>
+                <TerminalIcon className="h-4 w-4 mr-2" />
+                Terminal
+                <MenubarShortcut>Ctrl+`</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem onClick={() => setShowPreview(!showPreview)} className="lg:hidden">
+                <Globe className="h-4 w-4 mr-2" />
+                Toggle Preview
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem disabled>
+                <Maximize className="h-4 w-4 mr-2" />
+                Fullscreen
+                <MenubarShortcut>F11</MenubarShortcut>
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          {/* Run Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">Run</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem onClick={handleRun}>
+                <Play className="h-4 w-4 mr-2" />
+                Run Code
+                <MenubarShortcut>F5</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem onClick={() => setShowPreview(!showPreview)} className="lg:hidden">
+                <Globe className="h-4 w-4 mr-2" />
+                Toggle Preview
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          {/* Code Snippets Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">Snippets</MenubarTrigger>
+            <MenubarContent>
+              <MenubarSub>
+                <MenubarSubTrigger>HTML</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.html.map((snippet, idx) => (
+                    <MenubarItem key={`html-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>CSS</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.css.map((snippet, idx) => (
+                    <MenubarItem key={`css-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>JavaScript</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.javascript.map((snippet, idx) => (
+                    <MenubarItem key={`js-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>PWA/APK</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.pwa.map((snippet, idx) => (
+                    <MenubarItem key={`pwa-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSeparator />
+
+              <MenubarSub>
+                <MenubarSubTrigger>Utilities</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.utilities.map((snippet, idx) => (
+                    <MenubarItem key={`util-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Forms</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.forms.map((snippet, idx) => (
+                    <MenubarItem key={`form-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>API Calls</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.api.map((snippet, idx) => (
+                    <MenubarItem key={`api-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>UI Components</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.ui.map((snippet, idx) => (
+                    <MenubarItem key={`ui-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSeparator />
+
+              <MenubarSub>
+                <MenubarSubTrigger>Game Functions</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.game.map((snippet, idx) => (
+                    <MenubarItem key={`game-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Authentication</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.auth.map((snippet, idx) => (
+                    <MenubarItem key={`auth-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Animations</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.animations.map((snippet, idx) => (
+                    <MenubarItem key={`anim-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Data Operations</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.data.map((snippet, idx) => (
+                    <MenubarItem key={`data-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Mobile Features</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.mobile.map((snippet, idx) => (
+                    <MenubarItem key={`mobile-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Notifications</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.notifications.map((snippet, idx) => (
+                    <MenubarItem key={`notif-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+
+              <MenubarSub>
+                <MenubarSubTrigger>Payments</MenubarSubTrigger>
+                <MenubarSubContent>
+                  {codeSnippets.payments.map((snippet, idx) => (
+                    <MenubarItem key={`payment-${idx}`} onClick={() => insertSnippet(snippet.code)}>
+                      {snippet.name}
+                    </MenubarItem>
+                  ))}
+                </MenubarSubContent>
+              </MenubarSub>
+            </MenubarContent>
+          </MenubarMenu>
+
+          {/* Tools Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">Tools</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem onClick={() => setCodeSnatcherOpen(true)}>
+                <Download className="h-4 w-4 mr-2" />
+                Code Snatcher
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={() => setGithubDialogOpen(true)}>
+                <Github className="h-4 w-4 mr-2" />
+                Push to GitHub
+              </MenubarItem>
+              <MenubarItem onClick={() => setImportDialogOpen(true)}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import from GitHub
+              </MenubarItem>
+              <MenubarItem onClick={handleExportToGoogleDrive} disabled={isExportingToDrive}>
+                <Cloud className="h-4 w-4 mr-2" />
+                {isExportingToDrive ? 'Exporting...' : 'Export to Google Drive'}
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={handleSendToStore}>
+                <Store className="h-4 w-4 mr-2" />
+                Send to Grove Store
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          {/* Help Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">Help</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem disabled>
+                <FileText className="h-4 w-4 mr-2" />
+                Documentation
+              </MenubarItem>
+              <MenubarItem disabled>
+                Keyboard Shortcuts
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem disabled>
+                About Indyverse
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+      </div>
+
       <header className="border-b p-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button
