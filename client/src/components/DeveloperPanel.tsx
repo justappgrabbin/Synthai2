@@ -2792,6 +2792,89 @@ const result = await handlePayment({
           <Terminal onClose={() => setShowTerminal(false)} />
         </div>
       )}
+
+      {/* Bottom Toolbar - Quick Actions */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card/95 backdrop-blur border rounded-full px-4 py-2 shadow-lg">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="button-quick-snippets"
+              title="Code Snippets"
+            >
+              <Sparkles className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="w-56 mb-2">
+            <DropdownMenuLabel>Quick Snippets</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>HTML</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {codeSnippets.html.slice(0, 3).map((snippet, idx) => (
+                  <DropdownMenuItem key={idx} onClick={() => insertSnippet(snippet.code)}>
+                    {snippet.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>CSS</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {codeSnippets.css.slice(0, 3).map((snippet, idx) => (
+                  <DropdownMenuItem key={idx} onClick={() => insertSnippet(snippet.code)}>
+                    {snippet.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>JavaScript</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {codeSnippets.javascript.slice(0, 3).map((snippet, idx) => (
+                  <DropdownMenuItem key={idx} onClick={() => insertSnippet(snippet.code)}>
+                    {snippet.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="h-6 w-px bg-border" />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCodeSnatcherOpen(true)}
+          data-testid="button-quick-snatch"
+          title="Code Snatcher"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setGithubDialogOpen(true)}
+          data-testid="button-quick-github"
+          title="Push to GitHub"
+        >
+          <Github className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleExportToGoogleDrive}
+          disabled={isExportingToDrive}
+          data-testid="button-quick-drive"
+          title="Export to Drive"
+        >
+          <Cloud className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
