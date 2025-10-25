@@ -13,6 +13,7 @@ import { AgentPanel } from "@/components/AgentPanel";
 import { GroveStore } from "@/components/GroveStore";
 import { GANTrainer } from "@/components/GANTrainer";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -38,6 +39,7 @@ function App() {
         <TooltipProvider>
           <Router />
           <PersistentAssistant />
+          <InstallPrompt />
           <Toaster />
         </TooltipProvider>
       </ThemeProvider>

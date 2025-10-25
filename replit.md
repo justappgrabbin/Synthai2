@@ -67,6 +67,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 25, 2025)
 
+### PWA Installation & APK Conversion Ready 📱
+Added complete Progressive Web App functionality:
+
+**Install Prompt**
+- Auto-appears for eligible users (not previously dismissed)
+- Shows at bottom-right with install/dismiss options
+- Persists user choice in localStorage
+- Detects when app is running in standalone mode
+
+**PWA Configuration** (Production-Ready)
+- manifest.json: Complete with icons, shortcuts, share targets, screenshots
+- Service Worker: Intelligent caching with offline fallback
+- Icons: All 4 required sizes (192x192, 512x512, maskable variants)
+- Apple Support: Touch icons, status bar styling, web-app-capable
+- Theme Colors: Purple cosmic theme (#9b87f5)
+- Share Target: Accepts .zip files from other apps → opens in ZIP Player
+
+**APK Conversion Guide**
+- PWABuilder.com integration (easiest method)
+- Bubblewrap CLI instructions (developer method)
+- Deployment options (Replit, Vercel, Netlify, GitHub Pages)
+- Google Play Store distribution guide
+- Complete testing checklist
+
+**Files**:
+- `client/src/components/InstallPrompt.tsx` - Install prompt UI
+- `PWA-APK-GUIDE.md` - Complete PWA/APK documentation
+- `client/public/manifest.json` - PWA manifest (already configured)
+- `client/public/sw.js` - Service worker (already configured)
+- `client/index.html` - Service worker registration (already configured)
+
 ### Cloud Integrations Added (Google Drive & GitHub)
 Added professional export/publish features using Replit's built-in connectors:
 
