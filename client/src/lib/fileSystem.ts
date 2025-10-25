@@ -243,4 +243,84 @@ Edit files in the src/ folder and see your changes in the preview pane!`
   static loadFileTree(files: FileNode[]): void {
     this.saveFiles(files);
   }
+
+  static loadFromZipEntries(zipEntries: Array<{name: string, isFolder: boolean, content?: string}>): void {
+    const files: FileNode[] = [];
+    const folderMap = new Map<string, FileNode>();
+
+    // Helper function to ensure all parent folders exist
+    const ensureFolderExists = (folderPath: string): FileNode => {
+      // Remove trailing slash for consistency
+      const cleanPath = folderPath.replace(/\/$/, '');
+      
+      // Check if folder already exists
+      if (folderMap.has(cleanPath)) {
+        return folderMap.get(cleanPath)!;
+      }
+
+      const pathParts = cleanPath.split('/').filter(p => p);
+      const folderName = pathParts[pathParts.length - 1];
+      
+      const folderNode: FileNode = {
+        name: folderName,
+        type: 'folder',
+        path: cleanPath,
+        children: []
+      };
+      
+      folderMap.set(cleanPath, folderNode);
+
+      // Add to parent or root
+      if (pathParts.length === 1) {
+        files.push(folderNode);
+      } else {
+        const parentPath = pathParts.slice(0, -1).join('/');
+        const parent = ensureFolderExists(parentPath);
+        if (parent.children) {
+          parent.children.push(folderNode);
+        }
+      }
+
+      return folderNode;
+    };
+
+    // Process all entries
+    for (const entry of zipEntries) {
+      const pathParts = entry.name.split('/').filter(p => p);
+      if (pathParts.length === 0) continue;
+
+      if (entry.isFolder) {
+        // Explicit folder entry - ensure it exists
+        ensureFolderExists(entry.name);
+      } else {
+        // File entry - ensure all parent folders exist first
+        if (pathParts.length > 1) {
+          const parentPath = pathParts.slice(0, -1).join('/');
+          const parent = ensureFolderExists(parentPath);
+          
+          const fileNode: FileNode = {
+            name: pathParts[pathParts.length - 1],
+            type: 'file',
+            path: entry.name,
+            content: entry.content || ''
+          };
+          
+          if (parent.children) {
+            parent.children.push(fileNode);
+          }
+        } else {
+          // Root-level file
+          const fileNode: FileNode = {
+            name: pathParts[0],
+            type: 'file',
+            path: entry.name,
+            content: entry.content || ''
+          };
+          files.push(fileNode);
+        }
+      }
+    }
+
+    this.saveFiles(files);
+  }
 }

@@ -2,10 +2,18 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles } from "lucide-react";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function DeveloperPanel() {
   const [files, setFiles] = useState<FileNode[]>([]);
@@ -128,6 +136,97 @@ export function DeveloperPanel() {
     }
   };
 
+  const insertSnippet = (snippet: string) => {
+    if (!currentFile) {
+      toast({
+        title: "No file selected",
+        description: "Open a file first to insert code",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setCode((prevCode) => prevCode + '\n' + snippet);
+    toast({
+      title: "Snippet inserted!",
+      description: "Code snippet added to file"
+    });
+  };
+
+  const codeSnippets = {
+    html: [
+      { name: "HTML5 Boilerplate", code: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+</html>` },
+      { name: "Button", code: `<button class="btn">Click Me</button>` },
+      { name: "Form", code: `<form>
+  <input type="text" placeholder="Enter text">
+  <button type="submit">Submit</button>
+</form>` },
+      { name: "Card", code: `<div class="card">
+  <h3>Card Title</h3>
+  <p>Card content goes here.</p>
+</div>` }
+    ],
+    css: [
+      { name: "Flexbox Center", code: `.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}` },
+      { name: "Button Styles", code: `.btn {
+  padding: 0.75rem 1.5rem;
+  background: #9b87f5;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: #8b77e5;
+}` },
+      { name: "Card Styles", code: `.card {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}` }
+    ],
+    javascript: [
+      { name: "Event Listener", code: `document.querySelector('.btn').addEventListener('click', function() {
+  console.log('Button clicked!');
+});` },
+      { name: "Fetch API", code: `fetch('https://api.example.com/data')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));` },
+      { name: "Arrow Function", code: `const myFunction = (param) => {
+  return param * 2;
+};` },
+      { name: "Canvas Setup", code: `const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Your drawing code here
+  requestAnimationFrame(draw);
+}
+
+draw();` }
+    ]
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background">
       <TopNav />
@@ -156,6 +255,54 @@ export function DeveloperPanel() {
             <Save className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Save</span>
           </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                data-testid="button-snippets"
+                variant="outline"
+                size="sm"
+              >
+                <Sparkles className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Snippets</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>HTML</DropdownMenuLabel>
+              {codeSnippets.html.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`html-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-html-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>CSS</DropdownMenuLabel>
+              {codeSnippets.css.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`css-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-css-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>JavaScript</DropdownMenuLabel>
+              {codeSnippets.javascript.map((snippet, idx) => (
+                <DropdownMenuItem
+                  key={`js-${idx}`}
+                  onClick={() => insertSnippet(snippet.code)}
+                  data-testid={`snippet-js-${idx}`}
+                >
+                  {snippet.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button
             data-testid="button-run-code"
             size="sm"

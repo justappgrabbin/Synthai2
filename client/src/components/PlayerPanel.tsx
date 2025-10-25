@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench } from "lucide-react";
+import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2 } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
 import { UserCreations, type UserCreation } from "@/lib/userCreations";
+import { FileSystem } from "@/lib/fileSystem";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ZipAnalyzer, type EntryPoint, type CodeIssue } from "@/lib/zipAnalyzer";
@@ -150,11 +151,48 @@ export function PlayerPanel() {
   };
 
   const handleEditCreation = (creation: UserCreation) => {
-    toast({
-      title: "Opening in IDE",
-      description: `${creation.name} will open in the IDE`
-    });
-    // Note: In a full implementation, we'd extract the zip and load into IDE
+    if (zipContents.length === 0) {
+      toast({
+        title: "Cannot edit",
+        description: "No project currently loaded. Upload the ZIP file again first.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Load current ZIP contents into IDE
+    handleEditCurrentProject();
+  };
+
+  const handleEditCurrentProject = () => {
+    if (zipContents.length === 0) {
+      toast({
+        title: "Cannot edit",
+        description: "Upload a ZIP file first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      FileSystem.loadFromZipEntries(zipContents);
+      toast({
+        title: "Success!",
+        description: `Loaded ${zipContents.length} files into IDE`,
+      });
+      
+      // Navigate to IDE after a brief delay
+      setTimeout(() => {
+        window.location.href = '/ide';
+      }, 500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load files into IDE",
+        variant: "destructive"
+      });
+      console.error('Failed to load ZIP into IDE:', error);
+    }
   };
 
   const handlePlayProject = () => {
@@ -376,6 +414,15 @@ export function PlayerPanel() {
                       Issues ({codeIssues.length})
                     </Button>
                   )}
+                  <Button
+                    data-testid="button-edit-in-ide"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditCurrentProject}
+                  >
+                    <Code2 className="h-4 w-4 mr-2" />
+                    Edit in IDE
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

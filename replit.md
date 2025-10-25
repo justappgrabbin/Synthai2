@@ -190,3 +190,28 @@ Integrated multi-backend AI chat assistant available globally across all panels:
 - **Storage**: API keys stored securely in localStorage with backend-specific prefixes
 - **Local Option**: CodeLlama runs locally via Ollama (no API key required)
 - **UI Design**: Lavender-accented chat bubble with Guard Dog branding
+
+### ZIP to IDE Integration
+Complete workflow for editing uploaded creative bundles:
+- **Feature**: "Edit in IDE" button in Player Panel loads ZIP contents directly into IDE
+- **Implementation**: `FileSystem.loadFromZipEntries()` converts ZIP entries to file tree
+- **Navigation**: Automatic redirect to IDE after successful load
+- **File Structure**: Preserves folder hierarchy from uploaded ZIP files
+- **Use Case**: Upload game template → inspect in Player → edit in IDE → customize and run
+
+### Code Snippet Inserter
+Quick-access menu for inserting common HTML/CSS/JavaScript code patterns:
+- **Component**: Dropdown menu in IDE header between Save and Run buttons
+- **Location**: IDE toolbar with sparkles (✨) icon
+- **Categories**: HTML (boilerplate, buttons, forms, cards), CSS (flexbox, button styles, cards), JavaScript (event listeners, fetch API, canvas setup)
+- **Functionality**: One-click insertion of code snippets into current file
+- **Mobile**: Icon-only on mobile, label visible on desktop
+- **Snippets**: 11 pre-built templates for rapid prototyping
+
+### Mobile Preview Toggle
+Enhanced mobile support for IDE preview pane:
+- **Feature**: Preview toggle button now available on all screen sizes (phones + tablets)
+- **Button**: Globe icon (🌐) in IDE header
+- **Behavior**: Switches view between code editor and preview pane on mobile devices
+- **Previous Issue**: Preview was inaccessible on phones - now fixed
+- **Integration**: Works seamlessly with existing Run functionality
