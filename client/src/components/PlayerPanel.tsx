@@ -126,6 +126,23 @@ export function PlayerPanel() {
     }
   };
 
+  const handlePlayCreation = (creation: UserCreation) => {
+    toast({
+      title: "Loading Creation",
+      description: `Loading ${creation.name}...`
+    });
+    setActiveTab('current');
+    // Note: In a full implementation, we'd reload the zip file from storage
+  };
+
+  const handleEditCreation = (creation: UserCreation) => {
+    toast({
+      title: "Opening in IDE",
+      description: `${creation.name} will open in the IDE`
+    });
+    // Note: In a full implementation, we'd extract the zip and load into IDE
+  };
+
   const handlePlayProject = () => {
     if (!executableContent || !entryPoint) {
       toast({
@@ -213,6 +230,7 @@ export function PlayerPanel() {
                         </span>
                       </div>
                       <Button
+                        data-testid={`button-delete-${creation.id}`}
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6"
@@ -223,9 +241,30 @@ export function PlayerPanel() {
                     </div>
                     <h3 className="font-semibold mb-1 truncate">{creation.name}</h3>
                     <p className="text-xs text-muted-foreground mb-3">{creation.description}</p>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
                       <span>{creation.fileCount} files</span>
                       <span>{new Date(creation.uploadedAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        data-testid={`button-play-${creation.id}`}
+                        size="sm"
+                        className="flex-1 bg-lavender hover:bg-lavender-hover"
+                        onClick={() => handlePlayCreation(creation)}
+                      >
+                        <Play className="h-3 w-3 mr-2" />
+                        Play
+                      </Button>
+                      <Button
+                        data-testid={`button-edit-${creation.id}`}
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleEditCreation(creation)}
+                      >
+                        <File className="h-3 w-3 mr-2" />
+                        Edit
+                      </Button>
                     </div>
                   </Card>
                 ))}
