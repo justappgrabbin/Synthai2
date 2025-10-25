@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github } from "lucide-react";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
@@ -38,6 +38,10 @@ export function DeveloperPanel() {
   const [codeSnatcherOpen, setCodeSnatcherOpen] = useState(false);
   const [snatchUrl, setSnatchUrl] = useState("");
   const [isSnatchingCode, setIsSnatchingCode] = useState(false);
+  const [isExportingToDrive, setIsExportingToDrive] = useState(false);
+  const [isPushingToGitHub, setIsPushingToGitHub] = useState(false);
+  const [githubDialogOpen, setGithubDialogOpen] = useState(false);
+  const [repoName, setRepoName] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -268,6 +272,166 @@ export function DeveloperPanel() {
       });
     } finally {
       setIsSnatchingCode(false);
+    }
+  };
+
+  const handleExportToGoogleDrive = async () => {
+    setIsExportingToDrive(true);
+
+    try {
+      const allFiles = FileSystem.getAllFiles();
+      const flatFiles: Array<{ path: string; content: string }> = [];
+
+      const flatten = (nodes: FileNode[], prefix = '') => {
+        nodes.forEach(node => {
+          if (node.type === 'file') {
+            flatFiles.push({
+              path: prefix + node.name,
+              content: node.content || '' // Include empty files
+            });
+          } else if (node.type === 'directory' && node.children) {
+            flatten(node.children, prefix + node.name + '/');
+          }
+        });
+      };
+
+      flatten(allFiles);
+
+      if (flatFiles.length === 0) {
+        toast({
+          title: "No files to export",
+          description: "Create some files first!",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const projectName = 'IndyverseProject-' + Date.now();
+
+      const response = await fetch('/api/export/google-drive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectName, files: flatFiles })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.notConnected) {
+          toast({
+            title: "Google Drive Not Connected",
+            description: "Please connect your Google Drive in Settings first",
+            variant: "destructive"
+          });
+        } else {
+          throw new Error(data.error);
+        }
+        return;
+      }
+
+      toast({
+        title: "Exported to Google Drive! ☁️",
+        description: `${data.fileCount} files uploaded to "${data.folderName}"`
+      });
+
+      window.open(data.folderUrl, '_blank');
+
+    } catch (error: any) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Failed",
+        description: error.message || "Could not export to Google Drive",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExportingToDrive(false);
+    }
+  };
+
+  const handlePushToGitHub = async () => {
+    if (!repoName.trim()) {
+      toast({
+        title: "Repository Name Required",
+        description: "Enter a name for your GitHub repository",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsPushingToGitHub(true);
+
+    try {
+      const allFiles = FileSystem.getAllFiles();
+      const flatFiles: Array<{ path: string; content: string }> = [];
+
+      const flatten = (nodes: FileNode[], prefix = '') => {
+        nodes.forEach(node => {
+          if (node.type === 'file') {
+            flatFiles.push({
+              path: prefix + node.name,
+              content: node.content || '' // Include empty files
+            });
+          } else if (node.type === 'directory' && node.children) {
+            flatten(node.children, prefix + node.name + '/');
+          }
+        });
+      };
+
+      flatten(allFiles);
+
+      if (flatFiles.length === 0) {
+        toast({
+          title: "No files to push",
+          description: "Create some files first!",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await fetch('/api/push/github', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repoName: repoName.trim(),
+          files: flatFiles,
+          description: 'Created from YOU–N–I–VERSE Studio'
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.notConnected) {
+          toast({
+            title: "GitHub Not Connected",
+            description: "Please connect your GitHub account in the integration setup",
+            variant: "destructive"
+          });
+        } else {
+          throw new Error(data.error);
+        }
+        return;
+      }
+
+      setGithubDialogOpen(false);
+      setRepoName('');
+
+      toast({
+        title: "Pushed to GitHub! 🚀",
+        description: `Repository "${data.repoName}" updated successfully`
+      });
+
+      window.open(data.url, '_blank');
+
+    } catch (error: any) {
+      console.error('GitHub push error:', error);
+      toast({
+        title: "Push Failed",
+        description: error.message || "Could not push to GitHub",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPushingToGitHub(false);
     }
   };
 
@@ -1865,6 +2029,76 @@ const result = await handlePayment({
                     className="bg-lavender hover:bg-lavender-hover"
                   >
                     {isSnatchingCode ? 'Snatching...' : 'Snatch! 🪝'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Button
+            data-testid="button-export-google-drive"
+            variant="outline"
+            size="sm"
+            onClick={handleExportToGoogleDrive}
+            disabled={isExportingToDrive}
+            title="Export to Google Drive"
+          >
+            <Cloud className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{isExportingToDrive ? 'Exporting...' : 'Drive'}</span>
+          </Button>
+
+          <Dialog open={githubDialogOpen} onOpenChange={setGithubDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                data-testid="button-push-github"
+                variant="outline"
+                size="sm"
+                title="Push to GitHub"
+              >
+                <Github className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">GitHub</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Push to GitHub 🚀</DialogTitle>
+                <DialogDescription>
+                  Push your project to a GitHub repository. Enter a repository name below.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input
+                  data-testid="input-repo-name"
+                  placeholder="my-awesome-project"
+                  value={repoName}
+                  onChange={(e) => setRepoName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isPushingToGitHub) {
+                      handlePushToGitHub();
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Repository will be created or updated in your GitHub account
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setGithubDialogOpen(false);
+                      setRepoName('');
+                    }}
+                    data-testid="button-cancel-github"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handlePushToGitHub}
+                    disabled={isPushingToGitHub || !repoName.trim()}
+                    data-testid="button-execute-github-push"
+                    className="bg-lavender hover:bg-lavender-hover"
+                  >
+                    {isPushingToGitHub ? 'Pushing...' : 'Push to GitHub 🚀'}
                   </Button>
                 </div>
               </div>

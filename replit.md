@@ -59,3 +59,63 @@ Preferred communication style: Simple, everyday language.
 
 ### Routing
 - Wouter (client-side only).
+
+### Cloud Integrations
+- Google Drive connector (googleapis package) for project exports
+- GitHub connection for repository management and pushing code
+- Per-user OAuth authentication via Replit's connector system
+
+## Recent Changes (October 25, 2025)
+
+### Cloud Integrations Added (Google Drive & GitHub)
+Added professional export/publish features using Replit's built-in connectors:
+
+**Google Drive Export** ☁️
+- **Button**: "Drive" in IDE toolbar (Cloud icon)
+- **Function**: One-click export entire project to user's Google Drive
+- **Structure**: Preserves full directory hierarchy with nested folders
+- **Auth**: Replit's Google Drive connector handles OAuth automatically
+- **User Isolation**: Each user connects their own Google Drive account
+- **Files**: Includes empty scaffold/placeholder files
+- **Output**: Creates timestamped folder, opens in browser after upload
+- **Error Handling**: Clear "not connected" messages with setup instructions
+
+**GitHub Push** 🚀
+- **Button**: "GitHub" in IDE toolbar (GitHub icon)  
+- **Dialog**: Enter repository name
+- **Function**: Push entire project to GitHub (creates or updates repo)
+- **Auth**: Replit's GitHub connection handles OAuth automatically
+- **User Isolation**: Each user pushes to their own GitHub account
+- **Files**: Preserves directory structure, includes empty files
+- **Commits**: Auto-message: "Update [file] from YOU–N–I–VERSE Studio"
+- **Output**: Opens GitHub repo in browser after push
+
+**Technical Details**:
+- Backend: `server/lib/googleDriveService.ts`, `server/lib/githubService.ts`
+- Routes: POST `/api/export/google-drive`, POST `/api/push/github`
+- OAuth: Per-user tokens, automatic refresh, proper undefined guards
+- Structure: Recursive folder creation with caching to prevent duplicates
+
+### Theme System (Working)
+- Component: `client/src/components/ThemeProvider.tsx`
+- Settings toggle now functional (Sun/Moon icons)
+- localStorage persistence + system preference detection
+- Toggles `.dark` class on document root
+
+### Code Snatcher Feature 🎣
+- Dialog in IDE toolbar ("Snatch Code" button)
+- Extract HTML wireframes from any URL
+- Uses CORS proxy (allorigins.win)
+- Creates `snatched-[timestamp].html` file
+- Smart filtering (skips scripts/styles, preserves structure)
+
+### Enhanced Code Snippet Library (50+ snippets)
+- Nested dropdown categories for better organization
+- **Core**: HTML (5), CSS (5), JavaScript (4), PWA/APK (4), Utilities (3), Forms (2), API (3), UI (4)
+- **Advanced**: Game Functions (5), Auth (4), Animations (5), Data Operations (5), Mobile (4), Notifications (3), Payments (2)
+- **UI**: Hover to expand categories, click to insert instantly
+
+### AI Assistant Updates  
+- Renamed to "AI Guard Dog 🐕"
+- Friendlier welcome messages and setup guidance
+- Explicitly lists all 5 backend options (Claude, GPT-4, DeepSeek, Grok, CodeLlama)
