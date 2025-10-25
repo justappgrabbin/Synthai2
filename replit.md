@@ -38,7 +38,7 @@ Preferred communication style: Simple, everyday language.
 
 **Application Structure:**
 - Dashboard serves as central navigation hub (home world)
-- Seven main panels: Dashboard, GroveStore, IDE (DeveloperPanel), GameCreator, PlayerPanel, AgentPanel, SettingsPanel
+- Eight main panels: Dashboard, GroveStore, IDE (DeveloperPanel), GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel
 - TopNav component provides global navigation across all panels (except Dashboard which uses portal cards)
 - Each panel is a full-page component accessed via routes
 - Persistent AI Assistant overlay available globally across all views
@@ -48,7 +48,8 @@ Preferred communication style: Simple, everyday language.
 - `/grove-store` - Grove Store (community marketplace)
 - `/ide` - Developer Panel (code editor with file management)
 - `/game-creator` - Game Creator (template browser)
-- `/player` - Player Panel (ZIP file viewer)
+- `/gan-trainer` - GAN Trainer (neural network training with TensorFlow.js)
+- `/player` - Player Panel (ZIP file viewer with User Creations library)
 - `/agents` - Agent Panel (AI agent management)
 - `/settings` - Settings Panel (AI backend configuration)
 
@@ -150,6 +151,22 @@ Added community marketplace feature for discovering and downloading apps, agents
 Replaced per-panel back buttons with unified TopNav component:
 - **Component**: `client/src/components/TopNav.tsx`
 - **Features**: Persistent navigation bar with icons and labels, active state highlighting, responsive design
-- **Navigation Items**: Dashboard, Grove Store, IDE, Games, Player, Agents, Settings
+- **Navigation Items**: Dashboard, Grove Store, IDE, Games, GAN Trainer, Player, Agents, Settings
 - **Active Detection**: Uses wouter's useLocation() to highlight current page
 - **Design**: Lavender accent for active items, ghost variant for inactive items
+
+### GAN Trainer Panel
+Added neural network training capabilities with TensorFlow.js:
+- **Location**: `/gan-trainer` route, `client/src/components/GANTrainer.tsx`
+- **Features**: GAN template library, trainable and pre-trained model support
+- **Templates**: Simple GAN with TensorFlow.js implementation (generative adversarial network)
+- **Integration**: Templates load directly into IDE for modification and customization
+- **Technology**: Browser-based training using TensorFlow.js, no server required
+
+### User Creations Library
+Added tracking system for uploaded projects in Player Panel:
+- **Storage**: `client/src/lib/userCreations.ts` manages localStorage persistence
+- **Features**: Two-tab interface ("Current Project" and "User Creations")
+- **Functionality**: Automatically saves uploaded zip metadata, displays creation cards with file counts and dates
+- **Management**: Users can delete creations from their library
+- **Integration**: Works seamlessly with zip file upload system

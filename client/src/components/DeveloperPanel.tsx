@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2 } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu } from "lucide-react";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
@@ -14,6 +14,8 @@ export function DeveloperPanel() {
   const [previewContent, setPreviewContent] = useState("");
   const [newFileName, setNewFileName] = useState("");
   const [showNewFileInput, setShowNewFileInput] = useState(false);
+  const [showFilePanel, setShowFilePanel] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export function DeveloperPanel() {
     if (file.type === 'file') {
       setCurrentFile(file);
       setCode(file.content || '');
+      setShowFilePanel(false);
     }
   };
 
@@ -128,10 +131,19 @@ export function DeveloperPanel() {
   return (
     <div className="h-screen flex flex-col bg-background">
       <TopNav />
-      <header className="border-b p-3 flex items-center justify-between gap-4">
+      <header className="border-b p-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
+          <Button
+            data-testid="button-toggle-files"
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setShowFilePanel(!showFilePanel)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <Code2 className="h-5 w-5 text-lavender" />
-          <h2 className="text-lg font-semibold">Code Editor</h2>
+          <h2 className="text-lg font-semibold hidden sm:block">Code Editor</h2>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -141,8 +153,8 @@ export function DeveloperPanel() {
             onClick={handleSave}
             disabled={!currentFile}
           >
-            <Save className="h-4 w-4 mr-2" />
-            Save
+            <Save className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Save</span>
           </Button>
           <Button
             data-testid="button-run-code"
@@ -150,28 +162,63 @@ export function DeveloperPanel() {
             className="bg-lavender hover:bg-lavender-hover"
             onClick={handleRun}
           >
-            <Play className="h-4 w-4 mr-2" />
-            Run
+            <Play className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Run</span>
+          </Button>
+          <Button
+            data-testid="button-toggle-preview"
+            variant="outline"
+            size="sm"
+            className="hidden sm:flex lg:hidden"
+            onClick={() => setShowPreview(!showPreview)}
+          >
+            <Globe className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Preview</span>
           </Button>
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <aside className="w-64 border-r p-4 space-y-2 overflow-y-auto">
+      <div className="flex-1 flex overflow-hidden relative">
+        {showFilePanel && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setShowFilePanel(false)}
+          />
+        )}
+        
+        <aside className={`
+          fixed lg:relative lg:block
+          w-64 h-full border-r bg-background
+          p-4 space-y-2 overflow-y-auto
+          z-50 lg:z-auto
+          transition-transform duration-300
+          ${showFilePanel ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <FolderTree className="h-4 w-4 text-lavender" />
               <h3 className="font-medium text-sm">Files</h3>
             </div>
-            <Button
-              data-testid="button-new-file"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setShowNewFileInput(!showNewFileInput)}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                data-testid="button-new-file"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setShowNewFileInput(!showNewFileInput)}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+              <Button
+                data-testid="button-close-files"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 lg:hidden"
+                onClick={() => setShowFilePanel(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
           {showNewFileInput && (
@@ -206,10 +253,10 @@ export function DeveloperPanel() {
           ))}
         </aside>
 
-        <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col ${showPreview && 'hidden sm:flex'}`}>
           <div className="border-b p-2 flex items-center gap-2 text-sm text-muted-foreground">
             <Code2 className="h-3 w-3" />
-            <span>{currentFile?.name || 'No file selected'}</span>
+            <span className="truncate">{currentFile?.name || 'No file selected'}</span>
           </div>
           <Textarea
             data-testid="textarea-code-editor"
@@ -221,7 +268,10 @@ export function DeveloperPanel() {
           />
         </div>
 
-        <aside className="w-96 border-l flex flex-col">
+        <aside className={`
+          w-full sm:w-96 border-l flex flex-col
+          ${showPreview ? 'block sm:block' : 'hidden lg:flex'}
+        `}>
           <div className="border-b p-2 flex items-center gap-2 text-sm">
             <Globe className="h-4 w-4 text-lavender" />
             <span className="font-medium">Preview</span>
