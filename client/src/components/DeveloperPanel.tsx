@@ -2667,7 +2667,7 @@ const result = await handlePayment({
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className={`flex overflow-hidden relative ${showTerminal ? 'flex-1' : 'flex-1'}`}>
         {showFilePanel && (
           <div 
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -2788,7 +2788,7 @@ const result = await handlePayment({
       </div>
 
       {showTerminal && (
-        <div className="h-64 border-t">
+        <div className="h-64 border-t flex-shrink-0">
           <Terminal onClose={() => setShowTerminal(false)} />
         </div>
       )}
