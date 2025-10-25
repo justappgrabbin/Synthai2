@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Upload, FileArchive, File, Folder, Trash2, History } from "lucide-react";
+import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
 import { UserCreations, type UserCreation } from "@/lib/userCreations";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ZipAnalyzer, type EntryPoint, type CodeIssue } from "@/lib/zipAnalyzer";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-interface ZipEntry {
+export interface ZipEntry {
   name: string;
   isFolder: boolean;
   content?: string;
@@ -20,7 +23,10 @@ export function PlayerPanel() {
   const [activeTab, setActiveTab] = useState<'current' | 'creations'>('current');
   const [userCreations, setUserCreations] = useState<UserCreation[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [indexHtmlContent, setIndexHtmlContent] = useState<string>("");
+  const [executableContent, setExecutableContent] = useState<string>("");
+  const [entryPoint, setEntryPoint] = useState<EntryPoint | null>(null);
+  const [codeIssues, setCodeIssues] = useState<CodeIssue[]>([]);
+  const [showIssues, setShowIssues] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -59,12 +65,20 @@ export function PlayerPanel() {
       setZipName(file.name);
       setIsPlaying(false);
       
-      // Find index.html
-      const indexEntry = entries.find(e => e.name.toLowerCase().endsWith('index.html'));
-      if (indexEntry?.content) {
-        setIndexHtmlContent(indexEntry.content);
+      // Detect entry point intelligently
+      const detectedEntry = ZipAnalyzer.detectEntryPoint(entries);
+      setEntryPoint(detectedEntry);
+      
+      // Analyze code for issues
+      const issues = ZipAnalyzer.analyzeCode(entries);
+      setCodeIssues(issues);
+      
+      // Generate executable content
+      if (detectedEntry) {
+        const executable = ZipAnalyzer.generateExecutableHTML(entries, detectedEntry);
+        setExecutableContent(executable);
       } else {
-        setIndexHtmlContent("");
+        setExecutableContent("");
       }
       
       // Save to user creations
@@ -76,9 +90,10 @@ export function PlayerPanel() {
       });
       setUserCreations(UserCreations.getAll());
       
+      const issueWarning = issues.length > 0 ? ` (${issues.length} issues detected)` : '';
       toast({
         title: "Success!",
-        description: `Loaded ${entries.length} items from ${file.name}`
+        description: `Loaded ${entries.length} items from ${file.name}${issueWarning}`
       });
     } catch (error) {
       toast({
@@ -112,15 +127,16 @@ export function PlayerPanel() {
   };
 
   const handlePlayProject = () => {
-    if (!indexHtmlContent) {
+    if (!executableContent || !entryPoint) {
       toast({
-        title: "No index.html found",
-        description: "This bundle doesn't contain an index.html file to play",
+        title: "Cannot play project",
+        description: "No entry point detected. Upload a project with index.html, main.js, or similar.",
         variant: "destructive"
       });
       return;
     }
     setIsPlaying(true);
+    setShowIssues(false);
   };
 
   const handleStopPlaying = () => {
@@ -241,7 +257,7 @@ export function PlayerPanel() {
                   {zipName}
                 </h3>
                 <div className="flex gap-2">
-                  {indexHtmlContent && (
+                  {executableContent && (
                     <Button
                       data-testid="button-play-project"
                       variant={isPlaying ? "outline" : "default"}
@@ -253,6 +269,17 @@ export function PlayerPanel() {
                       {isPlaying ? "Stop" : "Play"}
                     </Button>
                   )}
+                  {codeIssues.length > 0 && (
+                    <Button
+                      data-testid="button-show-issues"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowIssues(!showIssues)}
+                    >
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Issues ({codeIssues.length})
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -262,7 +289,71 @@ export function PlayerPanel() {
                   </Button>
                 </div>
               </div>
-              <div className="space-y-1 max-h-[500px] overflow-y-auto">
+
+              {entryPoint && (
+                <div className="mb-4 p-3 bg-lavender/10 rounded border border-lavender/20">
+                  <div className="flex items-start gap-2">
+                    <Play className="h-4 w-4 text-lavender mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Entry Point Detected</p>
+                      <p className="text-xs text-muted-foreground font-mono mt-1">{entryPoint.file}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{entryPoint.reason}</p>
+                      <Badge className="mt-2 bg-lavender/20 text-lavender text-xs">
+                        {entryPoint.type} • {Math.round(entryPoint.confidence * 100)}% confidence
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showIssues && codeIssues.length > 0 && (
+                <div className="mb-4">
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Code Issues Detected</AlertTitle>
+                    <AlertDescription>
+                      <div className="mt-3 space-y-2 max-h-[200px] overflow-y-auto">
+                        {codeIssues.map((issue, idx) => (
+                          <div
+                            key={idx}
+                            className="p-2 bg-background rounded border text-xs"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge
+                                variant={issue.severity === 'error' ? 'destructive' : 'outline'}
+                                className="text-xs"
+                              >
+                                {issue.severity}
+                              </Badge>
+                              <span className="font-mono text-muted-foreground">{issue.file}</span>
+                            </div>
+                            <p className="font-medium">{issue.message}</p>
+                            {issue.suggestion && (
+                              <p className="text-muted-foreground mt-1">{issue.suggestion}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-3"
+                        onClick={() => {
+                          toast({
+                            title: "AI Fix Coming Soon",
+                            description: "AI-powered code fixing will be available in the next update"
+                          });
+                        }}
+                      >
+                        <Wrench className="h-3 w-3 mr-2" />
+                        Fix Issues with AI
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+
+              <div className="space-y-1 max-h-[300px] overflow-y-auto">
                 {zipContents.map((entry, idx) => (
                   <div
                     key={idx}
@@ -291,7 +382,7 @@ export function PlayerPanel() {
                 <div className="bg-white rounded overflow-hidden">
                   <iframe
                     data-testid="iframe-project-player"
-                    srcDoc={indexHtmlContent}
+                    srcDoc={executableContent}
                     className="w-full h-[500px] border-0"
                     sandbox="allow-scripts allow-same-origin"
                     title="Project Preview"
@@ -311,7 +402,7 @@ export function PlayerPanel() {
                   <div className="text-center">
                     <File className="h-12 w-12 mx-auto mb-2 opacity-20" />
                     <p className="text-sm">
-                      {indexHtmlContent 
+                      {executableContent 
                         ? "Click Play to run the project" 
                         : "Select a file to preview"}
                     </p>
