@@ -398,28 +398,28 @@ function AgentCard({
           className="flex-1 touch-manipulation"
           data-testid={`button-edit-agent-${agent.id}`}
         >
-          <Edit className="h-3 w-3 mr-1" />
+          <Edit className="h-4 w-4 mr-1" />
           Edit
         </Button>
         <Button
           variant="outline"
-          size="icon"
+          size="sm"
           onClick={onToggle}
-          className={`touch-manipulation ${
+          className={`touch-manipulation min-w-[2.5rem] ${
             agent.status === "active" ? "bg-green-500/10" : ""
           }`}
           data-testid={`button-toggle-agent-${agent.id}`}
         >
-          <Power className="h-3 w-3" />
+          <Power className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
-          size="icon"
+          size="sm"
           onClick={onDelete}
-          className="touch-manipulation"
+          className="touch-manipulation min-w-[2.5rem]"
           data-testid={`button-delete-agent-${agent.id}`}
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </Card>
