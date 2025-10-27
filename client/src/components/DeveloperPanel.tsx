@@ -106,7 +106,7 @@ export function DeveloperPanel() {
     loadFiles();
     
     if (currentFile && currentFile.path === filePath) {
-      const updatedFile = FileSystem.getFile(filePath);
+      const updatedFile = FileSystem.findFile(filePath);
       if (updatedFile) {
         setCurrentFile(updatedFile);
         setCode(updatedFile.content || '');
@@ -2300,8 +2300,9 @@ const result = await handlePayment({
                 data-testid="button-close-files"
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 lg:hidden"
+                className="h-6 w-6"
                 onClick={() => setShowFilePanel(false)}
+                title="Close File Panel"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -2359,9 +2360,21 @@ const result = await handlePayment({
           w-full sm:w-96 border-l flex flex-col
           ${showPreview ? 'block sm:block' : 'hidden lg:flex'}
         `}>
-          <div className="border-b p-2 flex items-center gap-2 text-sm">
-            <Globe className="h-4 w-4 text-lavender" />
-            <span className="font-medium">Preview</span>
+          <div className="border-b p-2 flex items-center justify-between gap-2 text-sm">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-lavender" />
+              <span className="font-medium">Preview</span>
+            </div>
+            <Button
+              data-testid="button-close-preview"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowPreview(false)}
+              title="Close Preview"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
           <div className="flex-1 bg-white overflow-auto">
             {previewContent ? (
@@ -2392,14 +2405,50 @@ const result = await handlePayment({
       )}
 
       {showSelfEditor && (
-        <div className="h-96 border-t flex-shrink-0 bg-background">
-          <SelfEditor onFileModified={handleFileModified} />
+        <div className="h-96 border-t flex-shrink-0 bg-background flex flex-col">
+          <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-purple-500" />
+              <span className="font-medium text-sm">Self-Editor & Code Injection</span>
+            </div>
+            <Button
+              data-testid="button-close-self-editor"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowSelfEditor(false)}
+              title="Close Self-Editor"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <SelfEditor onFileModified={handleFileModified} />
+          </div>
         </div>
       )}
 
       {showWorkspace && (
-        <div className="h-96 border-t flex-shrink-0 bg-background">
-          <WorkspaceOrganizer />
+        <div className="h-96 border-t flex-shrink-0 bg-background flex flex-col">
+          <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
+            <div className="flex items-center gap-2">
+              <FolderTree className="h-4 w-4 text-blue-500" />
+              <span className="font-medium text-sm">Workspace Organizer</span>
+            </div>
+            <Button
+              data-testid="button-close-workspace"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowWorkspace(false)}
+              title="Close Workspace Organizer"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <WorkspaceOrganizer />
+          </div>
         </div>
       )}
 
