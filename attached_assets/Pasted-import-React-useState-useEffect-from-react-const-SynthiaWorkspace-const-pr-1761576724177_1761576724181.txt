@@ -1,0 +1,657 @@
+import React, { useState, useEffect } from 'react';
+
+const SynthiaWorkspace = () => {
+  const [projectData, setProjectData] = useState({
+    consciousness: [],
+    glyph: [],
+    charts: [],
+    gameplay: [],
+    technical: [],
+    theory: [],
+    social: [],
+    business: [],
+    lab: [],
+    store: [],
+    characters: [],
+    data: []
+  });
+
+  const [categoryNotes, setCategoryNotes] = useState({});
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [previewCategory, setPreviewCategory] = useState(null);
+  const [viewMode, setViewMode] = useState('categories'); // 'categories' or 'template'
+
+  const [showModal, setShowModal] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [newArtifact, setNewArtifact] = useState({
+    title: '',
+    category: 'consciousness',
+    content: '',
+    isCode: false,
+    codeLanguage: 'javascript'
+  });
+  
+  const [newCode, setNewCode] = useState({
+    title: '',
+    category: 'consciousness',
+    content: '',
+    codeLanguage: 'javascript'
+  });
+
+  const modules = {
+    consciousness: {
+      icon: '🧠',
+      title: '5-Body Consciousness',
+      description: 'Mind, Body, Heart, Will, Soul frameworks & AI agents'
+    },
+    glyph: {
+      icon: '🔮',
+      title: 'Glyph & Resonance',
+      description: 'Visual systems, generators, resonance logic'
+    },
+    charts: {
+      icon: '🗺️',
+      title: 'Chart & Mapping',
+      description: 'Astrology, Human Design, metaphysical systems'
+    },
+    gameplay: {
+      icon: '🎮',
+      title: 'Gameplay & Quests',
+      description: 'Quest mechanics, progression, Hero\'s Journey'
+    },
+    technical: {
+      icon: '💻',
+      title: 'Technical Implementation',
+      description: 'HTML mockups, code, APIs, schemas'
+    },
+    theory: {
+      icon: '🧮',
+      title: 'Theory & Logic',
+      description: 'Consciousness theory, field logic, frameworks'
+    },
+    social: {
+      icon: '👥',
+      title: 'Social & Community',
+      description: 'Resonance matching, social features'
+    },
+    business: {
+      icon: '💰',
+      title: 'Monetization & Business',
+      description: 'Revenue models, pricing, business strategy'
+    },
+    lab: {
+      icon: '🔬',
+      title: 'Lab & Experiments',
+      description: 'Testing grounds, prototypes, experimental features'
+    },
+    store: {
+      icon: '🛍️',
+      title: 'Store & Marketplace',
+      description: 'Product offerings, mod store, premium content'
+    },
+    characters: {
+      icon: '🎭',
+      title: 'Character Selection',
+      description: 'AI agents, personalities, character designs & traits'
+    },
+    data: {
+      icon: '📊',
+      title: 'Data & Resources',
+      description: 'Datasets, user info, analytics, reference materials'
+    }
+  };
+
+  const addArtifact = () => {
+    if (newArtifact.title && newArtifact.content) {
+      setProjectData(prev => ({
+        ...prev,
+        [newArtifact.category]: [
+          ...prev[newArtifact.category],
+          {
+            ...newArtifact,
+            timestamp: new Date().toISOString(),
+            id: Date.now()
+          }
+        ]
+      }));
+      setNewArtifact({ 
+        title: '', 
+        category: 'consciousness', 
+        content: '',
+        isCode: false,
+        codeLanguage: 'javascript'
+      });
+      setShowModal(false);
+    }
+  };
+
+  const addCode = () => {
+    if (newCode.title && newCode.content) {
+      setProjectData(prev => ({
+        ...prev,
+        [newCode.category]: [
+          ...prev[newCode.category],
+          {
+            title: newCode.title,
+            content: newCode.content,
+            isCode: true,
+            codeLanguage: newCode.codeLanguage,
+            timestamp: new Date().toISOString(),
+            id: Date.now()
+          }
+        ]
+      }));
+      setNewCode({ 
+        title: '', 
+        category: 'consciousness', 
+        content: '',
+        codeLanguage: 'javascript'
+      });
+      setShowCodeModal(false);
+    }
+  };
+
+  const deleteArtifact = (category, id) => {
+    setProjectData(prev => ({
+      ...prev,
+      [category]: prev[category].filter(artifact => artifact.id !== id)
+    }));
+  };
+
+  const updateCategoryNote = (category, note) => {
+    setCategoryNotes(prev => ({
+      ...prev,
+      [category]: note
+    }));
+  };
+
+  const exportProject = () => {
+    const exportData = JSON.stringify(projectData, null, 2);
+    navigator.clipboard.writeText(exportData).then(() => {
+      alert('Project data copied to clipboard!');
+    });
+  };
+
+  const importProject = () => {
+    const data = prompt('Paste your exported project data:');
+    if (data) {
+      try {
+        const imported = JSON.parse(data);
+        setProjectData(imported);
+        alert('Project imported successfully!');
+      } catch (e) {
+        alert('Invalid project data format!');
+      }
+    }
+  };
+
+  const clearAll = () => {
+    if (window.confirm('Are you sure you want to clear all artifacts?')) {
+      setProjectData({
+        consciousness: [],
+        glyph: [],
+        charts: [],
+        gameplay: [],
+        technical: [],
+        theory: [],
+        social: [],
+        business: [],
+        lab: [],
+        store: [],
+        characters: [],
+        data: []
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-6">
+      <div className="max-w-7xl mx-auto bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl">
+        {/* Header */}
+        <div className="text-center mb-8 pb-6 border-b-4 border-purple-600">
+          <h1 className="text-4xl font-bold text-gray-800 mb-3">🌐 Synthia Project Workspace</h1>
+          <p className="text-xl text-purple-600 italic">"Awaken the Field. Live the Pattern. Rewrite Your Story."</p>
+        </div>
+
+        {/* Controls */}
+        <div className="flex flex-wrap gap-4 mb-8 items-center">
+          <button 
+            onClick={() => setShowModal(true)}
+            className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition-all hover:shadow-lg transform hover:-translate-y-1"
+          >
+            + Add Artifact
+          </button>
+          <button 
+            onClick={exportProject}
+            className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all hover:shadow-lg transform hover:-translate-y-1"
+          >
+            📤 Export Project
+          </button>
+          <button 
+            onClick={importProject}
+            className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all hover:shadow-lg transform hover:-translate-y-1"
+          >
+            📥 Import Project
+          </button>
+          <button 
+            onClick={clearAll}
+            className="bg-red-200 text-red-800 px-6 py-3 rounded-xl font-bold hover:bg-red-300 transition-all hover:shadow-lg transform hover:-translate-y-1"
+          >
+            🗑️ Clear All
+          </button>
+          
+          {/* View Toggle */}
+          <div className="ml-auto flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+            <button
+              onClick={() => setViewMode('categories')}
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                viewMode === 'categories' 
+                  ? 'bg-white text-purple-600 shadow' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              📁 Categories
+            </button>
+            <button
+              onClick={() => setViewMode('template')}
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                viewMode === 'template' 
+                  ? 'bg-white text-purple-600 shadow' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              📋 Template
+            </button>
+          </div>
+        </div>
+
+        {/* Module Grid or Template View */}
+        {viewMode === 'categories' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {Object.entries(modules).map(([key, module]) => (
+              <div 
+                key={key}
+                className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-purple-400 transition-all hover:shadow-xl transform hover:-translate-y-1"
+              >
+                <div className="flex items-center mb-4">
+                  <span className="text-2xl mr-3">{module.icon}</span>
+                  <h3 className="text-lg font-bold text-gray-800">{module.title}</h3>
+                  <span className="ml-auto bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                    {projectData[key].length}
+                  </span>
+                </div>
+                
+                {/* Description with Edit/Preview */}
+                <div className="mb-4">
+                  {editingCategory === key ? (
+                    <div>
+                      <textarea
+                        value={categoryNotes[key] || module.description}
+                        onChange={(e) => updateCategoryNote(key, e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded text-sm mb-2"
+                        rows="3"
+                      />
+                      <button
+                        onClick={() => setEditingCategory(null)}
+                        className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-gray-600 mb-2 text-sm">
+                        {categoryNotes[key] || module.description}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingCategory(key)}
+                          className="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => setPreviewCategory(key)}
+                          className="text-xs bg-blue-200 text-blue-700 px-3 py-1 rounded hover:bg-blue-300"
+                        >
+                          👁️ Preview
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Artifacts */}
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {projectData[key].map((artifact) => (
+                    <div key={artifact.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="font-semibold text-gray-800 text-sm mb-1">
+                        {artifact.title} {artifact.isCode && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">CODE</span>}
+                      </div>
+                      <div className="text-gray-600 text-xs mb-2 line-clamp-2">
+                        {artifact.content.substring(0, 100)}...
+                      </div>
+                      <button 
+                        onClick={() => deleteArtifact(key, artifact.id)}
+                        className="text-red-600 hover:text-red-800 text-xs font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                  
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        setNewArtifact(prev => ({ ...prev, category: key }));
+                        setShowModal(true);
+                      }}
+                      className="flex-1 p-3 border-2 border-dashed border-gray-300 rounded-lg text-purple-600 hover:border-purple-400 hover:bg-purple-50 transition-all text-sm"
+                    >
+                      + Add Content
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setNewCode(prev => ({ ...prev, category: key }));
+                        setShowCodeModal(true);
+                      }}
+                      className="flex-1 p-3 border-2 border-dashed border-purple-300 rounded-lg text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50 transition-all text-sm"
+                    >
+                      + Add Code
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">📋 Project Template</h2>
+            
+            {Object.entries(modules).map(([key, module]) => (
+              <div key={key} className="mb-8 pb-8 border-b border-gray-200 last:border-b-0">
+                <div className="flex items-center mb-4">
+                  <span className="text-3xl mr-4">{module.icon}</span>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-800">{module.title}</h3>
+                    <p className="text-sm text-gray-600">{categoryNotes[key] || module.description}</p>
+                  </div>
+                  <span className="bg-purple-100 text-purple-700 px-4 py-2 rounded-full font-bold">
+                    {projectData[key].length} items
+                  </span>
+                </div>
+                
+                {projectData[key].length > 0 && (
+                  <div className="ml-14 space-y-3">
+                    {projectData[key].map((artifact) => (
+                      <div key={artifact.id} className="bg-gray-50 rounded-lg p-4 border-l-4 border-purple-400">
+                        <div className="font-semibold text-gray-800 mb-2">
+                          {artifact.title}
+                          {artifact.isCode && (
+                            <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                              {artifact.codeLanguage}
+                            </span>
+                          )}
+                        </div>
+                        {artifact.isCode ? (
+                          <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                            <code>{artifact.content}</code>
+                          </pre>
+                        ) : (
+                          <p className="text-gray-600 text-sm whitespace-pre-wrap">{artifact.content}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Export Section */}
+        <div className="bg-gray-50 rounded-2xl p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">🚀 Project Summary</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Object.entries(modules).map(([key, module]) => (
+              <div key={key} className="text-center">
+                <div className="text-2xl mb-1">{module.icon}</div>
+                <div className="text-lg font-bold text-purple-600">{projectData[key].length}</div>
+                <div className="text-xs text-gray-600">{module.title}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Add Artifact Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Add New Artifact</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Title:</label>
+                <input 
+                  type="text"
+                  value={newArtifact.title}
+                  onChange={(e) => setNewArtifact(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                  placeholder="Enter artifact title..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Category:</label>
+                <select 
+                  value={newArtifact.category}
+                  onChange={(e) => setNewArtifact(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                >
+                  {Object.entries(modules).map(([key, module]) => (
+                    <option key={key} value={key}>{module.icon} {module.title}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newArtifact.isCode}
+                    onChange={(e) => setNewArtifact(prev => ({ ...prev, isCode: e.target.checked }))}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-bold text-gray-700">This is code</span>
+                </label>
+
+                {newArtifact.isCode && (
+                  <select
+                    value={newArtifact.codeLanguage}
+                    onChange={(e) => setNewArtifact(prev => ({ ...prev, codeLanguage: e.target.value }))}
+                    className="p-2 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="react">React</option>
+                    <option value="json">JSON</option>
+                    <option value="other">Other</option>
+                  </select>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Content:</label>
+                <textarea 
+                  value={newArtifact.content}
+                  onChange={(e) => setNewArtifact(prev => ({ ...prev, content: e.target.value }))}
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none h-40 resize-vertical ${
+                    newArtifact.isCode ? 'font-mono text-sm' : ''
+                  }`}
+                  placeholder={newArtifact.isCode ? "Paste your code here..." : "Paste your artifact content here..."}
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-4 mt-6">
+              <button 
+                onClick={addArtifact}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-all"
+              >
+                Add Artifact
+              </button>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {modules[previewCategory].icon} {modules[previewCategory].title} - Preview
+              </h2>
+              <button
+                onClick={() => setPreviewCategory(null)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <h3 className="font-bold text-gray-800 mb-2">Description:</h3>
+              <p className="text-gray-700">{categoryNotes[previewCategory] || modules[previewCategory].description}</p>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-gray-800 mb-4">Artifacts ({projectData[previewCategory].length}):</h3>
+              <div className="space-y-4">
+                {projectData[previewCategory].map((artifact) => (
+                  <div key={artifact.id} className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                    <h4 className="font-bold text-gray-800 mb-2">
+                      {artifact.title}
+                      {artifact.isCode && (
+                        <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                          {artifact.codeLanguage}
+                        </span>
+                      )}
+                    </h4>
+                    {artifact.isCode ? (
+                      <pre className="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto">
+                        <code>{artifact.content}</code>
+                      </pre>
+                    ) : (
+                      <p className="text-gray-600 whitespace-pre-wrap">{artifact.content}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setPreviewCategory(null)}
+              className="mt-6 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition-all"
+            >
+              Close Preview
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Code Modal */}
+      {showCodeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-6">💻 Add Code</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-300 mb-2">Code Title:</label>
+                <input 
+                  type="text"
+                  value={newCode.title}
+                  onChange={(e) => setNewCode(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full p-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
+                  placeholder="e.g., User Authentication Function"
+                />
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-gray-300 mb-2">Category:</label>
+                  <select 
+                    value={newCode.category}
+                    onChange={(e) => setNewCode(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full p-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
+                  >
+                    {Object.entries(modules).map(([key, module]) => (
+                      <option key={key} value={key}>{module.icon} {module.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-gray-300 mb-2">Language:</label>
+                  <select
+                    value={newCode.codeLanguage}
+                    onChange={(e) => setNewCode(prev => ({ ...prev, codeLanguage: e.target.value }))}
+                    className="w-full p-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:border-purple-500 focus:outline-none"
+                  >
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="react">React</option>
+                    <option value="json">JSON</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="sql">SQL</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-300 mb-2">Code:</label>
+                <textarea 
+                  value={newCode.content}
+                  onChange={(e) => setNewCode(prev => ({ ...prev, content: e.target.value }))}
+                  className="w-full p-4 bg-gray-800 border border-gray-700 text-green-400 rounded-lg focus:border-purple-500 focus:outline-none h-64 resize-vertical font-mono text-sm"
+                  placeholder="// Paste or write your code here..."
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-4 mt-6">
+              <button 
+                onClick={addCode}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-all"
+              >
+                Add Code
+              </button>
+              <button 
+                onClick={() => setShowCodeModal(false)}
+                className="bg-gray-700 text-gray-200 px-6 py-3 rounded-lg font-bold hover:bg-gray-600 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SynthiaWorkspace;

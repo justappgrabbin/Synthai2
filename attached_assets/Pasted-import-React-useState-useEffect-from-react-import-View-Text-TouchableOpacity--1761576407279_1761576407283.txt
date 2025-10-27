@@ -1,0 +1,858 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TextInput,
+  Modal
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Self-Analysis Engine - The Brain of Evolution
+class SelfAnalysisEngine {
+  constructor(llamaClient) {
+    this.llamaClient = llamaClient;
+    this.appVersion = '1.0.0';
+    this.evolutionHistory = [];
+    this.currentCodebase = null;
+  }
+
+  async analyzeOwnCode() {
+    // In real implementation, this would read the actual app bundle
+    const currentCode = `
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
+export default function BasicApp() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Basic Counter App</Text>
+      <Text style={styles.count}>{count}</Text>
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={() => setCount(count + 1)}
+      >
+        <Text style={styles.buttonText}>Increment</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  count: { fontSize: 48, color: '#007AFF', marginBottom: 20 },
+  button: { backgroundColor: '#007AFF', padding: 15, borderRadius: 8 },
+  buttonText: { color: 'white', fontSize: 16, fontWeight: '600' }
+});
+    `;
+
+    const analysisPrompt = `
+Analyze this React Native app code and suggest 3 specific improvements that would make it more useful and engaging:
+
+${currentCode}
+
+Respond with ONLY valid JSON in this format:
+{
+  "currentFeatures": ["list of current features"],
+  "improvements": [
+    {
+      "type": "feature|ui|performance|functionality",
+      "priority": "high|medium|low",
+      "description": "What to improve",
+      "benefit": "Why this improvement helps users",
+      "implementation": "Brief technical approach"
+    }
+  ],
+  "evolutionScore": "1-10 rating of how much this would evolve the app"
+}
+    `;
+
+    try {
+      const analysis = await this.llamaClient.generateAnalysis(analysisPrompt);
+      return JSON.parse(analysis);
+    } catch (error) {
+      console.error('Self-analysis failed:', error);
+      return null;
+    }
+  }
+
+  async generateEvolution(improvement) {
+    const evolutionPrompt = `
+Take this improvement suggestion and generate the complete React Native code that implements it:
+
+IMPROVEMENT: ${improvement.description}
+IMPLEMENTATION APPROACH: ${improvement.implementation}
+
+Generate a complete, working React Native component that implements this improvement. 
+Include all necessary imports, state management, styling, and functionality.
+Make it production-ready and user-friendly.
+
+Respond with clean React Native code only.
+    `;
+
+    try {
+      const evolvedCode = await this.llamaClient.generateCode(evolutionPrompt);
+      return {
+        code: evolvedCode,
+        improvement: improvement,
+        timestamp: new Date().toISOString(),
+        version: this.getNextVersion()
+      };
+    } catch (error) {
+      console.error('Evolution generation failed:', error);
+      return null;
+    }
+  }
+
+  async saveEvolution(evolution) {
+    this.evolutionHistory.push(evolution);
+    await AsyncStorage.setItem('evolutionHistory', JSON.stringify(this.evolutionHistory));
+    this.appVersion = evolution.version;
+    await AsyncStorage.setItem('appVersion', this.appVersion);
+  }
+
+  async loadEvolutionHistory() {
+    try {
+      const history = await AsyncStorage.getItem('evolutionHistory');
+      const version = await AsyncStorage.getItem('appVersion');
+      
+      if (history) {
+        this.evolutionHistory = JSON.parse(history);
+      }
+      if (version) {
+        this.appVersion = version;
+      }
+    } catch (error) {
+      console.error('Failed to load evolution history:', error);
+    }
+  }
+
+  getNextVersion() {
+    const [major, minor, patch] = this.appVersion.split('.').map(Number);
+    return `${major}.${minor}.${patch + 1}`;
+  }
+
+  async getEvolutionInsights() {
+    const totalEvolutions = this.evolutionHistory.length;
+    const recentEvolutions = this.evolutionHistory.slice(-5);
+    
+    return {
+      totalEvolutions,
+      currentVersion: this.appVersion,
+      recentEvolutions,
+      nextEvolutionDue: totalEvolutions > 0 ? 'Ready' : 'Analyzing...',
+      evolutionTypes: this.evolutionHistory.reduce((acc, ev) => {
+        acc[ev.improvement.type] = (acc[ev.improvement.type] || 0) + 1;
+        return acc;
+      }, {})
+    };
+  }
+}
+
+// Enhanced LlamaFile Client with Analysis Capabilities
+class EvolutionLlamaClient {
+  constructor(baseUrl = 'http://localhost:8080') {
+    this.baseUrl = baseUrl;
+    this.isConnected = false;
+  }
+
+  async checkConnection() {
+    try {
+      const response = await fetch(`${this.baseUrl}/health`, { timeout: 3000 });
+      this.isConnected = response.ok;
+      return this.isConnected;
+    } catch (error) {
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  async generateAnalysis(prompt) {
+    return this.makeRequest(prompt, "You are a senior software architect analyzing React Native apps for evolutionary improvements. Always respond with valid JSON only.");
+  }
+
+  async generateCode(prompt) {
+    return this.makeRequest(prompt, "You are a React Native expert. Generate clean, production-ready code with proper imports and styling.");
+  }
+
+  async makeRequest(prompt, systemMessage) {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: systemMessage },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.2,
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error('LlamaFile request failed:', error);
+      throw error;
+    }
+  }
+}
+
+// Evolution Dashboard Component
+const EvolutionDashboard = ({ engine, onStartEvolution }) => {
+  const [insights, setInsights] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadInsights();
+  }, []);
+
+  const loadInsights = async () => {
+    setLoading(true);
+    try {
+      await engine.loadEvolutionHistory();
+      const data = await engine.getEvolutionInsights();
+      setInsights(data);
+    } catch (error) {
+      console.error('Failed to load insights:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#10B981" />
+        <Text style={styles.loadingText}>Loading evolution data...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.dashboardContainer}>
+      <Text style={styles.dashboardTitle}>🧬 Evolution Dashboard</Text>
+      
+      <View style={styles.statsGrid}>
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>{insights.totalEvolutions}</Text>
+          <Text style={styles.statLabel}>Total Evolutions</Text>
+        </View>
+        
+        <View style={styles.statCard}>
+          <Text style={styles.statNumber}>v{insights.currentVersion}</Text>
+          <Text style={styles.statLabel}>Current Version</Text>
+        </View>
+        
+        <View style={styles.statCard}>
+          <Text style={[styles.statNumber, { color: '#10B981' }]}>
+            {insights.nextEvolutionDue}
+          </Text>
+          <Text style={styles.statLabel}>Next Evolution</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity 
+        style={styles.evolveButton}
+        onPress={onStartEvolution}
+      >
+        <Text style={styles.evolveButtonText}>🚀 Start Evolution Cycle</Text>
+      </TouchableOpacity>
+
+      {insights.recentEvolutions.length > 0 && (
+        <View style={styles.historyContainer}>
+          <Text style={styles.historyTitle}>Recent Evolutions:</Text>
+          {insights.recentEvolutions.map((evolution, index) => (
+            <View key={index} style={styles.evolutionItem}>
+              <Text style={styles.evolutionType}>{evolution.improvement.type.toUpperCase()}</Text>
+              <Text style={styles.evolutionDesc}>{evolution.improvement.description}</Text>
+              <Text style={styles.evolutionTime}>
+                {new Date(evolution.timestamp).toLocaleDateString()}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+};
+
+// Evolution Process Component
+const EvolutionProcess = ({ engine, isVisible, onComplete }) => {
+  const [stage, setStage] = useState('analyzing'); // analyzing, improving, generating, complete
+  const [currentAnalysis, setCurrentAnalysis] = useState(null);
+  const [selectedImprovement, setSelectedImprovement] = useState(null);
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [progress, setProgress] = useState(0);
+
+  const startEvolution = async () => {
+    try {
+      // Stage 1: Self-Analysis
+      setStage('analyzing');
+      setProgress(25);
+      
+      const analysis = await engine.analyzeOwnCode();
+      setCurrentAnalysis(analysis);
+      
+      // Stage 2: Select Best Improvement
+      setStage('improving');
+      setProgress(50);
+      
+      // Auto-select highest priority improvement
+      const bestImprovement = analysis.improvements
+        .sort((a, b) => {
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
+        })[0];
+      
+      setSelectedImprovement(bestImprovement);
+      
+      // Stage 3: Generate Evolution
+      setStage('generating');
+      setProgress(75);
+      
+      const evolution = await engine.generateEvolution(bestImprovement);
+      setGeneratedCode(evolution.code);
+      
+      // Stage 4: Save Evolution
+      await engine.saveEvolution(evolution);
+      setProgress(100);
+      setStage('complete');
+      
+    } catch (error) {
+      Alert.alert('Evolution Failed', error.message);
+      onComplete();
+    }
+  };
+
+  useEffect(() => {
+    if (isVisible) {
+      startEvolution();
+    }
+  }, [isVisible]);
+
+  const handleComplete = () => {
+    setStage('analyzing');
+    setProgress(0);
+    setCurrentAnalysis(null);
+    setSelectedImprovement(null);
+    setGeneratedCode('');
+    onComplete();
+  };
+
+  return (
+    <Modal visible={isVisible} animationType="slide">
+      <View style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>🧬 Evolution in Progress</Text>
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressBar, { width: `${progress}%` }]} />
+          </View>
+        </View>
+
+        <ScrollView style={styles.modalContent}>
+          {stage === 'analyzing' && (
+            <View style={styles.stageContainer}>
+              <Text style={styles.stageTitle}>🔍 Analyzing Current Code...</Text>
+              <Text style={styles.stageDesc}>
+                The app is examining its own code to identify areas for improvement
+              </Text>
+              <ActivityIndicator size="large" color="#10B981" style={{ marginTop: 20 }} />
+            </View>
+          )}
+
+          {stage === 'improving' && currentAnalysis && (
+            <View style={styles.stageContainer}>
+              <Text style={styles.stageTitle}>💡 Selecting Best Improvement</Text>
+              <Text style={styles.stageDesc}>
+                Found {currentAnalysis.improvements.length} potential improvements
+              </Text>
+              
+              {currentAnalysis.improvements.map((imp, index) => (
+                <View key={index} style={[
+                  styles.improvementCard,
+                  selectedImprovement === imp && styles.selectedImprovement
+                ]}>
+                  <Text style={styles.improvementType}>{imp.type.toUpperCase()}</Text>
+                  <Text style={styles.improvementDesc}>{imp.description}</Text>
+                  <Text style={styles.improvementBenefit}>💡 {imp.benefit}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {stage === 'generating' && (
+            <View style={styles.stageContainer}>
+              <Text style={styles.stageTitle}>⚡ Generating Enhanced Code</Text>
+              <Text style={styles.stageDesc}>
+                Creating new implementation: {selectedImprovement?.description}
+              </Text>
+              <ActivityIndicator size="large" color="#10B981" style={{ marginTop: 20 }} />
+            </View>
+          )}
+
+          {stage === 'complete' && (
+            <View style={styles.stageContainer}>
+              <Text style={styles.stageTitle}>🎉 Evolution Complete!</Text>
+              <Text style={styles.stageDesc}>
+                Your app has successfully evolved with new capabilities
+              </Text>
+              
+              <View style={styles.codePreview}>
+                <Text style={styles.codeTitle}>Generated Enhancement:</Text>
+                <ScrollView style={styles.codeScroll}>
+                  <Text style={styles.codeText}>{generatedCode}</Text>
+                </ScrollView>
+              </View>
+
+              <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
+                <Text style={styles.completeButtonText}>Continue Evolution Journey</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+};
+
+// Main Self-Evolving App
+export default function SelfEvolvingApp() {
+  const [llamaClient] = useState(() => new EvolutionLlamaClient());
+  const [engine] = useState(() => new SelfAnalysisEngine(llamaClient));
+  const [isConnected, setIsConnected] = useState(false);
+  const [showEvolution, setShowEvolution] = useState(false);
+  const [connectionChecking, setConnectionChecking] = useState(false);
+
+  const checkConnection = async () => {
+    setConnectionChecking(true);
+    const connected = await llamaClient.checkConnection();
+    setIsConnected(connected);
+    setConnectionChecking(false);
+  };
+
+  const startEvolution = () => {
+    if (!isConnected) {
+      Alert.alert('Connection Required', 'Please ensure LlamaFile is running first');
+      return;
+    }
+    setShowEvolution(true);
+  };
+
+  const handleEvolutionComplete = () => {
+    setShowEvolution(false);
+    // Could trigger a reload/refresh of the app here
+  };
+
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>🧬 Self-Evolving App</Text>
+          <Text style={styles.subtitle}>
+            An app that rewrites and improves itself using AI
+          </Text>
+        </View>
+
+        {/* Connection Status */}
+        <View style={styles.connectionContainer}>
+          <View style={styles.connectionRow}>
+            <Text style={styles.connectionLabel}>LlamaFile Connection:</Text>
+            <View style={[
+              styles.connectionBadge,
+              { backgroundColor: isConnected ? '#10B981' : '#EF4444' }
+            ]}>
+              <Text style={styles.connectionText}>
+                {isConnected ? 'Ready for Evolution' : 'Offline'}
+              </Text>
+            </View>
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.checkConnectionButton}
+            onPress={checkConnection}
+            disabled={connectionChecking}
+          >
+            {connectionChecking ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text style={styles.checkConnectionText}>Test Connection</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Evolution Dashboard */}
+        <EvolutionDashboard 
+          engine={engine}
+          onStartEvolution={startEvolution}
+        />
+
+        {/* Current App Version Demo */}
+        <View style={styles.demoContainer}>
+          <Text style={styles.demoTitle}>Current App State</Text>
+          <Text style={styles.demoDesc}>
+            This is what the app looks like now. After evolution, it will gain new features automatically.
+          </Text>
+          
+          {/* Simple demo of current functionality */}
+          <View style={styles.demoApp}>
+            <Text style={styles.demoAppTitle}>Basic Demo App</Text>
+            <TouchableOpacity style={styles.demoButton}>
+              <Text style={styles.demoButtonText}>Sample Feature</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Evolution Process Modal */}
+      <EvolutionProcess 
+        engine={engine}
+        isVisible={showEvolution}
+        onComplete={handleEvolutionComplete}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    paddingTop: 40,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+
+  // Connection Styles
+  connectionContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  connectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  connectionLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  connectionBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  connectionText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  checkConnectionButton: {
+    backgroundColor: '#007AFF',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  checkConnectionText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  // Dashboard Styles
+  dashboardContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  dashboardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statCard: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  evolveButton: {
+    backgroundColor: '#10B981',
+    padding: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  evolveButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  historyContainer: {
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 15,
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  evolutionItem: {
+    backgroundColor: '#F3F4F6',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  evolutionType: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#10B981',
+  },
+  evolutionDesc: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 4,
+  },
+  evolutionTime: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+
+  // Demo Styles
+  demoContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  demoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  demoDesc: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  demoApp: {
+    backgroundColor: '#F3F4F6',
+    padding: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  demoAppTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 15,
+  },
+  demoButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 6,
+  },
+  demoButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  modalHeader: {
+    backgroundColor: 'white',
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  progressContainer: {
+    height: 4,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 2,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#10B981',
+    borderRadius: 2,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  stageContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  stageTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  stageDesc: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  improvementCard: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 15,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    width: '100%',
+  },
+  selectedImprovement: {
+    borderColor: '#10B981',
+    backgroundColor: '#ECFDF5',
+  },
+  improvementType: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#10B981',
+    marginBottom: 5,
+  },
+  improvementDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+  },
+  improvementBenefit: {
+    fontSize: 14,
+    color: '#666',
+  },
+  codePreview: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 15,
+    marginTop: 20,
+    width: '100%',
+  },
+  codeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  codeScroll: {
+    maxHeight: 200,
+  },
+  codeText: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: '#1F2937',
+    lineHeight: 16,
+  },
+  completeButton: {
+    backgroundColor: '#10B981',
+    padding: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+  },
+  completeButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    color: '#666',
+  },
+});

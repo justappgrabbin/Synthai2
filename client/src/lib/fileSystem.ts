@@ -9,7 +9,15 @@ export interface FileNode {
   path: string;
   content?: string;
   children?: FileNode[];
+  language?: string;
 }
+
+export type CodeLanguage = 
+  | 'javascript' | 'typescript' | 'python' | 'java' | 'cpp' | 'c'
+  | 'html' | 'css' | 'json' | 'xml' | 'yaml' | 'markdown'
+  | 'sql' | 'shell' | 'ruby' | 'php' | 'go' | 'rust'
+  | 'swift' | 'kotlin' | 'dart' | 'r' | 'perl' | 'lua'
+  | 'plain' | 'unknown';
 
 const STORAGE_KEY = 'youniverse_files';
 
@@ -322,5 +330,195 @@ Edit files in the src/ folder and see your changes in the preview pane!`
     }
 
     this.saveFiles(files);
+  }
+
+  // Code Detection and Analysis
+  static detectLanguage(filename: string): CodeLanguage {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    
+    const languageMap: Record<string, CodeLanguage> = {
+      'js': 'javascript',
+      'jsx': 'javascript',
+      'ts': 'typescript',
+      'tsx': 'typescript',
+      'py': 'python',
+      'java': 'java',
+      'cpp': 'cpp',
+      'cc': 'cpp',
+      'cxx': 'cpp',
+      'c': 'c',
+      'h': 'c',
+      'hpp': 'cpp',
+      'html': 'html',
+      'htm': 'html',
+      'css': 'css',
+      'scss': 'css',
+      'sass': 'css',
+      'json': 'json',
+      'xml': 'xml',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+      'md': 'markdown',
+      'markdown': 'markdown',
+      'sql': 'sql',
+      'sh': 'shell',
+      'bash': 'shell',
+      'rb': 'ruby',
+      'php': 'php',
+      'go': 'go',
+      'rs': 'rust',
+      'swift': 'swift',
+      'kt': 'kotlin',
+      'kts': 'kotlin',
+      'dart': 'dart',
+      'r': 'r',
+      'pl': 'perl',
+      'lua': 'lua',
+      'txt': 'plain'
+    };
+
+    return languageMap[ext || ''] || 'unknown';
+  }
+
+  // Inject code at specific location
+  static injectCode(path: string, code: string, position: 'start' | 'end' | number = 'end'): boolean {
+    const file = this.findFile(path);
+    if (!file || file.type !== 'file') return false;
+
+    const currentContent = file.content || '';
+    let newContent: string;
+
+    if (position === 'start') {
+      newContent = code + '\n' + currentContent;
+    } else if (position === 'end') {
+      newContent = currentContent + '\n' + code;
+    } else {
+      // Insert at specific line number
+      const lines = currentContent.split('\n');
+      lines.splice(position, 0, code);
+      newContent = lines.join('\n');
+    }
+
+    this.saveFile(path, newContent);
+    return true;
+  }
+
+  // Replace code in file
+  static replaceCode(path: string, searchPattern: string | RegExp, replacement: string): boolean {
+    const file = this.findFile(path);
+    if (!file || file.type !== 'file') return false;
+
+    const currentContent = file.content || '';
+    const newContent = currentContent.replace(searchPattern, replacement);
+    
+    if (newContent !== currentContent) {
+      this.saveFile(path, newContent);
+      return true;
+    }
+    return false;
+  }
+
+  // Get all code files with language detection
+  static getAllCodeFiles(): Array<FileNode & { language: CodeLanguage }> {
+    const files = this.getFiles();
+    const codeFiles: Array<FileNode & { language: CodeLanguage }> = [];
+
+    function traverse(nodes: FileNode[]) {
+      for (const node of nodes) {
+        if (node.type === 'file') {
+          const language = FileSystem.detectLanguage(node.name);
+          codeFiles.push({ ...node, language });
+        }
+        if (node.children) {
+          traverse(node.children);
+        }
+      }
+    }
+
+    traverse(files);
+    return codeFiles;
+  }
+
+  // Analyze code structure
+  static analyzeCode(path: string): {
+    language: CodeLanguage;
+    lines: number;
+    characters: number;
+    isEmpty: boolean;
+    hasComments: boolean;
+    hasFunctions: boolean;
+  } | null {
+    const file = this.findFile(path);
+    if (!file || file.type !== 'file') return null;
+
+    const content = file.content || '';
+    const language = this.detectLanguage(file.name);
+    const lines = content.split('\n').length;
+    const characters = content.length;
+    const isEmpty = content.trim().length === 0;
+
+    // Basic pattern matching for different languages
+    const commentPatterns = [
+      /\/\//,  // JavaScript, C-style
+      /#/,     // Python, Ruby, Shell
+      /\/\*/,  // Multi-line comments
+    ];
+    const hasComments = commentPatterns.some(pattern => pattern.test(content));
+
+    const functionPatterns = [
+      /function\s+\w+/,           // JavaScript function
+      /def\s+\w+/,                // Python def
+      /const\s+\w+\s*=\s*\(/,     // Arrow functions
+      /class\s+\w+/,              // Class definitions
+      /public\s+\w+\s+\w+\s*\(/,  // Java methods
+    ];
+    const hasFunctions = functionPatterns.some(pattern => pattern.test(content));
+
+    return {
+      language,
+      lines,
+      characters,
+      isEmpty,
+      hasComments,
+      hasFunctions
+    };
+  }
+
+  // Search code across all files
+  static searchCode(query: string, caseSensitive = false): Array<{
+    file: FileNode;
+    matches: Array<{ line: number; text: string; column: number }>;
+  }> {
+    const codeFiles = this.getAllCodeFiles();
+    const results: Array<{
+      file: FileNode;
+      matches: Array<{ line: number; text: string; column: number }>;
+    }> = [];
+
+    for (const file of codeFiles) {
+      const content = file.content || '';
+      const lines = content.split('\n');
+      const matches: Array<{ line: number; text: string; column: number }> = [];
+
+      lines.forEach((line, index) => {
+        const searchText = caseSensitive ? line : line.toLowerCase();
+        const searchQuery = caseSensitive ? query : query.toLowerCase();
+        
+        const column = searchText.indexOf(searchQuery);
+        if (column !== -1) {
+          matches.push({
+            line: index + 1,
+            text: line,
+            column
+          });
+        }
+      });
+
+      if (matches.length > 0) {
+        results.push({ file, matches });
+      }
+    }
+
+    return results;
   }
 }

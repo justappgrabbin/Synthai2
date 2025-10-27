@@ -1,0 +1,430 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Dimensions
+} from 'react-native';
+
+// Simple LlamaFile Client for React Native
+class LlamaFileClient {
+  constructor(baseUrl = 'http://localhost:8080') {
+    this.baseUrl = baseUrl;
+    this.isConnected = false;
+  }
+
+  async checkConnection() {
+    try {
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: 'GET',
+        timeout: 3000
+      });
+      this.isConnected = response.ok;
+      return this.isConnected;
+    } catch (error) {
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  async generateCode(prompt) {
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system", 
+              content: "You are a React Native expert. Generate clean, working React Native code with proper imports and styling. Always include StyleSheet."
+            },
+            {
+              role: "user", 
+              content: `Generate React Native code for: ${prompt}`
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 1500
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('LlamaFile API error:', error);
+      throw error;
+    }
+  }
+}
+
+// Connection Status Component
+const ConnectionStatus = ({ isConnected, onCheck }) => {
+  const [checking, setChecking] = useState(false);
+
+  const handleCheck = async () => {
+    setChecking(true);
+    await onCheck();
+    setChecking(false);
+  };
+
+  return (
+    <View style={styles.statusContainer}>
+      <View style={styles.statusRow}>
+        <Text style={styles.statusLabel}>LlamaFile Status:</Text>
+        <View style={[
+          styles.statusBadge, 
+          { backgroundColor: isConnected ? '#10B981' : '#EF4444' }
+        ]}>
+          <Text style={styles.statusText}>
+            {isConnected ? 'Connected' : 'Disconnected'}
+          </Text>
+        </View>
+      </View>
+      
+      <TouchableOpacity 
+        style={styles.checkButton} 
+        onPress={handleCheck}
+        disabled={checking}
+      >
+        {checking ? (
+          <ActivityIndicator color="white" size="small" />
+        ) : (
+          <Text style={styles.checkButtonText}>Test Connection</Text>
+        )}
+      </TouchableOpacity>
+
+      {!isConnected && (
+        <View style={styles.setupInfo}>
+          <Text style={styles.setupTitle}>Setup Required:</Text>
+          <Text style={styles.setupText}>1. Download llamafile</Text>
+          <Text style={styles.setupText}>2. Run: ./llamafile --server --port 8080</Text>
+          <Text style={styles.setupText}>3. Test connection above</Text>
+        </View>
+      )}
+    </View>
+  );
+};
+
+// Code Generator Component
+const CodeGenerator = ({ client, isConnected }) => {
+  const [prompt, setPrompt] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateCode = async () => {
+    if (!isConnected || !prompt.trim()) {
+      Alert.alert('Error', 'Please ensure connection and enter a prompt');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const code = await client.generateCode(prompt);
+      setGeneratedCode(code);
+    } catch (error) {
+      Alert.alert('Error', `Generation failed: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const samplePrompts = [
+    "login screen with email and password",
+    "button component with different variants",
+    "user profile screen with avatar",
+    "list item with title and subtitle"
+  ];
+
+  return (
+    <View style={styles.generatorContainer}>
+      <Text style={styles.sectionTitle}>AI Code Generator</Text>
+      
+      {/* Sample Prompts */}
+      <Text style={styles.samplesTitle}>Quick Start:</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.samplesContainer}>
+        {samplePrompts.map((sample, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.sampleChip}
+            onPress={() => setPrompt(sample)}
+          >
+            <Text style={styles.sampleText}>{sample}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Prompt Input */}
+      <TextInput
+        style={styles.promptInput}
+        placeholder="Describe the React Native component you want..."
+        value={prompt}
+        onChangeText={setPrompt}
+        multiline
+        editable={isConnected}
+      />
+
+      {/* Generate Button */}
+      <TouchableOpacity 
+        style={[
+          styles.generateButton,
+          (!isConnected || !prompt.trim() || isGenerating) && styles.generateButtonDisabled
+        ]}
+        onPress={generateCode}
+        disabled={!isConnected || !prompt.trim() || isGenerating}
+      >
+        {isGenerating ? (
+          <View style={styles.generatingContainer}>
+            <ActivityIndicator color="white" size="small" />
+            <Text style={styles.generateButtonText}>Generating...</Text>
+          </View>
+        ) : (
+          <Text style={styles.generateButtonText}>Generate Code</Text>
+        )}
+      </TouchableOpacity>
+
+      {/* Generated Code Display */}
+      {generatedCode && (
+        <View style={styles.codeContainer}>
+          <Text style={styles.codeTitle}>Generated Code:</Text>
+          <ScrollView style={styles.codeScroll}>
+            <Text style={styles.codeText}>{generatedCode}</Text>
+          </ScrollView>
+        </View>
+      )}
+    </View>
+  );
+};
+
+// Main App Component
+export default function LlamaFileApp() {
+  const [client] = useState(() => new LlamaFileClient());
+  const [isConnected, setIsConnected] = useState(false);
+
+  const checkConnection = async () => {
+    const connected = await client.checkConnection();
+    setIsConnected(connected);
+  };
+
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>LlamaFile Code Generator</Text>
+          <Text style={styles.subtitle}>Local AI for React Native Development</Text>
+        </View>
+
+        {/* Connection Status */}
+        <ConnectionStatus 
+          isConnected={isConnected} 
+          onCheck={checkConnection} 
+        />
+
+        {/* Code Generator */}
+        <CodeGenerator 
+          client={client} 
+          isConnected={isConnected} 
+        />
+      </ScrollView>
+    </View>
+  );
+}
+
+const { width } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  scrollContent: {
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    paddingTop: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  
+  // Connection Status Styles
+  statusContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  statusLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  statusText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  checkButton: {
+    backgroundColor: '#007AFF',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  checkButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  setupInfo: {
+    marginTop: 15,
+    padding: 15,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#EF4444',
+  },
+  setupTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#DC2626',
+    marginBottom: 8,
+  },
+  setupText: {
+    fontSize: 12,
+    color: '#7F1D1D',
+    marginBottom: 4,
+  },
+
+  // Generator Styles
+  generatorContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginBottom: 20,
+  },
+  samplesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 10,
+  },
+  samplesContainer: {
+    marginBottom: 20,
+  },
+  sampleChip: {
+    backgroundColor: '#E5E7EB',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  sampleText: {
+    fontSize: 12,
+    color: '#374151',
+  },
+  promptInput: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    padding: 15,
+    minHeight: 100,
+    fontSize: 16,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+    backgroundColor: '#FAFAFA',
+  },
+  generateButton: {
+    backgroundColor: '#10B981',
+    padding: 18,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  generateButtonDisabled: {
+    backgroundColor: '#D1D5DB',
+  },
+  generatingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  generateButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  
+  // Code Display Styles
+  codeContainer: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 15,
+  },
+  codeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 10,
+  },
+  codeScroll: {
+    maxHeight: 400,
+  },
+  codeText: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: '#1F2937',
+    lineHeight: 18,
+  },
+});
