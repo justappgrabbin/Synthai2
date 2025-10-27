@@ -160,6 +160,16 @@ Optimized mobile experience across the app:
 - Properly accessible with thumb reach
 - Adjusted InstallPrompt positioning to match
 
+**IDE Panel Exit Buttons** ✖️
+- All IDE panels now have visible close/exit buttons
+- Files Panel: Exit button always visible (not just mobile)
+- Code Editor: Close button appears when file is open
+- Preview Panel: Exit button in header
+- Terminal: Already had close functionality
+- Self-Editor: Exit button in header with clear labeling
+- Workspace Organizer: Exit button in header with clear labeling
+- Consistent UI across all panels for better user control
+
 **IDE Mobile Menu** 📱
 - Desktop: Full menubar with File, Edit, View, Run, Snippets, Tools, Help
 - Mobile (<md): Compact dropdown menu with essential actions
