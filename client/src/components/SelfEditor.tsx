@@ -19,7 +19,11 @@ interface CodeAnalysis {
   hasFunctions: boolean;
 }
 
-export function SelfEditor() {
+interface SelfEditorProps {
+  onFileModified?: (filePath: string) => void;
+}
+
+export function SelfEditor({ onFileModified }: SelfEditorProps) {
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [codeToInject, setCodeToInject] = useState('');
   const [injectionPosition, setInjectionPosition] = useState<'start' | 'end'>('end');
@@ -72,6 +76,7 @@ export function SelfEditor() {
         description: `Code added to ${injectionPosition} of file`
       });
       setCodeToInject('');
+      onFileModified?.(selectedFile);
     } else {
       toast({
         title: 'Injection failed',
@@ -117,6 +122,7 @@ export function SelfEditor() {
       });
       setReplacePattern('');
       setReplaceWith('');
+      onFileModified?.(selectedFile);
     } else {
       toast({
         title: 'Replace failed',

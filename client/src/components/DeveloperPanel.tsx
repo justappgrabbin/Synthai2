@@ -102,6 +102,18 @@ export function DeveloperPanel() {
     }
   };
 
+  const handleFileModified = (filePath: string) => {
+    loadFiles();
+    
+    if (currentFile && currentFile.path === filePath) {
+      const updatedFile = FileSystem.getFile(filePath);
+      if (updatedFile) {
+        setCurrentFile(updatedFile);
+        setCode(updatedFile.content || '');
+      }
+    }
+  };
+
   const handleSave = () => {
     if (currentFile) {
       FileSystem.saveFile(currentFile.path, code);
@@ -446,28 +458,41 @@ export function DeveloperPanel() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.notConnected) {
-          toast({
-            title: "GitHub Not Connected",
-            description: "Please connect your GitHub account first",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Import Failed",
-            description: data.message || "Could not import from GitHub",
-            variant: "destructive"
-          });
-        }
+        toast({
+          title: "Import Failed",
+          description: data.message || "Could not import from GitHub",
+          variant: "destructive"
+        });
         return;
+      }
+
+      const zipData = Uint8Array.from(atob(data.zipData), c => c.charCodeAt(0));
+      const zip = await JSZip.loadAsync(zipData);
+      
+      let fileCount = 0;
+      const repoFolder = `github-${data.owner}-${data.repoName}`;
+      
+      for (const [path, file] of Object.entries(zip.files)) {
+        if (!file.dir) {
+          const content = await file.async('string');
+          const pathParts = path.split('/');
+          pathParts.shift();
+          
+          if (pathParts.length > 0) {
+            const relativePath = pathParts.join('/');
+            const fullPath = `${repoFolder}/${relativePath}`;
+            FileSystem.saveFile(fullPath, content);
+            fileCount++;
+          }
+        }
       }
 
       setImportDialogOpen(false);
       setImportRepoUrl('');
 
       toast({
-        title: "Imported from GitHub! 🎉",
-        description: `${data.fileCount} files loaded into IDE`
+        title: "Imported from GitHub!",
+        description: `${fileCount} files from ${data.repoName} loaded into IDE`
       });
 
       loadFiles();
@@ -2368,7 +2393,7 @@ const result = await handlePayment({
 
       {showSelfEditor && (
         <div className="h-96 border-t flex-shrink-0 bg-background">
-          <SelfEditor />
+          <SelfEditor onFileModified={handleFileModified} />
         </div>
       )}
 
