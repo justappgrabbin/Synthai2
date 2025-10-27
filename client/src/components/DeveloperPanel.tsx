@@ -9,6 +9,8 @@ import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { TopNav } from "@/components/TopNav";
 import { Terminal } from "@/components/Terminal";
+import { SelfEditor } from "@/components/SelfEditor";
+import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +63,8 @@ export function DeveloperPanel() {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
+  const [showSelfEditor, setShowSelfEditor] = useState(false);
+  const [showWorkspace, setShowWorkspace] = useState(false);
   const { toast} = useToast();
 
   useEffect(() => {
@@ -1914,6 +1918,14 @@ const result = await handlePayment({
                 Terminal
                 <MenubarShortcut>Ctrl+`</MenubarShortcut>
               </MenubarItem>
+              <MenubarItem onClick={() => setShowSelfEditor(!showSelfEditor)}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Self-Editor
+              </MenubarItem>
+              <MenubarItem onClick={() => setShowWorkspace(!showWorkspace)}>
+                <FolderTree className="h-4 w-4 mr-2" />
+                Workspace Organizer
+              </MenubarItem>
               <MenubarItem onClick={() => setShowPreview(!showPreview)} className="lg:hidden">
                 <Globe className="h-4 w-4 mr-2" />
                 Toggle Preview
@@ -2181,7 +2193,7 @@ const result = await handlePayment({
           <Code2 className="h-5 w-5 text-lavender" />
           <h2 className="text-lg font-semibold hidden sm:block">Code Editor</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             data-testid="button-toggle-terminal"
             variant="outline"
@@ -2192,6 +2204,28 @@ const result = await handlePayment({
           >
             <TerminalIcon className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Terminal</span>
+          </Button>
+          <Button
+            data-testid="button-toggle-self-editor"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSelfEditor(!showSelfEditor)}
+            className={showSelfEditor ? "bg-purple-500/10 border-purple-500/50" : ""}
+            title="Self-Editor & Code Injection"
+          >
+            <Sparkles className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Self-Editor</span>
+          </Button>
+          <Button
+            data-testid="button-toggle-workspace"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowWorkspace(!showWorkspace)}
+            className={showWorkspace ? "bg-blue-500/10 border-blue-500/50" : ""}
+            title="Workspace Organizer"
+          >
+            <FolderTree className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Workspace</span>
           </Button>
           <Button
             data-testid="button-toggle-preview"
@@ -2329,6 +2363,18 @@ const result = await handlePayment({
       {showTerminal && (
         <div className="h-64 border-t flex-shrink-0">
           <Terminal onClose={() => setShowTerminal(false)} />
+        </div>
+      )}
+
+      {showSelfEditor && (
+        <div className="h-96 border-t flex-shrink-0 bg-background">
+          <SelfEditor />
+        </div>
+      )}
+
+      {showWorkspace && (
+        <div className="h-96 border-t flex-shrink-0 bg-background">
+          <WorkspaceOrganizer />
         </div>
       )}
 
