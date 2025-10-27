@@ -2342,9 +2342,26 @@ const result = await handlePayment({
         </aside>
 
         <div className={`flex-1 flex flex-col ${showPreview && 'hidden sm:flex'}`}>
-          <div className="border-b p-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <Code2 className="h-3 w-3" />
-            <span className="truncate">{currentFile?.name || 'No file selected'}</span>
+          <div className="border-b p-2 flex items-center justify-between gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Code2 className="h-3 w-3" />
+              <span className="truncate">{currentFile?.name || 'No file selected'}</span>
+            </div>
+            {currentFile && (
+              <Button
+                data-testid="button-close-editor"
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => {
+                  setCurrentFile(null);
+                  setCode('');
+                }}
+                title="Close File"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           <Textarea
             data-testid="textarea-code-editor"

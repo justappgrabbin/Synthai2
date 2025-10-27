@@ -303,11 +303,9 @@ export function WorkspaceOrganizer() {
 
   return (
     <div className="flex flex-col h-full p-4 gap-4">
-      {/* Header with Mode Toggle */}
+      {/* Header with Mode Toggle - header now in DeveloperPanel wrapper */}
       <div className="flex items-center justify-between pb-2 border-b">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-lavender" />
-          <h2 className="text-lg font-bold">Workspace Organizer</h2>
           <Badge variant="outline">{totalArtifacts} artifacts</Badge>
         </div>
 

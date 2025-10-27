@@ -133,12 +133,7 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
   };
 
   return (
-    <div className="flex flex-col h-full p-4 gap-4">
-      <div className="flex items-center gap-2 pb-2 border-b">
-        <Zap className="h-5 w-5 text-lavender" />
-        <h2 className="text-lg font-bold">Self-Editor & Code Injection</h2>
-      </div>
-
+    <div className="flex flex-col h-full p-4 gap-2">
       <Tabs defaultValue="inject" className="flex-1 overflow-hidden flex flex-col">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="inject" data-testid="tab-inject">
