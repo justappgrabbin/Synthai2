@@ -129,7 +129,7 @@ export function ModManager() {
       return;
     }
 
-    // Save current files as a new project
+    // Save current files as a new project (full tree for project storage)
     const files = FileSystem.getAllFiles();
     
     const newProject: Project = {
@@ -214,7 +214,24 @@ export function ModManager() {
     setIsDeploying(true);
 
     try {
-      const files = FileSystem.getAllFiles();
+      // Get all files and flatten to only actual file nodes (not folders)
+      const allNodes = FileSystem.getAllFiles();
+      const flattenFiles = (nodes: any[]): any[] => {
+        const result: any[] = [];
+        for (const node of nodes) {
+          if (node.type === 'file' && node.content !== undefined) {
+            result.push({
+              path: node.path,
+              content: node.content
+            });
+          }
+          if (node.children) {
+            result.push(...flattenFiles(node.children));
+          }
+        }
+        return result;
+      };
+      const files = flattenFiles(allNodes);
       const response = await fetch('/api/deploy/netlify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

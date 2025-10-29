@@ -73,6 +73,12 @@ export async function deployToNetlify(
     const fileDigest: Record<string, string> = {};
     
     for (const file of files) {
+      // Validate that file has content (defensive check - allow empty strings)
+      if (file.content === undefined || file.content === null || typeof file.content !== 'string') {
+        console.warn(`Skipping file ${file.path} - no valid content`);
+        continue;
+      }
+      
       const hash = crypto.createHash('sha1')
         .update(file.content)
         .digest('hex');
