@@ -1,9 +1,18 @@
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, type LucideIcon } from "lucide-react";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
+import { SelfEditor } from "@/components/SelfEditor";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -61,6 +70,8 @@ export function Dashboard() {
   const [recentlyVisited, setRecentlyVisited] = useState<AppActivity[]>([]);
   const [recentlyCreated, setRecentlyCreated] = useState<AppActivity[]>([]);
   const [recommendations, setRecommendations] = useState<AppActivity[]>([]);
+  const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
+  const [showSelfEditorDialog, setShowSelfEditorDialog] = useState(false);
 
   useEffect(() => {
     const customApps = AppRegistry.getInstalledApps();
@@ -164,6 +175,43 @@ export function Dashboard() {
           </Card>
         )}
 
+        {/* Quick Tools */}
+        <Card className="mb-6" data-testid="card-quick-tools">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-lavender" />
+              <CardTitle>Quick Tools</CardTitle>
+            </div>
+            <CardDescription>Organize files & edit source code without leaving the dashboard</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                data-testid="button-open-workspace"
+                onClick={() => setShowWorkspaceDialog(true)}
+                className="group relative h-32 rounded-lg border-2 bg-card border-border hover:border-lavender/50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                  <FolderTree className="h-10 w-10 mb-3 text-lavender" />
+                  <h3 className="text-base font-semibold mb-1">Workspace Organizer</h3>
+                  <p className="text-sm text-muted-foreground">Manage your project files</p>
+                </div>
+              </button>
+              <button
+                data-testid="button-open-self-editor"
+                onClick={() => setShowSelfEditorDialog(true)}
+                className="group relative h-32 rounded-lg border-2 bg-card border-border hover:border-lavender/50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                  <FileEdit className="h-10 w-10 mb-3 text-lavender" />
+                  <h3 className="text-base font-semibold mb-1">Self Editor</h3>
+                  <p className="text-sm text-muted-foreground">Edit application source code</p>
+                </div>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Core Apps */}
         <Card className="mb-6">
           <CardHeader>
@@ -221,6 +269,42 @@ export function Dashboard() {
           <p>✨ Welcome to your cosmic workspace</p>
         </div>
       </div>
+
+      {/* Workspace Organizer Dialog */}
+      <Dialog open={showWorkspaceDialog} onOpenChange={setShowWorkspaceDialog}>
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-4">
+            <DialogTitle className="flex items-center gap-2">
+              <FolderTree className="h-5 w-5 text-lavender" />
+              Workspace Organizer
+            </DialogTitle>
+            <DialogDescription>
+              Manage your project files and folders
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-auto max-h-[calc(90vh-120px)]">
+            <WorkspaceOrganizer />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Self Editor Dialog */}
+      <Dialog open={showSelfEditorDialog} onOpenChange={setShowSelfEditorDialog}>
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-4">
+            <DialogTitle className="flex items-center gap-2">
+              <FileEdit className="h-5 w-5 text-lavender" />
+              Self Editor
+            </DialogTitle>
+            <DialogDescription>
+              Edit the source code of YOU–N–I–VERSE Studio itself
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-auto max-h-[calc(90vh-120px)]">
+            <SelfEditor />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
