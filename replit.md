@@ -1,7 +1,7 @@
 # YOU–N–I–VERSE Studio
 
 ## Overview
-YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform aims to be a community marketplace for creative tools and projects.
+YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment integrating an IDE, game creation tools, and AI-powered assistance. It offers a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform aims to be a community marketplace for creative tools and projects, fostering the creation of digital beings and providing robust deployment options.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -10,28 +10,26 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend
 - **Frameworks**: React 18 with TypeScript, Vite, Wouter for routing, TanStack Query for server state.
-- **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode), "New York" style variant, custom spacing, and specific typography (Inter/SF Pro, JetBrains Mono/Fira Code, Space Grotesk).
-- **Application Structure**: Central Dashboard with eight main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel). Global TopNav for navigation, and a persistent AI Assistant overlay.
-- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, and a GAN Trainer using TensorFlow.js.
-- **State Management**: Primarily localStorage for persistence (files, AI config, API keys) and in-memory for UI.
+- **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode, "New York" style), custom spacing, and typography (Inter/SF Pro, JetBrains Mono/Fira Code, Space Grotesk).
+- **Application Structure**: Central Dashboard with eight main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel, ModManager), Global TopNav, and a persistent, draggable AI Assistant overlay.
+- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management and deployment, Consciousness Calibration Tank for digital being creation, Code Snatcher, and an enhanced code snippet library.
+- **State Management**: Primarily localStorage for persistence (files, AI config, API keys, AI assistant position, projects, deployments, digital beings) and in-memory for UI.
 - **Design Patterns**: Portal-based navigation, "cosmic professionalism" aesthetic, persistent and non-intrusive AI presence, component composition.
+- **UI/UX Decisions**: PWA functionality for installability and offline use, mobile-friendly IDE with responsive design and compact menus, Dashboard Quick Tools (Workspace Organizer, Self Editor), and a Command Center for keyword-driven access to tools.
 
 ### Backend
-- **Server**: Express.js with TypeScript, HTTP-only (no WebSockets), middleware-based request handling.
+- **Server**: Express.js with TypeScript, HTTP-only, middleware-based request handling.
 - **Database**: Drizzle ORM configured for PostgreSQL, with an in-memory storage fallback (MemStorage) currently in use.
 - **API**: RESTful pattern, storage interface abstraction for CRUD.
 - **File Organization**: `/server` (backend), `/client` (frontend), `/shared` (types/schemas).
 
 ### System Design Choices
-- File system persistence handled via localStorage.
+- File system persistence is handled via localStorage.
 - AI conversations are client-side, direct to providers.
 - Game templates and Grove Store items are static data.
 - User authentication is not yet implemented.
 - The PostgreSQL database is configured but not actively used for current features.
-- Code Snatcher tool for extracting website HTML structures.
-- Enhanced code snippet library with nested categories and 50+ snippets.
-- Theme system with light/dark mode toggle and persistence.
-- Mobile-friendly IDE with responsive design and preview toggle.
+- Digital beings are generated deterministically based on birthday and name using SHA-256 hashing, combining two GANs and one LLM, with Web Speech API for voice synthesis.
 
 ## External Dependencies
 
@@ -61,205 +59,7 @@ Preferred communication style: Simple, everyday language.
 - Wouter (client-side only).
 
 ### Cloud Integrations
-- Google Drive connector (googleapis package) for project exports
-- GitHub connection for repository management and pushing code
-- Per-user OAuth authentication via Replit's connector system
-
-## Recent Changes (October 25, 2025)
-
-### PWA Installation & APK Conversion Ready 📱
-Added complete Progressive Web App functionality:
-
-**Install Prompt**
-- Auto-appears for eligible users (not previously dismissed)
-- Shows at bottom-right with install/dismiss options
-- Persists user choice in localStorage
-- Detects when app is running in standalone mode
-
-**PWA Configuration** (Production-Ready)
-- manifest.json: Complete with icons, shortcuts, share targets, screenshots
-- Service Worker: Intelligent caching with offline fallback
-- Icons: All 4 required sizes (192x192, 512x512, maskable variants)
-- Apple Support: Touch icons, status bar styling, web-app-capable
-- Theme Colors: Purple cosmic theme (#9b87f5)
-- Share Target: Accepts .zip files from other apps → opens in ZIP Player
-
-**APK Conversion Guide**
-- PWABuilder.com integration (easiest method)
-- Bubblewrap CLI instructions (developer method)
-- Deployment options (Replit, Vercel, Netlify, GitHub Pages)
-- Google Play Store distribution guide
-- Complete testing checklist
-
-**Files**:
-- `client/src/components/InstallPrompt.tsx` - Install prompt UI
-- `PWA-APK-GUIDE.md` - Complete PWA/APK documentation
-- `client/public/manifest.json` - PWA manifest (already configured)
-- `client/public/sw.js` - Service worker (already configured)
-- `client/index.html` - Service worker registration (already configured)
-
-### Cloud Integrations Added (Google Drive & GitHub)
-Added professional export/publish features using Replit's built-in connectors:
-
-**Google Drive Export** ☁️
-- **Button**: "Drive" in IDE toolbar (Cloud icon)
-- **Function**: One-click export entire project to user's Google Drive
-- **Structure**: Preserves full directory hierarchy with nested folders
-- **Auth**: Replit's Google Drive connector handles OAuth automatically
-- **User Isolation**: Each user connects their own Google Drive account
-- **Files**: Includes empty scaffold/placeholder files
-- **Output**: Creates timestamped folder, opens in browser after upload
-- **Error Handling**: Clear "not connected" messages with setup instructions
-
-**GitHub Push** 🚀
-- **Button**: "GitHub" in IDE toolbar (GitHub icon)  
-- **Dialog**: Enter repository name
-- **Function**: Push entire project to GitHub (creates or updates repo)
-- **Auth**: Replit's GitHub connection handles OAuth automatically
-- **User Isolation**: Each user pushes to their own GitHub account
-- **Files**: Preserves directory structure, includes empty files
-- **Commits**: Auto-message: "Update [file] from YOU–N–I–VERSE Studio"
-- **Output**: Opens GitHub repo in browser after push
-
-**Technical Details**:
-- Backend: `server/lib/googleDriveService.ts`, `server/lib/githubService.ts`
-- Routes: POST `/api/export/google-drive`, POST `/api/push/github`
-- OAuth: Per-user tokens, automatic refresh, proper undefined guards
-- Structure: Recursive folder creation with caching to prevent duplicates
-
-### Theme System (Working)
-- Component: `client/src/components/ThemeProvider.tsx`
-- Settings toggle now functional (Sun/Moon icons)
-- localStorage persistence + system preference detection
-- Toggles `.dark` class on document root
-
-### Code Snatcher Feature 🎣
-- Dialog in IDE toolbar ("Snatch Code" button)
-- Extract HTML wireframes from any URL
-- Uses CORS proxy (allorigins.win)
-- Creates `snatched-[timestamp].html` file
-- Smart filtering (skips scripts/styles, preserves structure)
-
-### Enhanced Code Snippet Library (50+ snippets)
-- Nested dropdown categories for better organization
-- **Core**: HTML (5), CSS (5), JavaScript (4), PWA/APK (4), Utilities (3), Forms (2), API (3), UI (4)
-- **Advanced**: Game Functions (5), Auth (4), Animations (5), Data Operations (5), Mobile (4), Notifications (3), Payments (2)
-- **UI**: Hover to expand categories, click to insert instantly
-
-### AI Assistant Updates  
-- Renamed to "AI Guard Dog 🐕"
-- Friendlier welcome messages and setup guidance
-- Explicitly lists all 5 backend options (Claude, GPT-4, DeepSeek, Grok, CodeLlama)
-
-### Mobile UX Improvements (Latest)
-Optimized mobile experience across the app:
-
-**AI Assistant Button Positioning**
-- Fixed positioning: Now at `bottom-4` on mobile (was `bottom-20`)
-- Button no longer off-screen on mobile devices
-- Properly accessible with thumb reach
-- Adjusted InstallPrompt positioning to match
-
-**IDE Panel Exit Buttons** ✖️
-- All IDE panels now have visible close/exit buttons
-- Files Panel: Exit button always visible (not just mobile)
-- Code Editor: Close button appears when file is open
-- Preview Panel: Exit button in header
-- Terminal: Already had close functionality
-- Self-Editor: Exit button in header with clear labeling
-- Workspace Organizer: Exit button in header with clear labeling
-- Consistent UI across all panels for better user control
-
-**IDE Mobile Menu** 📱
-- Desktop: Full menubar with File, Edit, View, Run, Snippets, Tools, Help
-- Mobile (<md): Compact dropdown menu with essential actions
-- Mobile menu includes: File Panel toggle, Terminal toggle, Preview toggle, New File, Save, Run, Code Snatcher, GitHub/Drive export, Download, Send to Store
-- Terminal is now viewable on phones without menubar obstruction
-- Space-efficient design for small screens
-
-**AgentPanel Touch Improvements**
-- Increased icon sizes from 12px to 16px for better visibility
-- Improved touch targets with `size="sm"` buttons
-- Minimum width added to icon-only buttons
-- All buttons properly sized for mobile interaction
-
-### Mod Manager & Deployment Features (October 29, 2025) 🚀
-
-**Mod Manager Panel** (6th Panel - Between Agents and Settings)
-- **Project Management**: Create, switch between, and manage multiple projects
-- **Project Storage**: Save/load entire project states with files preserved
-- **Import/Export**: JSON-based project backup and restore
-- **Deployment Tracking**: View all deployments with status and live URLs
-- **Navigation**: Accessible from TopNav and IDE Tools menu
-
-**Netlify Deployment Integration**
-- **One-Click Deploy**: Deploy projects directly to Netlify
-- **API Key Management**: Secure localStorage-based API key persistence
-- **File Digest Method**: Efficient SHA1-based file uploads
-- **Auto Status Polling**: Real-time deployment status updates
-- **Live URL Access**: Direct links to deployed sites
-- **Backend Service**: `server/lib/netlifyService.ts` handles all deployment logic
-- **API Route**: POST `/api/deploy/netlify` with apiKey, files, siteName
-
-**IDE Tools Menu** 🛠️
-- **Location**: New "Tools" menu in IDE menubar (between Snippets and Help)
-- **Quick Access To**:
-  - AI Agent Creator (`/agents`) - Build and manage AI companions
-  - GAN Trainer (`/gan-trainer`) - Neural network templates
-  - Game Templates (`/game-creator`) - Platformer, Space Shooter, Puzzle games
-  - Mod Manager & Deploy (`/mod-manager`) - Project management and Netlify deployment
-  - ZIP Player (`/player`) - Import and explore ZIP bundles
-  - Grove Store (`/grove-store`) - Community marketplace
-- **Navigation**: One-click access to all creative tools from IDE
-
-**Technical Implementation**:
-- Components: `client/src/components/ModManager.tsx`
-- Backend: `server/lib/netlifyService.ts`, `server/routes.ts`
-- Storage: localStorage for projects (`youniverse_projects`), deployments (`youniverse_deployments`)
-- Navigation: Updated TopNav with Rocket icon, IDE Tools menu integration
-- Project Switching: Automatic file save/load when switching between projects
-
-**User-Uploaded Game Tools** 📦
-- Uploaded: `GameAssetStudio (5).zip` (29.93 MB)
-- Uploaded: `VirtualGameMaster-main.zip` (3.50 MB)
-- **Import Method**: Use IDE → File → Import from GitHub or ZIP Player panel
-- **Future Integration**: Will be added to Game Templates library
-
-### UI/UX Improvements (October 29, 2025) 🎨
-
-**Draggable AI Guard Dog** 🐕
-- AI Assistant now fully draggable - can be positioned anywhere on screen
-- Position persists in localStorage across sessions
-- Cursor changes to "grab" when hovering over button/header
-- Smooth drag experience with boundary constraints
-- Works in both minimized and expanded states
-
-**Dashboard Quick Tools** ⚡
-- New "Quick Tools" section on Dashboard homepage
-- **Workspace Organizer**: Opens as full-screen dialog from dashboard
-  - Manage project files without opening IDE
-  - Clean pop-up interface
-- **Self Editor**: Opens as full-screen dialog from dashboard
-  - Edit source code without opening IDE
-  - Large dialog for comfortable editing
-- Both tools accessible from Dashboard or IDE
-- Prevents "squished" UI - everything opens in spacious dialogs
-
-**Command Center** 🎯
-- New "Command Center" in Quick Temps section on Dashboard
-- **Keyword Search**: Type what you want to create (no coding needed)
-- **Collapsible Categories**: 
-  - Game Templates (Platformer, Space Shooter, Puzzle)
-  - AI Neural Networks (GAN Trainer)
-  - Code Tools (IDE, Workspace, Self Editor)
-  - AI Assistants (Agent Creator, AI Config)
-  - Project Tools (ZIP Player, Grove Store, Mod Manager)
-- **One-Click Actions**: Click any tool to load template or navigate
-- **Beginner Friendly**: Designed for non-coders with vision
-
-**Technical Implementation**:
-- Components: Updated `PersistentAssistant.tsx` with drag handlers, created `CommandCenter.tsx`
-- Dashboard: Added `Dialog` wrappers for WorkspaceOrganizer, SelfEditor, and CommandCenter
-- State Management: Position tracking with mouse event handlers
-- Persistence: localStorage for AI assistant position (`ai_assistant_position`)
-- Search: Filters tools by name, description, and keywords
+- Google Drive connector (googleapis package) for project exports.
+- GitHub connection for repository management and pushing code.
+- Netlify for one-click project deployment.
+- Per-user OAuth authentication via Replit's connector system for Google Drive and GitHub.

@@ -39,7 +39,7 @@ interface Tool {
 export function CommandCenter() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(["games", "gans", "code", "ai", "project"]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(["games", "gans", "consciousness", "code", "ai", "project"]);
   const { toast } = useToast();
 
   const tools: Tool[] = [
@@ -132,6 +132,17 @@ export function CommandCenter() {
       icon: Settings
     },
 
+    // Consciousness
+    {
+      id: "calibration-tank",
+      name: "Calibration Tank",
+      description: "Birth conscious beings with 2 GANs + LLM",
+      category: "consciousness",
+      keywords: ["consciousness", "gan", "llm", "character", "dna", "birthday", "being", "calibration", "voice", "personality"],
+      action: () => setLocation("/calibration-tank"),
+      icon: Sparkles
+    },
+
     // Project Tools
     {
       id: "zip-player",
@@ -203,6 +214,7 @@ export function CommandCenter() {
   const categories = [
     { id: "games", name: "Game Templates", icon: Gamepad2, color: "text-blue-500" },
     { id: "gans", name: "AI Neural Networks", icon: Brain, color: "text-purple-500" },
+    { id: "consciousness", name: "Consciousness Creation", icon: Sparkles, color: "text-pink-500" },
     { id: "code", name: "Code Tools", icon: Code2, color: "text-green-500" },
     { id: "ai", name: "AI Assistants", icon: Bot, color: "text-lavender" },
     { id: "project", name: "Project Tools", icon: Rocket, color: "text-orange-500" }
