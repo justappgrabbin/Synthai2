@@ -25,6 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UniverseViewer3D } from "@/components/UniverseViewer3D";
 
 interface SemanticLayer {
   id: number;
@@ -106,6 +107,7 @@ export function SemanticUniverseCreator() {
   const [currentLayer, setCurrentLayer] = useState(0);
   const [universes, setUniverses] = useState<Universe[]>([]);
   const [selectedUniverse, setSelectedUniverse] = useState<Universe | null>(null);
+  const [playingUniverse, setPlayingUniverse] = useState<Universe | null>(null);
 
   useEffect(() => {
     loadUniverses();
@@ -440,16 +442,24 @@ export function SemanticUniverseCreator() {
                   <CardContent className="space-y-4">
                     <p className="text-sm line-clamp-3">{universe.prompt}</p>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        data-testid={`button-play-${universe.id}`}
+                        onClick={() => setPlayingUniverse(universe)}
+                        className="flex-1 bg-lavender hover:bg-lavender-hover"
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        Play 3D
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         data-testid={`button-view-${universe.id}`}
                         onClick={() => setSelectedUniverse(universe)}
-                        className="flex-1"
                       >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
+                        <Eye className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
@@ -508,6 +518,13 @@ export function SemanticUniverseCreator() {
           )}
         </TabsContent>
       </Tabs>
+      
+      {playingUniverse && (
+        <UniverseViewer3D 
+          universe={playingUniverse} 
+          onClose={() => setPlayingUniverse(null)}
+        />
+      )}
     </div>
   );
 }
