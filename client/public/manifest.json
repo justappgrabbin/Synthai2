@@ -1,7 +1,7 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "description": "A creative IDE with integrated AI consciousness. Code, create, and explore with AI Guard Dog.",
+  "description": "Creative development studio for building games, apps, GANs, and autonomous conscious beings with AI assistance.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f0f23",
@@ -55,6 +55,13 @@
       "short_name": "IDE",
       "description": "Open the code editor",
       "url": "/ide",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calibration Tank",
+      "short_name": "Cal Tank",
+      "description": "Create autonomous conscious beings",
+      "url": "/calibration-tank",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {

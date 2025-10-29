@@ -1,5 +1,5 @@
-const CACHE_NAME = 'indyverse-v1';
-const RUNTIME_CACHE = 'indyverse-runtime-v1';
+const CACHE_NAME = 'indyverse-v2';
+const RUNTIME_CACHE = 'indyverse-runtime-v2';
 
 const PRECACHE_URLS = [
   '/',
