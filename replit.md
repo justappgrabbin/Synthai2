@@ -224,3 +224,29 @@ Optimized mobile experience across the app:
 - Uploaded: `VirtualGameMaster-main.zip` (3.50 MB)
 - **Import Method**: Use IDE → File → Import from GitHub or ZIP Player panel
 - **Future Integration**: Will be added to Game Templates library
+
+### UI/UX Improvements (October 29, 2025) 🎨
+
+**Draggable AI Guard Dog** 🐕
+- AI Assistant now fully draggable - can be positioned anywhere on screen
+- Position persists in localStorage across sessions
+- Cursor changes to "grab" when hovering over button/header
+- Smooth drag experience with boundary constraints
+- Works in both minimized and expanded states
+
+**Dashboard Quick Tools** ⚡
+- New "Quick Tools" section on Dashboard homepage
+- **Workspace Organizer**: Opens as full-screen dialog from dashboard
+  - Manage project files without opening IDE
+  - Clean pop-up interface
+- **Self Editor**: Opens as full-screen dialog from dashboard
+  - Edit source code without opening IDE
+  - Large dialog for comfortable editing
+- Both tools accessible from Dashboard or IDE
+- Prevents "squished" UI - everything opens in spacious dialogs
+
+**Technical Implementation**:
+- Components: Updated `PersistentAssistant.tsx` with drag handlers
+- Dashboard: Added `Dialog` wrappers for WorkspaceOrganizer and SelfEditor
+- State Management: Position tracking with mouse event handlers
+- Persistence: localStorage for AI assistant position (`ai_assistant_position`)
