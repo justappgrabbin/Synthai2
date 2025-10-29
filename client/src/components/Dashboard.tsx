@@ -175,12 +175,12 @@ export function Dashboard() {
           </Card>
         )}
 
-        {/* Quick Tools */}
-        <Card className="mb-6" data-testid="card-quick-tools">
+        {/* Quick Temps */}
+        <Card className="mb-6" data-testid="card-quick-temps">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-lavender" />
-              <CardTitle>Quick Tools</CardTitle>
+              <CardTitle>Quick Temps</CardTitle>
             </div>
             <CardDescription>Organize files & edit source code without leaving the dashboard</CardDescription>
           </CardHeader>
