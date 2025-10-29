@@ -12,6 +12,7 @@ import { PlayerPanel } from "@/components/PlayerPanel";
 import { AgentPanel } from "@/components/AgentPanel";
 import { GroveStore } from "@/components/GroveStore";
 import { GANTrainer } from "@/components/GANTrainer";
+import { ModManager } from "@/components/ModManager";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import NotFound from "@/pages/not-found";
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/ide" component={DeveloperPanel} />
       <Route path="/game-creator" component={GameCreator} />
       <Route path="/gan-trainer" component={GANTrainer} />
+      <Route path="/mod-manager" component={ModManager} />
       <Route path="/settings" component={SettingsPanel} />
       <Route path="/player" component={PlayerPanel} />
       <Route path="/agents" component={AgentPanel} />

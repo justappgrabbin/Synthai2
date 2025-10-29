@@ -2184,6 +2184,39 @@ const result = await handlePayment({
             </MenubarContent>
           </MenubarMenu>
 
+          {/* Tools Menu */}
+          <MenubarMenu>
+            <MenubarTrigger className="text-sm cursor-pointer">Tools</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem onClick={() => setLocation('/agents')}>
+                <Bot className="h-4 w-4 mr-2" />
+                AI Agent Creator
+              </MenubarItem>
+              <MenubarItem onClick={() => setLocation('/gan-trainer')}>
+                <Brain className="h-4 w-4 mr-2" />
+                GAN Trainer
+              </MenubarItem>
+              <MenubarItem onClick={() => setLocation('/game-creator')}>
+                <Gamepad2 className="h-4 w-4 mr-2" />
+                Game Templates
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={() => setLocation('/mod-manager')}>
+                <Rocket className="h-4 w-4 mr-2" />
+                Mod Manager & Deploy
+              </MenubarItem>
+              <MenubarItem onClick={() => setLocation('/player')}>
+                <Play className="h-4 w-4 mr-2" />
+                ZIP Player
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={() => setLocation('/grove-store')}>
+                <Store className="h-4 w-4 mr-2" />
+                Grove Store
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
           {/* Help Menu */}
           <MenubarMenu>
             <MenubarTrigger className="text-sm cursor-pointer">Help</MenubarTrigger>

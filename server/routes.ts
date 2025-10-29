@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { uploadProjectToGoogleDrive, uploadFileToGoogleDrive } from "./lib/googleDriveService";
 import { createOrUpdateGitHubRepo } from "./lib/githubService";
 import { importGitHubRepo } from "./lib/githubImportService";
+import { deployToNetlify } from "./lib/netlifyService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Google Drive export endpoint
@@ -79,6 +80,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("GitHub import error:", error);
       res.status(500).json({ 
         message: error.message || "Failed to import from GitHub"
+      });
+    }
+  });
+
+  // Netlify deployment endpoint
+  app.post("/api/deploy/netlify", async (req, res) => {
+    try {
+      const { apiKey, files, siteName } = req.body;
+
+      if (!apiKey || !files || !Array.isArray(files)) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+
+      const result = await deployToNetlify(apiKey, files, siteName);
+
+      res.json({
+        success: true,
+        url: result.url,
+        deployId: result.deployId,
+        siteId: result.siteId,
+      });
+    } catch (error: any) {
+      console.error("Netlify deployment error:", error);
+      res.status(500).json({ 
+        error: error.message || "Failed to deploy to Netlify"
       });
     }
   });
