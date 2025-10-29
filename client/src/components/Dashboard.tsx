@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, type LucideIcon } from "lucide-react";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import { SelfEditor } from "@/components/SelfEditor";
+import { CommandCenter } from "@/components/CommandCenter";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -72,6 +73,7 @@ export function Dashboard() {
   const [recommendations, setRecommendations] = useState<AppActivity[]>([]);
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
   const [showSelfEditorDialog, setShowSelfEditorDialog] = useState(false);
+  const [showCommandCenterDialog, setShowCommandCenterDialog] = useState(false);
 
   useEffect(() => {
     const customApps = AppRegistry.getInstalledApps();
@@ -185,7 +187,7 @@ export function Dashboard() {
             <CardDescription>Organize files & edit source code without leaving the dashboard</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 data-testid="button-open-workspace"
                 onClick={() => setShowWorkspaceDialog(true)}
@@ -206,6 +208,17 @@ export function Dashboard() {
                   <FileEdit className="h-10 w-10 mb-3 text-lavender" />
                   <h3 className="text-base font-semibold mb-1">Self Editor</h3>
                   <p className="text-sm text-muted-foreground">Edit application source code</p>
+                </div>
+              </button>
+              <button
+                data-testid="button-open-command-center"
+                onClick={() => setShowCommandCenterDialog(true)}
+                className="group relative h-32 rounded-lg border-2 bg-lavender/10 border-lavender/50 hover:border-lavender transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                  <TerminalIcon className="h-10 w-10 mb-3 text-lavender" />
+                  <h3 className="text-base font-semibold mb-1">Command Center</h3>
+                  <p className="text-sm text-muted-foreground">Search & launch all tools</p>
                 </div>
               </button>
             </div>
@@ -302,6 +315,15 @@ export function Dashboard() {
           </DialogHeader>
           <div className="overflow-auto max-h-[calc(90vh-120px)]">
             <SelfEditor />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Command Center Dialog */}
+      <Dialog open={showCommandCenterDialog} onOpenChange={setShowCommandCenterDialog}>
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+          <div className="overflow-auto max-h-[90vh]">
+            <CommandCenter />
           </div>
         </DialogContent>
       </Dialog>
