@@ -24,6 +24,12 @@ export function PersistentAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [position, setPosition] = useState(() => {
+    const saved = localStorage.getItem('ai_assistant_position');
+    return saved ? JSON.parse(saved) : { x: window.innerWidth - 450, y: 24 };
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -32,6 +38,41 @@ export function PersistentAssistant() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem('ai_assistant_position', JSON.stringify(position));
+  }, [position]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - 400));
+        const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - 100));
+        setPosition({ x: newX, y: newY });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -101,10 +142,20 @@ export function PersistentAssistant() {
       {!isOpen && (
         <Button
           data-testid="button-open-assistant"
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-10 h-16 w-16 rounded-full shadow-2xl bg-lavender hover:bg-lavender-hover z-[100] touch-manipulation border-2 border-white/20 backdrop-blur-sm"
+          onClick={(e) => {
+            if (!isDragging) {
+              setIsOpen(true);
+            }
+          }}
+          onMouseDown={handleMouseDown}
+          style={{
+            left: `${position.x}px`,
+            top: `${position.y}px`,
+            cursor: isDragging ? 'grabbing' : 'grab'
+          }}
+          className="fixed h-16 w-16 rounded-full shadow-2xl bg-lavender hover:bg-lavender-hover z-[100] touch-manipulation border-2 border-white/20 backdrop-blur-sm"
           size="icon"
-          title="AI Guard Dog 🐕"
+          title="AI Guard Dog 🐕 - Drag to reposition"
         >
           <Bot className="h-7 w-7 text-white" />
         </Button>
@@ -112,13 +163,19 @@ export function PersistentAssistant() {
 
       {isOpen && (
         <div 
-          className={`fixed bg-card/95 backdrop-blur-sm border-2 border-lavender/20 rounded-lg shadow-2xl z-[100] flex flex-col transition-all
+          className={`fixed bg-card/95 backdrop-blur-sm border-2 border-lavender/20 rounded-lg shadow-2xl z-[100] flex flex-col
             ${isMinimized ? 'w-[90vw] sm:w-80 h-14' : 'w-[95vw] sm:w-96 h-[85vh] sm:h-[600px]'}
-            bottom-6 right-10
           `}
+          style={{
+            left: `${position.x}px`,
+            top: `${position.y}px`
+          }}
           data-testid="panel-assistant"
         >
-          <div className="flex items-center justify-between p-3 border-b border-lavender/20 bg-gradient-to-r from-lavender/10 to-transparent">
+          <div 
+            className="flex items-center justify-between p-3 border-b border-lavender/20 bg-gradient-to-r from-lavender/10 to-transparent cursor-move select-none"
+            onMouseDown={handleMouseDown}
+          >
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-lavender flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
