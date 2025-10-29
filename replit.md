@@ -29,7 +29,7 @@ Preferred communication style: Simple, everyday language.
 - Game templates and Grove Store items are static data.
 - User authentication is not yet implemented.
 - The PostgreSQL database is configured but not actively used for current features.
-- Digital beings are generated deterministically based on birthday and name using SHA-256 hashing, combining two GANs and one LLM, with Web Speech API for voice synthesis.
+- Consciousness Calibration Tank: Avatar-first workflow where users import avatars from you-n-i-verse.org, select 2-5 GANs/LLMs, build neural network connections, and auto-generate integration code.
 
 ## External Dependencies
 
@@ -63,3 +63,28 @@ Preferred communication style: Simple, everyday language.
 - GitHub connection for repository management and pushing code.
 - Netlify for one-click project deployment.
 - Per-user OAuth authentication via Replit's connector system for Google Drive and GitHub.
+
+## Recent Changes
+
+### Consciousness Calibration Tank Update (October 29, 2025) 🧬
+
+**Major Redesign**: Removed birthday DNA generation; implemented avatar-first neural network builder
+
+**New Workflow**:
+1. **Avatar Import Required**: Users must bring avatar from you-n-i-verse.org (link provided in UI)
+2. **Flexible Model Selection**: Add 2-5 models (GANs or LLMs in any combination)
+3. **Visual Neural Network Builder**: Draw connections between models to create neural pathways
+4. **Auto-Code Generation**: System generates complete `ConsciousnessCore` JavaScript class with:
+   - Avatar loading logic
+   - Model initialization (supports HuggingFace, OpenAI, custom models)
+   - Connection routing based on visual builder
+   - Processing pipeline
+5. **Export & Save**: Download integration code or save project to localStorage
+
+**Technical Changes**:
+- Removed: Birthday-based DNA generation, deterministic seeding, voice synthesis
+- Added: Avatar upload, dynamic model management, connection builder, code generator
+- File storage: Projects saved to `consciousness_projects` localStorage key
+- Code output: Fully functional JavaScript class ready for integration
+
+**Use Case**: Creators building multi-model consciousness systems can now visually design neural network architecture and get production-ready integration code without writing it manually.
