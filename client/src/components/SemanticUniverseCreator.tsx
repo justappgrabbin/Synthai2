@@ -113,11 +113,29 @@ export function SemanticUniverseCreator() {
   const [playingUniverse, setPlayingUniverse] = useState<Universe | null>(null);
   const [birthday, setBirthday] = useState("");
   const [oracleMode, setOracleMode] = useState(false);
+  const [autonomyEnabled, setAutonomyEnabled] = useState(false);
 
   useEffect(() => {
     loadUniverses();
     loadTokens();
+    loadAutonomyState();
+    
+    const handleAutonomyChange = (e: CustomEvent) => {
+      setAutonomyEnabled(e.detail.enabled);
+    };
+    
+    window.addEventListener("autonomy-state-changed" as any, handleAutonomyChange as any);
+    return () => {
+      window.removeEventListener("autonomy-state-changed" as any, handleAutonomyChange as any);
+    };
   }, []);
+
+  const loadAutonomyState = () => {
+    const stored = localStorage.getItem("autonomy_enabled");
+    if (stored) {
+      setAutonomyEnabled(JSON.parse(stored));
+    }
+  };
 
   const loadUniverses = () => {
     const stored = localStorage.getItem("semantic_universes");
@@ -286,6 +304,12 @@ export function SemanticUniverseCreator() {
     setPrompt(oraclePrompt);
     setUniverseName(`${element} Genesis: Day ${dayOfYear}`);
     
+    localStorage.setItem("autonomy_birth_data", JSON.stringify({
+      date: birthday,
+      time: null,
+      place: null
+    }));
+    
     toast({
       title: "Oracle Calibration Complete",
       description: `Your cosmic DNA has been decoded. Genetic signature: ${geneticSeed}`
@@ -425,15 +449,26 @@ export function SemanticUniverseCreator() {
             <p className="text-muted-foreground">Transform text into playable worlds through the seven-layer semantic framework</p>
           </div>
           
-          <Card className="bg-lavender/10 border-lavender/30">
-            <CardContent className="p-4 flex items-center gap-3">
-              <Coins className="h-8 w-8 text-lavender" />
-              <div>
-                <p className="text-sm text-muted-foreground">Tokens Remaining</p>
-                <p className="text-3xl font-bold text-lavender">{tokens}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex gap-3">
+            {autonomyEnabled && (
+              <Card className="bg-lavender/10 border-lavender/30">
+                <CardContent className="p-4 flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-lavender animate-pulse" />
+                  <p className="text-sm font-semibold text-lavender">Autonomy Active</p>
+                </CardContent>
+              </Card>
+            )}
+            
+            <Card className="bg-lavender/10 border-lavender/30">
+              <CardContent className="p-4 flex items-center gap-3">
+                <Coins className="h-8 w-8 text-lavender" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Tokens Remaining</p>
+                  <p className="text-3xl font-bold text-lavender">{tokens}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 

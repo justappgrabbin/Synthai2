@@ -1,0 +1,1 @@
+# Placeholder for authentic_hd_calculator.py

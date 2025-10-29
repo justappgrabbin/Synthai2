@@ -20,7 +20,8 @@ import {
   Cloud,
   Github,
   Settings,
-  Layers
+  Layers,
+  Zap
 } from "lucide-react";
 import { FileSystem } from "@/lib/fileSystem";
 import { GAME_TEMPLATES } from "@/lib/gameTemplates";
@@ -151,6 +152,15 @@ export function CommandCenter() {
       keywords: ["universe", "world", "semantic", "layers", "text", "creation", "token", "generate", "guagan"],
       action: () => setLocation("/universe-creator"),
       icon: Layers
+    },
+    {
+      id: "autonomy-control",
+      name: "Autonomy Control",
+      description: "Enable system self-development based on cosmic signature",
+      category: "consciousness",
+      keywords: ["autonomy", "self-development", "cosmic", "birthday", "trait", "proposal", "evolution", "ai"],
+      action: () => setLocation("/autonomy"),
+      icon: Zap
     },
 
     // Project Tools
