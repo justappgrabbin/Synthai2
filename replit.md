@@ -12,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 - **Frameworks**: React 18 with TypeScript, Vite, Wouter for routing, TanStack Query for server state.
 - **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode, "New York" style), custom spacing, and typography (Inter/SF Pro, JetBrains Mono/Fira Code, Space Grotesk).
 - **Application Structure**: Central Dashboard with nine main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel, ModManager, UniverseCreator), Global TopNav, and a persistent, draggable AI Assistant overlay.
-- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management and deployment, Consciousness Calibration Tank for digital being creation, Semantic Universe Creator for text-to-world generation, Code Snatcher, and an enhanced code snippet library.
+- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management and deployment, Consciousness Calibration Tank for digital being creation, Semantic Universe Creator for text-to-world generation with 3D playable viewer, Code Snatcher, and an enhanced code snippet library.
 - **State Management**: Primarily localStorage for persistence (files, AI config, API keys, AI assistant position, projects, deployments, digital beings) and in-memory for UI.
 - **Design Patterns**: Portal-based navigation, "cosmic professionalism" aesthetic, persistent and non-intrusive AI presence, component composition.
 - **UI/UX Decisions**: PWA functionality for installability and offline use, mobile-friendly IDE with responsive design and compact menus, Dashboard Quick Tools (Workspace Organizer, Self Editor), and a Command Center for keyword-driven access to tools.
@@ -66,6 +66,37 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### 3D Universe Viewer Launch (October 29, 2025) 🎮
+
+**New Feature**: Interactive 3D visualization of semantic universes using Three.js/React-Three-Fiber
+
+**Seven-Layer 3D Mapping**:
+1. **Physical/Substrate** → Terrain mesh (ground plane with variable size)
+2. **Energetic/Affective** → Particle systems (color/tone driven by emotional data)
+3. **Perceptual/Semantic** → Interactive objects (cubes representing semantic relationships)
+4. **Cognitive/Reasoning** → Dynamic sphere (animated based on action data)
+5. **Reflective/Meta-Cognitive** → Camera perspective (first-person vs third-person)
+6. **Transpersonal/Archetypal** → Lighting ambience (archetypal atmosphere)
+7. **Void/Potential** → Procedural envelope (seed-driven wireframe shell with noise-based animation)
+
+**Features**:
+- First-person and third-person exploration modes
+- OrbitControls for rotation, zoom, pan
+- Fullscreen mode toggle
+- Reset view to initial perspective
+- Info panel with controls and universe data
+- Sky, stars, and grid helpers for spatial context
+- Real-time seed-driven procedural variation
+
+**Technical Stack**:
+- Three.js ^0.160.0 for WebGL rendering
+- @react-three/fiber ^8.15.0 for React integration
+- @react-three/drei ^9.92.0 for helpers (Sky, Stars, OrbitControls, Text)
+- UniverseViewer3D component with fullscreen overlay
+- Play button integrated into Universe Library cards
+
+**Browser-Native**: No Unity required - runs directly in web browsers with WebGL support
+
 ### Semantic Universe Creator Launch (October 29, 2025) 🌌
 
 **New Feature**: Text-to-world generation system using seven-layer semantic framework
@@ -81,7 +112,7 @@ Preferred communication style: Simple, everyday language.
    - Transpersonal/Archetypal (patterns, myths)
    - Void/Potential (latent creativity, seed)
 3. **Token Economy**: 5 tokens/month, 1 token = 1 universe creation
-4. **Universe Library**: Save, view, export created worlds
+4. **Universe Library**: Save, view, export created worlds with 3D playback
 5. **Real-time Progress**: Visual feedback through each semantic layer
 6. **Export System**: Download universe data as JSON
 
@@ -91,6 +122,7 @@ Preferred communication style: Simple, everyday language.
 - Semantic layer parser extracting linguistic features
 - Universe storage in `semantic_universes` localStorage key
 - Integrated into TopNav and Command Center
+- Connected to UniverseViewer3D for playable 3D visualization
 
 **Design Alignment**: Follows Guagan.pro semantic framework architecture for future GAN/LLM integration
 
