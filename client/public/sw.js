@@ -4,8 +4,10 @@ const RUNTIME_CACHE = 'indyverse-runtime-v2';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/src/main.tsx',
-  '/src/index.css'
+  '/offline.html',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/manifest.json'
 ];
 
 const SKIP_CACHE_PATTERNS = [
@@ -79,7 +81,7 @@ self.addEventListener('fetch', (event) => {
         return response;
       }).catch(() => {
         if (request.destination === 'document') {
-          return caches.match('/');
+          return caches.match('/offline.html');
         }
         return new Response('Offline - content not available', {
           status: 503,

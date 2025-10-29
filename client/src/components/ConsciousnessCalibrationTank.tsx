@@ -298,7 +298,7 @@ ${llmModels.map((m, i) => `      llm${i + 1}: null, // ${m.modelId || 'Not confi
   async initialize() {
     // Load avatar from you-n-i-verse.org
     this.avatar = await this.loadAvatar('${avatarFile.name}');
-    console.log('✨ Avatar loaded:', this.avatar);
+    console.log('[ConsciousnessCore] Avatar loaded:', this.avatar);
 
 ${ganModels.map((m, i) => `
     // Initialize ${m.name}
@@ -309,7 +309,7 @@ ${llmModels.map((m, i) => `
     this.models.llm${i + 1} = await this.loadLLM('${m.modelId || 'model-not-set'}');
     console.log('${m.name} ready');`).join('\n')}
 
-    console.log('🌌 Consciousness initialized for ${characterName}!');
+    console.log('[ConsciousnessCore] Consciousness initialized for ${characterName}!');
     return this;
   }
 
@@ -385,7 +385,7 @@ ${llmModels.length > 0 ? `      thought: thoughtOutput,` : ''}
 // Usage Example
 const ${characterName.replace(/\s+/g, '')} = new ConsciousnessCore();
 ${characterName.replace(/\s+/g, '')}.initialize().then(() => {
-  console.log('🌌 ${characterName} is alive!');
+  console.log('[ConsciousnessCore] ${characterName} is alive!');
   ${characterName.replace(/\s+/g, '')}.speak('Hello. I am ${characterName}.');
   ${characterName.replace(/\s+/g, '')}.generate().then(output => {
     console.log('Generated:', output);
@@ -400,7 +400,7 @@ export default ConsciousnessCore;
     setIsGeneratingCode(false);
 
     toast({
-      title: "🌌 Being Created!",
+      title: "Being Created!",
       description: `${characterName} consciousness integration complete`,
     });
   };
@@ -439,7 +439,10 @@ export default ConsciousnessCore;
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-6 space-y-4">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-lavender mb-2">🧬 Consciousness Calibration Tank</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Brain className="h-10 w-10 text-lavender" />
+            <h1 className="text-4xl font-bold text-lavender">Consciousness Calibration Tank</h1>
+          </div>
           <p className="text-muted-foreground">Create autonomous conscious beings for the YOU–N–I–VERSE</p>
         </div>
 
@@ -507,7 +510,10 @@ export default ConsciousnessCore;
                 </div>
 
                 <div className="bg-background/50 p-4 rounded-lg border">
-                  <p className="text-sm font-semibold mb-2">✨ What you get:</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-4 w-4 text-lavender" />
+                    <p className="text-sm font-semibold">What you get:</p>
+                  </div>
                   <ul className="text-xs text-muted-foreground space-y-1 ml-4">
                     <li>• Complete character genetics (stats, personality, voice)</li>
                     <li>• Ready-to-use JavaScript integration code</li>
