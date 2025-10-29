@@ -14,6 +14,7 @@ import { GroveStore } from "@/components/GroveStore";
 import { GANTrainer } from "@/components/GANTrainer";
 import { ModManager } from "@/components/ModManager";
 import { ConsciousnessCalibrationTank } from "@/components/ConsciousnessCalibrationTank";
+import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import NotFound from "@/pages/not-found";
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/gan-trainer" component={GANTrainer} />
       <Route path="/mod-manager" component={ModManager} />
       <Route path="/calibration-tank" component={ConsciousnessCalibrationTank} />
+      <Route path="/universe-creator" component={SemanticUniverseCreator} />
       <Route path="/settings" component={SettingsPanel} />
       <Route path="/player" component={PlayerPanel} />
       <Route path="/agents" component={AgentPanel} />

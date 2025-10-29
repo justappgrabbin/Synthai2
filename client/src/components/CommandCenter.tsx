@@ -19,7 +19,8 @@ import {
   Sparkles,
   Cloud,
   Github,
-  Settings
+  Settings,
+  Layers
 } from "lucide-react";
 import { FileSystem } from "@/lib/fileSystem";
 import { GAME_TEMPLATES } from "@/lib/gameTemplates";
@@ -39,7 +40,7 @@ interface Tool {
 export function CommandCenter() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(["games", "gans", "consciousness", "code", "ai", "project"]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(["games", "gans", "consciousness", "universes", "code", "ai", "project"]);
   const { toast } = useToast();
 
   const tools: Tool[] = [
@@ -141,6 +142,15 @@ export function CommandCenter() {
       keywords: ["consciousness", "gan", "llm", "character", "dna", "birthday", "being", "calibration", "voice", "personality"],
       action: () => setLocation("/calibration-tank"),
       icon: Sparkles
+    },
+    {
+      id: "universe-creator",
+      name: "Universe Creator",
+      description: "Create playable worlds from text through 7-layer semantic framework",
+      category: "consciousness",
+      keywords: ["universe", "world", "semantic", "layers", "text", "creation", "token", "generate", "guagan"],
+      action: () => setLocation("/universe-creator"),
+      icon: Layers
     },
 
     // Project Tools

@@ -11,8 +11,8 @@ Preferred communication style: Simple, everyday language.
 ### Frontend
 - **Frameworks**: React 18 with TypeScript, Vite, Wouter for routing, TanStack Query for server state.
 - **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode, "New York" style), custom spacing, and typography (Inter/SF Pro, JetBrains Mono/Fira Code, Space Grotesk).
-- **Application Structure**: Central Dashboard with eight main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel, ModManager), Global TopNav, and a persistent, draggable AI Assistant overlay.
-- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management and deployment, Consciousness Calibration Tank for digital being creation, Code Snatcher, and an enhanced code snippet library.
+- **Application Structure**: Central Dashboard with nine main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel, ModManager, UniverseCreator), Global TopNav, and a persistent, draggable AI Assistant overlay.
+- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management and deployment, Consciousness Calibration Tank for digital being creation, Semantic Universe Creator for text-to-world generation, Code Snatcher, and an enhanced code snippet library.
 - **State Management**: Primarily localStorage for persistence (files, AI config, API keys, AI assistant position, projects, deployments, digital beings) and in-memory for UI.
 - **Design Patterns**: Portal-based navigation, "cosmic professionalism" aesthetic, persistent and non-intrusive AI presence, component composition.
 - **UI/UX Decisions**: PWA functionality for installability and offline use, mobile-friendly IDE with responsive design and compact menus, Dashboard Quick Tools (Workspace Organizer, Self Editor), and a Command Center for keyword-driven access to tools.
@@ -65,6 +65,36 @@ Preferred communication style: Simple, everyday language.
 - Per-user OAuth authentication via Replit's connector system for Google Drive and GitHub.
 
 ## Recent Changes
+
+### Semantic Universe Creator Launch (October 29, 2025) 🌌
+
+**New Feature**: Text-to-world generation system using seven-layer semantic framework
+
+**Core Functionality**:
+1. **Text Input System**: Users describe universes in natural language
+2. **Seven-Layer Semantic Parsing**: Breaks text into consciousness layers:
+   - Physical/Substrate (nouns, objects, environment)
+   - Energetic/Affective (emotion, tone, color)
+   - Perceptual/Semantic (relations, symbols, categories)
+   - Cognitive/Reasoning (verbs, actions, logic)
+   - Reflective/Meta-Cognitive (perspective, tense)
+   - Transpersonal/Archetypal (patterns, myths)
+   - Void/Potential (latent creativity, seed)
+3. **Token Economy**: 5 tokens/month, 1 token = 1 universe creation
+4. **Universe Library**: Save, view, export created worlds
+5. **Real-time Progress**: Visual feedback through each semantic layer
+6. **Export System**: Download universe data as JSON
+
+**Technical Implementation**:
+- SemanticUniverseCreator component with tabs (Create, Library)
+- Token wallet with monthly reset logic (localStorage)
+- Semantic layer parser extracting linguistic features
+- Universe storage in `semantic_universes` localStorage key
+- Integrated into TopNav and Command Center
+
+**Design Alignment**: Follows Guagan.pro semantic framework architecture for future GAN/LLM integration
+
+**Use Case**: Foundation for connecting to backend semantic GANs, video GANs, and LLM observers to generate actual playable worlds
 
 ### Consciousness Calibration Tank Update (October 29, 2025) 🧬
 
