@@ -103,7 +103,13 @@ Preferred communication style: Simple, everyday language.
 
 **Core Functionality**:
 1. **Text Input System**: Users describe universes in natural language
-2. **Seven-Layer Semantic Parsing**: Breaks text into consciousness layers:
+2. **Oracle Mode**: Birthday-based universe generation that calibrates cosmic DNA from birth date
+   - Deterministic generation using genetic seed derived from YYYYMMDD
+   - Assigns elemental alignment (Fire, Water, Earth, Air, Aether, Void, Light, Shadow)
+   - Cosmic archetype, environment, phenomena, beings, and purpose based on birth variables
+   - Each birthday produces a unique, reproducible universe signature
+3. **Random Generation**: One-click random universe with procedurally combined cosmic elements
+4. **Seven-Layer Semantic Parsing**: Breaks text into consciousness layers:
    - Physical/Substrate (nouns, objects, environment)
    - Energetic/Affective (emotion, tone, color)
    - Perceptual/Semantic (relations, symbols, categories)
@@ -111,10 +117,10 @@ Preferred communication style: Simple, everyday language.
    - Reflective/Meta-Cognitive (perspective, tense)
    - Transpersonal/Archetypal (patterns, myths)
    - Void/Potential (latent creativity, seed)
-3. **Token Economy**: 5 tokens/month, 1 token = 1 universe creation
-4. **Universe Library**: Save, view, export created worlds with 3D playback
-5. **Real-time Progress**: Visual feedback through each semantic layer
-6. **Export System**: Download universe data as JSON
+5. **Token Economy**: 5 tokens/month, 1 token = 1 universe creation
+6. **Universe Library**: Save, view, export created worlds with 3D playback
+7. **Real-time Progress**: Visual feedback through each semantic layer
+8. **Export System**: Download universe data as JSON
 
 **Technical Implementation**:
 - SemanticUniverseCreator component with tabs (Create, Library)

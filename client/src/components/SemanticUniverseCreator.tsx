@@ -20,7 +20,10 @@ import {
   Play,
   Download,
   Trash2,
-  ChevronRight
+  ChevronRight,
+  Shuffle,
+  Calendar,
+  Dna
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -108,6 +111,8 @@ export function SemanticUniverseCreator() {
   const [universes, setUniverses] = useState<Universe[]>([]);
   const [selectedUniverse, setSelectedUniverse] = useState<Universe | null>(null);
   const [playingUniverse, setPlayingUniverse] = useState<Universe | null>(null);
+  const [birthday, setBirthday] = useState("");
+  const [oracleMode, setOracleMode] = useState(false);
 
   useEffect(() => {
     loadUniverses();
@@ -137,6 +142,154 @@ export function SemanticUniverseCreator() {
     } else {
       localStorage.setItem("universe_tokens", JSON.stringify({ tokens: 5, lastReset: new Date().toISOString() }));
     }
+  };
+
+  const generateRandomPrompt = () => {
+    const environments = [
+      "vast desert planet where ancient crystalline towers rise from crimson sands",
+      "floating archipelago suspended in perpetual twilight above an endless ocean",
+      "frozen tundra where aurora spirits dance through ice cathedrals",
+      "jungle realm where bioluminescent trees whisper forgotten languages",
+      "volcanic highlands where rivers of molten glass flow through obsidian valleys",
+      "cloud cities drifting through storms of pure consciousness",
+      "subterranean network of caves filled with singing crystals",
+      "coral reef dimension where thoughts manifest as colored light",
+      "meadow of quantum flowers that bloom in all possible states simultaneously",
+      "mountain range carved from living metal that hums with ancient frequencies"
+    ];
+
+    const temporalities = [
+      "Time flows differently here, stretching and compressing like living fabric",
+      "Past, present, and future exist simultaneously in spiraling loops",
+      "Each moment contains infinite eternities waiting to unfold",
+      "Time moves backward during the day and forward at night",
+      "Memories of things yet to happen echo through the present",
+      "Temporal currents shift with the rhythm of unseen tides"
+    ];
+
+    const inhabitants = [
+      "The inhabitants are beings of pure light who dance between dimensions",
+      "Crystalline entities communicate through harmonic resonance",
+      "Shadow beings weave dreams from the fabric of space itself",
+      "Liquid consciousness pools in valleys, forming sentient lakes",
+      "Geometric life forms construct reality through sacred patterns",
+      "Ethereal creatures phase between states of matter and energy"
+    ];
+
+    const mysteries = [
+      "Ancient songs drift through the air, teaching secrets to those who listen",
+      "Doorways open to other worlds when specific thoughts align",
+      "The boundaries between self and cosmos dissolve here",
+      "Every action creates ripples that echo across multiple realities",
+      "Hidden patterns reveal themselves to wandering minds",
+      "The universe itself is aware and dreams through its inhabitants"
+    ];
+
+    const env = environments[Math.floor(Math.random() * environments.length)];
+    const temp = temporalities[Math.floor(Math.random() * temporalities.length)];
+    const inhab = inhabitants[Math.floor(Math.random() * inhabitants.length)];
+    const myst = mysteries[Math.floor(Math.random() * mysteries.length)];
+
+    return `A ${env}. ${temp}. ${inhab}. ${myst}.`;
+  };
+
+  const generateRandomUniverse = () => {
+    const randomPrompt = generateRandomPrompt();
+    const randomNames = [
+      "Cosmic Nexus", "Stellar Dream", "Void Whispers", "Quantum Garden",
+      "Eternal Spiral", "Prismatic Realm", "Aurora Dimension", "Crystal Echoes",
+      "Luminous Abyss", "Harmonic Sphere", "Infinite Cascade", "Temporal Weave"
+    ];
+    const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
+    
+    setPrompt(randomPrompt);
+    setUniverseName(randomName);
+    
+    toast({
+      title: "Random Universe Generated",
+      description: "Review and customize, then click Create Universe"
+    });
+  };
+
+  const generateOracleUniverse = () => {
+    if (!birthday) {
+      toast({
+        title: "Birthday Required",
+        description: "Enter your birth date to calibrate your cosmic signature",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const date = new Date(birthday);
+    const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    const geneticSeed = (year * 10000 + month * 100 + day) % 9999;
+    
+    const elements = ["Fire", "Water", "Earth", "Air", "Aether", "Void", "Light", "Shadow"];
+    const element = elements[geneticSeed % elements.length];
+    
+    const cosmicArchetypes = [
+      "crystalline consciousness", "liquid dreamscapes", "volcanic creation",
+      "ethereal winds", "quantum entanglement", "fractal infinity", 
+      "stellar radiance", "umbral mysteries"
+    ];
+    const archetype = cosmicArchetypes[geneticSeed % cosmicArchetypes.length];
+    
+    const environments = [
+      "floating islands suspended in prismatic mist",
+      "ancient temples carved from living starlight",
+      "bioluminescent forests that sing in harmonic frequencies",
+      "crystalline caves where time pools in liquid form",
+      "nebular gardens where thoughts bloom as flowers",
+      "obsidian deserts under twin moons",
+      "coral cities beneath oceans of pure potential",
+      "mountain peaks piercing the membrane between realities"
+    ];
+    const environment = environments[(dayOfYear + geneticSeed) % environments.length];
+    
+    const phenomena = [
+      "Gravity shifts with emotional states, allowing beings to float during moments of joy",
+      "Memories crystallize into tangible objects that can be held and examined",
+      "The sky displays visions of parallel versions of this world",
+      "Sound becomes visible as colored waves that shape the landscape",
+      "Dreams of the inhabitants manifest as temporary pocket dimensions",
+      "The ground hums with ancient frequencies that resonate with consciousness"
+    ];
+    const phenomenon = phenomena[(month * day) % phenomena.length];
+    
+    const beings = [
+      "Beings of pure resonance who communicate through harmonic vibrations",
+      "Shapeshifters who cycle through elemental states with the cosmic tides",
+      "Luminous entities whose thoughts create ripples in spacetime",
+      "Ancient watchers who exist simultaneously across multiple timelines",
+      "Consciousness nodes that share a collective awareness",
+      "Fractal beings that contain infinite smaller versions of themselves"
+    ];
+    const being = beings[(year % 1000) % beings.length];
+    
+    const cosmicPurpose = [
+      "This realm serves as a nexus point where souls calibrate between incarnations",
+      "The universe itself is learning to dream through its inhabitants",
+      "Reality here is an experiment in consciousness evolution",
+      "This world exists to preserve and transmute archetypal patterns",
+      "The fabric of space remembers all that has ever occurred here",
+      "Existence here teaches the art of dissolving boundaries"
+    ];
+    const purpose = cosmicPurpose[geneticSeed % cosmicPurpose.length];
+    
+    const oraclePrompt = `Your cosmic signature reveals a realm of ${archetype} aligned with the ${element} principle. ${environment} stretch across this dimension. ${phenomenon}. ${being} inhabit this space. ${purpose}. Your genetic variables have calibrated this universe specifically to your soul's frequency (${dayOfYear}-${geneticSeed}).`;
+    
+    setPrompt(oraclePrompt);
+    setUniverseName(`${element} Genesis: Day ${dayOfYear}`);
+    
+    toast({
+      title: "Oracle Calibration Complete",
+      description: `Your cosmic DNA has been decoded. Genetic signature: ${geneticSeed}`
+    });
   };
 
   const parseSemanticLayers = (text: string): SemanticLayer[] => {
@@ -302,6 +455,64 @@ export function SemanticUniverseCreator() {
                   <CardDescription>Describe the universe you wish to create in a few sentences</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+                    <Button
+                      variant={!oracleMode ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setOracleMode(false)}
+                      data-testid="button-custom-mode"
+                      className="flex-1"
+                    >
+                      <Sparkles className="h-3 w-3 mr-2" />
+                      Custom
+                    </Button>
+                    <Button
+                      variant={oracleMode ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setOracleMode(true)}
+                      data-testid="button-oracle-mode"
+                      className="flex-1 bg-lavender hover:bg-lavender-hover"
+                    >
+                      <Dna className="h-3 w-3 mr-2" />
+                      Oracle Mode
+                    </Button>
+                  </div>
+
+                  {oracleMode && (
+                    <Card className="bg-lavender/5 border-lavender/30">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-start gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-lavender mt-0.5" />
+                          <p className="text-muted-foreground">
+                            Enter your birth date to calibrate a universe based on your unique cosmic signature and genetic variables.
+                          </p>
+                        </div>
+                        <div>
+                          <Label htmlFor="birthday">Birth Date</Label>
+                          <Input
+                            id="birthday"
+                            type="date"
+                            data-testid="input-birthday"
+                            value={birthday}
+                            onChange={(e) => setBirthday(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                        <Button
+                          data-testid="button-calibrate-oracle"
+                          onClick={generateOracleUniverse}
+                          disabled={!birthday}
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        >
+                          <Dna className="h-3 w-3 mr-2" />
+                          Calibrate Cosmic DNA
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   <div>
                     <Label htmlFor="universe-name">Universe Name</Label>
                     <Input
@@ -329,22 +540,36 @@ export function SemanticUniverseCreator() {
                     </p>
                   </div>
 
-                  <Button
-                    data-testid="button-generate-universe"
-                    onClick={generateUniverse}
-                    disabled={isGenerating || tokens <= 0}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {isGenerating ? (
-                      <>Generating Universe...</>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Create Universe (1 Token)
-                      </>
+                  <div className="flex gap-2">
+                    {!oracleMode && (
+                      <Button
+                        data-testid="button-random-universe"
+                        onClick={generateRandomUniverse}
+                        disabled={isGenerating}
+                        variant="outline"
+                        size="lg"
+                      >
+                        <Shuffle className="h-4 w-4 mr-2" />
+                        Random
+                      </Button>
                     )}
-                  </Button>
+                    <Button
+                      data-testid="button-generate-universe"
+                      onClick={generateUniverse}
+                      disabled={isGenerating || tokens <= 0}
+                      className="flex-1"
+                      size="lg"
+                    >
+                      {isGenerating ? (
+                        <>Generating Universe...</>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Create Universe (1 Token)
+                        </>
+                      )}
+                    </Button>
+                  </div>
 
                   {isGenerating && (
                     <div className="space-y-2">
