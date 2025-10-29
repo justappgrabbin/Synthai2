@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon, FileText, FolderOpen, Copy, Scissors, ClipboardPaste, Search, RotateCcw, RotateCw, Maximize, Moon, Sun } from "lucide-react";
+import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon, FileText, FolderOpen, Copy, Scissors, ClipboardPaste, Search, RotateCcw, RotateCw, Maximize, Moon, Sun, Bot, Brain, Gamepad2, Rocket } from "lucide-react";
 import { GlyphGenerator, detectDimension } from "@/lib/glyphGenerator";
 import JSZip from "jszip";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
@@ -44,6 +45,7 @@ import {
 } from "@/components/ui/dialog";
 
 export function DeveloperPanel() {
+  const [, setLocation] = useLocation();
   const [files, setFiles] = useState<FileNode[]>([]);
   const [currentFile, setCurrentFile] = useState<FileNode | null>(null);
   const [code, setCode] = useState("");

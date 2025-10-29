@@ -182,3 +182,45 @@ Optimized mobile experience across the app:
 - Improved touch targets with `size="sm"` buttons
 - Minimum width added to icon-only buttons
 - All buttons properly sized for mobile interaction
+
+### Mod Manager & Deployment Features (October 29, 2025) 🚀
+
+**Mod Manager Panel** (6th Panel - Between Agents and Settings)
+- **Project Management**: Create, switch between, and manage multiple projects
+- **Project Storage**: Save/load entire project states with files preserved
+- **Import/Export**: JSON-based project backup and restore
+- **Deployment Tracking**: View all deployments with status and live URLs
+- **Navigation**: Accessible from TopNav and IDE Tools menu
+
+**Netlify Deployment Integration**
+- **One-Click Deploy**: Deploy projects directly to Netlify
+- **API Key Management**: Secure localStorage-based API key persistence
+- **File Digest Method**: Efficient SHA1-based file uploads
+- **Auto Status Polling**: Real-time deployment status updates
+- **Live URL Access**: Direct links to deployed sites
+- **Backend Service**: `server/lib/netlifyService.ts` handles all deployment logic
+- **API Route**: POST `/api/deploy/netlify` with apiKey, files, siteName
+
+**IDE Tools Menu** 🛠️
+- **Location**: New "Tools" menu in IDE menubar (between Snippets and Help)
+- **Quick Access To**:
+  - AI Agent Creator (`/agents`) - Build and manage AI companions
+  - GAN Trainer (`/gan-trainer`) - Neural network templates
+  - Game Templates (`/game-creator`) - Platformer, Space Shooter, Puzzle games
+  - Mod Manager & Deploy (`/mod-manager`) - Project management and Netlify deployment
+  - ZIP Player (`/player`) - Import and explore ZIP bundles
+  - Grove Store (`/grove-store`) - Community marketplace
+- **Navigation**: One-click access to all creative tools from IDE
+
+**Technical Implementation**:
+- Components: `client/src/components/ModManager.tsx`
+- Backend: `server/lib/netlifyService.ts`, `server/routes.ts`
+- Storage: localStorage for projects (`youniverse_projects`), deployments (`youniverse_deployments`)
+- Navigation: Updated TopNav with Rocket icon, IDE Tools menu integration
+- Project Switching: Automatic file save/load when switching between projects
+
+**User-Uploaded Game Tools** 📦
+- Uploaded: `GameAssetStudio (5).zip` (29.93 MB)
+- Uploaded: `VirtualGameMaster-main.zip` (3.50 MB)
+- **Import Method**: Use IDE → File → Import from GitHub or ZIP Player panel
+- **Future Integration**: Will be added to Game Templates library
