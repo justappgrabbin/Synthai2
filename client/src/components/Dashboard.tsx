@@ -1,7 +1,8 @@
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
 import {
@@ -65,12 +66,61 @@ const CORE_APPS: AppModule[] = [
   }
 ];
 
+const FLAGSHIP_FEATURES = [
+  {
+    id: "universe-creator",
+    title: "Semantic Universe Creator",
+    description: "Transform text into playable 3D worlds using seven-layer consciousness framework",
+    icon: Globe,
+    path: "/universe-creator",
+    gradient: "from-purple-500/20 to-blue-500/20"
+  },
+  {
+    id: "calibration-tank",
+    title: "Consciousness Calibration Tank",
+    description: "Build multi-model neural networks with visual connection builder and auto-code generation",
+    icon: Brain,
+    path: "/calibration-tank",
+    gradient: "from-lavender/20 to-purple-500/20"
+  },
+  {
+    id: "gan-trainer",
+    title: "GAN Trainer",
+    description: "Train generative adversarial networks for creative AI model development",
+    icon: Cpu,
+    path: "/gan-trainer",
+    gradient: "from-blue-500/20 to-cyan-500/20"
+  },
+  {
+    id: "autonomy",
+    title: "Autonomy Control Center",
+    description: "System self-development with Fu Xi I-Ching codon-based proposal generation",
+    icon: Orbit,
+    path: "/autonomy",
+    gradient: "from-pink-500/20 to-lavender/20"
+  },
+  {
+    id: "mod-manager",
+    title: "Deployment Hub",
+    description: "Deploy to Netlify, push to GitHub, export to Google Drive with one-click",
+    icon: Rocket,
+    path: "/mod-manager",
+    gradient: "from-green-500/20 to-emerald-500/20"
+  },
+  {
+    id: "game-creator",
+    title: "Game Creator",
+    description: "Build interactive experiences with templates and visual tools",
+    icon: Palette,
+    path: "/game-creator",
+    gradient: "from-orange-500/20 to-red-500/20"
+  }
+];
+
 export function Dashboard() {
   const [, setLocation] = useLocation();
   const [apps, setApps] = useState<AppModule[]>(CORE_APPS);
   const [recentlyVisited, setRecentlyVisited] = useState<AppActivity[]>([]);
-  const [recentlyCreated, setRecentlyCreated] = useState<AppActivity[]>([]);
-  const [recommendations, setRecommendations] = useState<AppActivity[]>([]);
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
   const [showSelfEditorDialog, setShowSelfEditorDialog] = useState(false);
   const [showCommandCenterDialog, setShowCommandCenterDialog] = useState(false);
@@ -82,8 +132,6 @@ export function Dashboard() {
     }
 
     setRecentlyVisited(ActivityTracker.getRecentlyVisited(4));
-    setRecentlyCreated(ActivityTracker.getRecentlyCreated(4));
-    setRecommendations(ActivityTracker.getRecommendations(6));
   }, []);
 
   const handleAppClick = (appId: string, appName: string, appType: string, path: string) => {
@@ -102,27 +150,99 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender/10 to-background p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-lavender" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-            YOU–N–I–VERSE Studio
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            The Indyverse • Your Creative IDE with AI Consciousness
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Gateway v1.0.0 • {apps.length} {apps.length === 1 ? 'module' : 'modules'} available
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Cosmic Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-background border-b border-lavender/20">
+        {/* Animated starfield background */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white rounded-full animate-pulse" />
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-lavender rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+          <div className="absolute bottom-1/4 left-1/2 w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-lavender rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-2/3 right-1/2 w-1 h-1 bg-lavender rounded-full animate-pulse" style={{ animationDelay: '2.5s' }} />
         </div>
 
+        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="text-center space-y-6">
+            <div className="inline-block">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Sparkles className="h-8 w-8 text-lavender animate-pulse" />
+                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-lavender via-purple-400 to-blue-400 bg-clip-text text-transparent" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                  YOU–N–I–VERSE
+                </h1>
+                <Sparkles className="h-8 w-8 text-lavender animate-pulse" />
+              </div>
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-lavender to-transparent" />
+            </div>
+            
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+              <span className="text-lavender font-semibold">The Indyverse</span> • Browser-Based Creative Development Studio
+            </p>
+            
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Transform consciousness into code. Build universes from text. Train AI with neural networks. 
+              Deploy anywhere. All powered by the seven-layer semantic framework.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+              <Button
+                size="lg"
+                className="bg-lavender hover:bg-lavender-hover text-white"
+                onClick={() => setLocation("/universe-creator")}
+                data-testid="button-hero-universe-creator"
+              >
+                <Globe className="h-5 w-5 mr-2" />
+                Create Universe
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-lavender/50 hover:border-lavender"
+                onClick={() => setLocation("/ide")}
+                data-testid="button-hero-ide"
+              >
+                <Code2 className="h-5 w-5 mr-2" />
+                Launch IDE
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-lavender/50 hover:border-lavender"
+                onClick={() => setShowCommandCenterDialog(true)}
+                data-testid="button-hero-command-center"
+              >
+                <TerminalIcon className="h-5 w-5 mr-2" />
+                Command Center
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-lavender" />
+                <span>PWA Ready</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4 text-lavender" />
+                <span>AI Powered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Orbit className="h-4 w-4 text-lavender" />
+                <span>7-Layer Framework</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Recently Visited */}
         {recentlyVisited.length > 0 && (
           <Card className="mb-6" data-testid="card-recent-apps">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-lavender" />
-                <CardTitle>Recent Apps</CardTitle>
+                <CardTitle>Recent Activity</CardTitle>
               </div>
               <CardDescription>Pick up where you left off</CardDescription>
             </CardHeader>
@@ -146,45 +266,54 @@ export function Dashboard() {
           </Card>
         )}
 
-        {/* Recently Created */}
-        {recentlyCreated.length > 0 && (
-          <Card className="mb-6" data-testid="card-created-apps">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-lavender" />
-                <CardTitle>Recently Created</CardTitle>
-              </div>
-              <CardDescription>Your latest creations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {recentlyCreated.map((activity) => (
-                  <ActivityCard
-                    key={activity.appId}
-                    activity={activity}
-                    icon={getIconForApp(activity.appId)}
-                    onClick={() => handleAppClick(
-                      activity.appId,
-                      activity.appName,
-                      activity.appType,
-                      getPathForApp(activity.appId)
-                    )}
-                    showCreatedDate
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Quick Temps */}
-        <Card className="mb-6" data-testid="card-quick-temps">
+        {/* Flagship Features - Consciousness Engine */}
+        <Card className="mb-6 border-lavender/30" data-testid="card-flagship-features">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-lavender" />
-              <CardTitle>Quick Temps</CardTitle>
+              <Brain className="h-6 w-6 text-lavender" />
+              <CardTitle className="text-2xl">Consciousness Engine</CardTitle>
             </div>
-            <CardDescription>Organize files & edit source code without leaving the dashboard</CardDescription>
+            <CardDescription>Transformative tools powered by semantic awareness and neural architecture</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {FLAGSHIP_FEATURES.map((feature) => (
+                <button
+                  key={feature.id}
+                  data-testid={`button-flagship-${feature.id}`}
+                  onClick={() => setLocation(feature.path)}
+                  className={`group relative h-48 rounded-lg border-2 border-border bg-gradient-to-br ${feature.gradient} hover:border-lavender/50 transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden`}
+                >
+                  <div className="absolute inset-0 bg-card/90 backdrop-blur-sm" />
+                  <div className="relative flex flex-col items-start justify-between h-full p-6 text-left">
+                    <div>
+                      <feature.icon className="h-10 w-10 mb-3 text-lavender" />
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 text-lavender text-sm font-medium mt-2">
+                      <span>Launch</span>
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Tools */}
+        <Card className="mb-6" data-testid="card-quick-tools">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-lavender" />
+              <CardTitle>Quick Tools</CardTitle>
+            </div>
+            <CardDescription>Organize workspace and edit code without leaving the dashboard</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -196,7 +325,7 @@ export function Dashboard() {
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                   <FolderTree className="h-10 w-10 mb-3 text-lavender" />
                   <h3 className="text-base font-semibold mb-1">Workspace Organizer</h3>
-                  <p className="text-sm text-muted-foreground">Manage your project files</p>
+                  <p className="text-sm text-muted-foreground">Manage project files</p>
                 </div>
               </button>
               <button
@@ -207,7 +336,7 @@ export function Dashboard() {
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                   <FileEdit className="h-10 w-10 mb-3 text-lavender" />
                   <h3 className="text-base font-semibold mb-1">Self Editor</h3>
-                  <p className="text-sm text-muted-foreground">Edit application source code</p>
+                  <p className="text-sm text-muted-foreground">Edit source code</p>
                 </div>
               </button>
               <button
@@ -218,7 +347,7 @@ export function Dashboard() {
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                   <TerminalIcon className="h-10 w-10 mb-3 text-lavender" />
                   <h3 className="text-base font-semibold mb-1">Command Center</h3>
-                  <p className="text-sm text-muted-foreground">Search & launch all tools</p>
+                  <p className="text-sm text-muted-foreground">Search & launch tools</p>
                 </div>
               </button>
             </div>
@@ -229,7 +358,7 @@ export function Dashboard() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Launch Pad</CardTitle>
-            <CardDescription>Your core creative tools</CardDescription>
+            <CardDescription>Essential creative tools and platform utilities</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -248,38 +377,16 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Recommendations */}
-        {recommendations.length > 0 && (
-          <Card data-testid="card-recommendations">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-lavender" />
-                <CardTitle>For You</CardTitle>
-              </div>
-              <CardDescription>Recommended based on your activity</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {recommendations.map((activity) => (
-                  <ActivityCard
-                    key={activity.appId}
-                    activity={activity}
-                    icon={getIconForApp(activity.appId)}
-                    onClick={() => handleAppClick(
-                      activity.appId,
-                      activity.appName,
-                      activity.appType,
-                      getPathForApp(activity.appId)
-                    )}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>✨ Welcome to your cosmic workspace</p>
+        {/* Footer */}
+        <div className="mt-8 text-center space-y-2">
+          <div className="flex items-center justify-center gap-2 text-lavender">
+            <Sparkles className="h-4 w-4 animate-pulse" />
+            <p className="text-sm font-medium">Welcome to your cosmic creative workspace</p>
+            <Sparkles className="h-4 w-4 animate-pulse" />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Gateway v1.0.0 • {apps.length} modules • Powered by consciousness
+          </p>
         </div>
       </div>
 
@@ -335,10 +442,9 @@ interface ActivityCardProps {
   activity: AppActivity;
   icon: LucideIcon | string;
   onClick: () => void;
-  showCreatedDate?: boolean;
 }
 
-function ActivityCard({ activity, icon: Icon, onClick, showCreatedDate }: ActivityCardProps) {
+function ActivityCard({ activity, icon: Icon, onClick }: ActivityCardProps) {
   const isImageIcon = typeof Icon === 'string';
   const timeAgo = (date: string) => {
     if (!date) return 'New';
@@ -364,11 +470,7 @@ function ActivityCard({ activity, icon: Icon, onClick, showCreatedDate }: Activi
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm truncate">{activity.appName}</p>
-        <p className="text-xs text-muted-foreground">
-          {showCreatedDate && activity.createdAt
-            ? `Created ${timeAgo(activity.createdAt)}`
-            : timeAgo(activity.lastVisited)}
-        </p>
+        <p className="text-xs text-muted-foreground">{timeAgo(activity.lastVisited)}</p>
       </div>
       <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
     </button>
