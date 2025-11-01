@@ -1,7 +1,7 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "description": "Browser-based creative development platform with IDE, game creator, ZIP player, AI assistance, and semantic universe generation.",
+  "description": "Browser-based creative development platform with IDE, game creator, ZIP player, 7-layer consciousness calibration, AI assistance, and semantic universe generation.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",
@@ -62,6 +62,13 @@
       "short_name": "ZIP",
       "description": "Upload, play & manage ZIP files",
       "url": "/zip-manager",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Consciousness Calibration",
+      "short_name": "Charts",
+      "description": "Calculate 7-layer consciousness charts with voice",
+      "url": "/consciousness-calibrator",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {

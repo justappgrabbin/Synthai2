@@ -1,7 +1,7 @@
 # YOU–N–I–VERSE Studio
 
 ## Overview
-YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment integrating an IDE, game creation tools, and AI-powered assistance. It offers a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform aims to be a community marketplace for creative tools and projects, fostering the creation of digital beings and providing robust deployment options.
+YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform aims to be a community marketplace for creative tools and projects, fostering the creation of digital beings and providing robust deployment options. Key capabilities include generating semantic worlds, creating digital consciousness, and managing creative assets.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -10,27 +10,29 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend
 - **Frameworks**: React 18 with TypeScript, Vite, Wouter for routing, TanStack Query for server state.
-- **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode, "New York" style), custom spacing, and typography (Inter/SF Pro, JetBrains Mono/Fira Code, Space Grotesk).
+- **UI/Styling**: shadcn/ui (Radix UI + Tailwind CSS), custom design tokens, CSS variables for theming (light/dark mode, "New York" style), custom spacing, and typography.
 - **Application Structure**: Central Dashboard with nine main panels (Dashboard, GroveStore, IDE, GameCreator, GANTrainer, PlayerPanel, AgentPanel, SettingsPanel, ModManager, UniverseCreator), Global TopNav, and a persistent, draggable AI Assistant overlay.
-- **Key Features**: Browser-based code editor with localStorage persistence, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management and deployment, Consciousness Calibration Tank for digital being creation, Semantic Universe Creator for text-to-world generation with 3D playable viewer, Code Snatcher, and an enhanced code snippet library.
+- **Key Features**: Browser-based code editor, game template library, community marketplace (Grove Store), ZIP file player, multi-backend AI assistant, GAN Trainer, Mod Manager for project management, Consciousness Calibration Tank for digital being creation, Semantic Universe Creator for text-to-world generation with 3D playable viewer, Code Snatcher, and an enhanced code snippet library.
 - **State Management**: Primarily localStorage for persistence (files, AI config, API keys, AI assistant position, projects, deployments, digital beings) and in-memory for UI.
-- **Design Patterns**: Portal-based navigation, "cosmic professionalism" aesthetic, persistent and non-intrusive AI presence, component composition.
-- **UI/UX Decisions**: PWA functionality for installability and offline use, mobile-friendly IDE with responsive design and compact menus, Dashboard Quick Tools (Workspace Organizer, Self Editor), and a Command Center for keyword-driven access to tools.
+- **Design Patterns**: Portal-based navigation, "cosmic professionalism" aesthetic, persistent and non-intrusive AI presence.
+- **UI/UX Decisions**: PWA functionality, mobile-friendly IDE, Dashboard Quick Tools (Workspace Organizer, Self Editor), Command Center for keyword-driven access.
+- **3D Universe Viewer**: Interactive 3D visualization of semantic universes using Three.js/React-Three-Fiber, featuring a seven-layer 3D mapping (terrain, particle systems, interactive objects, dynamic spheres, camera perspectives, lighting ambience, procedural envelope).
 
 ### Backend
-- **Server**: Express.js with TypeScript, HTTP-only, middleware-based request handling.
+- **Server**: Express.js with TypeScript, HTTP-only.
 - **Database**: Drizzle ORM configured for PostgreSQL, with an in-memory storage fallback (MemStorage) currently in use.
 - **API**: RESTful pattern, storage interface abstraction for CRUD.
-- **File Organization**: `/server` (backend), `/client` (frontend), `/shared` (types/schemas).
-- **StoryForge Integration**: Full semantic world generation pipeline with symbolic parser, LLM observer, and GAN stubs for text-to-world transformation.
+- **StoryForge Integration**: Full semantic world generation pipeline including a symbolic parser, LLM observer, and GAN stubs for text-to-world transformation.
+- **Consciousness Calibration**: Features 7 chart calculators based on astronomical calculations (Natal, Transit, Progressed, Solar Return, Lunar Return, Composite, Draconic Charts) integrated with HuggingFace LLM interpretation and Voice GAN Synthesis for each consciousness layer.
 
 ### System Design Choices
-- File system persistence is handled via localStorage.
+- File system persistence via localStorage.
 - AI conversations are client-side, direct to providers.
 - Game templates and Grove Store items are static data.
 - User authentication is not yet implemented.
-- The PostgreSQL database is configured but not actively used for current features.
-- Consciousness Calibration Tank: Avatar-first workflow where users import avatars from you-n-i-verse.org, select 2-5 GANs/LLMs, build neural network connections, and auto-generate integration code.
+- PostgreSQL database is configured but not actively used for current features.
+- Consciousness Calibration Tank: Avatar-first workflow for building neural networks using 2-5 GANs/LLMs, generating integration code.
+- Semantic Universe Creator: Text-to-world generation using a seven-layer semantic framework, supporting Oracle Mode (birthday-based), random generation, token economy, and a universe library.
 
 ## External Dependencies
 
@@ -41,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - Grok API
 - CodeLlama (local via Ollama)
 - AIService router for managing API calls.
+- HuggingFace (Mistral-7B-Instruct) for consciousness insights.
 
 ### UI/Development Libraries
 - Radix UI primitives, shadcn/ui components, Lucide React for icons.
@@ -48,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 - Neon Database serverless driver, Drizzle Kit.
 - ESBuild for server bundling.
 - Replit-specific Vite plugins (cartographer, dev-banner, runtime-error-modal).
+- Three.js, @react-three/fiber, @react-three/drei for 3D visualization.
 
 ### Utility Libraries
 - clsx + tailwind-merge for CSS class management.
@@ -55,145 +59,13 @@ Preferred communication style: Simple, everyday language.
 - react-hook-form + Zod resolvers for forms.
 - JSZip for handling .zip files.
 - nanoid for ID generation.
+- Astronomy Engine for accurate planetary positions.
 
 ### Routing
 - Wouter (client-side only).
 
 ### Cloud Integrations
 - Google Drive connector (googleapis package) for project exports.
-- GitHub connection for repository management and pushing code.
+- GitHub connection for repository management.
 - Netlify for one-click project deployment.
 - Per-user OAuth authentication via Replit's connector system for Google Drive and GitHub.
-
-## Recent Changes
-
-### StoryForge Backend Integration (October 29, 2025) 🌌
-
-**Major Integration**: Complete semantic world generation backend from StoryForge Games
-
-**Backend Services**:
-1. **Symbolic Parser** (`symbolic-parser.ts`): Parses text using punctuation as semantic operators based on Yi Jing
-   - Operators: • (movement), . (being), ° (transpersonal), : (design), ; (evolution), , (space), ... (void)
-   - Rhythm analysis, complexity scoring, semantic hints
-2. **LLM Observer** (`llm-observer.ts`): Interprets text through 7-layer semantic framework using OpenAI GPT-4o
-   - Layers: Movement, Evolution, Being, Design, Space, Transpersonal, Void
-   - Generates narrative, world attributes, discriminator scores (coherence/resonance/beauty)
-3. **World Orchestrator** (`world-orchestrator.ts`): Main pipeline coordinating full ideogenesis flow
-   - Text → Symbolic Parse → LLM Observe → GAN Generate → World Manifestation
-   - Token economy (5 tokens/month), status tracking, error handling
-4. **GAN Integrations** (`gan-integrations.ts`): Stub interfaces for Semantic GAN and Video GAN endpoints
-   - Ready for real generative model integration
-
-**Database Schema**:
-- `tokenLedger`: Monthly token tracking (5 tokens/month per user)
-- `ideonSeeds`: Parsed semantic structures from user input
-- `worldManifestations`: Generated worlds with GAN outputs, narratives, quality scores
-
-**API Endpoints**:
-- `GET /api/health`: Health check
-- `GET /api/tokens/status`: Check token availability
-- `POST /api/ideons`: Generate world from text (consumes token)
-- `GET /api/ideons`: List all ideons for user
-- `GET /api/ideons/:id`: Get specific ideon
-- `GET /api/worlds/:ideonId`: Get world manifestation
-
-**Technical Stack**:
-- OpenAI GPT-4o for semantic interpretation
-- In-memory storage with full CRUD for ideons and worlds
-- Lazy-loaded OpenAI client to avoid startup failures
-- Zod validation for API requests
-
-**Use Case**: Powers Semantic Universe Creator with real AI-driven world generation instead of client-side localStorage
-
-
-
-### 3D Universe Viewer Launch (October 29, 2025) 🎮
-
-**New Feature**: Interactive 3D visualization of semantic universes using Three.js/React-Three-Fiber
-
-**Seven-Layer 3D Mapping**:
-1. **Physical/Substrate** → Terrain mesh (ground plane with variable size)
-2. **Energetic/Affective** → Particle systems (color/tone driven by emotional data)
-3. **Perceptual/Semantic** → Interactive objects (cubes representing semantic relationships)
-4. **Cognitive/Reasoning** → Dynamic sphere (animated based on action data)
-5. **Reflective/Meta-Cognitive** → Camera perspective (first-person vs third-person)
-6. **Transpersonal/Archetypal** → Lighting ambience (archetypal atmosphere)
-7. **Void/Potential** → Procedural envelope (seed-driven wireframe shell with noise-based animation)
-
-**Features**:
-- First-person and third-person exploration modes
-- OrbitControls for rotation, zoom, pan
-- Fullscreen mode toggle
-- Reset view to initial perspective
-- Info panel with controls and universe data
-- Sky, stars, and grid helpers for spatial context
-- Real-time seed-driven procedural variation
-
-**Technical Stack**:
-- Three.js ^0.160.0 for WebGL rendering
-- @react-three/fiber ^8.15.0 for React integration
-- @react-three/drei ^9.92.0 for helpers (Sky, Stars, OrbitControls, Text)
-- UniverseViewer3D component with fullscreen overlay
-- Play button integrated into Universe Library cards
-
-**Browser-Native**: No Unity required - runs directly in web browsers with WebGL support
-
-### Semantic Universe Creator Launch (October 29, 2025) 🌌
-
-**New Feature**: Text-to-world generation system using seven-layer semantic framework
-
-**Core Functionality**:
-1. **Text Input System**: Users describe universes in natural language
-2. **Oracle Mode**: Birthday-based universe generation that calibrates cosmic DNA from birth date
-   - Deterministic generation using genetic seed derived from YYYYMMDD
-   - Assigns elemental alignment (Fire, Water, Earth, Air, Aether, Void, Light, Shadow)
-   - Cosmic archetype, environment, phenomena, beings, and purpose based on birth variables
-   - Each birthday produces a unique, reproducible universe signature
-3. **Random Generation**: One-click random universe with procedurally combined cosmic elements
-4. **Seven-Layer Semantic Parsing**: Breaks text into consciousness layers:
-   - Physical/Substrate (nouns, objects, environment)
-   - Energetic/Affective (emotion, tone, color)
-   - Perceptual/Semantic (relations, symbols, categories)
-   - Cognitive/Reasoning (verbs, actions, logic)
-   - Reflective/Meta-Cognitive (perspective, tense)
-   - Transpersonal/Archetypal (patterns, myths)
-   - Void/Potential (latent creativity, seed)
-5. **Token Economy**: 5 tokens/month, 1 token = 1 universe creation
-6. **Universe Library**: Save, view, export created worlds with 3D playback
-7. **Real-time Progress**: Visual feedback through each semantic layer
-8. **Export System**: Download universe data as JSON
-
-**Technical Implementation**:
-- SemanticUniverseCreator component with tabs (Create, Library)
-- Token wallet with monthly reset logic (localStorage)
-- Semantic layer parser extracting linguistic features
-- Universe storage in `semantic_universes` localStorage key
-- Integrated into TopNav and Command Center
-- Connected to UniverseViewer3D for playable 3D visualization
-
-**Design Alignment**: Follows Guagan.pro semantic framework architecture for future GAN/LLM integration
-
-**Use Case**: Foundation for connecting to backend semantic GANs, video GANs, and LLM observers to generate actual playable worlds
-
-### Consciousness Calibration Tank Update (October 29, 2025) 🧬
-
-**Major Redesign**: Removed birthday DNA generation; implemented avatar-first neural network builder
-
-**New Workflow**:
-1. **Avatar Import Required**: Users must bring avatar from you-n-i-verse.org (link provided in UI)
-2. **Flexible Model Selection**: Add 2-5 models (GANs or LLMs in any combination)
-3. **Visual Neural Network Builder**: Draw connections between models to create neural pathways
-4. **Auto-Code Generation**: System generates complete `ConsciousnessCore` JavaScript class with:
-   - Avatar loading logic
-   - Model initialization (supports HuggingFace, OpenAI, custom models)
-   - Connection routing based on visual builder
-   - Processing pipeline
-5. **Export & Save**: Download integration code or save project to localStorage
-
-**Technical Changes**:
-- Removed: Birthday-based DNA generation, deterministic seeding, voice synthesis
-- Added: Avatar upload, dynamic model management, connection builder, code generator
-- File storage: Projects saved to `consciousness_projects` localStorage key
-- Code output: Fully functional JavaScript class ready for integration
-
-**Use Case**: Creators building multi-model consciousness systems can now visually design neural network architecture and get production-ready integration code without writing it manually.
