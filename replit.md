@@ -22,6 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **Database**: Drizzle ORM configured for PostgreSQL, with an in-memory storage fallback (MemStorage) currently in use.
 - **API**: RESTful pattern, storage interface abstraction for CRUD.
 - **File Organization**: `/server` (backend), `/client` (frontend), `/shared` (types/schemas).
+- **StoryForge Integration**: Full semantic world generation pipeline with symbolic parser, LLM observer, and GAN stubs for text-to-world transformation.
 
 ### System Design Choices
 - File system persistence is handled via localStorage.
@@ -65,6 +66,46 @@ Preferred communication style: Simple, everyday language.
 - Per-user OAuth authentication via Replit's connector system for Google Drive and GitHub.
 
 ## Recent Changes
+
+### StoryForge Backend Integration (October 29, 2025) 🌌
+
+**Major Integration**: Complete semantic world generation backend from StoryForge Games
+
+**Backend Services**:
+1. **Symbolic Parser** (`symbolic-parser.ts`): Parses text using punctuation as semantic operators based on Yi Jing
+   - Operators: • (movement), . (being), ° (transpersonal), : (design), ; (evolution), , (space), ... (void)
+   - Rhythm analysis, complexity scoring, semantic hints
+2. **LLM Observer** (`llm-observer.ts`): Interprets text through 7-layer semantic framework using OpenAI GPT-4o
+   - Layers: Movement, Evolution, Being, Design, Space, Transpersonal, Void
+   - Generates narrative, world attributes, discriminator scores (coherence/resonance/beauty)
+3. **World Orchestrator** (`world-orchestrator.ts`): Main pipeline coordinating full ideogenesis flow
+   - Text → Symbolic Parse → LLM Observe → GAN Generate → World Manifestation
+   - Token economy (5 tokens/month), status tracking, error handling
+4. **GAN Integrations** (`gan-integrations.ts`): Stub interfaces for Semantic GAN and Video GAN endpoints
+   - Ready for real generative model integration
+
+**Database Schema**:
+- `tokenLedger`: Monthly token tracking (5 tokens/month per user)
+- `ideonSeeds`: Parsed semantic structures from user input
+- `worldManifestations`: Generated worlds with GAN outputs, narratives, quality scores
+
+**API Endpoints**:
+- `GET /api/health`: Health check
+- `GET /api/tokens/status`: Check token availability
+- `POST /api/ideons`: Generate world from text (consumes token)
+- `GET /api/ideons`: List all ideons for user
+- `GET /api/ideons/:id`: Get specific ideon
+- `GET /api/worlds/:ideonId`: Get world manifestation
+
+**Technical Stack**:
+- OpenAI GPT-4o for semantic interpretation
+- In-memory storage with full CRUD for ideons and worlds
+- Lazy-loaded OpenAI client to avoid startup failures
+- Zod validation for API requests
+
+**Use Case**: Powers Semantic Universe Creator with real AI-driven world generation instead of client-side localStorage
+
+
 
 ### 3D Universe Viewer Launch (October 29, 2025) 🎮
 
