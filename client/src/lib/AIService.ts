@@ -24,6 +24,40 @@ export class AIService {
   }
 
   /**
+   * Test API key validation
+   */
+  static async testConnection(backend: string, apiKey: string): Promise<AIResponse> {
+    const testMessages: AIMessage[] = [
+      { role: "user", content: "Hello" }
+    ];
+
+    try {
+      switch (backend) {
+        case "claude":
+          return await this.callClaudeWithKey(testMessages, apiKey);
+        case "gpt":
+          return await this.callGPTWithKey(testMessages, apiKey);
+        case "deepseek":
+          return await this.callDeepSeekWithKey(testMessages, apiKey);
+        case "grok":
+          return await this.callGrokWithKey(testMessages, apiKey);
+        case "huggingface":
+          return await this.callHuggingFaceWithKey(testMessages, apiKey);
+        case "codellama":
+          return { content: "Local model - no key validation needed" };
+        default:
+          return { content: "", error: `Unknown backend: ${backend}` };
+      }
+    } catch (error) {
+      console.error("Connection test error:", error);
+      return {
+        content: "",
+        error: error instanceof Error ? error.message : "Connection test failed"
+      };
+    }
+  }
+
+  /**
    * Send a message to the selected AI backend
    */
   static async sendMessage(messages: AIMessage[]): Promise<AIResponse> {
@@ -63,7 +97,10 @@ export class AIService {
     if (!apiKey) {
       return { content: "", error: "Claude API key not configured" };
     }
+    return this.callClaudeWithKey(messages, apiKey);
+  }
 
+  private static async callClaudeWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -82,7 +119,9 @@ export class AIService {
     });
 
     if (!response.ok) {
-      throw new Error(`Claude API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || response.statusText;
+      throw new Error(`Claude API error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();
@@ -97,7 +136,10 @@ export class AIService {
     if (!apiKey) {
       return { content: "", error: "OpenAI API key not configured" };
     }
+    return this.callGPTWithKey(messages, apiKey);
+  }
 
+  private static async callGPTWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -112,7 +154,9 @@ export class AIService {
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || response.statusText;
+      throw new Error(`OpenAI API error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();
@@ -154,7 +198,10 @@ export class AIService {
     if (!apiKey) {
       return { content: "", error: "DeepSeek API key not configured" };
     }
+    return this.callDeepSeekWithKey(messages, apiKey);
+  }
 
+  private static async callDeepSeekWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -169,7 +216,9 @@ export class AIService {
     });
 
     if (!response.ok) {
-      throw new Error(`DeepSeek API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || response.statusText;
+      throw new Error(`DeepSeek API error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();
@@ -184,7 +233,10 @@ export class AIService {
     if (!apiKey) {
       return { content: "", error: "Grok API key not configured" };
     }
+    return this.callGrokWithKey(messages, apiKey);
+  }
 
+  private static async callGrokWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -199,7 +251,9 @@ export class AIService {
     });
 
     if (!response.ok) {
-      throw new Error(`Grok API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || response.statusText;
+      throw new Error(`Grok API error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();
@@ -214,7 +268,10 @@ export class AIService {
     if (!apiKey) {
       return { content: "", error: "HuggingFace API key not configured" };
     }
+    return this.callHuggingFaceWithKey(messages, apiKey);
+  }
 
+  private static async callHuggingFaceWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
     const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -230,8 +287,9 @@ export class AIService {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HuggingFace API error: ${response.statusText} - ${errorText}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || errorData.detail || response.statusText;
+      throw new Error(`HuggingFace API error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();

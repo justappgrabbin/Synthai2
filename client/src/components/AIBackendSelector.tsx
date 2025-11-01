@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, ChevronDown } from "lucide-react";
+import { Bot, ChevronDown, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { AIService } from "@/lib/AIService";
 
 interface AIBackend {
   id: string;
@@ -84,6 +85,8 @@ export function AIBackendSelector() {
   const [apiKey, setApiKey] = useState("");
   const [ollamaUrl, setOllamaUrl] = useState("http://localhost:11434");
   const [isConfigured, setIsConfigured] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
 
   useEffect(() => {
     const savedBackendId = localStorage.getItem("ai_backend");
@@ -120,6 +123,48 @@ export function AIBackendSelector() {
     } else {
       setApiKey("");
       setIsConfigured(false);
+    }
+  };
+
+  const handleTestConnection = async () => {
+    if (!apiKey.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter an API key first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsTesting(true);
+    setTestResult(null);
+
+    try {
+      const result = await AIService.testConnection(selectedBackend.id, apiKey);
+      
+      if (result.error) {
+        setTestResult("error");
+        toast({
+          title: "Connection Failed",
+          description: result.error,
+          variant: "destructive"
+        });
+      } else {
+        setTestResult("success");
+        toast({
+          title: "Connection Successful",
+          description: `${selectedBackend.name} API key is valid and working!`
+        });
+      }
+    } catch (error) {
+      setTestResult("error");
+      toast({
+        title: "Connection Failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
+      });
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -206,21 +251,66 @@ export function AIBackendSelector() {
               data-testid="input-api-key"
               type="password"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) => {
+                setApiKey(e.target.value);
+                setTestResult(null);
+              }}
               placeholder={selectedBackend.keyPlaceholder}
               className="font-mono text-sm"
             />
             <Button 
+              data-testid="button-test-connection"
+              onClick={handleTestConnection}
+              disabled={isTesting || !apiKey.trim()}
+              variant="outline"
+              className="shrink-0"
+            >
+              {isTesting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  Testing
+                </>
+              ) : testResult === "success" ? (
+                <>
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                  Valid
+                </>
+              ) : testResult === "error" ? (
+                <>
+                  <XCircle className="h-4 w-4 text-red-500 mr-1" />
+                  Test
+                </>
+              ) : (
+                "Test"
+              )}
+            </Button>
+            <Button 
               data-testid="button-save-api-key"
               onClick={handleSaveKey}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 shrink-0"
             >
               Save
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {isConfigured ? "✓ API key configured" : "Enter your API key to enable"}
-          </p>
+          <div className="flex items-center gap-2">
+            {testResult === "success" && (
+              <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Connection successful
+              </p>
+            )}
+            {testResult === "error" && (
+              <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                <XCircle className="h-3 w-3" />
+                Connection failed - check your key
+              </p>
+            )}
+            {!testResult && (
+              <p className="text-xs text-muted-foreground">
+                {isConfigured ? "✓ API key configured" : "Enter your API key to enable"}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
