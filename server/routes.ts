@@ -6,6 +6,8 @@ import { createOrUpdateGitHubRepo } from "./lib/githubService";
 import { importGitHubRepo } from "./lib/githubImportService";
 import { deployToNetlify } from "./lib/netlifyService";
 import { orchestrateWorldGeneration, checkTokenAvailability, consumeToken } from "./services/world-orchestrator";
+import { ConsciousnessCalibrator, ChartInterpreter, type BirthData } from "./services/chart-calculators";
+import { generateLayeredConsciousnessVoice } from "./services/gan-integrations";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -307,6 +309,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete ZIP" });
+    }
+  });
+
+  // ========== Consciousness Calibration API ==========
+  
+  // Calculate all 7 charts and get ERN calibration data
+  app.post("/api/consciousness/calibrate", async (req, res) => {
+    try {
+      const calibrateSchema = z.object({
+        datetime: z.string().transform(str => new Date(str)),
+        latitude: z.number().min(-90).max(90),
+        longitude: z.number().min(-180).max(180),
+        timezone: z.string(),
+        withVoice: z.boolean().optional().default(false),
+        withLLMInterpretation: z.boolean().optional().default(false),
+      });
+      
+      const birthData: BirthData = calibrateSchema.parse(req.body);
+      
+      // Calculate all 7 charts
+      const allSeeds = ConsciousnessCalibrator.calibrateAll(birthData);
+      
+      // Merge into unified oscillator seeds
+      const mergedSeeds = ConsciousnessCalibrator.mergeSeeds(allSeeds);
+      
+      let interpretation = null;
+      let voiceReadings = null;
+      
+      // Optional: Generate LLM interpretation
+      if (req.body.withLLMInterpretation) {
+        try {
+          interpretation = await ChartInterpreter.interpretCharts(allSeeds, birthData);
+          
+          // Optional: Generate voice readings
+          if (req.body.withVoice && interpretation?.layerInsights) {
+            voiceReadings = await generateLayeredConsciousnessVoice(interpretation.layerInsights);
+          }
+        } catch (error) {
+          console.error('Interpretation error:', error);
+          // Continue without interpretation if it fails
+        }
+      }
+      
+      res.json({
+        success: true,
+        charts: allSeeds,
+        oscillatorSeeds: mergedSeeds,
+        interpretation,
+        voiceReadings,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid birth data", 
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to calibrate consciousness" 
+      });
+    }
+  });
+  
+  // Quick natal chart calculation (single layer)
+  app.post("/api/consciousness/natal", async (req, res) => {
+    try {
+      const birthDataSchema = z.object({
+        datetime: z.string().transform(str => new Date(str)),
+        latitude: z.number().min(-90).max(90),
+        longitude: z.number().min(-180).max(180),
+        timezone: z.string(),
+      });
+      
+      const birthData: BirthData = birthDataSchema.parse(req.body);
+      
+      // Import the calculator
+      const { NatalChartCalculator } = await import("./services/chart-calculators");
+      const natalChart = NatalChartCalculator.calculate(birthData);
+      
+      res.json({
+        success: true,
+        chart: natalChart,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid birth data", 
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to calculate natal chart" 
+      });
     }
   });
 
