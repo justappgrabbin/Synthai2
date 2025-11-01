@@ -39,6 +39,8 @@ export interface IStorage {
   getAllZips(): Promise<StoredZip[]>;
   createZip(zip: Omit<StoredZip, 'id'>): Promise<StoredZip>;
   deleteZip(id: string): Promise<boolean>;
+  getZipFileContent(zipId: string, filePath: string): Promise<string>;
+  mergeZips(zipIds: string[], conflictResolutions: Record<string, 'first' | 'last' | 'rename'>): Promise<{ id: string; fileCount: number }>;
 }
 
 export class MemStorage implements IStorage {
@@ -205,6 +207,85 @@ export class MemStorage implements IStorage {
 
   async deleteZip(id: string): Promise<boolean> {
     return this.zips.delete(id);
+  }
+
+  async getZipFileContent(zipId: string, filePath: string): Promise<string> {
+    const zip = this.zips.get(zipId);
+    if (!zip) {
+      throw new Error('ZIP not found');
+    }
+
+    const entry = zip.structure.entries.find(e => e.path === filePath && e.type === 'file');
+    if (!entry) {
+      throw new Error('File not found in ZIP');
+    }
+
+    // For in-memory storage, we'll return a placeholder
+    // In a real implementation, this would extract the file from the ZIP blob
+    return `<!-- File: ${filePath} from ${zip.originalName} -->\n<p>File content would be loaded from ZIP archive</p>`;
+  }
+
+  async mergeZips(zipIds: string[], conflictResolutions: Record<string, 'first' | 'last' | 'rename'>): Promise<{ id: string; fileCount: number }> {
+    const zips = zipIds.map(id => this.zips.get(id)).filter(z => z !== undefined) as StoredZip[];
+    
+    if (zips.length < 2) {
+      throw new Error('Need at least 2 ZIPs to merge');
+    }
+
+    // Merge file structures
+    const mergedEntries = new Map<string, any>();
+    let totalSize = 0;
+    let fileCount = 0;
+    let directoryCount = 0;
+
+    for (const zip of zips) {
+      for (const entry of zip.structure.entries) {
+        const path = entry.path;
+        
+        if (mergedEntries.has(path)) {
+          const resolution = conflictResolutions[path] || 'last';
+          if (resolution === 'last') {
+            mergedEntries.set(path, entry);
+          } else if (resolution === 'rename') {
+            const newPath = `${path}.${zip.id.slice(0, 8)}`;
+            mergedEntries.set(newPath, { ...entry, path: newPath });
+          }
+          // 'first' means skip, entry already exists
+        } else {
+          mergedEntries.set(path, entry);
+        }
+
+        if (entry.type === 'file') {
+          fileCount++;
+          totalSize += entry.size || 0;
+        } else {
+          directoryCount++;
+        }
+      }
+    }
+
+    // Create merged ZIP record
+    const mergedZip = await this.createZip({
+      filename: `merged_${Date.now()}.zip`,
+      originalName: `Merged Archive (${zips.length} files)`,
+      uploadDate: new Date().toISOString(),
+      size: totalSize,
+      objectPath: `merged/${randomUUID()}`,
+      structure: {
+        entries: Array.from(mergedEntries.values()),
+        totalSize,
+        fileCount,
+        directoryCount,
+      },
+      analysis: {
+        description: `Merged from ${zips.length} archives`,
+        projectType: 'merged',
+        technologies: [],
+        confidence: 0.5,
+      },
+    });
+
+    return { id: mergedZip.id, fileCount };
   }
 }
 

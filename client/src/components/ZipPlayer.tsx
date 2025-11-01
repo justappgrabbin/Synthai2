@@ -28,7 +28,7 @@ export function ZipPlayer({ zip, open, onClose }: ZipPlayerProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
-  const { data: entryFileData } = useQuery({
+  const { data: entryFileData } = useQuery<{ entryFile: string | null }>({
     queryKey: ['/api/zips', zip?.id, 'entry-file'],
     enabled: !!zip && open,
   });

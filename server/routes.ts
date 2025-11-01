@@ -312,6 +312,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get entry file for ZIP (auto-detect index.html or main HTML file)
+  app.get("/api/zips/:id/entry-file", async (req, res) => {
+    try {
+      const zip = await storage.getZip(req.params.id);
+      if (!zip) {
+        return res.status(404).json({ error: "ZIP not found" });
+      }
+
+      // Find entry file - prioritize index.html, then any HTML file
+      const htmlFiles = zip.structure.entries
+        .filter(e => e.type === 'file' && (e.name.endsWith('.html') || e.name.endsWith('.htm')))
+        .map(e => e.path);
+
+      const entryFile = htmlFiles.find(f => f.includes('index.html')) || htmlFiles[0] || null;
+
+      res.json({ entryFile });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to detect entry file" });
+    }
+  });
+
+  // Serve files from ZIP for playback
+  app.get("/api/zips/:id/play/:filePath(*)", async (req, res) => {
+    try {
+      const zip = await storage.getZip(req.params.id);
+      if (!zip) {
+        return res.status(404).json({ error: "ZIP not found" });
+      }
+
+      const filePath = req.params.filePath;
+      const entry = zip.structure.entries.find(e => e.path === filePath);
+      
+      if (!entry || entry.type !== 'file') {
+        return res.status(404).send('File not found in archive');
+      }
+
+      // Since we're using in-memory storage, get the file content
+      const content = await storage.getZipFileContent(zip.id, filePath);
+      
+      // Set content type based on file extension
+      const ext = filePath.split('.').pop()?.toLowerCase();
+      const contentTypes: Record<string, string> = {
+        'html': 'text/html',
+        'htm': 'text/html',
+        'css': 'text/css',
+        'js': 'application/javascript',
+        'json': 'application/json',
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'gif': 'image/gif',
+        'svg': 'image/svg+xml',
+        'txt': 'text/plain',
+      };
+
+      res.setHeader('Content-Type', contentTypes[ext || ''] || 'application/octet-stream');
+      res.send(content);
+    } catch (error) {
+      res.status(500).send('Failed to serve file');
+    }
+  });
+
+  // Merge/stitch multiple ZIPs
+  app.post("/api/zips/merge", async (req, res) => {
+    try {
+      const { zipIds, conflictResolutions } = req.body;
+
+      if (!zipIds || !Array.isArray(zipIds) || zipIds.length < 2) {
+        return res.status(400).json({ error: "At least 2 ZIP IDs required" });
+      }
+
+      const result = await storage.mergeZips(zipIds, conflictResolutions || {});
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to merge ZIPs" });
+    }
+  });
+
   // ========== Consciousness Calibration API ==========
   
   // Calculate all 7 charts and get ERN calibration data
