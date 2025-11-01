@@ -65,6 +65,15 @@ const AI_BACKENDS: AIBackend[] = [
     keyLabel: "Grok API Key",
     keyPlaceholder: "xai-...",
     endpoint: "https://api.x.ai/v1/chat/completions"
+  },
+  {
+    id: "huggingface",
+    name: "HuggingFace",
+    displayName: "HuggingFace",
+    requiresKey: true,
+    keyLabel: "HuggingFace API Key",
+    keyPlaceholder: "hf_...",
+    endpoint: "https://api-inference.huggingface.co/models"
   }
 ];
 
