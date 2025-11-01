@@ -160,19 +160,9 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Cosmic Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-background border-b border-lavender/20">
-        {/* Animated starfield background */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white rounded-full animate-pulse" />
-          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-lavender rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
-          <div className="absolute bottom-1/4 left-1/2 w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-lavender rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
-          <div className="absolute bottom-1/3 left-1/3 w-1 h-1 bg-white rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
-          <div className="absolute top-2/3 right-1/2 w-1 h-1 bg-lavender rounded-full animate-pulse" style={{ animationDelay: '2.5s' }} />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-background border-b">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
           <div className="text-center space-y-6">
             <div className="inline-block">
               <div className="flex items-center justify-center gap-3 mb-4">

@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, Minimize2, Maximize2, X } from "lucide-react";
+import { Bot, Send, Minimize2, Maximize2, X, MoveIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,8 +25,8 @@ export function PersistentAssistant() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [position, setPosition] = useState(() => {
-    const saved = localStorage.getItem('ai_assistant_position');
-    return saved ? JSON.parse(saved) : { x: window.innerWidth - 450, y: 24 };
+    const saved = localStorage.getItem('ai_assistant_position_v2');
+    return saved ? JSON.parse(saved) : { x: window.innerWidth - 450, y: 100 };
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -40,7 +40,7 @@ export function PersistentAssistant() {
   }, [messages]);
 
   useEffect(() => {
-    localStorage.setItem('ai_assistant_position', JSON.stringify(position));
+    localStorage.setItem('ai_assistant_position_v2', JSON.stringify(position));
   }, [position]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -134,6 +134,16 @@ export function PersistentAssistant() {
     toast({
       title: "Chat Cleared",
       description: "Conversation history has been reset"
+    });
+  };
+
+  const resetPosition = () => {
+    const newPos = { x: window.innerWidth - 450, y: 100 };
+    setPosition(newPos);
+    localStorage.setItem('ai_assistant_position_v2', JSON.stringify(newPos));
+    toast({
+      title: "Position Reset",
+      description: "Guard Dog moved to default position"
     });
   };
 

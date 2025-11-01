@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_ITEMS = [
   { path: "/", icon: Home, label: "Dashboard" },
@@ -48,8 +47,6 @@ export function GlobalNav() {
             );
           })}
         </div>
-
-        <ThemeToggle />
       </div>
     </nav>
   );
