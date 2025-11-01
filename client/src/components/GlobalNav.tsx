@@ -6,12 +6,11 @@ const NAV_ITEMS = [
   { path: "/", icon: Home, label: "Dashboard" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/grove-store", icon: Store, label: "Grove Store" },
-  { path: "/zip-manager", icon: FolderTree, label: "ZIP Manager" },
+  { path: "/zip-manager", icon: FolderTree, label: "ZIP Studio" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
   { path: "/gan-trainer", icon: Palette, label: "GAN" },
   { path: "/universe-creator", icon: Network, label: "Universe" },
   { path: "/calibration-tank", icon: Brain, label: "Calibration" },
-  { path: "/player", icon: Play, label: "Player" },
   { path: "/agents", icon: Bot, label: "Agents" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
