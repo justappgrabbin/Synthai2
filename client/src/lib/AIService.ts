@@ -207,7 +207,7 @@ export class AIService {
   }
 
   /**
-   * HuggingFace Inference API
+   * HuggingFace Router API (OpenAI-compatible)
    */
   private static async callHuggingFace(messages: AIMessage[]): Promise<AIResponse> {
     const apiKey = this.getApiKey("huggingface");
@@ -215,37 +215,26 @@ export class AIService {
       return { content: "", error: "HuggingFace API key not configured" };
     }
 
-    // Format messages into a single prompt for text generation models
-    const prompt = messages.map(m => {
-      if (m.role === "system") return m.content;
-      if (m.role === "user") return `User: ${m.content}`;
-      return `Assistant: ${m.content}`;
-    }).join("\n\n") + "\n\nAssistant:";
-
-    const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
+    const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.7,
-          top_p: 0.9,
-          return_full_text: false
-        }
+        model: "MiniMaxAI/MiniMax-M2:novita",
+        messages: messages,
+        max_tokens: 1024,
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
-      throw new Error(`HuggingFace API error: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`HuggingFace API error: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
-    // HuggingFace returns an array with the generated text
-    const content = Array.isArray(data) ? data[0].generated_text : data.generated_text || "";
-    return { content: content.trim() };
+    return { content: data.choices[0].message.content };
   }
 }
