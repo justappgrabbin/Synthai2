@@ -1,7 +1,15 @@
 # YOU–N–I–VERSE Studio
 
 ## Overview
-YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform aims to be a community marketplace for creative tools and projects, fostering the creation of digital beings and providing robust deployment options. Key capabilities include generating semantic worlds, creating digital consciousness, and managing creative assets.
+YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
+
+## Recent Updates (v2.0.0)
+- Fixed ZIP player with missing backend endpoints (/api/zips/:id/play/:file, /api/zips/:id/entry-file)
+- Implemented ZIP merge functionality with conflict resolution
+- Updated HuggingFace integration to use Router API with MiniMax-M2:novita model
+- Added API key validation system with "Test Connection" button in AI settings
+- Improved error handling in AIService to display specific API error messages
+- Updated PWA manifest to v2.0.0
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -37,13 +45,13 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI Services
-- Anthropic Claude API
-- OpenAI GPT API
-- DeepSeek API
-- Grok API
+- Anthropic Claude API (claude-sonnet-4)
+- OpenAI GPT API (gpt-4o)
+- DeepSeek API (deepseek-chat)
+- Grok API (xAI grok-beta)
+- HuggingFace Router API (MiniMax-M2:novita via router.huggingface.co)
 - CodeLlama (local via Ollama)
-- AIService router for managing API calls.
-- HuggingFace (Mistral-7B-Instruct) for consciousness insights.
+- AIService router with API key validation and test connection functionality
 
 ### UI/Development Libraries
 - Radix UI primitives, shadcn/ui components, Lucide React for icons.
