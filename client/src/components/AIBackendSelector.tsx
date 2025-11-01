@@ -71,11 +71,11 @@ const AI_BACKENDS: AIBackend[] = [
   {
     id: "huggingface",
     name: "HuggingFace",
-    displayName: "HuggingFace",
+    displayName: "HuggingFace (MiniMax-M2)",
     requiresKey: true,
-    keyLabel: "HuggingFace API Key",
+    keyLabel: "HuggingFace Token (HF_TOKEN)",
     keyPlaceholder: "hf_...",
-    endpoint: "https://api-inference.huggingface.co/models"
+    endpoint: "https://router.huggingface.co/v1/chat/completions"
   }
 ];
 
