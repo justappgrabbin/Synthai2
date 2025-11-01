@@ -13,7 +13,16 @@
  * These convert ephemeris data → Human Design gates → field activation seeds
  */
 
-import { DateTime } from 'luxon';
+import Astronomy from 'astronomy-engine';
+
+// LLM integration for chart interpretation
+interface ChartInterpretation {
+  summary: string;
+  layerInsights: Record<string, string>;
+  calibrationGuidance: string;
+  dominantThemes: string[];
+  energySignature: string;
+}
 
 // ============================================================================
 // TYPES
@@ -119,34 +128,84 @@ const CENTER_FREQUENCIES = {
 
 class EphemerisCalculator {
   /**
-   * Calculate planetary positions at given time
-   * NOTE: This is a STUB - will use actual swisseph library
+   * Calculate planetary positions using Astronomy Engine
    */
   static calculatePositions(datetime: Date, latitude: number, longitude: number): PlanetaryPosition[] {
-    // TODO: Replace with actual swisseph calculations
-    // For now, return placeholder positions
-    const julianDay = this.dateToJulianDay(datetime);
+    const astroTime = new Astronomy.AstroTime(datetime);
     
-    return [
-      { planet: 'Sun', longitude: 0, latitude: 0, speed: 1.0 },
-      { planet: 'Moon', longitude: 0, latitude: 0, speed: 13.0 },
-      { planet: 'Mercury', longitude: 0, latitude: 0, speed: 1.0 },
-      { planet: 'Venus', longitude: 0, latitude: 0, speed: 1.0 },
-      { planet: 'Mars', longitude: 0, latitude: 0, speed: 0.5 },
-      { planet: 'Jupiter', longitude: 0, latitude: 0, speed: 0.08 },
-      { planet: 'Saturn', longitude: 0, latitude: 0, speed: 0.03 },
-      { planet: 'Uranus', longitude: 0, latitude: 0, speed: 0.01 },
-      { planet: 'Neptune', longitude: 0, latitude: 0, speed: 0.006 },
-      { planet: 'Pluto', longitude: 0, latitude: 0, speed: 0.004 },
-      { planet: 'NorthNode', longitude: 0, latitude: 0, speed: -0.05 },
-      { planet: 'SouthNode', longitude: 180, latitude: 0, speed: -0.05 },
-      { planet: 'Earth', longitude: 180, latitude: 0, speed: 1.0 },
-    ];
+    // Calculate actual planetary positions
+    const positions: PlanetaryPosition[] = [];
+    
+    // Sun
+    const sunEcliptic = Astronomy.Ecliptic(Astronomy.SunPosition(astroTime));
+    positions.push({
+      planet: 'Sun',
+      longitude: sunEcliptic.elon,
+      latitude: sunEcliptic.elat,
+      speed: 1.0
+    });
+    
+    // Moon
+    const moonEcliptic = Astronomy.Ecliptic(Astronomy.GeoMoon(astroTime));
+    positions.push({
+      planet: 'Moon',
+      longitude: moonEcliptic.elon,
+      latitude: moonEcliptic.elat,
+      speed: 13.0
+    });
+    
+    // Planets
+    const planets = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    const speeds = [1.6, 1.2, 0.5, 0.08, 0.03, 0.01, 0.006, 0.004];
+    
+    planets.forEach((planet, idx) => {
+      const bodyCode = planet as Astronomy.Body;
+      const geoVector = Astronomy.GeoVector(bodyCode, astroTime, false);
+      const ecliptic = Astronomy.Ecliptic(geoVector);
+      
+      positions.push({
+        planet,
+        longitude: ecliptic.elon,
+        latitude: ecliptic.elat,
+        speed: speeds[idx]
+      });
+    });
+    
+    // North Node (approximation using Moon's orbit)
+    const moonNode = this.calculateMoonNode(astroTime);
+    positions.push({
+      planet: 'NorthNode',
+      longitude: moonNode,
+      latitude: 0,
+      speed: -0.05
+    });
+    
+    // South Node (opposite North Node)
+    positions.push({
+      planet: 'SouthNode',
+      longitude: (moonNode + 180) % 360,
+      latitude: 0,
+      speed: -0.05
+    });
+    
+    // Earth (opposite Sun)
+    positions.push({
+      planet: 'Earth',
+      longitude: (sunEcliptic.elon + 180) % 360,
+      latitude: 0,
+      speed: 1.0
+    });
+    
+    return positions;
   }
-
-  static dateToJulianDay(date: Date): number {
-    const time = date.getTime();
-    return (time / 86400000) + 2440587.5;
+  
+  static calculateMoonNode(astroTime: Astronomy.AstroTime): number {
+    // Approximate North Node calculation
+    // Using simplified formula: Node = 125.04 - 0.0529539 * days from J2000
+    const j2000 = new Astronomy.AstroTime(new Date('2000-01-01T12:00:00Z'));
+    const daysSinceJ2000 = astroTime.ut - j2000.ut;
+    const nodePosition = (125.04 - 0.0529539 * daysSinceJ2000) % 360;
+    return nodePosition < 0 ? nodePosition + 360 : nodePosition;
   }
 
   static longitudeToGate(longitude: number): GateActivation {
@@ -639,5 +698,164 @@ export class ConsciousnessCalibrator {
     });
 
     return merged;
+  }
+}
+
+// ============================================================================
+// LLM CHART INTERPRETER (HuggingFace)
+// ============================================================================
+
+import { HfInference } from '@huggingface/inference';
+
+export class ChartInterpreter {
+  private static hf: HfInference | null = null;
+
+  private static getHF(): HfInference {
+    if (!this.hf) {
+      const apiKey = process.env.HUGGINGFACE_API_KEY;
+      if (!apiKey) {
+        throw new Error('HuggingFace API key not configured. Set HUGGINGFACE_API_KEY environment variable.');
+      }
+      this.hf = new HfInference(apiKey);
+    }
+    return this.hf;
+  }
+
+  /**
+   * Interpret all 7 charts using HuggingFace LLM
+   */
+  static async interpretCharts(allSeeds: Record<string, ChartSeeds>, birthData: BirthData): Promise<ChartInterpretation> {
+    const hf = this.getHF();
+
+    const chartSummary = this.generateChartSummary(allSeeds);
+    
+    const prompt = `You are an expert consciousness calibration analyst specializing in the 7-layer semantic framework for human consciousness field activation.
+
+Analyze this multi-layered chart reading and provide deep insights:
+
+${chartSummary}
+
+Birth Data:
+- Date: ${birthData.datetime.toISOString()}
+- Location: ${birthData.latitude}, ${birthData.longitude}
+
+Provide a comprehensive interpretation focusing on:
+1. Overall consciousness signature
+2. Dominant energy centers and their interplay
+3. Layer-specific insights for each of the 7 consciousness layers
+4. Calibration guidance for optimal field activation
+5. Key themes and archetypal patterns
+
+Format your response as JSON:
+{
+  "summary": "overall consciousness signature summary",
+  "layerInsights": {
+    "BEING": "insights about physical/genetic foundation",
+    "MOVEMENT": "insights about temporal movement state",
+    "EVOLUTION": "insights about developmental arc",
+    "DESIGN": "insights about yearly intentions",
+    "SPACE": "insights about emotional cycles",
+    "TRANSPERSONAL": "insights about relational field",
+    "VOID": "insights about soul purpose"
+  },
+  "calibrationGuidance": "specific guidance for ERN oscillator calibration",
+  "dominantThemes": ["theme1", "theme2", "theme3"],
+  "energySignature": "unique consciousness energy signature description"
+}`;
+
+    try {
+      const response = await hf.textGeneration({
+        model: 'mistralai/Mistral-7B-Instruct-v0.2',
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 1500,
+          temperature: 0.7,
+          top_p: 0.95,
+          return_full_text: false
+        }
+      });
+
+      const generated = response.generated_text.trim();
+      
+      let parsed: ChartInterpretation;
+      try {
+        const jsonMatch = generated.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (parseError) {
+        parsed = {
+          summary: generated,
+          layerInsights: {
+            BEING: 'Analysis in progress',
+            MOVEMENT: 'Analysis in progress',
+            EVOLUTION: 'Analysis in progress',
+            DESIGN: 'Analysis in progress',
+            SPACE: 'Analysis in progress',
+            TRANSPERSONAL: 'Analysis in progress',
+            VOID: 'Analysis in progress'
+          },
+          calibrationGuidance: 'Interpreting consciousness field patterns...',
+          dominantThemes: ['Consciousness', 'Field Activation', 'ERN Calibration'],
+          energySignature: 'Unique consciousness signature'
+        };
+      }
+
+      return parsed;
+    } catch (error) {
+      console.error('HuggingFace interpretation error:', error);
+      
+      return {
+        summary: 'Consciousness field calculated successfully. LLM interpretation temporarily unavailable.',
+        layerInsights: this.generateFallbackInsights(allSeeds),
+        calibrationGuidance: 'Use merged center activations for ERN oscillator initialization.',
+        dominantThemes: this.extractDominantThemes(allSeeds),
+        energySignature: this.generateEnergySignature(allSeeds)
+      };
+    }
+  }
+
+  private static generateChartSummary(allSeeds: Record<string, ChartSeeds>): string {
+    let summary = '';
+    
+    Object.entries(allSeeds).forEach(([layer, seeds]) => {
+      const activeCenters = Object.entries(seeds.centers)
+        .filter(([_, c]) => c.amplitude > 0.5)
+        .map(([name, c]) => `${name} (amp: ${c.amplitude.toFixed(2)})`);
+      
+      summary += `\n${layer} LAYER:\n`;
+      summary += `- Element: ${seeds.dominantElement}\n`;
+      summary += `- Coherence: ${seeds.coherenceBias.toFixed(2)}\n`;
+      summary += `- Active Centers: ${activeCenters.join(', ')}\n`;
+      summary += `- Gates Activated: ${seeds.gates.length}\n`;
+    });
+    
+    return summary;
+  }
+
+  private static generateFallbackInsights(allSeeds: Record<string, ChartSeeds>): Record<string, string> {
+    const insights: Record<string, string> = {};
+    
+    Object.entries(allSeeds).forEach(([layer, seeds]) => {
+      const activeCenters = Object.keys(seeds.centers).filter(c => seeds.centers[c].amplitude > 0.5);
+      insights[layer] = `${layer} layer activated with ${activeCenters.length} primary centers. Dominant element: ${seeds.dominantElement}`;
+    });
+    
+    return insights;
+  }
+
+  private static extractDominantThemes(allSeeds: Record<string, ChartSeeds>): string[] {
+    const elements = Object.values(allSeeds).map(s => s.dominantElement);
+    const unique = [...new Set(elements)];
+    return unique.map(el => `${el}-Element Consciousness`);
+  }
+
+  private static generateEnergySignature(allSeeds: Record<string, ChartSeeds>): string {
+    const avgCoherence = Object.values(allSeeds).reduce((sum, s) => sum + s.coherenceBias, 0) / 7;
+    const totalGates = Object.values(allSeeds).reduce((sum, s) => sum + s.gates.length, 0);
+    
+    return `Consciousness field with ${totalGates} gate activations, ${avgCoherence.toFixed(2)} coherence rating`;
   }
 }
