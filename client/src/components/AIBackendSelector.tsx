@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface AIBackend {
   id: string;
@@ -78,6 +79,7 @@ const AI_BACKENDS: AIBackend[] = [
 ];
 
 export function AIBackendSelector() {
+  const { toast } = useToast();
   const [selectedBackend, setSelectedBackend] = useState<AIBackend>(AI_BACKENDS[0]);
   const [apiKey, setApiKey] = useState("");
   const [ollamaUrl, setOllamaUrl] = useState("http://localhost:11434");
@@ -85,16 +87,18 @@ export function AIBackendSelector() {
 
   useEffect(() => {
     const savedBackendId = localStorage.getItem("ai_backend");
-    const savedKey = localStorage.getItem(`ai_key_${selectedBackend.id}`);
     const savedOllamaUrl = localStorage.getItem("ollama_url");
     
+    let backendToLoad = AI_BACKENDS[0];
     if (savedBackendId) {
       const backend = AI_BACKENDS.find(b => b.id === savedBackendId);
       if (backend) {
+        backendToLoad = backend;
         setSelectedBackend(backend);
       }
     }
     
+    const savedKey = localStorage.getItem(`ai_key_${backendToLoad.id}`);
     if (savedKey) {
       setApiKey(savedKey);
       setIsConfigured(true);
@@ -120,19 +124,31 @@ export function AIBackendSelector() {
   };
 
   const handleSaveKey = () => {
-    if (selectedBackend.requiresKey && apiKey) {
+    if (selectedBackend.requiresKey && apiKey.trim()) {
       localStorage.setItem(`ai_key_${selectedBackend.id}`, apiKey);
       setIsConfigured(true);
-      console.log('API key saved for', selectedBackend.name);
+      toast({
+        title: "API Key Saved",
+        description: `${selectedBackend.name} is now configured and ready to use.`
+      });
     } else if (!selectedBackend.requiresKey) {
       setIsConfigured(true);
+    } else {
+      toast({
+        title: "Error",
+        description: "Please enter a valid API key",
+        variant: "destructive"
+      });
     }
   };
 
   const handleSaveOllamaUrl = () => {
     if (ollamaUrl) {
       localStorage.setItem("ollama_url", ollamaUrl);
-      console.log('Ollama URL saved:', ollamaUrl);
+      toast({
+        title: "Ollama URL Saved",
+        description: `Ollama server set to: ${ollamaUrl}`
+      });
     }
   };
 
