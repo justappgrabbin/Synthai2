@@ -38,6 +38,15 @@ const CORE_APPS: AppModule[] = [
     version: "1.0.0"
   },
   {
+    id: "zip-manager",
+    name: "ZIP Manager",
+    description: "Upload, manage, play & stitch ZIP archives",
+    path: "/zip-manager",
+    icon: FolderTree,
+    type: "core",
+    version: "1.0.0"
+  },
+  {
     id: "player",
     name: "YOU–N–I–Versal Player",
     description: "Play & explore creative bundles",

@@ -18,6 +18,7 @@ import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
 import { AutonomyControlCenter } from "@/components/AutonomyControlCenter";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import ZipManager from "@/pages/ZipManager";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/settings" component={SettingsPanel} />
       <Route path="/player" component={PlayerPanel} />
       <Route path="/agents" component={AgentPanel} />
+      <Route path="/zip-manager" component={ZipManager} />
       <Route component={NotFound} />
     </Switch>
   );

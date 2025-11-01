@@ -6,7 +6,8 @@ import {
   type IdeonSeed,
   type InsertIdeonSeed,
   type WorldManifestation,
-  type InsertWorldManifestation
+  type InsertWorldManifestation,
+  type StoredZip
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -32,6 +33,12 @@ export interface IStorage {
   getWorldManifestation(id: string): Promise<WorldManifestation | undefined>;
   getWorldManifestationByIdeonId(ideonSeedId: string): Promise<WorldManifestation | undefined>;
   createWorldManifestation(manifestation: InsertWorldManifestation): Promise<WorldManifestation>;
+  
+  // ZIP archives (in-memory)
+  getZip(id: string): Promise<StoredZip | undefined>;
+  getAllZips(): Promise<StoredZip[]>;
+  createZip(zip: Omit<StoredZip, 'id'>): Promise<StoredZip>;
+  deleteZip(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -39,12 +46,14 @@ export class MemStorage implements IStorage {
   private tokenLedgers: Map<string, TokenLedger>;
   private ideonSeeds: Map<string, IdeonSeed>;
   private worldManifestations: Map<string, WorldManifestation>;
+  private zips: Map<string, StoredZip>;
 
   constructor() {
     this.users = new Map();
     this.tokenLedgers = new Map();
     this.ideonSeeds = new Map();
     this.worldManifestations = new Map();
+    this.zips = new Map();
   }
 
   // User methods
@@ -172,6 +181,30 @@ export class MemStorage implements IStorage {
     };
     this.worldManifestations.set(id, manifestation);
     return manifestation;
+  }
+
+  // ZIP archive methods
+  async getZip(id: string): Promise<StoredZip | undefined> {
+    return this.zips.get(id);
+  }
+
+  async getAllZips(): Promise<StoredZip[]> {
+    return Array.from(this.zips.values())
+      .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
+  }
+
+  async createZip(zip: Omit<StoredZip, 'id'>): Promise<StoredZip> {
+    const id = randomUUID();
+    const storedZip: StoredZip = {
+      ...zip,
+      id,
+    };
+    this.zips.set(id, storedZip);
+    return storedZip;
+  }
+
+  async deleteZip(id: string): Promise<boolean> {
+    return this.zips.delete(id);
   }
 }
 

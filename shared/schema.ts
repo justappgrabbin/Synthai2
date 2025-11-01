@@ -102,3 +102,74 @@ export const insertWorldManifestationSchema = createInsertSchema(worldManifestat
 
 export type InsertWorldManifestation = z.infer<typeof insertWorldManifestationSchema>;
 export type WorldManifestation = typeof worldManifestations.$inferSelect;
+
+// ZIP Archive Types (in-memory storage)
+export interface ZipFileEntry {
+  path: string;
+  name: string;
+  isDirectory: boolean;
+  size: number;
+  type?: string;
+}
+
+export interface ZipFileStructure {
+  entries: ZipFileEntry[];
+  totalSize: number;
+  fileCount: number;
+  directoryCount: number;
+}
+
+export interface AIAnalysis {
+  description: string;
+  projectType: string;
+  technologies: string[];
+  framework?: string;
+  confidence: number;
+}
+
+export interface StoredZip {
+  id: string;
+  filename: string;
+  originalName: string;
+  uploadDate: string;
+  size: number;
+  objectPath: string;
+  structure: ZipFileStructure;
+  analysis: AIAnalysis;
+}
+
+export interface ExternalSource {
+  type: 'github' | 'dropbox' | 'drive';
+  name: string;
+  url?: string;
+  path?: string;
+}
+
+export interface StitchConflict {
+  path: string;
+  sources: string[];
+}
+
+export interface MergedZipRequest {
+  zipIds: string[];
+  conflictResolutions: Record<string, 'first' | 'last' | 'rename'>;
+}
+
+export const zipUploadSchema = z.object({
+  filename: z.string(),
+  objectPath: z.string(),
+  size: z.number(),
+});
+
+export const zipAnalysisSchema = z.object({
+  zipId: z.string(),
+});
+
+export const mergeZipsSchema = z.object({
+  zipIds: z.array(z.string()),
+  conflictResolutions: z.record(z.enum(['first', 'last', 'rename'])),
+});
+
+export type ZipUpload = z.infer<typeof zipUploadSchema>;
+export type ZipAnalysis = z.infer<typeof zipAnalysisSchema>;
+export type MergeZips = z.infer<typeof mergeZipsSchema>;

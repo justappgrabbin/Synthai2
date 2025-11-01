@@ -2157,7 +2157,7 @@ const result = await handlePayment({
             </MenubarContent>
           </MenubarMenu>
 
-          {/* Tools Menu */}
+          {/* Tools & Deploy Menu */}
           <MenubarMenu>
             <MenubarTrigger className="text-sm cursor-pointer">Tools</MenubarTrigger>
             <MenubarContent>
@@ -2166,55 +2166,65 @@ const result = await handlePayment({
                 Code Snatcher
               </MenubarItem>
               <MenubarSeparator />
-              <MenubarItem onClick={() => setGithubDialogOpen(true)}>
-                <Github className="h-4 w-4 mr-2" />
-                Push to GitHub
-              </MenubarItem>
-              <MenubarItem onClick={() => setImportDialogOpen(true)}>
-                <Upload className="h-4 w-4 mr-2" />
-                Import from GitHub
-              </MenubarItem>
+              <MenubarSub>
+                <MenubarSubTrigger>
+                  <Github className="h-4 w-4 mr-2" />
+                  GitHub
+                </MenubarSubTrigger>
+                <MenubarSubContent>
+                  <MenubarItem onClick={() => setGithubDialogOpen(true)}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Push to GitHub
+                  </MenubarItem>
+                  <MenubarItem onClick={() => setImportDialogOpen(true)}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Import from GitHub
+                  </MenubarItem>
+                </MenubarSubContent>
+              </MenubarSub>
               <MenubarItem onClick={handleExportToGoogleDrive} disabled={isExportingToDrive}>
                 <Cloud className="h-4 w-4 mr-2" />
                 {isExportingToDrive ? 'Exporting...' : 'Export to Google Drive'}
               </MenubarItem>
               <MenubarSeparator />
+              <MenubarSub>
+                <MenubarSubTrigger>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Launch Apps
+                </MenubarSubTrigger>
+                <MenubarSubContent>
+                  <MenubarItem onClick={() => setLocation('/agents')}>
+                    <Bot className="h-4 w-4 mr-2" />
+                    AI Agent Creator
+                  </MenubarItem>
+                  <MenubarItem onClick={() => setLocation('/gan-trainer')}>
+                    <Brain className="h-4 w-4 mr-2" />
+                    GAN Trainer
+                  </MenubarItem>
+                  <MenubarItem onClick={() => setLocation('/game-creator')}>
+                    <Gamepad2 className="h-4 w-4 mr-2" />
+                    Game Templates
+                  </MenubarItem>
+                  <MenubarSeparator />
+                  <MenubarItem onClick={() => setLocation('/mod-manager')}>
+                    <Rocket className="h-4 w-4 mr-2" />
+                    Mod Manager & Deploy
+                  </MenubarItem>
+                  <MenubarItem onClick={() => setLocation('/player')}>
+                    <Play className="h-4 w-4 mr-2" />
+                    ZIP Player
+                  </MenubarItem>
+                  <MenubarSeparator />
+                  <MenubarItem onClick={() => setLocation('/grove-store')}>
+                    <Store className="h-4 w-4 mr-2" />
+                    Grove Store
+                  </MenubarItem>
+                </MenubarSubContent>
+              </MenubarSub>
+              <MenubarSeparator />
               <MenubarItem onClick={handleSendToStore}>
                 <Store className="h-4 w-4 mr-2" />
                 Send to Grove Store
-              </MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-
-          {/* Tools Menu */}
-          <MenubarMenu>
-            <MenubarTrigger className="text-sm cursor-pointer">Tools</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem onClick={() => setLocation('/agents')}>
-                <Bot className="h-4 w-4 mr-2" />
-                AI Agent Creator
-              </MenubarItem>
-              <MenubarItem onClick={() => setLocation('/gan-trainer')}>
-                <Brain className="h-4 w-4 mr-2" />
-                GAN Trainer
-              </MenubarItem>
-              <MenubarItem onClick={() => setLocation('/game-creator')}>
-                <Gamepad2 className="h-4 w-4 mr-2" />
-                Game Templates
-              </MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem onClick={() => setLocation('/mod-manager')}>
-                <Rocket className="h-4 w-4 mr-2" />
-                Mod Manager & Deploy
-              </MenubarItem>
-              <MenubarItem onClick={() => setLocation('/player')}>
-                <Play className="h-4 w-4 mr-2" />
-                ZIP Player
-              </MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem onClick={() => setLocation('/grove-store')}>
-                <Store className="h-4 w-4 mr-2" />
-                Grove Store
               </MenubarItem>
             </MenubarContent>
           </MenubarMenu>

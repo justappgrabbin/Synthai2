@@ -241,6 +241,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========== ZIP Archive Management API ==========
+  
+  // Get all ZIPs
+  app.get("/api/zips", async (_req, res) => {
+    try {
+      const zips = await storage.getAllZips();
+      res.json(zips);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch ZIP archives" });
+    }
+  });
+
+  // Get single ZIP
+  app.get("/api/zips/:id", async (req, res) => {
+    try {
+      const zip = await storage.getZip(req.params.id);
+      if (!zip) {
+        return res.status(404).json({ error: "ZIP not found" });
+      }
+      res.json(zip);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch ZIP" });
+    }
+  });
+
+  // Create ZIP record (simplified - without actual object storage)
+  app.post("/api/zips", async (req, res) => {
+    try {
+      const { filename, objectPath, size } = req.body;
+      
+      const zip = await storage.createZip({
+        filename,
+        originalName: filename,
+        uploadDate: new Date().toISOString(),
+        size,
+        objectPath,
+        structure: {
+          entries: [],
+          totalSize: size,
+          fileCount: 0,
+          directoryCount: 0,
+        },
+        analysis: {
+          description: "Archive uploaded",
+          projectType: "unknown",
+          technologies: [],
+          confidence: 0.5,
+        },
+      });
+
+      res.json({ id: zip.id });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create ZIP record" });
+    }
+  });
+
+  // Delete ZIP
+  app.delete("/api/zips/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteZip(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "ZIP not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete ZIP" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
