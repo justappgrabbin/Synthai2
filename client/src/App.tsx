@@ -10,6 +10,7 @@ import { DeveloperPanel } from "@/components/DeveloperPanel";
 import { GameCreator } from "@/components/GameCreator";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AgentPanel } from "@/components/AgentPanel";
+import { PlayerPanel } from "@/components/PlayerPanel";
 import { GroveStore } from "@/components/GroveStore";
 import { GANTrainer } from "@/components/GANTrainer";
 import { ModManager } from "@/components/ModManager";
@@ -35,6 +36,7 @@ function Router() {
         <Route path="/universe-creator" component={SemanticUniverseCreator} />
         <Route path="/settings" component={SettingsPanel} />
         <Route path="/zip-manager" component={ZipManager} />
+        <Route path="/player" component={PlayerPanel} />
         <Route path="/agents" component={AgentPanel} />
         <Route component={NotFound} />
       </Switch>

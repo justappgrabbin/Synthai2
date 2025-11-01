@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2, Download, ChevronDown } from "lucide-react";
 import JSZip from "jszip";
 import { useToast } from "@/hooks/use-toast";
-import { TopNav } from "@/components/TopNav";
 import { UserCreations, type UserCreation } from "@/lib/userCreations";
 import { FileSystem } from "@/lib/fileSystem";
 import { Card } from "@/components/ui/card";
@@ -350,7 +349,6 @@ export function PlayerPanel() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
 
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8 flex items-start justify-between">

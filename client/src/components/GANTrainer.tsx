@@ -7,7 +7,6 @@ import { useLocation } from "wouter";
 import { GAN_TEMPLATES } from "@/lib/ganTemplates";
 import { FileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
-import { TopNav } from "@/components/TopNav";
 
 export function GANTrainer() {
   const [, setLocation] = useLocation();
@@ -39,8 +38,6 @@ export function GANTrainer() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
-
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">

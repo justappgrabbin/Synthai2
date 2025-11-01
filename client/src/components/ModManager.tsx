@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TopNav } from "@/components/TopNav";
 import {
   Dialog,
   DialogContent,
@@ -346,8 +345,6 @@ export function ModManager() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
-
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8 flex items-start justify-between">
           <div>

@@ -8,7 +8,6 @@ import { GlyphGenerator, detectDimension } from "@/lib/glyphGenerator";
 import JSZip from "jszip";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
-import { TopNav } from "@/components/TopNav";
 import { Terminal } from "@/components/Terminal";
 import { SelfEditor } from "@/components/SelfEditor";
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
@@ -1866,8 +1865,6 @@ const result = await handlePayment({
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <TopNav />
-      
       {/* VS Code-style Menu Bar */}
       <div className="border-b bg-background/95 overflow-x-auto">
         <Menubar className="border-0 rounded-none h-9 px-2 flex-nowrap min-w-max">

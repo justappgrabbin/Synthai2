@@ -9,7 +9,6 @@ import { ZipUploader } from "@/components/ZipUploader";
 import { ArchiveManager } from "@/components/ArchiveManager";
 import { ZipPlayer } from "@/components/ZipPlayer";
 import { StitchingWorkspace } from "@/components/StitchingWorkspace";
-import { TopNav } from "@/components/TopNav";
 import type { StoredZip } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -79,7 +78,6 @@ export default function ZipManager() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
       
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         <div className="flex items-center justify-between mb-6">

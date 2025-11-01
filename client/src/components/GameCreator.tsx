@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Gamepad2, Search, Play } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation} from "wouter";
 import { GAME_TEMPLATES } from "@/lib/gameTemplates";
 import { FileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
-import { TopNav } from "@/components/TopNav";
 
 export function GameCreator() {
   const [, setLocation] = useLocation();
@@ -39,8 +38,6 @@ export function GameCreator() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
-
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-lavender mb-2">Game Templates</h1>

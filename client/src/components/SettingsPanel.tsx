@@ -130,8 +130,6 @@ export function SettingsPanel() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
-
       <div className="p-8 max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">Configuration</h1>

@@ -15,7 +15,6 @@ import {
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import { SelfEditor } from "@/components/SelfEditor";
 import { CommandCenter } from "@/components/CommandCenter";
-import { TopNav } from "@/components/TopNav";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -153,8 +152,6 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
-      
       {/* Hero Section - Sleek & Minimal */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-background border-b">
         <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">

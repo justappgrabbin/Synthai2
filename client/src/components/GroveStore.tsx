@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Store, Search, Download, Star, Users, Sparkles, Play } from "lucide-react";
-import { TopNav } from "@/components/TopNav";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { TEMPLATE_REGISTRY } from "@/lib/templateRegistry";
@@ -201,7 +200,6 @@ export function GroveStore() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav />
 
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
