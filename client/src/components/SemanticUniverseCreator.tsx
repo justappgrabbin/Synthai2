@@ -62,14 +62,14 @@ const SEMANTIC_LAYERS: SemanticLayer[] = [
     name: "Energetic / Affective",
     function: "Emotion, tone, feeling states",
     icon: <Heart className="h-4 w-4" />,
-    color: "text-orange-500"
+    color: "text-primary"
   },
   {
     id: 3,
     name: "Perceptual / Semantic",
     function: "Symbols, categories, relationships",
     icon: <Eye className="h-4 w-4" />,
-    color: "text-yellow-500"
+    color: "text-muted-foreground"
   },
   {
     id: 4,
@@ -90,14 +90,14 @@ const SEMANTIC_LAYERS: SemanticLayer[] = [
     name: "Transpersonal / Archetypal",
     function: "Mythic patterns, collective memory",
     icon: <User className="h-4 w-4" />,
-    color: "text-purple-500"
+    color: "text-primary"
   },
   {
     id: 7,
     name: "Void / Potential",
     function: "Pure possibility, latent creativity",
     icon: <Infinity className="h-4 w-4" />,
-    color: "text-lavender"
+    color: "text-primary"
   }
 ];
 
@@ -445,28 +445,28 @@ export function SemanticUniverseCreator() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <Layers className="h-8 w-8 text-lavender" />
-                <h1 className="text-4xl font-bold text-lavender">Semantic Universe Creator</h1>
+                <Layers className="h-8 w-8 text-primary" />
+                <h1 className="text-4xl font-bold text-primary">Semantic Universe Creator</h1>
               </div>
               <p className="text-muted-foreground">Transform text into playable worlds through the seven-layer semantic framework</p>
             </div>
           
           <div className="flex gap-3">
             {autonomyEnabled && (
-              <Card className="bg-lavender/10 border-lavender/30">
+              <Card className="bg-primary/10 border-primary/30">
                 <CardContent className="p-4 flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-lavender animate-pulse" />
-                  <p className="text-sm font-semibold text-lavender">Autonomy Active</p>
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <p className="text-sm font-semibold text-primary">Autonomy Active</p>
                 </CardContent>
               </Card>
             )}
             
-            <Card className="bg-lavender/10 border-lavender/30">
+            <Card className="bg-primary/10 border-primary/30">
               <CardContent className="p-4 flex items-center gap-3">
-                <Coins className="h-8 w-8 text-lavender" />
+                <Coins className="h-8 w-8 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Tokens Remaining</p>
-                  <p className="text-3xl font-bold text-lavender">{tokens}</p>
+                  <p className="text-3xl font-bold text-primary">{tokens}</p>
                 </div>
               </CardContent>
             </Card>
@@ -486,7 +486,7 @@ export function SemanticUniverseCreator() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-lavender" />
+                    <Sparkles className="h-5 w-5 text-primary" />
                     Speak Your World Into Being
                   </CardTitle>
                   <CardDescription>Describe the universe you wish to create in a few sentences</CardDescription>
@@ -508,7 +508,7 @@ export function SemanticUniverseCreator() {
                       size="sm"
                       onClick={() => setOracleMode(true)}
                       data-testid="button-oracle-mode"
-                      className="flex-1 bg-lavender hover:bg-lavender-hover"
+                      className="flex-1 bg-primary hover:bg-primary/90"
                     >
                       <Dna className="h-3 w-3 mr-2" />
                       Oracle Mode
@@ -516,10 +516,10 @@ export function SemanticUniverseCreator() {
                   </div>
 
                   {oracleMode && (
-                    <Card className="bg-lavender/5 border-lavender/30">
+                    <Card className="bg-primary/5 border-primary/30">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-lavender mt-0.5" />
+                          <Calendar className="h-4 w-4 text-primary mt-0.5" />
                           <p className="text-muted-foreground">
                             Enter your birth date to calibrate a universe based on your unique cosmic signature and genetic variables.
                           </p>
@@ -634,7 +634,7 @@ export function SemanticUniverseCreator() {
                           key={layer.id}
                           className={`${
                             isGenerating && currentLayer === index
-                              ? "border-lavender bg-lavender/5"
+                              ? "border-primary bg-primary/5"
                               : ""
                           }`}
                         >
@@ -654,12 +654,12 @@ export function SemanticUniverseCreator() {
                                     </Badge>
                                   )}
                                   {isGenerating && currentLayer > index && (
-                                    <ChevronRight className="h-4 w-4 text-lavender" />
+                                    <ChevronRight className="h-4 w-4 text-primary" />
                                   )}
                                 </div>
                                 <p className="text-xs text-muted-foreground">{layer.function}</p>
                                 {layer.extractedData && (
-                                  <p className="text-xs text-lavender mt-2">{layer.extractedData}</p>
+                                  <p className="text-xs text-primary mt-2">{layer.extractedData}</p>
                                 )}
                               </div>
                             </div>
@@ -710,7 +710,7 @@ export function SemanticUniverseCreator() {
                         variant="default"
                         data-testid={`button-play-${universe.id}`}
                         onClick={() => setPlayingUniverse(universe)}
-                        className="flex-1 bg-lavender hover:bg-lavender-hover"
+                        className="flex-1 bg-primary hover:bg-primary/90"
                       >
                         <Play className="h-3 w-3 mr-1" />
                         Play 3D
@@ -747,7 +747,7 @@ export function SemanticUniverseCreator() {
           )}
 
           {selectedUniverse && (
-            <Card className="bg-lavender/5 border-lavender/30">
+            <Card className="bg-primary/5 border-primary/30">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>{selectedUniverse.name}</span>

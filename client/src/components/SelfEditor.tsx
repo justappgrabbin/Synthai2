@@ -219,7 +219,7 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
                   <Button 
                     data-testid="button-inject"
                     onClick={handleInjectCode}
-                    className="w-full bg-lavender hover:bg-lavender-hover"
+                    className="w-full bg-primary hover:bg-primary/90"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Inject Code
@@ -346,7 +346,7 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
                   <Button 
                     data-testid="button-replace"
                     onClick={handleReplace}
-                    className="w-full bg-lavender hover:bg-lavender-hover"
+                    className="w-full bg-primary hover:bg-primary/90"
                   >
                     <Code className="h-4 w-4 mr-2" />
                     Replace Code
@@ -389,7 +389,7 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
                   <Button 
                     data-testid="button-analyze"
                     onClick={handleAnalyze}
-                    className="w-full bg-lavender hover:bg-lavender-hover"
+                    className="w-full bg-primary hover:bg-primary/90"
                   >
                     <FileCode className="h-4 w-4 mr-2" />
                     Analyze Code
@@ -399,13 +399,13 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
                     <div className="grid grid-cols-2 gap-4 pt-4">
                       <Card>
                         <CardContent className="pt-6 text-center">
-                          <div className="text-3xl font-bold text-lavender">{analysis.lines}</div>
+                          <div className="text-3xl font-bold text-primary">{analysis.lines}</div>
                           <div className="text-sm text-muted-foreground">Lines of Code</div>
                         </CardContent>
                       </Card>
                       <Card>
                         <CardContent className="pt-6 text-center">
-                          <div className="text-3xl font-bold text-lavender">{analysis.characters}</div>
+                          <div className="text-3xl font-bold text-primary">{analysis.characters}</div>
                           <div className="text-sm text-muted-foreground">Characters</div>
                         </CardContent>
                       </Card>
@@ -427,7 +427,7 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
                       </Card>
                       <Card className="col-span-2">
                         <CardContent className="pt-6 text-center">
-                          <Badge className="bg-lavender hover:bg-lavender-hover text-white">
+                          <Badge className="bg-primary hover:bg-primary/90 text-white">
                             {analysis.language.toUpperCase()}
                           </Badge>
                           <div className="text-sm text-muted-foreground mt-2">Language Detected</div>

@@ -41,9 +41,9 @@ export function GANTrainer() {
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
-            <Brain className="h-8 w-8 text-lavender" />
-            <h1 className="text-3xl font-bold text-lavender">GAN Trainer</h1>
-            <Zap className="h-6 w-6 text-lavender/60" />
+            <Brain className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-primary">GAN Trainer</h1>
+            <Zap className="h-6 w-6 text-primary/60" />
           </div>
           <p className="text-muted-foreground">
             Generative Adversarial Networks - Create, train, and deploy AI models in your browser
@@ -63,17 +63,17 @@ export function GANTrainer() {
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-lavender" />
+            <Sparkles className="h-5 w-5 text-primary" />
             Available GAN Templates
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTemplates.map((template) => (
               <Card
                 key={template.id}
-                className="p-6 hover:border-lavender/50 transition-all hover:shadow-lg"
+                className="p-6 hover:border-primary transition-all hover:shadow-lg"
               >
-                <div className="h-32 bg-gradient-to-br from-purple-500/10 to-lavender/10 rounded-md mb-4 flex items-center justify-center">
-                  <Brain className="h-12 w-12 text-lavender/40" />
+                <div className="h-32 bg-card rounded-md mb-4 flex items-center justify-center">
+                  <Brain className="h-12 w-12 text-primary/40" />
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-lg font-semibold">{template.title}</h3>
@@ -93,7 +93,7 @@ export function GANTrainer() {
                   {template.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs px-2 py-1 rounded-full bg-lavender/10 text-lavender"
+                      className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
                     >
                       {tag}
                     </span>
@@ -101,7 +101,7 @@ export function GANTrainer() {
                 </div>
                 <Button
                   data-testid={`button-use-gan-template-${template.id}`}
-                  className="w-full bg-lavender hover:bg-lavender-hover"
+                  className="w-full"
                   onClick={() => handleUseTemplate(template.id)}
                 >
                   <Play className="h-4 w-4 mr-2" />
@@ -112,8 +112,8 @@ export function GANTrainer() {
           </div>
         </section>
 
-        <section className="p-8 border-2 border-dashed border-lavender/30 rounded-lg text-center bg-card">
-          <Brain className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+        <section className="p-8 border-2 border-dashed border-primary/30 rounded-lg text-center bg-card">
+          <Brain className="h-16 w-16 mx-auto mb-4 text-primary/40" />
           <h3 className="text-lg font-semibold mb-2">Upload Your Own GAN</h3>
           <p className="text-sm text-muted-foreground mb-6">
             You can upload pre-trained models or custom GAN implementations via the Player panel

@@ -130,7 +130,7 @@ export function AIBackendSelector() {
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-card">
       <div className="flex items-center gap-2">
-        <Bot className="h-5 w-5 text-lavender" />
+        <Bot className="h-5 w-5 text-primary" />
         <h3 className="text-base font-medium">AI Assistant Backend</h3>
       </div>
 
@@ -141,7 +141,7 @@ export function AIBackendSelector() {
             <Button 
               data-testid="button-select-backend"
               variant="outline" 
-              className="w-full justify-between hover:border-lavender transition-colors"
+              className="w-full justify-between hover:border-primary transition-colors"
             >
               <span className="flex items-center gap-2">
                 <Bot className="h-4 w-4" />
@@ -158,7 +158,7 @@ export function AIBackendSelector() {
                 key={backend.id}
                 data-testid={`option-backend-${backend.id}`}
                 onClick={() => handleBackendChange(backend)}
-                className={selectedBackend.id === backend.id ? "bg-lavender/10" : ""}
+                className={selectedBackend.id === backend.id ? "bg-primary/10" : ""}
               >
                 <span className="flex items-center gap-2">
                   {backend.displayName}
@@ -188,7 +188,7 @@ export function AIBackendSelector() {
             <Button 
               data-testid="button-save-api-key"
               onClick={handleSaveKey}
-              className="bg-lavender hover:bg-lavender-hover"
+              className="bg-primary hover:bg-primary/90"
             >
               Save
             </Button>
@@ -201,7 +201,7 @@ export function AIBackendSelector() {
 
       {!selectedBackend.requiresKey && (
         <div className="space-y-3">
-          <div className="p-3 rounded-md bg-lavender/5 border border-lavender/20">
+          <div className="p-3 rounded-md bg-primary/5 border border-primary/20">
             <p className="text-xs text-muted-foreground mb-3">
               <strong>{selectedBackend.name}</strong> runs locally via Ollama.
               Make sure Ollama is running on your machine.
@@ -222,7 +222,7 @@ export function AIBackendSelector() {
                   data-testid="button-save-ollama-url"
                   onClick={handleSaveOllamaUrl}
                   size="sm"
-                  className="bg-lavender hover:bg-lavender-hover"
+                  className="bg-primary hover:bg-primary/90"
                 >
                   Save
                 </Button>

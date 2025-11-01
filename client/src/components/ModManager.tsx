@@ -349,8 +349,8 @@ export function ModManager() {
         <div className="mb-8 flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <Rocket className="h-8 w-8 text-lavender" />
-              <h1 className="text-3xl font-bold text-lavender">Mod Manager</h1>
+              <Rocket className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold text-primary">Mod Manager</h1>
             </div>
             <p className="text-muted-foreground">
               Deploy your apps to Netlify and manage multiple projects
@@ -366,7 +366,7 @@ export function ModManager() {
               Import
             </Button>
             <Button
-              className="bg-lavender hover:bg-lavender-hover"
+              className="bg-primary hover:bg-primary/90"
               onClick={() => setShowNewProjectDialog(true)}
               data-testid="button-new-project"
             >
@@ -384,7 +384,7 @@ export function ModManager() {
 
           <TabsContent value="projects" className="mt-6">
             {currentProject && (
-              <Card className="mb-6 border-lavender/30 bg-lavender/5">
+              <Card className="mb-6 border-primary/30 bg-primary/5">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
@@ -412,7 +412,7 @@ export function ModManager() {
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-lavender hover:bg-lavender-hover"
+                        className="bg-primary hover:bg-primary/90"
                         onClick={() => setShowDeployDialog(true)}
                         data-testid="button-deploy-to-netlify"
                       >
@@ -431,12 +431,12 @@ export function ModManager() {
                   <Card 
                     key={project.id}
                     className={`p-6 hover-elevate transition-all ${
-                      currentProject?.id === project.id ? 'border-lavender' : ''
+                      currentProject?.id === project.id ? 'border-primary' : ''
                     }`}
                   >
                     <div className="flex items-start justify-between mb-4">
-                      <div className="h-12 w-12 rounded-full bg-lavender/10 flex items-center justify-center">
-                        <FolderOpen className="h-6 w-6 text-lavender" />
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <FolderOpen className="h-6 w-6 text-primary" />
                       </div>
                       {currentProject?.id === project.id && (
                         <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
@@ -481,14 +481,14 @@ export function ModManager() {
                 ))}
               </div>
             ) : (
-              <div className="mt-12 p-8 border-2 border-dashed border-lavender/30 rounded-lg text-center bg-card">
-                <FolderOpen className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+              <div className="mt-12 p-8 border-2 border-dashed border-primary/30 rounded-lg text-center bg-card">
+                <FolderOpen className="h-16 w-16 mx-auto mb-4 text-primary/40" />
                 <h3 className="text-lg font-semibold mb-2">Create Your First Project</h3>
                 <p className="text-sm text-muted-foreground mb-6">
                   Organize your work into projects and deploy them anywhere
                 </p>
                 <Button
-                  className="bg-lavender hover:bg-lavender-hover"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => setShowNewProjectDialog(true)}
                   data-testid="button-create-first-project"
                 >
@@ -542,14 +542,14 @@ export function ModManager() {
                 ))}
               </div>
             ) : (
-              <div className="mt-12 p-8 border-2 border-dashed border-lavender/30 rounded-lg text-center bg-card">
-                <Rocket className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+              <div className="mt-12 p-8 border-2 border-dashed border-primary/30 rounded-lg text-center bg-card">
+                <Rocket className="h-16 w-16 mx-auto mb-4 text-primary/40" />
                 <h3 className="text-lg font-semibold mb-2">No Deployments Yet</h3>
                 <p className="text-sm text-muted-foreground mb-6">
                   Deploy your project to Netlify to see it here
                 </p>
                 <Button
-                  className="bg-lavender hover:bg-lavender-hover"
+                  className="bg-primary hover:bg-primary/90"
                   onClick={() => setShowDeployDialog(true)}
                   disabled={!currentProject}
                   data-testid="button-deploy-first"
@@ -567,7 +567,7 @@ export function ModManager() {
       <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lavender">Create New Project</DialogTitle>
+            <DialogTitle className="text-primary">Create New Project</DialogTitle>
             <DialogDescription>
               Save your current files as a new project
             </DialogDescription>
@@ -600,7 +600,7 @@ export function ModManager() {
               Cancel
             </Button>
             <Button
-              className="bg-lavender hover:bg-lavender-hover"
+              className="bg-primary hover:bg-primary/90"
               onClick={handleCreateProject}
               data-testid="button-confirm-create-project"
             >
@@ -614,7 +614,7 @@ export function ModManager() {
       <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lavender">Deploy to Netlify</DialogTitle>
+            <DialogTitle className="text-primary">Deploy to Netlify</DialogTitle>
             <DialogDescription>
               Enter your Netlify API key to deploy {currentProject?.name}
             </DialogDescription>
@@ -636,7 +636,7 @@ export function ModManager() {
                   href="https://app.netlify.com/user/applications"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-lavender hover:underline"
+                  className="text-primary hover:underline"
                 >
                   Netlify Settings
                 </a>
@@ -648,7 +648,7 @@ export function ModManager() {
               Cancel
             </Button>
             <Button
-              className="bg-lavender hover:bg-lavender-hover"
+              className="bg-primary hover:bg-primary/90"
               onClick={handleDeployToNetlify}
               disabled={isDeploying}
               data-testid="button-confirm-deploy"

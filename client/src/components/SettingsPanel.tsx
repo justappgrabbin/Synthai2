@@ -132,7 +132,7 @@ export function SettingsPanel() {
     <div className="min-h-screen bg-background">
       <div className="p-8 max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">Configuration</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Configuration</h1>
           <p className="text-muted-foreground">Manage your AI backends, autonomy, and studio preferences</p>
         </div>
 

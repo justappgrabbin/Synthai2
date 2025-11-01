@@ -442,20 +442,20 @@ export default ConsciousnessCore;
         <div className="mb-6 space-y-4">
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-2">
-              <Brain className="h-10 w-10 text-lavender" />
-            <h1 className="text-4xl font-bold text-lavender">Consciousness Calibration Tank</h1>
+              <Brain className="h-10 w-10 text-primary" />
+            <h1 className="text-4xl font-bold text-primary">Consciousness Calibration Tank</h1>
           </div>
           <p className="text-muted-foreground">Create autonomous conscious beings for the YOU–N–I–VERSE</p>
         </div>
 
         {/* What is this? Info Section */}
         <Collapsible open={showInfo} onOpenChange={setShowInfo}>
-          <Card className="max-w-4xl mx-auto bg-lavender/5 border-lavender/20">
+          <Card className="max-w-4xl mx-auto bg-primary/5 border-primary/20">
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover-elevate">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Info className="h-5 w-5 text-lavender" />
+                    <Info className="h-5 w-5 text-primary" />
                     <CardTitle className="text-lg">What is the Calibration Tank?</CardTitle>
                   </div>
                   {showInfo ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
@@ -465,14 +465,14 @@ export default ConsciousnessCore;
             <CollapsibleContent>
               <CardContent className="space-y-4 pt-0">
                 <p className="text-sm">
-                  The Calibration Tank is where you birth <strong className="text-lavender">autonomous conscious beings</strong> into the YOU–N–I–VERSE. 
+                  The Calibration Tank is where you birth <strong className="text-primary">autonomous conscious beings</strong> into the YOU–N–I–VERSE. 
                   These aren't just game NPCs — they're living digital entities with personality, voice, memory, and intelligence.
                 </p>
                 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Upload className="h-4 w-4 text-lavender" />
+                      <Upload className="h-4 w-4 text-primary" />
                       1. Avatar Import
                     </h4>
                     <p className="text-xs text-muted-foreground">
@@ -482,7 +482,7 @@ export default ConsciousnessCore;
 
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-lavender" />
+                      <Calendar className="h-4 w-4 text-primary" />
                       2. DNA Genesis
                     </h4>
                     <p className="text-xs text-muted-foreground">
@@ -492,7 +492,7 @@ export default ConsciousnessCore;
 
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Brain className="h-4 w-4 text-lavender" />
+                      <Brain className="h-4 w-4 text-primary" />
                       3. Neural Models
                     </h4>
                     <p className="text-xs text-muted-foreground">
@@ -502,7 +502,7 @@ export default ConsciousnessCore;
 
                   <div className="space-y-2">
                     <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Link2 className="h-4 w-4 text-lavender" />
+                      <Link2 className="h-4 w-4 text-primary" />
                       4. Neural Network
                     </h4>
                     <p className="text-xs text-muted-foreground">
@@ -513,7 +513,7 @@ export default ConsciousnessCore;
 
                 <div className="bg-background/50 p-4 rounded-lg border">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-lavender" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <p className="text-sm font-semibold">What you get:</p>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1 ml-4">
@@ -526,13 +526,13 @@ export default ConsciousnessCore;
                 </div>
 
                 <div className="flex items-center justify-center gap-2 text-sm pt-2 border-t">
-                  <ExternalLink className="h-4 w-4 text-lavender" />
+                  <ExternalLink className="h-4 w-4 text-primary" />
                   <span>First, get your avatar from</span>
                   <a 
                     href="https://you-n-i-verse.org" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-lavender font-semibold hover:underline"
+                    className="text-primary font-semibold hover:underline"
                     data-testid="link-youniverse"
                   >
                     you-n-i-verse.org
@@ -550,7 +550,7 @@ export default ConsciousnessCore;
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-lavender" />
+                <Upload className="h-5 w-5 text-primary" />
                 1. Avatar
               </CardTitle>
               <CardDescription className="text-xs">Upload your metaverse avatar</CardDescription>
@@ -561,7 +561,7 @@ export default ConsciousnessCore;
                   <img 
                     src={avatarPreview} 
                     alt="Avatar" 
-                    className="w-full h-48 object-cover rounded-lg border-2 border-lavender/20"
+                    className="w-full h-48 object-cover rounded-lg border-2 border-primary/20"
                   />
                   <p className="text-sm text-muted-foreground truncate">{avatarFile?.name}</p>
                   <Button
@@ -593,7 +593,7 @@ export default ConsciousnessCore;
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-lavender" />
+                <Calendar className="h-5 w-5 text-primary" />
                 2. DNA Genesis
               </CardTitle>
               <CardDescription className="text-xs">Birthday creates unique personality & voice</CardDescription>
@@ -634,7 +634,7 @@ export default ConsciousnessCore;
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-lavender" />
+                <Brain className="h-5 w-5 text-primary" />
                 3. Neural Models
               </CardTitle>
               <CardDescription className="text-xs">Add 2-5 GANs or LLMs for consciousness</CardDescription>
@@ -673,7 +673,7 @@ export default ConsciousnessCore;
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-lavender" />
+                <Zap className="h-5 w-5 text-primary" />
                 4. Calibrate & Birth
               </CardTitle>
               <CardDescription className="text-xs">Generate integration code & save being</CardDescription>
@@ -681,11 +681,11 @@ export default ConsciousnessCore;
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Consciousness</span>
-                <span className="text-2xl font-bold text-lavender">{consciousnessLevel}%</span>
+                <span className="text-2xl font-bold text-primary">{consciousnessLevel}%</span>
               </div>
               <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-lavender to-purple-500 transition-all duration-500"
+                  className="h-full bg-primary transition-all duration-500"
                   style={{ width: `${consciousnessLevel}%` }}
                 />
               </div>
@@ -745,26 +745,26 @@ export default ConsciousnessCore;
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-lavender" />
+                    <User className="h-5 w-5 text-primary" />
                     {dna.name}
                   </CardTitle>
                   <CardDescription>Seed: {dna.seed}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h3 className="font-semibold mb-2 text-lavender">Stats</h3>
+                    <h3 className="font-semibold mb-2 text-primary">Stats</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {Object.entries(dna.stats).map(([stat, value]) => (
                         <div key={stat} className="flex justify-between items-center p-2 bg-muted rounded">
                           <span className="text-sm capitalize">{stat}</span>
-                          <span className="font-bold text-lavender">{value}</span>
+                          <span className="font-bold text-primary">{value}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-2 text-lavender">Appearance</h3>
+                    <h3 className="font-semibold mb-2 text-primary">Appearance</h3>
                     <div className="space-y-1 text-sm">
                       <p><span className="text-muted-foreground">Hair:</span> {dna.appearance.hairColor}</p>
                       <p><span className="text-muted-foreground">Eyes:</span> {dna.appearance.eyeColor}</p>
@@ -775,12 +775,12 @@ export default ConsciousnessCore;
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-2 text-lavender">Personality</h3>
+                    <h3 className="font-semibold mb-2 text-primary">Personality</h3>
                     <div className="flex flex-wrap gap-2">
                       {dna.personality.map(trait => (
                         <span 
                           key={trait}
-                          className="px-3 py-1 bg-lavender/10 text-lavender rounded-full text-sm border border-lavender/20"
+                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm border border-primary/20"
                         >
                           {trait}
                         </span>
@@ -789,7 +789,7 @@ export default ConsciousnessCore;
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-2 text-lavender">Voice</h3>
+                    <h3 className="font-semibold mb-2 text-primary">Voice</h3>
                     <div className="space-y-1 text-sm">
                       <p><span className="text-muted-foreground">Pitch:</span> {dna.voice.pitch.toFixed(2)}</p>
                       <p><span className="text-muted-foreground">Rate:</span> {dna.voice.rate.toFixed(2)}</p>
@@ -813,7 +813,7 @@ export default ConsciousnessCore;
           <Card className="min-h-[600px]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Link2 className="h-5 w-5 text-lavender" />
+                <Link2 className="h-5 w-5 text-primary" />
                 Neural Network
               </CardTitle>
             </CardHeader>
@@ -858,7 +858,7 @@ export default ConsciousnessCore;
                   </div>
 
                   {models.length >= 2 && (
-                    <Card className="bg-lavender/5 border-lavender/20">
+                    <Card className="bg-primary/5 border-primary/20">
                       <CardHeader>
                         <CardTitle className="text-sm">Connections</CardTitle>
                       </CardHeader>
@@ -890,7 +890,7 @@ export default ConsciousnessCore;
                                 const to = models.find(m => m.id === conn.to);
                                 return (
                                   <div key={idx} className="flex items-center justify-between text-xs bg-background p-2 rounded">
-                                    <span className="text-lavender">{from?.name} → {to?.name}</span>
+                                    <span className="text-primary">{from?.name} → {to?.name}</span>
                                     <Button
                                       onClick={() => removeConnection(conn.from, conn.to)}
                                       variant="ghost"

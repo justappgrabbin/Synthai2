@@ -336,7 +336,7 @@ export function WorkspaceOrganizer() {
         <Button
           data-testid="button-add-artifact"
           onClick={() => setShowDialog(true)}
-          className="bg-lavender hover:bg-lavender-hover"
+          className="bg-primary hover:bg-primary/90"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Artifact
@@ -370,7 +370,7 @@ export function WorkspaceOrganizer() {
                       <Icon className={`h-5 w-5 ${module.color}`} />
                       <CardTitle className="text-sm">{module.title}</CardTitle>
                     </div>
-                    <Badge className="bg-lavender hover:bg-lavender-hover text-white">
+                    <Badge className="bg-primary hover:bg-primary/90 text-white">
                       {artifacts.length}
                     </Badge>
                   </div>
@@ -524,7 +524,7 @@ export function WorkspaceOrganizer() {
               <Button
                 data-testid="button-save-artifact"
                 onClick={addArtifact}
-                className="bg-lavender hover:bg-lavender-hover"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Artifact

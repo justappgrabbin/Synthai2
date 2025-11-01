@@ -55,7 +55,7 @@ export function InstallPrompt() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <Download className="h-5 w-5 text-purple-400" />
+            <Download className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-sm">Install YOU–N–I–VERSE</h3>
           </div>
           <p className="text-xs text-muted-foreground mb-3">

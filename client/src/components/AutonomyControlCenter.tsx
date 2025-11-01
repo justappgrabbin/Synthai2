@@ -128,8 +128,8 @@ export function AutonomyControlCenter() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <Brain className="h-8 w-8 text-lavender" />
-              <h1 className="text-4xl font-bold text-lavender">Autonomy Control Center</h1>
+              <Brain className="h-8 w-8 text-primary" />
+              <h1 className="text-4xl font-bold text-primary">Autonomy Control Center</h1>
             </div>
             <p className="text-muted-foreground">
               Enable the system to propose and develop enhancements based on your cosmic signature
@@ -139,7 +139,7 @@ export function AutonomyControlCenter() {
           <div className="flex items-center gap-4">
             <Badge 
               variant={autonomyEnabled ? "default" : "secondary"}
-              className={autonomyEnabled ? "bg-lavender" : ""}
+              className={autonomyEnabled ? "bg-primary" : ""}
             >
               {autonomyEnabled ? (
                 <><Zap className="h-3 w-3 mr-1" /> Active</>
@@ -155,7 +155,7 @@ export function AutonomyControlCenter() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-lavender" />
+              <Sparkles className="h-5 w-5 text-primary" />
               Master Autonomy Control
             </CardTitle>
             <CardDescription>
@@ -181,10 +181,10 @@ export function AutonomyControlCenter() {
             </div>
 
             {autonomyEnabled && (
-              <Card className="bg-lavender/5 border-lavender/30">
+              <Card className="bg-primary/5 border-primary/30">
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start gap-2 text-sm">
-                    <AlertTriangle className="h-4 w-4 text-lavender mt-0.5" />
+                    <AlertTriangle className="h-4 w-4 text-primary mt-0.5" />
                     <div className="space-y-2">
                       <p className="font-semibold">Autonomy Active</p>
                       <p className="text-muted-foreground text-xs">
@@ -254,7 +254,7 @@ export function AutonomyControlCenter() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Implemented</span>
-                <Badge className="bg-lavender">{implementedCount}</Badge>
+                <Badge className="bg-primary">{implementedCount}</Badge>
               </div>
             </div>
           </CardContent>
@@ -264,7 +264,7 @@ export function AutonomyControlCenter() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5 text-lavender" />
+            <Code className="h-5 w-5 text-primary" />
             Feature Proposal Queue
           </CardTitle>
           <CardDescription>
@@ -299,7 +299,7 @@ export function AutonomyControlCenter() {
                                 proposal.status === "rejected" ? "secondary" :
                                 "outline"
                               }
-                              className={proposal.status === "implemented" ? "bg-lavender" : ""}
+                              className={proposal.status === "implemented" ? "bg-primary" : ""}
                             >
                               {proposal.status === "pending" && <Clock className="h-3 w-3 mr-1" />}
                               {proposal.status === "approved" && <CheckCircle className="h-3 w-3 mr-1" />}
@@ -342,7 +342,7 @@ export function AutonomyControlCenter() {
                           <Button
                             size="sm"
                             variant="default"
-                            className="bg-lavender hover:bg-lavender-hover"
+                            className="bg-primary hover:bg-primary/90"
                             data-testid={`button-implement-${proposal.id}`}
                             onClick={() => markImplemented(proposal.id)}
                           >

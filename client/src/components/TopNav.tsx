@@ -24,7 +24,7 @@ export function TopNav() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center h-14 px-4 gap-2">
         <div className="flex items-center gap-2 mr-4">
-          <div className="h-6 w-6 rounded bg-lavender flex items-center justify-center">
+          <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
             <span className="text-white text-xs font-bold">Y</span>
           </div>
           <span className="font-semibold text-sm hidden sm:inline">YOU–N–I–VERSE</span>
@@ -42,7 +42,7 @@ export function TopNav() {
                 variant={isActive ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setLocation(item.path)}
-                className={`gap-2 ${isActive ? "bg-lavender/10 text-lavender" : ""}`}
+                className={`gap-2 ${isActive ? "bg-primary/10 text-primary" : ""}`}
               >
                 <Icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{item.label}</span>

@@ -40,7 +40,7 @@ export function GameCreator() {
     <div className="min-h-screen bg-background">
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-lavender mb-2">Game Templates</h1>
+          <h1 className="text-3xl font-bold text-primary mb-2">Game Templates</h1>
           <p className="text-muted-foreground">Choose a template to start creating your game</p>
         </div>
 
@@ -59,10 +59,10 @@ export function GameCreator() {
           {filteredTemplates.map((template) => (
             <Card
               key={template.id}
-              className="p-6 hover:border-lavender/50 transition-all hover:shadow-lg"
+              className="p-6 hover:border-primary transition-all hover:shadow-lg"
             >
-              <div className="h-32 bg-gradient-to-br from-lavender/10 to-accent/10 rounded-md mb-4 flex items-center justify-center">
-                <Gamepad2 className="h-12 w-12 text-lavender/40" />
+              <div className="h-32 bg-card rounded-md mb-4 flex items-center justify-center">
+                <Gamepad2 className="h-12 w-12 text-primary/40" />
               </div>
               <h3 className="text-lg font-semibold mb-2">{template.title}</h3>
               <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
@@ -70,7 +70,7 @@ export function GameCreator() {
                 {template.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs px-2 py-1 rounded-full bg-lavender/10 text-lavender"
+                    className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
                   >
                     {tag}
                   </span>
@@ -78,7 +78,7 @@ export function GameCreator() {
               </div>
               <Button
                 data-testid={`button-use-template-${template.id}`}
-                className="w-full bg-lavender hover:bg-lavender-hover"
+                className="w-full"
                 onClick={() => handleUseTemplate(template.id)}
               >
                 <Play className="h-4 w-4 mr-2" />

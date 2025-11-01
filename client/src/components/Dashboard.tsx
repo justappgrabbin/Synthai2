@@ -73,48 +73,42 @@ const FLAGSHIP_FEATURES = [
     title: "Semantic Universe Creator",
     description: "Transform text into playable 3D worlds using seven-layer consciousness framework",
     icon: Globe,
-    path: "/universe-creator",
-    gradient: "from-purple-500/20 to-blue-500/20"
+    path: "/universe-creator"
   },
   {
     id: "calibration-tank",
     title: "Consciousness Calibration Tank",
     description: "Build multi-model neural networks with visual connection builder and auto-code generation",
     icon: Brain,
-    path: "/calibration-tank",
-    gradient: "from-lavender/20 to-purple-500/20"
+    path: "/calibration-tank"
   },
   {
     id: "gan-trainer",
     title: "GAN Trainer",
     description: "Train generative adversarial networks for creative AI model development",
     icon: Cpu,
-    path: "/gan-trainer",
-    gradient: "from-blue-500/20 to-cyan-500/20"
+    path: "/gan-trainer"
   },
   {
     id: "autonomy",
     title: "Autonomy Control Center",
     description: "System self-development with Fu Xi I-Ching codon-based proposal generation",
     icon: Orbit,
-    path: "/autonomy",
-    gradient: "from-pink-500/20 to-lavender/20"
+    path: "/autonomy"
   },
   {
     id: "mod-manager",
     title: "Deployment Hub",
     description: "Deploy to Netlify, push to GitHub, export to Google Drive with one-click",
     icon: Rocket,
-    path: "/mod-manager",
-    gradient: "from-green-500/20 to-emerald-500/20"
+    path: "/mod-manager"
   },
   {
     id: "game-creator",
     title: "Game Creator",
     description: "Build interactive experiences with templates and visual tools",
     icon: Palette,
-    path: "/game-creator",
-    gradient: "from-orange-500/20 to-red-500/20"
+    path: "/game-creator"
   }
 ];
 
@@ -153,14 +147,14 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section - Sleek & Minimal */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-background border-b">
+      <div className="relative overflow-hidden bg-muted/20 border-b">
         <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
           <div className="text-center space-y-6">
             <div className="inline-block">
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 YOU–N–I–VERSE Studio
               </h1>
-              <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mt-3" />
+              <div className="h-px bg-border mt-3" />
             </div>
             
             <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto">
@@ -205,7 +199,7 @@ export function Dashboard() {
           <Card className="mb-6" data-testid="card-recent-apps">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-lavender" />
+                <Clock className="h-5 w-5 text-primary" />
                 <CardTitle>Recent Activity</CardTitle>
               </div>
               <CardDescription>Pick up where you left off</CardDescription>
@@ -231,10 +225,10 @@ export function Dashboard() {
         )}
 
         {/* Flagship Features - Consciousness Engine */}
-        <Card className="mb-6 border-lavender/30" data-testid="card-flagship-features">
+        <Card className="mb-6 border-primary/30" data-testid="card-flagship-features">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Brain className="h-6 w-6 text-lavender" />
+              <Brain className="h-6 w-6 text-primary" />
               <CardTitle className="text-2xl">Consciousness Engine</CardTitle>
             </div>
             <CardDescription>Transformative tools powered by semantic awareness and neural architecture</CardDescription>
@@ -246,12 +240,11 @@ export function Dashboard() {
                   key={feature.id}
                   data-testid={`button-flagship-${feature.id}`}
                   onClick={() => setLocation(feature.path)}
-                  className={`group relative h-48 rounded-lg border-2 border-border bg-gradient-to-br ${feature.gradient} hover:border-lavender/50 transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden`}
+                  className="group relative h-48 rounded-lg border-2 border-border bg-card hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-card/90 backdrop-blur-sm" />
                   <div className="relative flex flex-col items-start justify-between h-full p-6 text-left">
                     <div>
-                      <feature.icon className="h-10 w-10 mb-3 text-lavender" />
+                      <feature.icon className="h-10 w-10 mb-3 text-primary" />
                       <h3 className="text-lg font-semibold mb-2 text-foreground">
                         {feature.title}
                       </h3>
@@ -259,7 +252,7 @@ export function Dashboard() {
                         {feature.description}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-lavender text-sm font-medium mt-2">
+                    <div className="flex items-center gap-1 text-primary text-sm font-medium mt-2">
                       <span>Launch</span>
                       <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -274,7 +267,7 @@ export function Dashboard() {
         <Card className="mb-6" data-testid="card-quick-tools">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-lavender" />
+              <Zap className="h-5 w-5 text-primary" />
               <CardTitle>Quick Tools</CardTitle>
             </div>
             <CardDescription>Organize workspace and edit code without leaving the dashboard</CardDescription>
@@ -284,10 +277,10 @@ export function Dashboard() {
               <button
                 data-testid="button-open-workspace"
                 onClick={() => setShowWorkspaceDialog(true)}
-                className="group relative h-32 rounded-lg border-2 bg-card border-border hover:border-lavender/50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="group relative h-32 rounded-lg border-2 bg-card border-border hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                  <FolderTree className="h-10 w-10 mb-3 text-lavender" />
+                  <FolderTree className="h-10 w-10 mb-3 text-primary" />
                   <h3 className="text-base font-semibold mb-1">Workspace Organizer</h3>
                   <p className="text-sm text-muted-foreground">Manage project files</p>
                 </div>
@@ -295,10 +288,10 @@ export function Dashboard() {
               <button
                 data-testid="button-open-self-editor"
                 onClick={() => setShowSelfEditorDialog(true)}
-                className="group relative h-32 rounded-lg border-2 bg-card border-border hover:border-lavender/50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="group relative h-32 rounded-lg border-2 bg-card border-border hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                  <FileEdit className="h-10 w-10 mb-3 text-lavender" />
+                  <FileEdit className="h-10 w-10 mb-3 text-primary" />
                   <h3 className="text-base font-semibold mb-1">Self Editor</h3>
                   <p className="text-sm text-muted-foreground">Edit source code</p>
                 </div>
@@ -306,10 +299,10 @@ export function Dashboard() {
               <button
                 data-testid="button-open-command-center"
                 onClick={() => setShowCommandCenterDialog(true)}
-                className="group relative h-32 rounded-lg border-2 bg-lavender/10 border-lavender/50 hover:border-lavender transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="group relative h-32 rounded-lg border-2 bg-primary/10 border-primary hover:border-primary transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                  <TerminalIcon className="h-10 w-10 mb-3 text-lavender" />
+                  <TerminalIcon className="h-10 w-10 mb-3 text-primary" />
                   <h3 className="text-base font-semibold mb-1">Command Center</h3>
                   <p className="text-sm text-muted-foreground">Search & launch tools</p>
                 </div>
@@ -343,7 +336,7 @@ export function Dashboard() {
 
         {/* Footer */}
         <div className="mt-8 text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 text-lavender">
+          <div className="flex items-center justify-center gap-2 text-primary">
             <Sparkles className="h-4 w-4 animate-pulse" />
             <p className="text-sm font-medium">Welcome to your cosmic creative workspace</p>
             <Sparkles className="h-4 w-4 animate-pulse" />
@@ -359,7 +352,7 @@ export function Dashboard() {
         <DialogContent className="max-w-6xl max-h-[90vh] p-0">
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="flex items-center gap-2">
-              <FolderTree className="h-5 w-5 text-lavender" />
+              <FolderTree className="h-5 w-5 text-primary" />
               Workspace Organizer
             </DialogTitle>
             <DialogDescription>
@@ -377,7 +370,7 @@ export function Dashboard() {
         <DialogContent className="max-w-6xl max-h-[90vh] p-0">
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="flex items-center gap-2">
-              <FileEdit className="h-5 w-5 text-lavender" />
+              <FileEdit className="h-5 w-5 text-primary" />
               Self Editor
             </DialogTitle>
             <DialogDescription>
@@ -429,7 +422,7 @@ function ActivityCard({ activity, icon: Icon, onClick }: ActivityCardProps) {
         {isImageIcon ? (
           <img src={Icon as string} alt={activity.appName} className="h-8 w-8 object-contain" />
         ) : (
-          <Icon className="h-8 w-8 text-lavender" />
+          <Icon className="h-8 w-8 text-primary" />
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -459,12 +452,9 @@ function PortalButton({ icon: Icon, title, description, onClick, variant = "defa
       onClick={onClick}
       className={`group relative h-40 rounded-lg border-2 transition-all duration-300 hover:scale-105 hover:shadow-xl ${
         variant === "primary"
-          ? "bg-lavender border-lavender text-white hover:bg-lavender-hover"
-          : "bg-card border-border hover:border-lavender/50"
+          ? "bg-primary border-primary text-white hover:bg-primary/90"
+          : "bg-card border-border hover:border-primary"
       }`}
-      style={{
-        boxShadow: variant === "primary" ? "0 0 20px rgba(155, 135, 245, 0.3)" : undefined
-      }}
     >
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         {isImageIcon ? (
@@ -474,7 +464,7 @@ function PortalButton({ icon: Icon, title, description, onClick, variant = "defa
             className="h-12 w-12 mb-4 object-contain" 
           />
         ) : (
-          <Icon className={`h-12 w-12 mb-4 ${variant === "primary" ? "text-white" : "text-lavender"}`} />
+          <Icon className={`h-12 w-12 mb-4 ${variant === "primary" ? "text-white" : "text-primary"}`} />
         )}
         <h3 className={`text-lg font-semibold mb-2 ${variant === "primary" ? "text-white" : "text-foreground"}`}>
           {title}

@@ -204,9 +204,9 @@ export function GroveStore() {
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
-            <Store className="h-8 w-8 text-lavender" />
-            <h1 className="text-3xl font-bold text-lavender">Grove Store</h1>
-            <Sparkles className="h-6 w-6 text-lavender/60" />
+            <Store className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-primary">Grove Store</h1>
+            <Sparkles className="h-6 w-6 text-primary/60" />
           </div>
           <p className="text-muted-foreground">
             Discover apps, agents, templates, and tools created by the YOU–N–I–VERSE community
@@ -233,7 +233,7 @@ export function GroveStore() {
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.id)}
-                className={selectedCategory === category.id ? "bg-lavender hover:bg-lavender-hover" : ""}
+                className={selectedCategory === category.id ? "bg-primary hover:bg-primary/90" : ""}
               >
                 {category.label}
               </Button>
@@ -244,7 +244,7 @@ export function GroveStore() {
         {featuredItems.length > 0 && (
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-lavender" />
+              <Sparkles className="h-5 w-5 text-primary" />
               Featured
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -285,12 +285,12 @@ interface StoreItemCardProps {
 
 function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
   const categoryColors: Record<StoreItem['category'], string> = {
-    app: "bg-blue-500/10 text-blue-500",
-    agent: "bg-purple-500/10 text-purple-500",
-    template: "bg-green-500/10 text-green-500",
-    game: "bg-pink-500/10 text-pink-500",
-    gan: "bg-indigo-500/10 text-indigo-500",
-    tool: "bg-orange-500/10 text-orange-500"
+    app: "bg-primary/10 text-primary",
+    agent: "bg-primary/10 text-primary",
+    template: "bg-primary/10 text-primary",
+    game: "bg-primary/10 text-primary",
+    gan: "bg-primary/10 text-primary",
+    tool: "bg-primary/10 text-primary"
   };
 
   const categoryIcons: Record<StoreItem['category'], string> = {
@@ -304,8 +304,8 @@ function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
 
   return (
     <Card
-      className={`p-6 hover:border-lavender/50 transition-all hover:shadow-lg ${
-        featured ? "border-lavender/30 bg-lavender/5" : ""
+      className={`p-6 hover:border-primary/50 transition-all hover:shadow-lg ${
+        featured ? "border-primary/30 bg-primary/5" : ""
       }`}
     >
       <div className="flex items-start justify-between mb-3">
@@ -322,7 +322,7 @@ function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
           )}
         </div>
         {featured && (
-          <Sparkles className="h-4 w-4 text-lavender" />
+          <Sparkles className="h-4 w-4 text-primary" />
         )}
       </div>
 
@@ -332,7 +332,7 @@ function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
 
       <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
-          <Star className="h-3 w-3 fill-lavender text-lavender" />
+          <Star className="h-3 w-3 fill-primary text-primary" />
           <span>{item.rating}</span>
         </div>
         <div className="flex items-center gap-1">
@@ -354,7 +354,7 @@ function StoreItemCard({ item, onDownload, featured }: StoreItemCardProps) {
 
       <Button
         data-testid={`button-download-${item.id}`}
-        className="w-full bg-lavender hover:bg-lavender-hover"
+        className="w-full bg-primary hover:bg-primary/90"
         onClick={() => onDownload(item)}
       >
         {item.isTemplate ? (

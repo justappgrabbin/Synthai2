@@ -192,13 +192,13 @@ export function AgentPanel() {
       <div className="p-8 max-w-6xl mx-auto">
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-lavender mb-2">AI Agents</h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">AI Agents</h1>
             <p className="text-muted-foreground">
               Build and manage your AI consciousness companions
             </p>
           </div>
           <Button
-            className="bg-lavender hover:bg-lavender-hover touch-manipulation"
+            className="touch-manipulation"
             onClick={() => setShowCreateDialog(true)}
             data-testid="button-create-agent"
           >
@@ -220,14 +220,14 @@ export function AgentPanel() {
             ))}
           </div>
         ) : (
-          <div className="mt-12 p-8 border-2 border-dashed border-lavender/30 rounded-lg text-center bg-card">
-            <Bot className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+          <div className="mt-12 p-8 border-2 border-dashed border-primary/30 rounded-lg text-center bg-card">
+            <Bot className="h-16 w-16 mx-auto mb-4 text-primary/40" />
             <h3 className="text-lg font-semibold mb-2">Create Your First Agent</h3>
             <p className="text-sm text-muted-foreground mb-6">
               AI agents can help with coding, creative tasks, debugging, and more
             </p>
             <Button
-              className="bg-lavender hover:bg-lavender-hover touch-manipulation"
+              className="touch-manipulation"
               onClick={() => setShowCreateDialog(true)}
               data-testid="button-create-first-agent"
             >
@@ -242,7 +242,7 @@ export function AgentPanel() {
       <Dialog open={showCreateDialog || editingAgent !== null} onOpenChange={handleCloseDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-lavender">
+            <DialogTitle className="text-primary">
               {editingAgent ? "Edit Agent" : "Create New Agent"}
             </DialogTitle>
             <DialogDescription>
@@ -337,7 +337,7 @@ export function AgentPanel() {
             </Button>
             <Button
               onClick={editingAgent ? handleUpdateAgent : handleCreateAgent}
-              className="bg-lavender hover:bg-lavender-hover touch-manipulation"
+              className="touch-manipulation"
               data-testid="button-save-agent"
             >
               {editingAgent ? "Update" : "Create"} Agent
@@ -363,8 +363,8 @@ function AgentCard({
   return (
     <Card className="p-6 hover-elevate transition-all">
       <div className="flex items-start justify-between mb-4">
-        <div className="h-12 w-12 rounded-full bg-lavender/10 flex items-center justify-center">
-          <Bot className="h-6 w-6 text-lavender" />
+        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+          <Bot className="h-6 w-6 text-primary" />
         </div>
         <div className="flex items-center gap-2">
           <div

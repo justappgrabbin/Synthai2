@@ -2257,7 +2257,7 @@ const result = await handlePayment({
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <Code2 className="h-5 w-5 text-lavender" />
+          <Code2 className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold hidden sm:block">Code Editor</h2>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -2325,7 +2325,7 @@ const result = await handlePayment({
         `}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <FolderTree className="h-4 w-4 text-lavender" />
+              <FolderTree className="h-4 w-4 text-primary" />
               <h3 className="font-medium text-sm">Files</h3>
             </div>
             <div className="flex items-center gap-1">
@@ -2421,7 +2421,7 @@ const result = await handlePayment({
         `}>
           <div className="border-b p-2 flex items-center justify-between gap-2 text-sm">
             <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-lavender" />
+              <Globe className="h-4 w-4 text-primary" />
               <span className="font-medium">Preview</span>
             </div>
             <Button
@@ -2467,7 +2467,7 @@ const result = await handlePayment({
         <div className="h-96 border-t flex-shrink-0 bg-background flex flex-col">
           <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-purple-500" />
+              <Sparkles className="h-4 w-4 text-primary" />
               <span className="font-medium text-sm">Self-Editor & Code Injection</span>
             </div>
             <Button
@@ -2617,7 +2617,7 @@ function FileTreeNode({
     <div>
       <div
         className={`text-sm py-1 px-2 rounded hover:bg-accent cursor-pointer flex items-center justify-between group ${
-          isActive ? 'bg-lavender/10 border border-lavender/30' : ''
+          isActive ? 'bg-primary/10 border border-primary/30' : ''
         }`}
         style={{ marginLeft: `${indent * 12}px` }}
       >

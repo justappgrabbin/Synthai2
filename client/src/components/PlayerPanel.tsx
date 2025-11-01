@@ -353,7 +353,7 @@ export function PlayerPanel() {
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-lavender mb-2">Creative Bundle Player</h1>
+            <h1 className="text-3xl font-bold text-primary mb-2">Creative Bundle Player</h1>
             <p className="text-muted-foreground">
               Upload and explore zipped creative universes
             </p>
@@ -363,9 +363,9 @@ export function PlayerPanel() {
             variant="outline"
             size="icon"
             onClick={() => setShowHelp(!showHelp)}
-            className="border-lavender/30 hover:bg-lavender/10"
+            className="border-primary/30 hover:bg-primary/10"
           >
-            <AlertCircle className="h-5 w-5 text-lavender" />
+            <AlertCircle className="h-5 w-5 text-primary" />
           </Button>
         </div>
 
@@ -398,7 +398,7 @@ export function PlayerPanel() {
                 {canAutoFix ? (
                   <Button
                     onClick={handleAutoFix}
-                    className="bg-lavender hover:bg-lavender-hover touch-manipulation"
+                    className="bg-primary hover:bg-primary/90 touch-manipulation"
                     data-testid="button-autofix-zip"
                   >
                     <Wrench className="h-4 w-4 mr-2" />
@@ -434,9 +434,9 @@ export function PlayerPanel() {
         )}
 
         {showHelp && (
-          <Alert className="mb-6 bg-lavender/5 border-lavender/20">
-            <AlertCircle className="h-4 w-4 text-lavender" />
-            <AlertTitle className="text-lavender">How to Use the Creative Bundle Player</AlertTitle>
+          <Alert className="mb-6 bg-primary/5 border-primary/20">
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <AlertTitle className="text-primary">How to Use the Creative Bundle Player</AlertTitle>
             <AlertDescription className="mt-3 space-y-3 text-sm">
               <div>
                 <p className="font-semibold mb-1">📦 Uploading Projects</p>
@@ -467,7 +467,7 @@ export function PlayerPanel() {
             data-testid="button-tab-current"
             variant={activeTab === 'current' ? 'default' : 'outline'}
             onClick={() => setActiveTab('current')}
-            className={activeTab === 'current' ? 'bg-lavender hover:bg-lavender-hover' : ''}
+            className={activeTab === 'current' ? 'bg-primary hover:bg-primary/90' : ''}
           >
             <Play className="h-4 w-4 mr-2" />
             Current Project
@@ -476,7 +476,7 @@ export function PlayerPanel() {
             data-testid="button-tab-creations"
             variant={activeTab === 'creations' ? 'default' : 'outline'}
             onClick={() => setActiveTab('creations')}
-            className={activeTab === 'creations' ? 'bg-lavender hover:bg-lavender-hover' : ''}
+            className={activeTab === 'creations' ? 'bg-primary hover:bg-primary/90' : ''}
           >
             <History className="h-4 w-4 mr-2" />
             User Creations ({userCreations.length})
@@ -495,8 +495,8 @@ export function PlayerPanel() {
         {activeTab === 'creations' ? (
           <div>
             {userCreations.length === 0 ? (
-              <div className="border-2 border-dashed border-lavender/30 rounded-lg p-12 text-center bg-card">
-                <History className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+              <div className="border-2 border-dashed border-primary/30 rounded-lg p-12 text-center bg-card">
+                <History className="h-16 w-16 mx-auto mb-4 text-primary/40" />
                 <h3 className="text-lg font-semibold mb-2">No creations yet</h3>
                 <p className="text-sm text-muted-foreground mb-6">
                   Upload zip files to build your creation library
@@ -511,11 +511,11 @@ export function PlayerPanel() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userCreations.map((creation) => (
-                  <Card key={creation.id} className="p-6 hover:border-lavender/50 transition-all">
+                  <Card key={creation.id} className="p-6 hover:border-primary/50 transition-all">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <FileArchive className="h-5 w-5 text-lavender" />
-                        <span className="text-xs px-2 py-1 rounded-full bg-lavender/10 text-lavender">
+                        <FileArchive className="h-5 w-5 text-primary" />
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
                           {creation.type}
                         </span>
                       </div>
@@ -576,15 +576,15 @@ export function PlayerPanel() {
             )}
           </div>
         ) : zipContents.length === 0 ? (
-          <div className="border-2 border-dashed border-lavender/30 rounded-lg p-12 text-center bg-card">
-            <FileArchive className="h-16 w-16 mx-auto mb-4 text-lavender/40" />
+          <div className="border-2 border-dashed border-primary/30 rounded-lg p-12 text-center bg-card">
+            <FileArchive className="h-16 w-16 mx-auto mb-4 text-primary/40" />
             <h3 className="text-lg font-semibold mb-2">Drop a .zip file to play</h3>
             <p className="text-sm text-muted-foreground mb-6">
               Or click below to browse your files
             </p>
             <Button
               data-testid="button-upload-zip"
-              className="bg-lavender hover:bg-lavender-hover"
+              className="bg-primary hover:bg-primary/90"
               onClick={handleUploadClick}
             >
               <Upload className="h-4 w-4 mr-2" />
@@ -596,7 +596,7 @@ export function PlayerPanel() {
             <div className="border rounded-lg bg-card p-4">
               <div className="mb-4">
                 <h3 className="font-semibold flex items-center gap-2 mb-3">
-                  <FileArchive className="h-4 w-4 text-lavender" />
+                  <FileArchive className="h-4 w-4 text-primary" />
                   {zipName}
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -606,7 +606,7 @@ export function PlayerPanel() {
                       variant={isPlaying ? "outline" : "default"}
                       size="sm"
                       onClick={isPlaying ? handleStopPlaying : handlePlayProject}
-                      className={!isPlaying ? "bg-lavender hover:bg-lavender-hover" : ""}
+                      className={!isPlaying ? "bg-primary hover:bg-primary/90" : ""}
                     >
                       <Play className="h-4 w-4 mr-2" />
                       {isPlaying ? "Stop" : "Play"}
@@ -670,14 +670,14 @@ export function PlayerPanel() {
               </div>
 
               {entryPoint && (
-                <div className="mb-4 p-3 bg-lavender/10 rounded border border-lavender/20">
+                <div className="mb-4 p-3 bg-primary/10 rounded border border-primary/20">
                   <div className="flex items-start gap-2">
-                    <Play className="h-4 w-4 text-lavender mt-0.5" />
+                    <Play className="h-4 w-4 text-primary mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm font-medium">Entry Point Detected</p>
                       <p className="text-xs text-muted-foreground font-mono mt-1">{entryPoint.file}</p>
                       <p className="text-xs text-muted-foreground mt-1">{entryPoint.reason}</p>
-                      <Badge className="mt-2 bg-lavender/20 text-lavender text-xs">
+                      <Badge className="mt-2 bg-primary/20 text-primary text-xs">
                         {entryPoint.type} • {Math.round(entryPoint.confidence * 100)}% confidence
                       </Badge>
                     </div>
@@ -740,13 +740,13 @@ export function PlayerPanel() {
                     data-testid={`zip-entry-${idx}`}
                     onClick={() => handleFileClick(entry)}
                     className={`flex items-center gap-2 p-2 rounded hover:bg-accent cursor-pointer text-sm ${
-                      selectedFile?.name === entry.name ? 'bg-lavender/10 border border-lavender/30' : ''
+                      selectedFile?.name === entry.name ? 'bg-primary/10 border border-primary/30' : ''
                     }`}
                   >
                     {entry.isFolder ? (
-                      <Folder className="h-4 w-4 text-lavender/60" />
+                      <Folder className="h-4 w-4 text-primary/60" />
                     ) : (
-                      <File className="h-4 w-4 text-lavender" />
+                      <File className="h-4 w-4 text-primary" />
                     )}
                     <span className="font-mono text-xs truncate">{entry.name}</span>
                   </div>
@@ -770,7 +770,7 @@ export function PlayerPanel() {
                     </Alert>
                   ) : (
                     <>
-                      <div className="bg-white rounded overflow-hidden border-2 border-lavender/20">
+                      <div className="bg-white rounded overflow-hidden border-2 border-primary/20">
                         <iframe
                           data-testid="iframe-project-player"
                           srcDoc={executableContent}
@@ -787,8 +787,8 @@ export function PlayerPanel() {
                           {executableContent}
                         </pre>
                       </details>
-                      <div className="mt-4 p-4 border rounded-lg bg-lavender/5 border-lavender/20">
-                        <h4 className="text-sm font-semibold mb-1 text-lavender">What is a Creative Bundle?</h4>
+                      <div className="mt-4 p-4 border rounded-lg bg-primary/5 border-primary/20">
+                        <h4 className="text-sm font-semibold mb-1 text-primary">What is a Creative Bundle?</h4>
                         <p className="text-xs text-muted-foreground">
                           Creative bundles are .zip files containing complete projects, games, or interactive experiences.
                           The YOU–N–I–Versal Player extracts and displays their contents in a safe environment.
@@ -822,8 +822,8 @@ export function PlayerPanel() {
           </div>
         )}
 
-        <div className="mt-8 p-6 border rounded-lg bg-lavender/5 border-lavender/20">
-          <h3 className="font-semibold mb-2 text-lavender">What is a Creative Bundle?</h3>
+        <div className="mt-8 p-6 border rounded-lg bg-primary/5 border-primary/20">
+          <h3 className="font-semibold mb-2 text-primary">What is a Creative Bundle?</h3>
           <p className="text-sm text-muted-foreground">
             Creative bundles are .zip files containing complete projects, games, or interactive experiences.
             The YOU–N–I–Versal Player extracts and displays their contents in a safe environment.

@@ -232,12 +232,12 @@ export function CommandCenter() {
   });
 
   const categories = [
-    { id: "games", name: "Game Templates", icon: Gamepad2, color: "text-blue-500" },
-    { id: "gans", name: "AI Neural Networks", icon: Brain, color: "text-purple-500" },
-    { id: "consciousness", name: "Consciousness Creation", icon: Sparkles, color: "text-pink-500" },
-    { id: "code", name: "Code Tools", icon: Code2, color: "text-green-500" },
-    { id: "ai", name: "AI Assistants", icon: Bot, color: "text-lavender" },
-    { id: "project", name: "Project Tools", icon: Rocket, color: "text-orange-500" }
+    { id: "games", name: "Game Templates", icon: Gamepad2, color: "text-primary" },
+    { id: "gans", name: "AI Neural Networks", icon: Brain, color: "text-primary" },
+    { id: "consciousness", name: "Consciousness Creation", icon: Sparkles, color: "text-primary" },
+    { id: "code", name: "Code Tools", icon: Code2, color: "text-primary" },
+    { id: "ai", name: "AI Assistants", icon: Bot, color: "text-primary" },
+    { id: "project", name: "Project Tools", icon: Rocket, color: "text-primary" }
   ];
 
   const toggleCategory = (categoryId: string) => {
@@ -251,7 +251,7 @@ export function CommandCenter() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-lavender mb-2">Command Center</h2>
+        <h2 className="text-2xl font-bold text-primary mb-2">Command Center</h2>
         <p className="text-muted-foreground">Search for tools - no coding needed, just click to use</p>
       </div>
 
@@ -301,7 +301,7 @@ export function CommandCenter() {
                           className="h-auto p-4 justify-start hover-elevate active-elevate-2"
                         >
                           <div className="flex items-start gap-3 text-left w-full">
-                            <ToolIcon className="h-5 w-5 text-lavender flex-shrink-0 mt-0.5" />
+                            <ToolIcon className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                               <div className="font-semibold mb-1">{tool.name}</div>
                               <div className="text-xs text-muted-foreground">{tool.description}</div>
