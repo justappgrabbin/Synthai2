@@ -266,6 +266,15 @@ export function AIBackendSelector() {
           {isConfigured ? `${selectedBackend.name} ready` : "Configuration required"}
         </span>
       </div>
+
+      {/* Debug info */}
+      <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
+        <div>Selected: {selectedBackend.id}</div>
+        <div>Has Key: {apiKey ? 'Yes' : 'No'}</div>
+        <div>Configured: {isConfigured ? 'Yes' : 'No'}</div>
+        <div>Saved Backend: {localStorage.getItem("ai_backend") || "none"}</div>
+        <div>Saved Key: {localStorage.getItem(`ai_key_${selectedBackend.id}`) ? 'Yes' : 'No'}</div>
+      </div>
     </div>
   );
 }
