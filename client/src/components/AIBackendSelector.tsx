@@ -71,11 +71,11 @@ const AI_BACKENDS: AIBackend[] = [
   {
     id: "huggingface",
     name: "HuggingFace",
-    displayName: "HuggingFace (MiniMax-M2)",
+    displayName: "MiniMax M2 (Free)",
     requiresKey: true,
-    keyLabel: "HuggingFace Token (HF_TOKEN)",
-    keyPlaceholder: "hf_...",
-    endpoint: "https://router.huggingface.co/v1/chat/completions"
+    keyLabel: "MiniMax API Key (Get at platform.minimax.io)",
+    keyPlaceholder: "Enter your MiniMax API key",
+    endpoint: "https://api.minimax.io/v1/chat/completions"
   }
 ];
 

@@ -261,35 +261,37 @@ export class AIService {
   }
 
   /**
-   * HuggingFace Router API (OpenAI-compatible)
+   * MiniMax M2 API (OpenAI-compatible)
+   * Official MiniMax API - Free until November 7, 2025
    */
   private static async callHuggingFace(messages: AIMessage[]): Promise<AIResponse> {
     const apiKey = this.getApiKey("huggingface");
     if (!apiKey) {
-      return { content: "", error: "HuggingFace API key not configured" };
+      return { content: "", error: "MiniMax API key not configured. Get one at https://platform.minimax.io" };
     }
     return this.callHuggingFaceWithKey(messages, apiKey);
   }
 
   private static async callHuggingFaceWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
-    const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
+    const response = await fetch("https://api.minimax.io/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: "MiniMaxAI/MiniMax-M2:novita",
+        model: "MiniMax-M2",
         messages: messages,
-        max_tokens: 1024,
-        temperature: 0.7
+        max_tokens: 4096,
+        temperature: 1.0,
+        top_p: 0.95
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMsg = errorData.error?.message || errorData.detail || response.statusText;
-      throw new Error(`HuggingFace API error (${response.status}): ${errorMsg}`);
+      throw new Error(`MiniMax API error (${response.status}): ${errorMsg}`);
     }
 
     const data = await response.json();

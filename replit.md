@@ -3,13 +3,15 @@
 ## Overview
 YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
 
-## Recent Updates (v2.0.0)
+## Recent Updates (v2.0.1)
+- Fixed MiniMax M2 integration to use official MiniMax API (https://api.minimax.io/v1)
+- Updated AI backend selector with correct endpoint and instructions
+- Free MiniMax API access until November 7, 2025
 - Fixed ZIP player with missing backend endpoints (/api/zips/:id/play/:file, /api/zips/:id/entry-file)
 - Implemented ZIP merge functionality with conflict resolution
-- Updated HuggingFace integration to use Router API with MiniMax-M2:novita model
 - Added API key validation system with "Test Connection" button in AI settings
 - Improved error handling in AIService to display specific API error messages
-- Updated PWA manifest to v2.0.0
+- Updated PWA manifest to v2.0.1
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
