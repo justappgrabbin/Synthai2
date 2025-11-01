@@ -1,5 +1,5 @@
-const CACHE_NAME = 'indyverse-v2';
-const RUNTIME_CACHE = 'indyverse-runtime-v2';
+const CACHE_NAME = 'indyverse-v3-' + Date.now();
+const RUNTIME_CACHE = 'indyverse-runtime-v3';
 
 const PRECACHE_URLS = [
   '/',
@@ -61,12 +61,33 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(request).then(cachedResponse => {
+    (async () => {
+      // For HTML/navigation requests, always try network first to get fresh content
+      if (request.destination === 'document' || request.mode === 'navigate') {
+        try {
+          const response = await fetch(request);
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(RUNTIME_CACHE).then(cache => {
+              cache.put(request, responseToCache);
+            });
+            return response;
+          }
+        } catch (err) {
+          const cachedResponse = await caches.match(request);
+          if (cachedResponse) return cachedResponse;
+          return caches.match('/offline.html');
+        }
+      }
+
+      // For other resources, use cache-first strategy
+      const cachedResponse = await caches.match(request);
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      return fetch(request).then(response => {
+      try {
+        const response = await fetch(request);
         if (!response || response.status !== 200 || response.type === 'error') {
           return response;
         }
@@ -79,7 +100,7 @@ self.addEventListener('fetch', (event) => {
         }
 
         return response;
-      }).catch(() => {
+      } catch (err) {
         if (request.destination === 'document') {
           return caches.match('/offline.html');
         }
@@ -90,8 +111,8 @@ self.addEventListener('fetch', (event) => {
             'Content-Type': 'text/plain'
           })
         });
-      });
-    })
+      }
+    })()
   );
 });
 
