@@ -152,44 +152,24 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-background border-b">
-        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+      {/* Hero Section - Sleek & Minimal */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-background border-b">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
           <div className="text-center space-y-6">
             <div className="inline-block">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Sparkles className="h-8 w-8 text-lavender animate-pulse" />
-                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-lavender via-purple-400 to-blue-400 bg-clip-text text-transparent" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                  YOU–N–I–VERSE
-                </h1>
-                <Sparkles className="h-8 w-8 text-lavender animate-pulse" />
-              </div>
-              <div className="h-0.5 bg-gradient-to-r from-transparent via-lavender to-transparent" />
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                YOU–N–I–VERSE Studio
+              </h1>
+              <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mt-3" />
             </div>
             
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
-              <span className="text-lavender font-semibold">The Indyverse</span> • Browser-Based Creative Development Studio
-            </p>
-            
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Transform consciousness into code. Build universes from text. Train AI with neural networks. 
-              Deploy anywhere. All powered by the seven-layer semantic framework.
+            <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto">
+              Build, create, and deploy in one unified workspace
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <Button
                 size="lg"
-                className="bg-lavender hover:bg-lavender-hover text-white"
-                onClick={() => setLocation("/universe-creator")}
-                data-testid="button-hero-universe-creator"
-              >
-                <Globe className="h-5 w-5 mr-2" />
-                Create Universe
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-lavender/50 hover:border-lavender"
                 onClick={() => setLocation("/ide")}
                 data-testid="button-hero-ide"
               >
@@ -199,28 +179,21 @@ export function Dashboard() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-lavender/50 hover:border-lavender"
-                onClick={() => setShowCommandCenterDialog(true)}
-                data-testid="button-hero-command-center"
+                onClick={() => setLocation("/game-creator")}
+                data-testid="button-hero-game-creator"
               >
-                <TerminalIcon className="h-5 w-5 mr-2" />
-                Command Center
+                <Palette className="h-5 w-5 mr-2" />
+                Create Game
               </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 pt-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-lavender" />
-                <span>PWA Ready</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4 text-lavender" />
-                <span>AI Powered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Orbit className="h-4 w-4 text-lavender" />
-                <span>7-Layer Framework</span>
-              </div>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => setLocation("/zip-manager")}
+                data-testid="button-hero-zip-manager"
+              >
+                <FolderTree className="h-5 w-5 mr-2" />
+                Upload & Play
+              </Button>
             </div>
           </div>
         </div>

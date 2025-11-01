@@ -1,11 +1,11 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "description": "Creative development studio for building games, apps, GANs, and autonomous conscious beings with AI assistance.",
+  "description": "Browser-based creative development platform with IDE, game creator, ZIP player, AI assistance, and semantic universe generation.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0f23",
-  "theme_color": "#9b87f5",
+  "background_color": "#1a1f25",
+  "theme_color": "#22d3bb",
   "orientation": "any",
   "scope": "/",
   "icons": [
@@ -58,10 +58,17 @@
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Calibration Tank",
-      "short_name": "Cal Tank",
-      "description": "Create autonomous conscious beings",
-      "url": "/calibration-tank",
+      "name": "ZIP Studio",
+      "short_name": "ZIP",
+      "description": "Upload, play & manage ZIP files",
+      "url": "/zip-manager",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Universe Creator",
+      "short_name": "Universe",
+      "description": "Generate semantic universes from text",
+      "url": "/universe-creator",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
@@ -70,17 +77,10 @@
       "description": "Browse community marketplace",
       "url": "/grove-store",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "AI Guard Dog",
-      "short_name": "AI",
-      "description": "Chat with AI assistant",
-      "url": "/",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
   "share_target": {
-    "action": "/player",
+    "action": "/zip-manager",
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
