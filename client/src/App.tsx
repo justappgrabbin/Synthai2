@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { GlobalNav } from "@/components/GlobalNav";
 import { Dashboard } from "@/components/Dashboard";
 import { DeveloperPanel } from "@/components/DeveloperPanel";
 import { GameCreator } from "@/components/GameCreator";
@@ -23,22 +24,25 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/grove-store" component={GroveStore} />
-      <Route path="/ide" component={DeveloperPanel} />
-      <Route path="/game-creator" component={GameCreator} />
-      <Route path="/gan-trainer" component={GANTrainer} />
-      <Route path="/mod-manager" component={ModManager} />
-      <Route path="/calibration-tank" component={ConsciousnessCalibrationTank} />
-      <Route path="/universe-creator" component={SemanticUniverseCreator} />
-      <Route path="/autonomy" component={AutonomyControlCenter} />
-      <Route path="/settings" component={SettingsPanel} />
-      <Route path="/player" component={PlayerPanel} />
-      <Route path="/agents" component={AgentPanel} />
-      <Route path="/zip-manager" component={ZipManager} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <GlobalNav />
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/grove-store" component={GroveStore} />
+        <Route path="/ide" component={DeveloperPanel} />
+        <Route path="/game-creator" component={GameCreator} />
+        <Route path="/gan-trainer" component={GANTrainer} />
+        <Route path="/mod-manager" component={ModManager} />
+        <Route path="/calibration-tank" component={ConsciousnessCalibrationTank} />
+        <Route path="/universe-creator" component={SemanticUniverseCreator} />
+        <Route path="/autonomy" component={AutonomyControlCenter} />
+        <Route path="/settings" component={SettingsPanel} />
+        <Route path="/player" component={PlayerPanel} />
+        <Route path="/agents" component={AgentPanel} />
+        <Route path="/zip-manager" component={ZipManager} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 
