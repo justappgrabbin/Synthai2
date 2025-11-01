@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIBackendSelector } from "./AIBackendSelector";
 import { TopNav } from "@/components/TopNav";
 import { useTheme } from "@/components/ThemeProvider";
-import { Moon, Sun, Palette } from "lucide-react";
+import { Moon, Sun, Palette, Brain, Zap, XCircle, AlertTriangle, Sparkles, CheckCircle } from "lucide-react";
 import { ThemeManager, type ColorTheme, THEME_PRESETS } from "@/lib/themeManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 const THEME_NAMES: Record<ColorTheme, string> = {
   teal: 'Teal & Amber',
@@ -15,9 +23,28 @@ const THEME_NAMES: Record<ColorTheme, string> = {
   amber: 'Golden Amber'
 };
 
+interface AutonomyProposal {
+  id: string;
+  title: string;
+  description: string;
+  status: "pending" | "approved" | "rejected" | "implemented";
+  createdAt: string;
+  sourceSignal: string;
+  category: string;
+}
+
 export function SettingsPanel() {
   const { theme, toggleTheme } = useTheme();
+  const { toast } = useToast();
   const [colorTheme, setColorTheme] = useState<ColorTheme>(ThemeManager.getCurrentTheme());
+  
+  const [autonomyEnabled, setAutonomyEnabled] = useState(false);
+  const [proposals, setProposals] = useState<AutonomyProposal[]>([]);
+  const [birthData, setBirthData] = useState<{
+    date?: string;
+    time?: string;
+    place?: string;
+  }>({});
 
   const handleColorThemeChange = (newTheme: ColorTheme) => {
     setColorTheme(newTheme);
@@ -26,118 +53,398 @@ export function SettingsPanel() {
 
   useEffect(() => {
     ThemeManager.initializeTheme();
+    loadAutonomyState();
+    loadProposals();
+    loadBirthData();
   }, []);
+
+  const loadAutonomyState = () => {
+    const stored = localStorage.getItem("autonomy_enabled");
+    if (stored) {
+      setAutonomyEnabled(JSON.parse(stored));
+    }
+  };
+
+  const loadProposals = () => {
+    const stored = localStorage.getItem("autonomy_proposals");
+    if (stored) {
+      setProposals(JSON.parse(stored));
+    }
+  };
+
+  const loadBirthData = () => {
+    const stored = localStorage.getItem("autonomy_birth_data");
+    if (stored) {
+      setBirthData(JSON.parse(stored));
+    }
+  };
+
+  const toggleAutonomy = (enabled: boolean) => {
+    setAutonomyEnabled(enabled);
+    localStorage.setItem("autonomy_enabled", JSON.stringify(enabled));
+    
+    toast({
+      title: enabled ? "Autonomy Activated" : "Autonomy Deactivated",
+      description: enabled 
+        ? "The system can now propose self-development enhancements"
+        : "Self-development proposals are paused"
+    });
+
+    window.dispatchEvent(new CustomEvent("autonomy-state-changed", { detail: { enabled } }));
+  };
+
+  const updateBirthData = (field: string, value: string) => {
+    const updated = { ...birthData, [field]: value };
+    setBirthData(updated);
+    localStorage.setItem("autonomy_birth_data", JSON.stringify(updated));
+  };
+
+  const approveProposal = (id: string) => {
+    const updated = proposals.map(p => 
+      p.id === id ? { ...p, status: "approved" as const } : p
+    );
+    setProposals(updated);
+    localStorage.setItem("autonomy_proposals", JSON.stringify(updated));
+    
+    toast({
+      title: "Proposal Approved",
+      description: "This enhancement will be implemented"
+    });
+  };
+
+  const rejectProposal = (id: string) => {
+    const updated = proposals.map(p => 
+      p.id === id ? { ...p, status: "rejected" as const } : p
+    );
+    setProposals(updated);
+    localStorage.setItem("autonomy_proposals", JSON.stringify(updated));
+    
+    toast({
+      title: "Proposal Rejected",
+      description: "This enhancement will not be implemented"
+    });
+  };
+
+  const pendingCount = proposals.filter(p => p.status === "pending").length;
+  const approvedCount = proposals.filter(p => p.status === "approved").length;
 
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
 
-      <div className="p-8 max-w-3xl mx-auto space-y-8">
-        <div>
+      <div className="p-8 max-w-5xl mx-auto">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">Configuration</h1>
-          <p className="text-muted-foreground">Manage your AI backends and studio preferences</p>
+          <p className="text-muted-foreground">Manage your AI backends, autonomy, and studio preferences</p>
         </div>
 
-        <section>
-          <h2 className="text-xl font-semibold mb-4">AI Configuration</h2>
-          <AIBackendSelector />
-        </section>
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
+            <TabsTrigger value="ai" data-testid="tab-ai">AI Config</TabsTrigger>
+            <TabsTrigger value="autonomy" data-testid="tab-autonomy">
+              Autonomy
+              {pendingCount > 0 && (
+                <Badge variant="destructive" className="ml-2 h-5 px-1.5 text-xs">{pendingCount}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="about" data-testid="tab-about">About</TabsTrigger>
+          </TabsList>
 
-        <section className="p-6 border rounded-lg bg-card">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Palette className="h-5 w-5 text-primary" />
-            Color Palette
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Choose your preferred color scheme
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {(Object.keys(THEME_PRESETS) as ColorTheme[]).map((themeKey) => (
-              <button
-                key={themeKey}
-                data-testid={`button-theme-${themeKey}`}
-                onClick={() => handleColorThemeChange(themeKey)}
-                className={`p-4 rounded-lg border-2 transition-all hover-elevate ${
-                  colorTheme === themeKey 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border bg-card'
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div 
-                    className="h-8 w-8 rounded-full border-2 border-white/20 shadow-md"
-                    style={{ backgroundColor: `hsl(${THEME_PRESETS[themeKey].primary})` }}
-                  />
-                  <div 
-                    className="h-6 w-6 rounded-full border-2 border-white/20 shadow-sm"
-                    style={{ backgroundColor: `hsl(${THEME_PRESETS[themeKey].accent})` }}
+          <TabsContent value="general" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5 text-primary" />
+                  Color Palette
+                </CardTitle>
+                <CardDescription>Choose your preferred color scheme</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {(Object.keys(THEME_PRESETS) as ColorTheme[]).map((themeKey) => (
+                    <button
+                      key={themeKey}
+                      data-testid={`button-theme-${themeKey}`}
+                      onClick={() => handleColorThemeChange(themeKey)}
+                      className={`p-4 rounded-lg border-2 transition-all hover-elevate ${
+                        colorTheme === themeKey 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border bg-card'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div 
+                          className="h-8 w-8 rounded-full border-2 border-white/20 shadow-md"
+                          style={{ backgroundColor: `hsl(${THEME_PRESETS[themeKey].primary})` }}
+                        />
+                        <div 
+                          className="h-6 w-6 rounded-full border-2 border-white/20 shadow-sm"
+                          style={{ backgroundColor: `hsl(${THEME_PRESETS[themeKey].accent})` }}
+                        />
+                      </div>
+                      <p className="text-sm font-medium text-left">{THEME_NAMES[themeKey]}</p>
+                      {colorTheme === themeKey && (
+                        <p className="text-xs text-primary mt-1">Active</p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Theme Preferences</CardTitle>
+                <CardDescription>Customize your workspace appearance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {theme === "dark" ? (
+                      <Moon className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Sun className="h-4 w-4 text-primary" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {theme === "dark" ? "Dark Mode" : "Light Mode"}
+                    </span>
+                  </div>
+                  <Button 
+                    data-testid="button-toggle-theme"
+                    variant="outline" 
+                    size="sm" 
+                    onClick={toggleTheme}
+                    className="gap-2"
+                  >
+                    {theme === "dark" ? (
+                      <>
+                        <Sun className="h-4 w-4" />
+                        Switch to Light
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="h-4 w-4" />
+                        Switch to Dark
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ai" className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-4">AI Configuration</h2>
+              <AIBackendSelector />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="autonomy" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-primary" />
+                      Autonomy Control Center
+                    </CardTitle>
+                    <CardDescription>
+                      Enable the system to propose self-development enhancements
+                    </CardDescription>
+                  </div>
+                  <Badge 
+                    variant={autonomyEnabled ? "default" : "secondary"}
+                    className="gap-1"
+                  >
+                    {autonomyEnabled ? (
+                      <><Zap className="h-3 w-3" /> Active</>
+                    ) : (
+                      <><XCircle className="h-3 w-3" /> Inactive</>
+                    )}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                  <div className="space-y-1">
+                    <Label htmlFor="autonomy-switch" className="text-base font-semibold">
+                      Enable Self-Development Mode
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      System will use your cosmic signature to generate proposals
+                    </p>
+                  </div>
+                  <Switch
+                    id="autonomy-switch"
+                    data-testid="switch-autonomy"
+                    checked={autonomyEnabled}
+                    onCheckedChange={toggleAutonomy}
                   />
                 </div>
-                <p className="text-sm font-medium text-left">{THEME_NAMES[themeKey]}</p>
-                {colorTheme === themeKey && (
-                  <p className="text-xs text-primary mt-1">Active</p>
-                )}
-              </button>
-            ))}
-          </div>
-        </section>
 
-        <section className="p-6 border rounded-lg bg-card">
-          <h2 className="text-lg font-semibold mb-4">Theme Preferences</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Customize your workspace appearance
-          </p>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {theme === "dark" ? (
-                  <Moon className="h-4 w-4 text-primary" />
-                ) : (
-                  <Sun className="h-4 w-4 text-primary" />
+                {autonomyEnabled && (
+                  <Card className="bg-primary/5 border-primary/30">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-start gap-2 text-sm">
+                        <AlertTriangle className="h-4 w-4 text-primary mt-0.5" />
+                        <div className="space-y-2">
+                          <p className="font-semibold">Autonomy Active</p>
+                          <p className="text-muted-foreground text-xs">
+                            The system will analyze your cosmic signature and propose features.
+                            All proposals require your approval before implementation.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
-                <span className="text-sm font-medium">
-                  {theme === "dark" ? "Dark Mode" : "Light Mode"}
-                </span>
-              </div>
-              <Button 
-                data-testid="button-toggle-theme"
-                variant="outline" 
-                size="sm" 
-                onClick={toggleTheme}
-                className="gap-2"
-              >
-                {theme === "dark" ? (
-                  <>
-                    <Sun className="h-4 w-4" />
-                    Switch to Light
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-4 w-4" />
-                    Switch to Dark
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </section>
 
-        <section className="p-6 border rounded-lg bg-card">
-          <h2 className="text-lg font-semibold mb-4">About</h2>
-          <p className="text-sm text-muted-foreground">
-            YOU–N–I–VERSE Studio • The Indyverse
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Creative IDE with integrated AI consciousness
-          </p>
-        </section>
+                <div className="space-y-3">
+                  <Label className="text-base">Cosmic Signature Data</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    This data is used to calibrate autonomous feature proposals
+                  </p>
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="birth-date">Birth Date</Label>
+                      <Input
+                        id="birth-date"
+                        data-testid="input-birth-date"
+                        type="date"
+                        value={birthData.date || ""}
+                        onChange={(e) => updateBirthData("date", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="birth-time">Birth Time (optional)</Label>
+                      <Input
+                        id="birth-time"
+                        data-testid="input-birth-time"
+                        type="time"
+                        value={birthData.time || ""}
+                        onChange={(e) => updateBirthData("time", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="birth-place">Birth Place (optional)</Label>
+                      <Input
+                        id="birth-place"
+                        data-testid="input-birth-place"
+                        placeholder="City, Country"
+                        value={birthData.place || ""}
+                        onChange={(e) => updateBirthData("place", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <section className="p-6 border rounded-lg bg-card/50">
-          <h2 className="text-lg font-semibold mb-3 text-lavender">Special Thanks</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            This project was made possible with the incredible assistance of <span className="text-foreground font-medium">ChatGPT</span>, <span className="text-foreground font-medium">Claude</span>, and the amazing <span className="text-foreground font-medium">Replit</span> platform. Thank you for empowering creators to build the future! 🌌
-          </p>
-        </section>
+            {proposals.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Autonomy Proposals
+                  </CardTitle>
+                  <CardDescription>
+                    Review and manage system-generated enhancement proposals
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px] pr-4">
+                    <div className="space-y-3">
+                      {proposals.map((proposal) => (
+                        <Card key={proposal.id} className={
+                          proposal.status === "pending" ? "border-primary/50" :
+                          proposal.status === "approved" ? "border-green-500/50" :
+                          proposal.status === "implemented" ? "border-blue-500/50" :
+                          "border-muted"
+                        }>
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold">{proposal.title}</h3>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {proposal.description}
+                                  </p>
+                                </div>
+                                <Badge variant={
+                                  proposal.status === "pending" ? "default" :
+                                  proposal.status === "approved" ? "default" :
+                                  proposal.status === "implemented" ? "default" :
+                                  "secondary"
+                                }>
+                                  {proposal.status}
+                                </Badge>
+                              </div>
+                              
+                              {proposal.status === "pending" && (
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => approveProposal(proposal.id)}
+                                    data-testid={`button-approve-${proposal.id}`}
+                                    className="gap-1"
+                                  >
+                                    <CheckCircle className="h-3 w-3" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => rejectProposal(proposal.id)}
+                                    data-testid={`button-reject-${proposal.id}`}
+                                    className="gap-1"
+                                  >
+                                    <XCircle className="h-3 w-3" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="about" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>About</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    YOU–N–I–VERSE Studio • The Indyverse
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Creative IDE with integrated AI consciousness
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50">
+              <CardHeader>
+                <CardTitle className="text-primary">Special Thanks</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  This project was made possible with the incredible assistance of <span className="text-foreground font-medium">ChatGPT</span>, <span className="text-foreground font-medium">Claude</span>, and the amazing <span className="text-foreground font-medium">Replit</span> platform. Thank you for empowering creators to build the future!
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -37,6 +37,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { TopNav } from "@/components/TopNav";
 
 interface CharacterDNA {
   seed: number;
@@ -436,11 +437,13 @@ export default ConsciousnessCore;
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6 space-y-4">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Brain className="h-10 w-10 text-lavender" />
+    <div className="min-h-screen bg-background">
+      <TopNav />
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="mb-6 space-y-4">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Brain className="h-10 w-10 text-lavender" />
             <h1 className="text-4xl font-bold text-lavender">Consciousness Calibration Tank</h1>
           </div>
           <p className="text-muted-foreground">Create autonomous conscious beings for the YOU–N–I–VERSE</p>
@@ -930,6 +933,7 @@ export default ConsciousnessCore;
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

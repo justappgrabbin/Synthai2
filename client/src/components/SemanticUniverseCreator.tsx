@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniverseViewer3D } from "@/components/UniverseViewer3D";
+import { TopNav } from "@/components/TopNav";
 
 interface SemanticLayer {
   id: number;
@@ -438,16 +439,18 @@ export function SemanticUniverseCreator() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Layers className="h-8 w-8 text-lavender" />
-              <h1 className="text-4xl font-bold text-lavender">Semantic Universe Creator</h1>
+    <div className="min-h-screen bg-background">
+      <TopNav />
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <Layers className="h-8 w-8 text-lavender" />
+                <h1 className="text-4xl font-bold text-lavender">Semantic Universe Creator</h1>
+              </div>
+              <p className="text-muted-foreground">Transform text into playable worlds through the seven-layer semantic framework</p>
             </div>
-            <p className="text-muted-foreground">Transform text into playable worlds through the seven-layer semantic framework</p>
-          </div>
           
           <div className="flex gap-3">
             {autonomyEnabled && (
@@ -785,6 +788,7 @@ export function SemanticUniverseCreator() {
           onClose={() => setPlayingUniverse(null)}
         />
       )}
+      </div>
     </div>
   );
 }

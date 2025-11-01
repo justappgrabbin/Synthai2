@@ -15,7 +15,6 @@ import { GANTrainer } from "@/components/GANTrainer";
 import { ModManager } from "@/components/ModManager";
 import { ConsciousnessCalibrationTank } from "@/components/ConsciousnessCalibrationTank";
 import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
-import { AutonomyControlCenter } from "@/components/AutonomyControlCenter";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import ZipManager from "@/pages/ZipManager";
@@ -34,7 +33,6 @@ function Router() {
         <Route path="/mod-manager" component={ModManager} />
         <Route path="/calibration-tank" component={ConsciousnessCalibrationTank} />
         <Route path="/universe-creator" component={SemanticUniverseCreator} />
-        <Route path="/autonomy" component={AutonomyControlCenter} />
         <Route path="/settings" component={SettingsPanel} />
         <Route path="/zip-manager" component={ZipManager} />
         <Route path="/agents" component={AgentPanel} />
