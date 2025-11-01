@@ -147,6 +147,14 @@ export class MemStorage implements IStorage {
       ...insertSeed,
       id,
       status: insertSeed.status ?? 'pending',
+      movement: insertSeed.movement ?? null,
+      evolution: insertSeed.evolution ?? null,
+      being: insertSeed.being ?? null,
+      design: insertSeed.design ?? null,
+      space: insertSeed.space ?? null,
+      transpersonal: insertSeed.transpersonal ?? null,
+      void: insertSeed.void ?? null,
+      symbolicStructure: insertSeed.symbolicStructure ?? null,
       createdAt: new Date(),
       completedAt: null,
     };
@@ -179,6 +187,14 @@ export class MemStorage implements IStorage {
     const manifestation: WorldManifestation = {
       ...insertManifestation,
       id,
+      narrative: insertManifestation.narrative ?? null,
+      worldAttributes: insertManifestation.worldAttributes ?? null,
+      semanticGanResult: insertManifestation.semanticGanResult ?? null,
+      videoGanResult: insertManifestation.videoGanResult ?? null,
+      coherenceScore: insertManifestation.coherenceScore ?? null,
+      resonanceScore: insertManifestation.resonanceScore ?? null,
+      beautyScore: insertManifestation.beautyScore ?? null,
+      reflectionNotes: insertManifestation.reflectionNotes ?? null,
       createdAt: new Date(),
     };
     this.worldManifestations.set(id, manifestation);
