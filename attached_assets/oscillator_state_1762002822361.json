@@ -1,0 +1,74 @@
+{
+  "timestamp": "2025-10-27T01:00:00.266776",
+  "centers": {
+    "Head": {
+      "phase": 3.815550161456077,
+      "activation": 0.18795845177308662,
+      "field": "Mind",
+      "frequency": 1.33
+    },
+    "Ajna": {
+      "phase": 3.6000330713607167,
+      "activation": 0.27872494996304314,
+      "field": "Mind",
+      "frequency": 1.33
+    },
+    "Throat": {
+      "phase": 3.371491598560228,
+      "activation": 0.3860604357575225,
+      "field": "Mind",
+      "frequency": 1.33
+    },
+    "G": {
+      "phase": 3.4469294831683692,
+      "activation": 0.3496927789822549,
+      "field": "Heart",
+      "frequency": 3.33
+    },
+    "Heart/Ego": {
+      "phase": 3.5935907639056124,
+      "activation": 0.28161807136478323,
+      "field": "Heart",
+      "frequency": 3.33
+    },
+    "Solar Plexus": {
+      "phase": 3.403231849523038,
+      "activation": 0.37066784583904505,
+      "field": "Heart",
+      "frequency": 3.33
+    },
+    "Sacral": {
+      "phase": 1.8362130789673257,
+      "activation": 0.9824916329091162,
+      "field": "Body",
+      "frequency": 1.0
+    },
+    "Spleen": {
+      "phase": 1.517637227643578,
+      "activation": 0.9992936938964615,
+      "field": "Body",
+      "frequency": 1.0
+    },
+    "Root": {
+      "phase": 1.3228746380573315,
+      "activation": 0.9847122556133872,
+      "field": "Body",
+      "frequency": 1.0
+    }
+  },
+  "coherence": {
+    "body": 0.9777395682891233,
+    "mind": 0.9836303877626252,
+    "heart": 0.9966885500452352,
+    "body_mind": -0.3515144921384892,
+    "body_heart": -0.38796965874647094,
+    "mind_heart": 0.9635448333920181,
+    "global": 0.6080785399010693
+  },
+  "dominant_field": "Body",
+  "field_strengths": {
+    "Body": 0.9888325274729883,
+    "Mind": 0.28424794583121743,
+    "Heart": 0.3339928987286944
+  }
+}
