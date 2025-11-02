@@ -22,8 +22,8 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 
 # Import our existing modules
-from consciousness_oscillator import ConsciousnessOscillator, CENTERS
-from bioenergetic_geometry_engine import (
+from .consciousness_oscillator import ConsciousnessOscillator, CENTERS
+from ..engines.bioenergetic_geometry_engine import (
     generate_GAN_prompt,
     generate_LLM_tone_filter,
     ELEMENT_ARCHITECTURE,

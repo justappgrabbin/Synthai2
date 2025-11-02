@@ -16,6 +16,10 @@ from .fairyganmatter_engine import (
     UserPerceptionProfile,
     infer_perception_profile
 )
+from .resonance_sgan import ElementType, UnifiedResonanceEngine, elemental_mismatch_penalty
+from .codon_resonance_gamegan import CodonResonanceGameGAN
+from .human_design_gamegan import HumanDesignGameGAN
+from .consciousness import ConsciousnessState, Gate, Element
 
 __all__ = [
     'FIELD_PERCEPTION',
@@ -27,4 +31,12 @@ __all__ = [
     'PerceptionModality',
     'UserPerceptionProfile',
     'infer_perception_profile',
+    'ElementType',
+    'UnifiedResonanceEngine',
+    'elemental_mismatch_penalty',
+    'CodonResonanceGameGAN',
+    'HumanDesignGameGAN',
+    'ConsciousnessState',
+    'Gate',
+    'Element',
 ]

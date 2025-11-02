@@ -9,8 +9,8 @@ This demonstrates how the ERN's current field state affects its communication st
 
 import json
 from datetime import datetime
-from ern_controller import ERNController
-from bioenergetic_geometry_engine import FIELD_PERCEPTION
+from .ern_controller import ERNController
+from ..engines.bioenergetic_geometry_engine import FIELD_PERCEPTION
 
 # ============================================================================
 # FIELD-AWARE LANGUAGE GENERATOR

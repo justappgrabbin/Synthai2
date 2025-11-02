@@ -13,7 +13,7 @@ The answer depends on:
 
 import numpy as np
 from datetime import datetime
-from ern_controller import ERNController
+from .ern_controller import ERNController
 
 # ============================================================================
 # YES/NO ORACLE

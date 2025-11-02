@@ -11,9 +11,9 @@ from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-from unified_cognitive_engine import UnifiedCognitiveEngine, UnifiedConsciousnessState
-from fairyganmatter_engine import FairyGANmatter, UserPerceptionProfile, PerceptionModality, infer_perception_profile
-from resonance_sgan import ElementType, elemental_mismatch_penalty
+from ..core.unified_cognitive_engine import UnifiedCognitiveEngine, UnifiedConsciousnessState
+from ..engines.fairyganmatter_engine import FairyGANmatter, UserPerceptionProfile, PerceptionModality, infer_perception_profile
+from ..engines.resonance_sgan import ElementType, elemental_mismatch_penalty
 
 
 # ============================================================================
