@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AIBackendSelector } from "./AIBackendSelector";
 import { TopNav } from "@/components/TopNav";
 import { useTheme } from "@/components/ThemeProvider";
-import { Moon, Sun, Palette, Brain, Zap, XCircle, AlertTriangle, Sparkles, CheckCircle } from "lucide-react";
+import { Moon, Sun, Palette, Brain, Zap, XCircle, AlertTriangle, Sparkles, CheckCircle, Shield, ShieldOff, ShieldCheck } from "lucide-react";
 import { ThemeManager, type ColorTheme, THEME_PRESETS } from "@/lib/themeManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -33,12 +33,35 @@ interface AutonomyProposal {
   category: string;
 }
 
+type AutonomyMode = 'off' | 'controlled' | 'adaptive';
+
+interface AutonomySettings {
+  mode: AutonomyMode;
+  requireConfirmation: boolean;
+  allowFileCreation: boolean;
+  allowFileDeletion: boolean;
+  allowDependencyChanges: boolean;
+  allowConfigChanges: boolean;
+  preserveUserCode: boolean;
+}
+
+const DEFAULT_AUTONOMY: AutonomySettings = {
+  mode: 'controlled',
+  requireConfirmation: true,
+  allowFileCreation: false,
+  allowFileDeletion: false,
+  allowDependencyChanges: false,
+  allowConfigChanges: false,
+  preserveUserCode: true,
+};
+
 export function SettingsPanel() {
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const [colorTheme, setColorTheme] = useState<ColorTheme>(ThemeManager.getCurrentTheme());
   
   const [autonomyEnabled, setAutonomyEnabled] = useState(false);
+  const [autonomySettings, setAutonomySettings] = useState<AutonomySettings>(DEFAULT_AUTONOMY);
   const [proposals, setProposals] = useState<AutonomyProposal[]>([]);
   const [birthData, setBirthData] = useState<{
     date?: string;
@@ -54,6 +77,7 @@ export function SettingsPanel() {
   useEffect(() => {
     ThemeManager.initializeTheme();
     loadAutonomyState();
+    loadAutonomySettings();
     loadProposals();
     loadBirthData();
   }, []);
@@ -62,6 +86,17 @@ export function SettingsPanel() {
     const stored = localStorage.getItem("autonomy_enabled");
     if (stored) {
       setAutonomyEnabled(JSON.parse(stored));
+    }
+  };
+
+  const loadAutonomySettings = () => {
+    const stored = localStorage.getItem("youniverse_autonomy_settings");
+    if (stored) {
+      try {
+        setAutonomySettings(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to load autonomy settings:', e);
+      }
     }
   };
 
@@ -76,6 +111,22 @@ export function SettingsPanel() {
     const stored = localStorage.getItem("autonomy_birth_data");
     if (stored) {
       setBirthData(JSON.parse(stored));
+    }
+  };
+
+  const updateAutonomySetting = <K extends keyof AutonomySettings>(
+    key: K,
+    value: AutonomySettings[K]
+  ) => {
+    const updated = { ...autonomySettings, [key]: value };
+    setAutonomySettings(updated);
+    localStorage.setItem("youniverse_autonomy_settings", JSON.stringify(updated));
+    
+    if (key === 'mode') {
+      toast({
+        title: "Autonomy Mode Updated",
+        description: `AI autonomy mode set to ${value}`
+      });
     }
   };
 
@@ -299,7 +350,213 @@ export function SettingsPanel() {
                   </Card>
                 )}
 
-                <div className="space-y-3">
+                {/* Autonomy Mode Selection */}
+                <div className="space-y-4 pt-4 border-t">
+                  <div>
+                    <Label className="text-base font-semibold">AI Autonomy Mode</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Control how much freedom the AI has when working on your code
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button
+                      data-testid="button-mode-off"
+                      variant={autonomySettings.mode === 'off' ? 'default' : 'outline'}
+                      onClick={() => updateAutonomySetting('mode', 'off')}
+                      className="justify-start h-auto py-3"
+                    >
+                      <div className="flex items-start gap-3 w-full">
+                        <ShieldOff className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">Off</div>
+                          <div className="text-xs text-muted-foreground font-normal">
+                            AI assistance disabled - manual control only
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                    
+                    <Button
+                      data-testid="button-mode-controlled"
+                      variant={autonomySettings.mode === 'controlled' ? 'default' : 'outline'}
+                      onClick={() => updateAutonomySetting('mode', 'controlled')}
+                      className="justify-start h-auto py-3"
+                    >
+                      <div className="flex items-start gap-3 w-full">
+                        <Shield className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">Controlled</div>
+                          <div className="text-xs text-muted-foreground font-normal">
+                            AI can only do exactly what you request - no extras
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                    
+                    <Button
+                      data-testid="button-mode-adaptive"
+                      variant={autonomySettings.mode === 'adaptive' ? 'default' : 'outline'}
+                      onClick={() => updateAutonomySetting('mode', 'adaptive')}
+                      className="justify-start h-auto py-3"
+                    >
+                      <div className="flex items-start gap-3 w-full">
+                        <ShieldCheck className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">Adaptive</div>
+                          <div className="text-xs text-muted-foreground font-normal">
+                            AI can suggest and make improvements within guardrails
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+
+                  {/* Current Status Badge */}
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                    <span className="text-sm text-muted-foreground">Current Mode:</span>
+                    <Badge variant="default" className="capitalize">
+                      {autonomySettings.mode}
+                    </Badge>
+                  </div>
+
+                  {/* Guardrail Settings - Only show when Adaptive mode is active */}
+                  {autonomySettings.mode === 'adaptive' && (
+                    <div className="space-y-4 pt-4 border-t">
+                      <div>
+                        <h3 className="text-sm font-semibold mb-2">Guardrails & Permissions</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Configure what the AI is allowed to do in Adaptive mode
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                          <div className="flex-1">
+                            <Label htmlFor="confirm" className="text-sm font-medium cursor-pointer">
+                              Require Confirmation
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Ask before making any changes
+                            </p>
+                          </div>
+                          <Switch
+                            id="confirm"
+                            data-testid="switch-require-confirmation"
+                            checked={autonomySettings.requireConfirmation}
+                            onCheckedChange={(checked) => updateAutonomySetting('requireConfirmation', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                          <div className="flex-1">
+                            <Label htmlFor="create-files" className="text-sm font-medium cursor-pointer">
+                              Allow File Creation
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              AI can create new files as needed
+                            </p>
+                          </div>
+                          <Switch
+                            id="create-files"
+                            data-testid="switch-allow-file-creation"
+                            checked={autonomySettings.allowFileCreation}
+                            onCheckedChange={(checked) => updateAutonomySetting('allowFileCreation', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                          <div className="flex-1">
+                            <Label htmlFor="delete-files" className="text-sm font-medium cursor-pointer">
+                              Allow File Deletion
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              AI can delete files (use with caution)
+                            </p>
+                          </div>
+                          <Switch
+                            id="delete-files"
+                            data-testid="switch-allow-file-deletion"
+                            checked={autonomySettings.allowFileDeletion}
+                            onCheckedChange={(checked) => updateAutonomySetting('allowFileDeletion', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                          <div className="flex-1">
+                            <Label htmlFor="dependencies" className="text-sm font-medium cursor-pointer">
+                              Allow Dependency Changes
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              AI can install or update packages
+                            </p>
+                          </div>
+                          <Switch
+                            id="dependencies"
+                            data-testid="switch-allow-dependency-changes"
+                            checked={autonomySettings.allowDependencyChanges}
+                            onCheckedChange={(checked) => updateAutonomySetting('allowDependencyChanges', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                          <div className="flex-1">
+                            <Label htmlFor="config" className="text-sm font-medium cursor-pointer">
+                              Allow Config Changes
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              AI can modify configuration files
+                            </p>
+                          </div>
+                          <Switch
+                            id="config"
+                            data-testid="switch-allow-config-changes"
+                            checked={autonomySettings.allowConfigChanges}
+                            onCheckedChange={(checked) => updateAutonomySetting('allowConfigChanges', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                          <div className="flex-1">
+                            <Label htmlFor="preserve" className="text-sm font-medium cursor-pointer">
+                              Preserve User Code
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Never delete or overwrite your code
+                            </p>
+                          </div>
+                          <Switch
+                            id="preserve"
+                            data-testid="switch-preserve-user-code"
+                            checked={autonomySettings.preserveUserCode}
+                            onCheckedChange={(checked) => updateAutonomySetting('preserveUserCode', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Info for Controlled Mode */}
+                  {autonomySettings.mode === 'controlled' && (
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                        In Controlled mode, the AI will only perform the exact tasks you request. 
+                        It won't add features, optimize code, or make suggestions beyond your instructions.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Info for Off Mode */}
+                  {autonomySettings.mode === 'off' && (
+                    <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-md">
+                      <p className="text-sm text-orange-600 dark:text-orange-400">
+                        AI assistance is currently disabled. You'll need to make all changes manually.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-4 border-t">
                   <Label className="text-base">Cosmic Signature Data</Label>
                   <p className="text-xs text-muted-foreground mb-2">
                     This data is used to calibrate autonomous feature proposals
