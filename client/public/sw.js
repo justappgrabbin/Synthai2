@@ -1,5 +1,5 @@
-const CACHE_NAME = 'indyverse-v7-' + Date.now();
-const RUNTIME_CACHE = 'indyverse-runtime-v7';
+const CACHE_NAME = 'indyverse-ern-v8-' + Date.now();
+const RUNTIME_CACHE = 'indyverse-runtime-ern-v8';
 
 const PRECACHE_URLS = [
   '/',

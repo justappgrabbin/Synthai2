@@ -1,8 +1,8 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "version": "2.0.3",
-  "description": "Browser-based creative development platform with IDE, game creator, ZIP player, 7-layer consciousness calibration, AI-powered semantic universe generation, and fully responsive mobile-optimized interface.",
+  "version": "2.0.3-ERN",
+  "description": "Living consciousness ecosystem: Browser IDE, game creator, ERN Oracle (birthday-based resonance engine), 7-layer consciousness calibration with codon mapping, AI semantic universes, ZIP playback & merge. Fully responsive mobile-optimized interface.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",
@@ -72,9 +72,9 @@
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Consciousness Calibration",
-      "short_name": "Charts",
-      "description": "Calculate 7-layer consciousness charts with voice",
+      "name": "ERN Oracle & Charts",
+      "short_name": "Oracle",
+      "description": "Birthday-based resonance engine with 7-layer consciousness charts, codon mapping & voice synthesis",
       "url": "/consciousness-calibrator",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
