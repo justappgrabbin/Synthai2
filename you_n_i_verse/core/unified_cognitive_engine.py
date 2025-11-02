@@ -4,9 +4,18 @@ Integrates: Resonance S-GAN + Codon GameGAN + Human Design GameGAN
 For: 9-body consciousness system with progressive resonance
 """
 
-import torch
+from __future__ import annotations
+
+# Optional torch import for GAN functionality
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
 import numpy as np
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
 

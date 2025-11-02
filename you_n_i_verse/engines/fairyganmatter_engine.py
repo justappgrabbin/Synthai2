@@ -13,7 +13,14 @@ Takes unified cognitive engine output → Renders in format with LEAST friction:
 The format chosen is based on user's consciousness profile + solution complexity
 """
 
-import torch
+# Optional torch import for GAN functionality
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
 import numpy as np
 from typing import Dict, List, Optional, Tuple
 from enum import Enum

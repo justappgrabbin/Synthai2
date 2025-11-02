@@ -9,7 +9,6 @@ from .bioenergetic_geometry_engine import (
     generate_GAN_prompt,
     generate_LLM_tone_filter
 )
-from .element_codon_shape_geometry import CODON_TO_ELEMENT_MAP
 from .fairyganmatter_engine import (
     FairyGANmatter,
     PerceptionModality,
@@ -26,7 +25,6 @@ __all__ = [
     'ELEMENT_ARCHITECTURE',
     'generate_GAN_prompt',
     'generate_LLM_tone_filter',
-    'CODON_TO_ELEMENT_MAP',
     'FairyGANmatter',
     'PerceptionModality',
     'UserPerceptionProfile',
