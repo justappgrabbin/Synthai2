@@ -25,9 +25,11 @@ import {
   RefreshCw,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Eye,
+  X
 } from "lucide-react";
-import { FileSystem } from "@/lib/fileSystem";
+import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -61,6 +63,8 @@ export function ModManager() {
   const [showDeployDialog, setShowDeployDialog] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [netlifyApiKey, setNetlifyApiKey] = useState("");
+  const [previewProject, setPreviewProject] = useState<Project | null>(null);
+  const [iframeKey, setIframeKey] = useState(0);
   const { toast } = useToast();
 
   const [newProjectForm, setNewProjectForm] = useState({
@@ -189,6 +193,55 @@ export function ModManager() {
         description: `${project?.name} has been removed`,
       });
     }
+  };
+
+  const generateExecutableHTML = (files: FileNode[]): string => {
+    const indexFile = files.find(f => f.type === 'file' && f.name === 'index.html');
+    if (!indexFile || !indexFile.content) return '';
+
+    let html = indexFile.content;
+
+    const getAllFiles = (nodes: FileNode[]): FileNode[] => {
+      let result: FileNode[] = [];
+      for (const node of nodes) {
+        if (node.type === 'file') {
+          result.push(node);
+        }
+        if (node.children) {
+          result = result.concat(getAllFiles(node.children));
+        }
+      }
+      return result;
+    };
+
+    const allFiles = getAllFiles(files);
+
+    html = html.replace(/<link\s+rel="stylesheet"\s+href="([^"]+)">/g, (match, href) => {
+      const cssFile = allFiles.find(f => f.path === href || f.path.endsWith(href));
+      if (cssFile && cssFile.content) {
+        return `<style>${cssFile.content}</style>`;
+      }
+      return match;
+    });
+
+    html = html.replace(/<script\s+src="([^"]+)"><\/script>/g, (match, src) => {
+      const jsFile = allFiles.find(f => f.path === src || f.path.endsWith(src));
+      if (jsFile && jsFile.content) {
+        return `<script>${jsFile.content}</script>`;
+      }
+      return match;
+    });
+
+    return html;
+  };
+
+  const handlePreviewProject = (project: Project) => {
+    setPreviewProject(project);
+    setIframeKey(prev => prev + 1);
+  };
+
+  const handleRefreshPreview = () => {
+    setIframeKey(prev => prev + 1);
   };
 
   const handleDeployToNetlify = async () => {
@@ -459,6 +512,16 @@ export function ModManager() {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => handlePreviewProject(project)}
+                        className="flex-1"
+                        data-testid={`button-preview-project-${project.id}`}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Preview
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleSwitchProject(project)}
                         className="flex-1"
                         disabled={currentProject?.id === project.id}
@@ -666,6 +729,59 @@ export function ModManager() {
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Project Dialog */}
+      <Dialog open={!!previewProject} onOpenChange={() => setPreviewProject(null)}>
+        <DialogContent className="max-w-6xl h-[90vh] flex flex-col" data-testid="dialog-project-preview">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FolderOpen className="w-5 h-5 text-primary" />
+                <div>
+                  <DialogTitle>
+                    {previewProject?.name} Preview
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Interactive project preview
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshPreview}
+                  data-testid="button-refresh-preview"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setPreviewProject(null)}
+                  data-testid="button-close-preview"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 bg-muted rounded-lg overflow-hidden border">
+            {previewProject && (
+              <iframe
+                key={iframeKey}
+                srcDoc={generateExecutableHTML(previewProject.files || [])}
+                className="w-full h-full bg-white"
+                sandbox="allow-scripts allow-same-origin allow-forms"
+                title="Project Preview"
+                data-testid="iframe-project-preview"
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
