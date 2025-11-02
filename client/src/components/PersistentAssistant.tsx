@@ -4,13 +4,21 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIService } from "@/lib/AIService";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +27,17 @@ interface Message {
   thinking?: string;
 }
 
+interface Conversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const CONVERSATIONS_KEY = "ai-assistant-conversations";
+const CURRENT_CONVERSATION_KEY = "ai-assistant-current";
+
 export function PersistentAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -26,6 +45,8 @@ export function PersistentAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
+  const [currentConversationId, setCurrentConversationId] = useState<string>("");
+  const [savedConversations, setSavedConversations] = useState<Conversation[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
@@ -45,11 +66,115 @@ export function PersistentAssistant() {
     window.speechSynthesis.speak(utterance);
   };
 
+  // Load conversations from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(CONVERSATIONS_KEY);
+    if (stored) {
+      const conversations: Conversation[] = JSON.parse(stored, (key, value) => {
+        if (key === 'timestamp' || key === 'createdAt' || key === 'updatedAt') {
+          return new Date(value);
+        }
+        return value;
+      });
+      setSavedConversations(conversations);
+    }
+
+    const currentId = localStorage.getItem(CURRENT_CONVERSATION_KEY);
+    if (currentId) {
+      setCurrentConversationId(currentId);
+      const conversation = JSON.parse(stored || '[]').find((c: Conversation) => c.id === currentId);
+      if (conversation) {
+        setMessages(conversation.messages.map((m: Message) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        })));
+      }
+    } else {
+      const newId = Date.now().toString();
+      setCurrentConversationId(newId);
+      localStorage.setItem(CURRENT_CONVERSATION_KEY, newId);
+    }
+  }, []);
+
+  // Save current conversation to localStorage when messages change
+  useEffect(() => {
+    if (messages.length === 0 || !currentConversationId) return;
+
+    const title = messages[0]?.content.slice(0, 50) + (messages[0]?.content.length > 50 ? '...' : '') || 'New conversation';
+    const now = new Date();
+
+    const conversation: Conversation = {
+      id: currentConversationId,
+      title,
+      messages,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    const stored = localStorage.getItem(CONVERSATIONS_KEY);
+    const conversations: Conversation[] = stored ? JSON.parse(stored) : [];
+    const existingIndex = conversations.findIndex(c => c.id === currentConversationId);
+
+    if (existingIndex >= 0) {
+      conversations[existingIndex] = {
+        ...conversation,
+        createdAt: conversations[existingIndex].createdAt
+      };
+    } else {
+      conversations.unshift(conversation);
+    }
+
+    localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(conversations));
+    setSavedConversations(conversations);
+  }, [messages, currentConversationId]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const createNewConversation = () => {
+    const newId = Date.now().toString();
+    setCurrentConversationId(newId);
+    setMessages([]);
+    localStorage.setItem(CURRENT_CONVERSATION_KEY, newId);
+    toast({
+      title: "New Conversation",
+      description: "Started a fresh conversation"
+    });
+  };
+
+  const loadConversation = (conversationId: string) => {
+    const conversation = savedConversations.find(c => c.id === conversationId);
+    if (conversation) {
+      setCurrentConversationId(conversationId);
+      setMessages(conversation.messages.map(m => ({
+        ...m,
+        timestamp: new Date(m.timestamp)
+      })));
+      localStorage.setItem(CURRENT_CONVERSATION_KEY, conversationId);
+      toast({
+        title: "Conversation Loaded",
+        description: conversation.title
+      });
+    }
+  };
+
+  const deleteConversation = (conversationId: string) => {
+    const updated = savedConversations.filter(c => c.id !== conversationId);
+    localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(updated));
+    setSavedConversations(updated);
+    
+    if (currentConversationId === conversationId) {
+      createNewConversation();
+    }
+    
+    toast({
+      title: "Conversation Deleted",
+      description: "Conversation removed from history"
+    });
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -174,6 +299,68 @@ export function PersistentAssistant() {
               </div>
             </div>
             <div className="flex items-center gap-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    data-testid="button-history-menu"
+                    variant="ghost"
+                    size="icon"
+                    title="Conversation history"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72">
+                  <DropdownMenuLabel>Conversation History</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    data-testid="button-new-conversation"
+                    onClick={createNewConversation}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>New Conversation</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <ScrollArea className="max-h-64">
+                    {savedConversations.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        No saved conversations yet
+                      </div>
+                    ) : (
+                      savedConversations.map((conv) => (
+                        <div
+                          key={conv.id}
+                          className="flex items-center gap-2 px-2 py-1 hover-elevate rounded-md"
+                        >
+                          <button
+                            onClick={() => loadConversation(conv.id)}
+                            className="flex-1 text-left text-sm truncate p-1"
+                            data-testid={`button-load-conversation-${conv.id}`}
+                          >
+                            <div className="font-medium truncate">{conv.title}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {conv.messages.length} messages
+                            </div>
+                          </button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 flex-shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteConversation(conv.id);
+                            }}
+                            data-testid={`button-delete-conversation-${conv.id}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </ScrollArea>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 data-testid="button-toggle-speech"
                 variant="ghost"
