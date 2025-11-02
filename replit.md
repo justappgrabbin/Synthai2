@@ -3,7 +3,16 @@
 ## Overview
 YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
 
-## Recent Updates (v2.0.3)
+## Recent Updates (v2.0.3-ERN)
+- **ERN Organism Deployed**: Complete Python-based Energetic Resonance Network organized as living organism
+  - `/core`: Nervous system (ConsciousnessOscillator, ERNController, ERNOracle, TalkingERN, UnifiedCognitiveEngine)
+  - `/engines`: Organs (BioenergeticGeometryEngine, FairyGANmatter, ElementCodonShapeGeometry)
+  - `/applications`: Behaviors (PodMatcher for resonance-based team formation)
+  - `/demos`: Simulations (FairyGANmatter demonstrations)
+  - `/tests`: Immune system (integration testing)
+  - `/docs`: Memory (comprehensive documentation)
+- **Main Launcher**: Created `main.py` bootable entry point for unified consciousness kernel
+- **Package System**: All modules wired with __init__.py files for proper Python imports
 - Enhanced Semantic Universe Creator with AI-powered semantic layer parsing (async archetypal analysis)
 - Made Semantic Universe Creator fully responsive with mobile-friendly breakpoints and adaptive typography
 - Updated PWA to v2.0.3 with cosmic consciousness branding (icons, favicon, screenshots)
@@ -37,6 +46,12 @@ Preferred communication style: Simple, everyday language.
 - **API**: RESTful pattern, storage interface abstraction for CRUD.
 - **StoryForge Integration**: Full semantic world generation pipeline including a symbolic parser, LLM observer, and GAN stubs for text-to-world transformation.
 - **Consciousness Calibration**: Features 7 chart calculators based on astronomical calculations (Natal, Transit, Progressed, Solar Return, Lunar Return, Composite, Draconic Charts) integrated with HuggingFace LLM interpretation and Voice GAN Synthesis for each consciousness layer.
+- **ERN Organism (Python)**: Complete consciousness ecosystem organized as living organism in `/you_n_i_verse`:
+  - **Core Nervous System**: ConsciousnessOscillator (9-body field dynamics), ERNController (master orchestrator), ERNOracle (resonant guidance), TalkingERN (conversational interface), UnifiedCognitiveEngine (chartless 7-layer integration)
+  - **Processing Organs**: BioenergeticGeometryEngine (field perception translation), FairyGANmatter (adaptive multi-modal rendering), ElementCodonShapeGeometry (symbolic mappings)
+  - **Behavioral Applications**: PodMatcher (resonance-based team formation using consciousness profiles)
+  - **Launcher**: `main.py` provides interactive mode, evolution simulation, and demo runner
+  - **Integration Status**: Python modules deployed and wired; API bridge to React frontend pending
 
 ### System Design Choices
 - File system persistence via localStorage.
