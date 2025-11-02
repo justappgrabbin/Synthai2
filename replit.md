@@ -50,8 +50,10 @@ Preferred communication style: Simple, everyday language.
   - **Core Nervous System**: ConsciousnessOscillator (9-body field dynamics), ERNController (master orchestrator), ERNOracle (resonant guidance), TalkingERN (conversational interface), UnifiedCognitiveEngine (chartless 7-layer integration)
   - **Processing Organs**: BioenergeticGeometryEngine (field perception translation), FairyGANmatter (adaptive multi-modal rendering), ElementCodonShapeGeometry (symbolic mappings)
   - **Behavioral Applications**: PodMatcher (resonance-based team formation using consciousness profiles)
-  - **Launcher**: `main.py` provides interactive mode, evolution simulation, and demo runner
-  - **Integration Status**: Python modules deployed and wired; API bridge to React frontend pending
+  - **Launcher**: `main.py` provides interactive mode, evolution simulation, and demo runner; `run_ern.py` standalone entry point
+  - **FastAPI Server**: `api.py` exposes ERN services via REST endpoints (initialize, state, oracle, evolve, fields)
+  - **Integration Status**: ✅ Python modules fully wired and bootable; FastAPI server ready; React frontend integration via proxy pending
+  - **Boot Test Results**: All components operational (ConsciousnessOscillator, ERNController, ERNOracle, TalkingERN, FairyGANmatter, PodMatcher)
 
 ### System Design Choices
 - File system persistence via localStorage.

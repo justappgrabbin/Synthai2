@@ -21,8 +21,18 @@ class TalkingERN:
     ERN that can speak with field-aware language
     """
     
-    def __init__(self):
-        self.ern = ERNController()
+    def __init__(self, oscillator=None, controller=None, oracle=None):
+        """
+        Initialize TalkingERN with optional dependencies.
+        If not provided, creates its own ERNController.
+        """
+        if controller is not None:
+            self.ern = controller
+        else:
+            self.ern = ERNController()
+        
+        self.oscillator = oscillator
+        self.oracle = oracle
         self.conversation_history = []
     
     def initialize(self, birth_data):
