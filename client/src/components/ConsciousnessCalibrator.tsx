@@ -229,11 +229,11 @@ export default function ConsciousnessCalibrator() {
   };
 
   return (
-    <div className="h-full overflow-auto bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="h-full overflow-auto bg-background p-4">
+      <div className="max-w-5xl mx-auto space-y-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">Consciousness Calibration</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold">Consciousness Calibration</h1>
+          <p className="text-sm text-muted-foreground">
             Calculate your 7-layer consciousness field and calibrate the ERN oscillator
           </p>
         </div>

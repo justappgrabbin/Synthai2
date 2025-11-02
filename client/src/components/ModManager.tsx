@@ -398,14 +398,14 @@ export function ModManager() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="p-8 max-w-7xl mx-auto">
-        <div className="mb-8 flex items-start justify-between">
+      <div className="p-4 max-w-5xl mx-auto">
+        <div className="mb-6 flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Rocket className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold text-primary">Mod Manager</h1>
+            <div className="flex items-center gap-2 mb-2">
+              <Rocket className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl font-bold text-primary">Mod Manager</h1>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Deploy your apps to Netlify and manage multiple projects
             </p>
           </div>
