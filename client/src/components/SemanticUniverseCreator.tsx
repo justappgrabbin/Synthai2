@@ -30,6 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniverseViewer3D } from "@/components/UniverseViewer3D";
 import { TopNav } from "@/components/TopNav";
+import { AIService } from "@/lib/AIService";
 
 interface SemanticLayer {
   id: number;
@@ -317,27 +318,47 @@ export function SemanticUniverseCreator() {
     });
   };
 
-  const parseSemanticLayers = (text: string): SemanticLayer[] => {
+  const parseSemanticLayers = async (text: string): Promise<SemanticLayer[]> => {
     const words = text.toLowerCase().split(/\s+/);
     const layers = SEMANTIC_LAYERS.map(layer => ({ ...layer }));
 
     const nouns = words.filter(w => w.length > 3 && /^[a-z]+$/.test(w));
-    layers[0].extractedData = `Nouns: ${nouns.slice(0, 5).join(", ")}`;
+    layers[0].extractedData = `Physical elements: ${nouns.slice(0, 6).join(", ")}`;
 
-    const adjectives = words.filter(w => ["dark", "bright", "vast", "tiny", "ancient", "new", "beautiful", "harsh"].some(adj => w.includes(adj)));
-    layers[1].extractedData = `Tone: ${adjectives.length > 0 ? adjectives.join(", ") : "neutral"}`;
+    const adjectives = words.filter(w => ["dark", "bright", "vast", "tiny", "ancient", "new", "beautiful", "harsh", "luminous", "ethereal", "crystalline", "cosmic"].some(adj => w.includes(adj)));
+    layers[1].extractedData = `Emotional tone: ${adjectives.length > 0 ? adjectives.join(", ") : "neutral, balanced"}`;
 
-    const relations = words.filter(w => ["in", "on", "through", "between", "around", "above", "below"].includes(w));
-    layers[2].extractedData = `Relations: ${relations.length > 0 ? relations.join(", ") : "simple"}`;
+    const relations = words.filter(w => ["in", "on", "through", "between", "around", "above", "below", "within", "beyond"].includes(w));
+    layers[2].extractedData = `Spatial relationships: ${relations.length > 0 ? relations.join(", ") : "simple, direct"}`;
 
-    const verbs = words.filter(w => ["is", "was", "become", "create", "destroy", "transform"].some(v => w.includes(v)));
-    layers[3].extractedData = `Actions: ${verbs.length > 0 ? verbs.join(", ") : "static"}`;
+    const verbs = words.filter(w => ["is", "was", "become", "create", "destroy", "transform", "flow", "dance", "echo", "resonate"].some(v => w.includes(v)));
+    layers[3].extractedData = `Actions & dynamics: ${verbs.length > 0 ? verbs.join(", ") : "static, contemplative"}`;
 
-    const perspective = text.includes("I") || text.includes("my") ? "first-person" : text.includes("you") ? "second-person" : "third-person";
-    layers[4].extractedData = `Perspective: ${perspective}`;
+    const perspective = text.includes("I") || text.includes("my") ? "first-person (personal)" : text.includes("you") || text.includes("your") ? "second-person (invitational)" : "third-person (observational)";
+    layers[4].extractedData = `Narrative perspective: ${perspective}`;
 
-    layers[5].extractedData = "Archetypal resonance: analyzing patterns...";
-    layers[6].extractedData = "Latent seed: " + Math.random().toString(36).substring(7);
+    try {
+      const aiResponse = await AIService.sendMessage([
+        {
+          role: "system",
+          content: "You are a semantic analyzer that identifies archetypal patterns in creative text. Respond in 1-2 sentences maximum."
+        },
+        {
+          role: "user",
+          content: `Identify the dominant archetypal patterns in this universe description: "${text}"`
+        }
+      ]);
+
+      if (aiResponse.content && !aiResponse.error) {
+        layers[5].extractedData = `Archetypal resonance: ${aiResponse.content.slice(0, 120)}...`;
+      } else {
+        layers[5].extractedData = "Archetypal resonance: cosmic, mythic, transformative";
+      }
+    } catch (error) {
+      layers[5].extractedData = "Archetypal resonance: cosmic, mythic, transformative";
+    }
+
+    layers[6].extractedData = "Quantum seed: " + Math.random().toString(36).substring(7).toUpperCase();
 
     return layers;
   };
@@ -365,12 +386,12 @@ export function SemanticUniverseCreator() {
     setGenerationProgress(0);
     setCurrentLayer(0);
 
-    const layers = parseSemanticLayers(prompt);
+    const layers = await parseSemanticLayers(prompt);
 
     for (let i = 0; i < 7; i++) {
       setCurrentLayer(i);
       setGenerationProgress((i + 1) * 14.28);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 600));
     }
 
     const newUniverse: Universe = {
@@ -440,58 +461,66 @@ export function SemanticUniverseCreator() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Layers className="h-8 w-8 text-primary" />
-                <h1 className="text-4xl font-bold text-primary">Semantic Universe Creator</h1>
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 max-w-7xl">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <Layers className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary">Semantic Universe Creator</h1>
               </div>
-              <p className="text-muted-foreground">Transform text into playable worlds through the seven-layer semantic framework</p>
+              <p className="text-sm sm:text-base text-muted-foreground">Transform text into playable worlds through the seven-layer semantic framework</p>
             </div>
-          
-          <div className="flex gap-3">
-            {autonomyEnabled && (
+            
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {autonomyEnabled && (
+                <Card className="bg-primary/10 border-primary/30">
+                  <CardContent className="p-3 sm:p-4 flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <p className="text-xs sm:text-sm font-semibold text-primary">Autonomy Active</p>
+                  </CardContent>
+                </Card>
+              )}
+              
               <Card className="bg-primary/10 border-primary/30">
-                <CardContent className="p-4 flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  <p className="text-sm font-semibold text-primary">Autonomy Active</p>
+                <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                  <Coins className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                  <div>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Tokens Remaining</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-primary">{tokens}</p>
+                  </div>
                 </CardContent>
               </Card>
-            )}
-            
-            <Card className="bg-primary/10 border-primary/30">
-              <CardContent className="p-4 flex items-center gap-3">
-                <Coins className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Tokens Remaining</p>
-                  <p className="text-3xl font-bold text-primary">{tokens}</p>
-                </div>
-              </CardContent>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
 
-      <Tabs defaultValue="create" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="create" data-testid="tab-create">Create Universe</TabsTrigger>
-          <TabsTrigger value="library" data-testid="tab-library">Universe Library ({universes.length})</TabsTrigger>
-        </TabsList>
+      <div className="px-4 sm:px-6">
+        <Tabs defaultValue="create" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="create" data-testid="tab-create" className="text-sm sm:text-base">
+              <span className="hidden sm:inline">Create Universe</span>
+              <span className="sm:hidden">Create</span>
+            </TabsTrigger>
+            <TabsTrigger value="library" data-testid="tab-library" className="text-sm sm:text-base">
+              <span className="hidden sm:inline">Universe Library ({universes.length})</span>
+              <span className="sm:hidden">Library ({universes.length})</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="create" className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
+          <TabsContent value="create" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-4 sm:space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     Speak Your World Into Being
                   </CardTitle>
-                  <CardDescription>Describe the universe you wish to create in a few sentences</CardDescription>
+                  <CardDescription className="text-sm">Describe the universe you wish to create in a few sentences</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
                     <Button
                       variant={!oracleMode ? "default" : "ghost"}
@@ -577,7 +606,7 @@ export function SemanticUniverseCreator() {
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     {!oracleMode && (
                       <Button
                         data-testid="button-random-universe"
@@ -585,6 +614,7 @@ export function SemanticUniverseCreator() {
                         disabled={isGenerating}
                         variant="outline"
                         size="lg"
+                        className="w-full sm:w-auto"
                       >
                         <Shuffle className="h-4 w-4 mr-2" />
                         Random
@@ -598,11 +628,12 @@ export function SemanticUniverseCreator() {
                       size="lg"
                     >
                       {isGenerating ? (
-                        <>Generating Universe...</>
+                        <><span className="hidden sm:inline">Generating Universe...</span><span className="sm:hidden">Generating...</span></>
                       ) : (
                         <>
                           <Play className="h-4 w-4 mr-2" />
-                          Create Universe (1 Token)
+                          <span className="hidden sm:inline">Create Universe (1 Token)</span>
+                          <span className="sm:hidden">Create (1 Token)</span>
                         </>
                       )}
                     </Button>
@@ -620,14 +651,14 @@ export function SemanticUniverseCreator() {
               </Card>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>The Seven-Layer Semantic Body</CardTitle>
-                  <CardDescription>Each universe is generated through these consciousness layers</CardDescription>
+                  <CardTitle className="text-lg sm:text-xl">The Seven-Layer Semantic Body</CardTitle>
+                  <CardDescription className="text-sm">Each universe is generated through these consciousness layers</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[500px] pr-4">
+                  <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
                     <div className="space-y-3">
                       {SEMANTIC_LAYERS.map((layer, index) => (
                         <Card
@@ -674,13 +705,13 @@ export function SemanticUniverseCreator() {
           </div>
         </TabsContent>
 
-        <TabsContent value="library" className="space-y-6">
+        <TabsContent value="library" className="space-y-4 sm:space-y-6">
           {universes.length === 0 ? (
             <Card>
-              <CardContent className="p-12 text-center">
-                <Globe className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-semibold mb-2">No Universes Created Yet</p>
-                <p className="text-muted-foreground mb-4">
+              <CardContent className="p-8 sm:p-12 text-center">
+                <Globe className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-base sm:text-lg font-semibold mb-2">No Universes Created Yet</p>
+                <p className="text-sm sm:text-base text-muted-foreground mb-4">
                   Use the Create Universe tab to speak your first world into existence
                 </p>
                 <Button variant="outline" onClick={() => document.querySelector('[value="create"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}>
@@ -689,7 +720,7 @@ export function SemanticUniverseCreator() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {universes.map((universe) => (
                 <Card key={universe.id} className="hover-elevate">
                   <CardHeader>

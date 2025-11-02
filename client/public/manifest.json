@@ -1,8 +1,8 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "version": "2.0.2",
-  "description": "Browser-based creative development platform with IDE, game creator, ZIP player, 7-layer consciousness calibration, AI assistance, and semantic universe generation.",
+  "version": "2.0.3",
+  "description": "Browser-based creative development platform with IDE, game creator, ZIP player, 7-layer consciousness calibration, AI-powered semantic universe generation, and fully responsive mobile-optimized interface.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",
