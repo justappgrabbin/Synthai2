@@ -131,7 +131,7 @@ class EphemerisCalculator {
    * Calculate planetary positions using Astronomy Engine
    */
   static calculatePositions(datetime: Date, latitude: number, longitude: number): PlanetaryPosition[] {
-    const astroTime = new Astronomy.AstroTime(datetime);
+    const astroTime = Astronomy.MakeTime(datetime);
     
     // Calculate actual planetary positions
     const positions: PlanetaryPosition[] = [];
@@ -202,7 +202,7 @@ class EphemerisCalculator {
   static calculateMoonNode(astroTime: Astronomy.AstroTime): number {
     // Approximate North Node calculation
     // Using simplified formula: Node = 125.04 - 0.0529539 * days from J2000
-    const j2000 = new Astronomy.AstroTime(new Date('2000-01-01T12:00:00Z'));
+    const j2000 = Astronomy.MakeTime(new Date('2000-01-01T12:00:00Z'));
     const daysSinceJ2000 = astroTime.ut - j2000.ut;
     const nodePosition = (125.04 - 0.0529539 * daysSinceJ2000) % 360;
     return nodePosition < 0 ? nodePosition + 360 : nodePosition;
