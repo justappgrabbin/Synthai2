@@ -38,6 +38,12 @@
   "categories": ["productivity", "development", "utilities"],
   "screenshots": [
     {
+      "src": "/screenshots/cosmic-consciousness.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "label": "Cosmic consciousness visualization with 7-layer semantic framework"
+    },
+    {
       "src": "/screenshots/dashboard.png",
       "sizes": "1280x720",
       "type": "image/png",
