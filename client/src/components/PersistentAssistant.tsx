@@ -4,17 +4,19 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIService } from "@/lib/AIService";
 import { useToast } from "@/hooks/use-toast";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  thinking?: string;
 }
 
 export function PersistentAssistant() {
@@ -22,8 +24,28 @@ export function PersistentAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast} = useToast();
+
+  // Sound notification
+  const playNotificationSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -31,17 +53,34 @@ export function PersistentAssistant() {
     }
   }, [messages]);
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedFile(file);
+      toast({
+        title: "File attached",
+        description: `${file.name} (${(file.size / 1024).toFixed(1)}KB)`
+      });
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    let messageContent = input.trim();
+    if (uploadedFile) {
+      messageContent += `\n\n[Attached: ${uploadedFile.name}]`;
+    }
+
     const userMessage: Message = {
       role: "user",
-      content: input.trim(),
+      content: messageContent,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
+    setUploadedFile(null);
     setIsLoading(true);
 
     try {
@@ -60,13 +99,26 @@ export function PersistentAssistant() {
         return;
       }
 
+      // Extract thinking from response
+      const thinkingMatch = response.content.match(/<think>([\s\S]*?)<\/think>/);
+      const thinking = thinkingMatch ? thinkingMatch[1].trim() : undefined;
+      const contentWithoutThinking = response.content.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
       const assistantMessage: Message = {
         role: "assistant",
-        content: response.content,
-        timestamp: new Date()
+        content: contentWithoutThinking || response.content,
+        timestamp: new Date(),
+        thinking
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Play notification sound
+      try {
+        playNotificationSound();
+      } catch (e) {
+        console.log('Sound notification failed');
+      }
     } catch (error) {
       const errorMessage: Message = {
         role: "assistant",
@@ -159,13 +211,33 @@ export function PersistentAssistant() {
                       </div>
                     )}
                     <div
-                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                      className={`max-w-[80%] ${
                         msg.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                          ? "bg-primary text-primary-foreground rounded-lg px-3 py-2 text-sm"
+                          : "space-y-1"
                       }`}
                     >
-                      {msg.content}
+                      {msg.role === "assistant" && msg.thinking && (
+                        <Collapsible>
+                          <CollapsibleTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs gap-1 px-2 mb-1"
+                              data-testid={`button-toggle-thinking-${idx}`}
+                            >
+                              <Brain className="h-3 w-3" />
+                              <span className="text-muted-foreground">View thinking</span>
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="bg-muted/50 border border-border rounded-md px-2 py-1.5 text-xs text-muted-foreground mb-1">
+                            {msg.thinking}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      )}
+                      <div className={msg.role === "assistant" ? "bg-muted rounded-lg px-3 py-2 text-sm" : ""}>
+                        {msg.content}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -188,6 +260,20 @@ export function PersistentAssistant() {
           </ScrollArea>
 
           <div className="p-3 border-t">
+            {uploadedFile && (
+              <div className="mb-2 flex items-center gap-2 text-xs bg-muted rounded-md px-2 py-1">
+                <span className="text-muted-foreground">📎 {uploadedFile.name}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0"
+                  onClick={() => setUploadedFile(null)}
+                  data-testid="button-remove-file"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
             <div className="flex gap-2">
               <Textarea
                 data-testid="input-assistant-message"
@@ -207,6 +293,15 @@ export function PersistentAssistant() {
                 >
                   <Send className="h-4 w-4" />
                 </Button>
+                <Button
+                  data-testid="button-upload-file"
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  size="icon"
+                  disabled={isLoading}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
                 {messages.length > 0 && (
                   <Button
                     data-testid="button-clear-chat"
@@ -219,6 +314,13 @@ export function PersistentAssistant() {
                 )}
               </div>
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileUpload}
+              data-testid="input-file-upload"
+            />
             <p className="text-xs text-muted-foreground mt-2">
               Press Enter to send, Shift+Enter for new line
             </p>
