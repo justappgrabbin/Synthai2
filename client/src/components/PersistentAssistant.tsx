@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,26 +25,24 @@ export function PersistentAssistant() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
 
-  // Sound notification
-  const playNotificationSound = () => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+  // Text-to-speech function
+  const speakText = (text: string) => {
+    if (!isSpeechEnabled) return;
     
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
     
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
     
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
+    window.speechSynthesis.speak(utterance);
   };
 
   useEffect(() => {
@@ -113,11 +111,11 @@ export function PersistentAssistant() {
 
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Play notification sound
+      // Speak the response
       try {
-        playNotificationSound();
+        speakText(assistantMessage.content);
       } catch (e) {
-        console.log('Sound notification failed');
+        console.log('Text-to-speech failed');
       }
     } catch (error) {
       const errorMessage: Message = {
@@ -175,14 +173,29 @@ export function PersistentAssistant() {
                 <p className="text-xs text-muted-foreground">Ask anything</p>
               </div>
             </div>
-            <Button
-              data-testid="button-close-assistant"
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                data-testid="button-toggle-speech"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSpeechEnabled(!isSpeechEnabled)}
+                title={isSpeechEnabled ? "Disable speech" : "Enable speech"}
+              >
+                {isSpeechEnabled ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                data-testid="button-close-assistant"
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
