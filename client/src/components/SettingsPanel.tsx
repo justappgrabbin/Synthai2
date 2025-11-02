@@ -371,7 +371,7 @@ export function SettingsPanel() {
                         <div className="flex-1 text-left">
                           <div className="font-semibold">Off</div>
                           <div className="text-xs text-muted-foreground font-normal">
-                            AI assistance disabled - manual control only
+                            AI available for help - won't edit your code automatically
                           </div>
                         </div>
                       </div>
