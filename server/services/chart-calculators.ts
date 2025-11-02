@@ -136,8 +136,8 @@ class EphemerisCalculator {
     // Calculate actual planetary positions
     const positions: PlanetaryPosition[] = [];
     
-    // Sun
-    const sunEcliptic = Astronomy.Ecliptic(Astronomy.SunPosition(astroTime));
+    // Sun (SunPosition already returns ecliptic coordinates)
+    const sunEcliptic = Astronomy.SunPosition(astroTime);
     positions.push({
       planet: 'Sun',
       longitude: sunEcliptic.elon,
@@ -848,7 +848,7 @@ Format your response as JSON:
 
   private static extractDominantThemes(allSeeds: Record<string, ChartSeeds>): string[] {
     const elements = Object.values(allSeeds).map(s => s.dominantElement);
-    const unique = [...new Set(elements)];
+    const unique = Array.from(new Set(elements));
     return unique.map(el => `${el}-Element Consciousness`);
   }
 
