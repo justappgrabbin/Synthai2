@@ -125,6 +125,9 @@ export class AIService {
     }
 
     const data = await response.json();
+    if (!data.content || !data.content[0] || !data.content[0].text) {
+      throw new Error("Invalid response format from Claude API");
+    }
     return { content: data.content[0].text };
   }
 
@@ -160,6 +163,9 @@ export class AIService {
     }
 
     const data = await response.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error("Invalid response format from OpenAI API");
+    }
     return { content: data.choices[0].message.content };
   }
 
@@ -222,6 +228,9 @@ export class AIService {
     }
 
     const data = await response.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error("Invalid response format from DeepSeek API");
+    }
     return { content: data.choices[0].message.content };
   }
 
@@ -257,6 +266,9 @@ export class AIService {
     }
 
     const data = await response.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error("Invalid response format from Grok API");
+    }
     return { content: data.choices[0].message.content };
   }
 
@@ -295,6 +307,9 @@ export class AIService {
     }
 
     const data = await response.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      throw new Error("Invalid response format from MiniMax API");
+    }
     return { content: data.choices[0].message.content };
   }
 }
