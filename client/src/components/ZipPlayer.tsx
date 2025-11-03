@@ -43,6 +43,11 @@ export function ZipPlayer({ zip, open, onClose }: ZipPlayerProps) {
     .filter(e => e.type === 'file' && (e.name.endsWith('.html') || e.name.endsWith('.htm')))
     .map(e => e.path) || [];
 
+  // Detect Godot export by checking for .pck and .wasm files
+  const isGodotExport = zip?.structure.entries.some(e => 
+    e.type === 'file' && (e.name.endsWith('.pck') || e.name.endsWith('.wasm'))
+  );
+
   const handleRefresh = () => {
     setIframeKey(prev => prev + 1);
   };
@@ -99,6 +104,12 @@ export function ZipPlayer({ zip, open, onClose }: ZipPlayerProps) {
             </Badge>
           )}
 
+          {isGodotExport && (
+            <Badge variant="default" className="text-xs bg-primary">
+              Godot Export
+            </Badge>
+          )}
+
           <Button
             variant="outline"
             size="sm"
@@ -117,9 +128,14 @@ export function ZipPlayer({ zip, open, onClose }: ZipPlayerProps) {
               key={iframeKey}
               src={playerUrl}
               className="w-full h-full bg-white"
-              sandbox="allow-scripts allow-same-origin allow-forms"
+              sandbox={
+                isGodotExport 
+                  ? "allow-scripts allow-same-origin allow-forms allow-modals allow-pointer-lock" 
+                  : "allow-scripts allow-same-origin allow-forms"
+              }
               title="Zip Player Preview"
               data-testid="iframe-player"
+              allow="cross-origin-isolated"
             />
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">

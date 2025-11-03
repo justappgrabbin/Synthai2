@@ -219,9 +219,14 @@ export function GameCreator() {
                 key={iframeKey}
                 srcDoc={generateExecutableHTML(GAME_TEMPLATES.find(t => t.id === previewTemplate)?.files || [])}
                 className="w-full h-full bg-white"
-                sandbox="allow-scripts allow-same-origin allow-forms"
+                sandbox={
+                  previewTemplate === 'godot-starter'
+                    ? "allow-scripts allow-same-origin allow-forms allow-modals allow-pointer-lock"
+                    : "allow-scripts allow-same-origin allow-forms"
+                }
                 title="Template Preview"
                 data-testid="iframe-template-preview"
+                allow="cross-origin-isolated"
               />
             )}
           </div>
