@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AIBackendSelector } from "./AIBackendSelector";
 import { ProfileBuilder } from "./ProfileBuilder";
 import { ResonanceTracker } from "./ResonanceTracker";
+import { SessionAnalytics } from "./SessionAnalytics";
 import { TopNav } from "@/components/TopNav";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun, Palette, Brain, Zap, XCircle, AlertTriangle, Sparkles, CheckCircle, Shield, ShieldOff, ShieldCheck } from "lucide-react";
@@ -680,6 +681,7 @@ export function SettingsPanel() {
           <TabsContent value="consciousness" className="space-y-6">
             <ProfileBuilder />
             <ResonanceTracker />
+            <SessionAnalytics />
           </TabsContent>
 
           <TabsContent value="about" className="space-y-6">

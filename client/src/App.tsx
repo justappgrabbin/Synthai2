@@ -19,6 +19,7 @@ import ConsciousnessCalibrator from "@/components/ConsciousnessCalibrator";
 import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { ModeIndicator } from "@/components/ModeIndicator";
 import ZipManager from "@/pages/ZipManager";
 import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
@@ -57,6 +58,7 @@ function App() {
         <TooltipProvider>
           <Router />
           <PersistentAssistant />
+          <ModeIndicator />
           <InstallPrompt />
           <Toaster />
         </TooltipProvider>

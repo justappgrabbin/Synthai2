@@ -4,12 +4,13 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIService } from "@/lib/AIService";
 import { UserProfileService } from "@/lib/userProfileService";
+import { WorkspaceManager } from "@/lib/workspaceManager";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -182,6 +183,23 @@ export function PersistentAssistant() {
     } finally {
       setSuggestionLoading(false);
     }
+  };
+
+  const activateProgram = () => {
+    if (!programSuggestion) {
+      toast({
+        title: "No Program",
+        description: "No program suggestion to activate",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    WorkspaceManager.activateProgram(programSuggestion);
+    toast({
+      title: "Program Activated",
+      description: `${programSuggestion.primaryMode} mode is now active`
+    });
   };
 
   const provideFeedback = (rating: number) => {
@@ -712,6 +730,20 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                             </span>
                           ))}
                         </div>
+                      </div>
+                    )}
+                    
+                    {/* Activation Button */}
+                    {!WorkspaceManager.hasActiveProgram() && (
+                      <div className="mt-3 border-t pt-3">
+                        <Button
+                          onClick={activateProgram}
+                          className="w-full gap-2"
+                          data-testid="button-activate-program"
+                        >
+                          <Play className="h-4 w-4" />
+                          Activate This Program
+                        </Button>
                       </div>
                     )}
                     
