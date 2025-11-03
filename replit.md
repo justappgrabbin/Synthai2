@@ -3,7 +3,7 @@
 ## Overview
 YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
 
-## Recent Updates (v2.2.0)
+## Recent Updates (v2.2.1)
 - **Live Workspace Orchestration COMPLETE** (Week 5-6 Complete): Program activation and session tracking
   - **One-Click Program Activation**: Activate growth programs directly from Guard Dog assistant
   - **Mode Indicator**: Persistent visual indicator shows active workspace mode (Focus, Creative, Collaborate, Reflect, Integrate)
@@ -55,7 +55,7 @@ YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative developme
 - **Package System**: All modules wired with __init__.py files for proper Python imports
 - Enhanced Semantic Universe Creator with AI-powered semantic layer parsing (async archetypal analysis)
 - Made Semantic Universe Creator fully responsive with mobile-friendly breakpoints and adaptive typography
-- **PWA v2.2.0**: Updated with one-click program activation, live workspace mode switching, and session analytics features
+- **PWA v2.2.1**: Comprehensive mobile responsiveness overhaul with optimized layouts for phones and tablets
 - Fixed theme-color consistency across PWA manifest and HTML meta tags
 - Fixed MiniMax M2 integration to use official MiniMax API (https://api.minimax.io/v1)
 - Updated AI backend selector with correct endpoint and instructions
