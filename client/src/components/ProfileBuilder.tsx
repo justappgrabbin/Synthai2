@@ -119,14 +119,14 @@ export function ProfileBuilder() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
           <div className="flex items-center gap-3">
-            <User className="w-6 h-6 text-primary" />
+            <User className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             <div>
-              <h2 className="text-xl font-bold">Consciousness Profile</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-lg sm:text-xl font-bold">Consciousness Profile</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {profile.birthData.location || "No birth data set"}
               </p>
             </div>
@@ -134,6 +134,7 @@ export function ProfileBuilder() {
           {!isEditing && (
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setIsEditing(true)}
               data-testid="button-edit-profile"
             >
@@ -155,7 +156,7 @@ export function ProfileBuilder() {
           </TabsList>
 
           <TabsContent value="birth-data" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="birth-date">Birth Date</Label>
                 <Input
@@ -196,7 +197,7 @@ export function ProfileBuilder() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="latitude">Latitude</Label>
                 <Input
@@ -308,12 +309,12 @@ export function ProfileBuilder() {
         </Tabs>
       </Card>
 
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Resonance History</h3>
-        <div className="grid grid-cols-3 gap-4">
+      <Card className="p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold mb-4">Resonance History</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {(Object.entries(profile.resonanceHistory) as [FieldName, number][]).map(([field, value]) => (
             <div key={field} className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-medium">{field}</span>
                 <span className="text-muted-foreground">{Math.round(value * 100)}%</span>
               </div>

@@ -92,21 +92,20 @@ export function ResonanceTracker() {
     <div className="space-y-4">
       <Card data-testid="card-resonance-overview">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5" />
               <CardTitle>Field Resonance</CardTitle>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSortBy(sortBy === 'name' ? 'effectiveness' : 'name')}
-                data-testid="button-sort-fields"
-              >
-                {sortBy === 'name' ? 'Sort by Effectiveness' : 'Sort by Name'}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortBy(sortBy === 'name' ? 'effectiveness' : 'name')}
+              data-testid="button-sort-fields"
+              className="text-xs sm:text-sm"
+            >
+              {sortBy === 'name' ? 'Sort by Effectiveness' : 'Sort by Name'}
+            </Button>
           </div>
           <CardDescription>
             Track which consciousness fields resonate most with your work patterns
@@ -114,16 +113,16 @@ export function ResonanceTracker() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Overall Stats */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Average Resonance</div>
-              <div className="text-2xl font-bold" data-testid="text-average-resonance">
+              <div className="text-xs sm:text-sm text-muted-foreground">Average Resonance</div>
+              <div className="text-xl sm:text-2xl font-bold" data-testid="text-average-resonance">
                 {(averageResonance * 100).toFixed(0)}%
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Top Field</div>
-              <div className="text-2xl font-bold" data-testid="text-top-field">
+              <div className="text-xs sm:text-sm text-muted-foreground">Top Field</div>
+              <div className="text-xl sm:text-2xl font-bold" data-testid="text-top-field">
                 {FIELD_LABELS[topFields[0][0]]}
               </div>
             </div>
