@@ -43,8 +43,12 @@ interface Conversation {
 const CONVERSATIONS_KEY = "ai-assistant-conversations";
 const CURRENT_CONVERSATION_KEY = "ai-assistant-current";
 
-export function PersistentAssistant() {
-  const [isOpen, setIsOpen] = useState(false);
+interface PersistentAssistantProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function PersistentAssistant({ isOpen, onClose }: PersistentAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -581,21 +585,10 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
     });
   };
 
-  return (
-    <>
-      {!isOpen && (
-        <Button
-          data-testid="button-open-assistant"
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-[100]"
-          size="icon"
-          title="AI Assistant"
-        >
-          <MessageSquare className="h-6 w-6" />
-        </Button>
-      )}
+  if (!isOpen) return null;
 
-      {isOpen && (
+  return (
+    <>(
         <div 
           className="fixed bottom-6 right-6 w-[95vw] sm:w-96 h-[500px] bg-card border rounded-lg shadow-xl z-[100] flex flex-col"
           data-testid="panel-assistant"
@@ -690,7 +683,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                 data-testid="button-close-assistant"
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsOpen(false)}
+                onClick={onClose}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -942,7 +935,6 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
             </p>
           </div>
         </div>
-      )}
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -25,10 +26,14 @@ import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import NotFound from "@/pages/not-found";
 
-function Router() {
+interface RouterProps {
+  onGuardDogClick: () => void;
+}
+
+function Router({ onGuardDogClick }: RouterProps) {
   return (
     <>
-      <GlobalNav />
+      <GlobalNav onGuardDogClick={onGuardDogClick} />
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/grove-store" component={GroveStore} />
@@ -52,12 +57,17 @@ function Router() {
 }
 
 function App() {
+  const [isGuardDogOpen, setIsGuardDogOpen] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <Router />
-          <PersistentAssistant />
+          <Router onGuardDogClick={() => setIsGuardDogOpen(true)} />
+          <PersistentAssistant 
+            isOpen={isGuardDogOpen} 
+            onClose={() => setIsGuardDogOpen(false)} 
+          />
           <ModeIndicator />
           <InstallPrompt />
           <Toaster />
