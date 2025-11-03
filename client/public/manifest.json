@@ -1,8 +1,8 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "version": "2.1.0-AI",
-  "description": "Full-stack development IDE with AI Guard Dog assistant. Game creation, GAN training, consciousness calibration (Trinity Charts + Stellar Proximology), semantic universe builder, ZIP previewer/player, built-in terminal, and multi-agent resonance system. Mobile-optimized consciousness operating system.",
+  "version": "2.2.0-Continuity",
+  "description": "Living creative ecosystem with Presentation Planner (Jupyter notebook export), Continuity Glyphs (cross-device sync), AI Guard Dog, consciousness calibration (Trinity Charts), GAN training, game development, and portable workspace states. Full-stack IDE with consciousness operating system.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",
@@ -97,6 +97,27 @@
       "short_name": "ZIP",
       "description": "Preview, play & manage ZIP files",
       "url": "/zip-manager",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Presentation Planner",
+      "short_name": "Planner",
+      "description": "Turn code into interactive stories with Jupyter export",
+      "url": "/presentation-planner",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Continuity Glyph",
+      "short_name": "Glyphs",
+      "description": "Portable workspace states with cross-device sync",
+      "url": "/continuity-glyph",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Grove Store",
+      "short_name": "Store",
+      "description": "Download game templates & asset packs",
+      "url": "/grove-store",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
