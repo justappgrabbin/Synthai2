@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Network, Rocket, Sparkles } from "lucide-react";
+import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Network, Rocket, Sparkles, Presentation, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun } from "lucide-react";
@@ -11,6 +11,8 @@ const NAV_ITEMS = [
   { path: "/zip-manager", icon: FolderTree, label: "ZIP Studio" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
   { path: "/gan-trainer", icon: Palette, label: "GAN" },
+  { path: "/presentation-planner", icon: Presentation, label: "Planner" },
+  { path: "/continuity-glyph", icon: QrCode, label: "Glyphs" },
   { path: "/calibration-tank", icon: Brain, label: "Cal Tank" },
   { path: "/consciousness-calibrator", icon: Sparkles, label: "Charts" },
   { path: "/universe-creator", icon: Layers, label: "Universes" },

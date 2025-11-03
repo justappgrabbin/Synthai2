@@ -305,6 +305,22 @@ YOU-N-I-VERSE Studio Features & Capabilities:
     - Set agent knowledge domains
     - Deploy agents for specific tasks
 
+11. **Presentation Planner** - Turn code into story at /presentation-planner
+    - Scene-based storyboard system
+    - AI-assisted narration and scripting
+    - Live presentation playback for demos and teaching
+    - Export to video, HTML, or interactive deck
+    - Collaborative editing for teams
+    - Turn logic into visual narrative
+
+12. **Continuity Glyph System** - Portable session states at /continuity-glyph
+    - Generate unique glyph codes for workspace states
+    - Instant cross-device continuity
+    - Share glyphs with collaborators
+    - Merge glyphs to create shared states
+    - Each glyph has a geometric symbol identity
+    - Cloud-synced persistent states
+
 **Common Workflows:**
 
 - **"I want to make a game"** → Start in Game Creator, then use IDE for custom code, add assets from Grove Store
@@ -313,6 +329,9 @@ YOU-N-I-VERSE Studio Features & Capabilities:
 - **"I want to code something"** → Use the IDE panel, create new files, write code with syntax highlighting
 - **"I want to customize a template"** → Download from Grove Store, open in Game Creator or IDE, modify as needed
 - **"I need help with this project"** → Create an AI agent in the Agent Panel tailored to your needs
+- **"I want to present my work"** → Use Presentation Planner to create scene-based storyboards with AI narration
+- **"I want to work across devices"** → Generate a Continuity Glyph to save your workspace and restore it anywhere
+- **"I want to collaborate"** → Share your Continuity Glyph code with team members for instant sync
 
 **How You Help Users (Technical & Creative):**
 

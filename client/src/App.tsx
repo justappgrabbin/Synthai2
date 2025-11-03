@@ -20,6 +20,8 @@ import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import ZipManager from "@/pages/ZipManager";
+import PresentationPlanner from "@/pages/PresentationPlanner";
+import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -40,6 +42,8 @@ function Router() {
         <Route path="/zip-manager" component={ZipManager} />
         <Route path="/player" component={PlayerPanel} />
         <Route path="/agents" component={AgentPanel} />
+        <Route path="/presentation-planner" component={PresentationPlanner} />
+        <Route path="/continuity-glyph" component={ContinuityGlyph} />
         <Route component={NotFound} />
       </Switch>
     </>
