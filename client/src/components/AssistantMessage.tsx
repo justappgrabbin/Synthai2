@@ -87,8 +87,9 @@ export function AssistantMessage({ content, thinking, messageIndex }: AssistantM
         </Collapsible>
       )}
       
-      <div className="bg-muted rounded-lg px-4 py-3 text-sm prose prose-sm dark:prose-invert max-w-none">
+      <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
         <ReactMarkdown
+          className="prose prose-sm dark:prose-invert max-w-none [&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0"
           remarkPlugins={[remarkGfm]}
           components={{
             code({ node, className, children, ...props }: any) {
