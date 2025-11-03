@@ -540,5 +540,161 @@ h1 {
         ]
       }
     ]
+  },
+  {
+    id: 'godot-starter',
+    title: 'Godot Game',
+    description: 'Godot HTML5 export template with WebAssembly',
+    tags: ['Godot', '3D', 'WebAssembly'],
+    files: [
+      {
+        name: 'index.html',
+        type: 'file',
+        path: 'index.html',
+        content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Godot Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+    #canvas-container {
+      text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #9b87f5;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(155, 135, 245, 0.5);
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #9b87f5;
+    }
+    .info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="canvas" width="800" height="600">
+      Your browser doesn't support HTML5 canvas.
+    </canvas>
+    <div id="status">Godot Game Ready</div>
+    <div class="info">
+      This is a Godot HTML5 export template.<br>
+      Export your Godot project to HTML5 and replace these files.
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>`
+      },
+      {
+        name: 'game.js',
+        type: 'file',
+        path: 'game.js',
+        content: `// Godot Engine Loader Placeholder
+// In a real Godot export, this would be the generated loader script
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const status = document.getElementById('status');
+
+// Simple demo to show the template works
+let rotation = 0;
+
+function drawDemo() {
+  ctx.fillStyle = '#222';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(rotation);
+  
+  // Draw Godot logo-inspired shape
+  ctx.fillStyle = '#478cbf';
+  ctx.fillRect(-60, -60, 120, 120);
+  
+  ctx.fillStyle = '#9b87f5';
+  ctx.beginPath();
+  ctx.arc(-30, -30, 20, 0, Math.PI * 2);
+  ctx.arc(30, -30, 20, 0, Math.PI * 2);
+  ctx.arc(0, 30, 20, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.restore();
+  
+  rotation += 0.01;
+  requestAnimationFrame(drawDemo);
+}
+
+status.textContent = 'Demo Running - Replace with Godot Export';
+drawDemo();
+
+// Note: When you export from Godot, you'll get:
+// - index.html (main HTML file)
+// - [YourGame].wasm (WebAssembly binary)
+// - [YourGame].pck (game data package)  
+// - [YourGame].js (Godot engine loader)
+console.log('Godot Template - Replace these files with your Godot HTML5 export');`
+      },
+      {
+        name: 'README.md',
+        type: 'file',
+        path: 'README.md',
+        content: `# Godot HTML5 Export Template
+
+## How to Use This Template
+
+1. **Create your game in Godot** (version 4.x recommended)
+2. **Export to HTML5**:
+   - Project → Export → Add → HTML5 (WebAssembly)
+   - Configure export settings
+   - Export your project
+3. **Replace these template files** with your exported files:
+   - Replace \`index.html\` with Godot's generated HTML
+   - Add the \`.wasm\` file (WebAssembly binary)
+   - Add the \`.pck\` file (packed game data)
+   - Add the \`.js\` file (Godot engine)
+
+## Godot HTML5 Export Files
+
+A typical Godot export includes:
+- \`index.html\` - Main HTML page
+- \`[GameName].wasm\` - Compiled game engine (WebAssembly)
+- \`[GameName].pck\` - Game assets and scenes (packed)
+- \`[GameName].js\` - Godot engine loader script
+
+## Tips
+
+- Test your export locally first
+- Enable CORS if loading external assets
+- Optimize your game for web (smaller textures, compressed audio)
+- Use Godot 4.x for better WebGL2 support
+
+## Resources
+
+- Godot Docs: https://docs.godotengine.org
+- HTML5 Export: https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html
+`
+      }
+    ]
   }
 ];
