@@ -3,13 +3,23 @@
 ## Overview
 YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
 
-## Recent Updates (v2.0.4-GPE)
+## Recent Updates (v2.0.5-Profile)
+- **User Profile System COMPLETE** (Week 4 Complete): Personalized consciousness-aware development
+  - Complete UserProfile schema with birth data, field assignments, and resonance history
+  - ProfileBuilder UI component in Settings → Consciousness tab with birth data form and field configuration
+  - localStorage-based persistence with import/export functionality
+  - **Personalized Program Suggestions**: Guard Dog uses YOUR actual birth data for cosmic transit analysis
+  - **Resonance Tracking & Visualization**: ResonanceTracker shows field effectiveness with progress bars, top field stats, sortable views
+  - **Feedback Loop**: Rate program suggestions (Great/Okay/Not Much) → updates field resonance scores in real-time
+  - Event-driven architecture: custom 'userProfileUpdated' event ensures UI refreshes immediately after feedback
+  - Running average algorithm (80/20 blend) with normalized weighting prevents runaway values
+  - Bug fixes: Latitude/longitude validation uses explicit undefined checks (equator/prime meridian edge case)
 - **Growth Program Engine DEPLOYED** (Week 2-3 Complete): Transit-aware workflow orchestration system
   - 5 archetypal growth programs with declarative trigger conditions (Focus Sprint, Creative Flow, Collaborative Surge, Reflective Depth, Integration Mode)
   - Rules Engine evaluates transit conditions against program triggers using AND/OR/NOT logic
   - Directive Synthesis blends multiple field signals into unified workspace modes
   - API endpoints: `/api/programs/suggest` (user-based), `/api/programs/demo` (demo mode), `/api/programs/all`
-  - Guard Dog AI assistant now displays program suggestions based on current cosmic transits
+  - Guard Dog AI assistant displays program suggestions based on current cosmic transits
   - Seamless integration with Transit Cache Layer for real-time field vector analysis
   - Bug fixes: FieldName alignment in TransitCache, improved error handling
 - **ERN Organism Deployed**: Complete Python-based Energetic Resonance Network organized as living organism
