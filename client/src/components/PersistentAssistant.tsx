@@ -214,27 +214,25 @@ export function PersistentAssistant() {
 
     // Update resonance for each field based on their contribution and the rating
     const profile = UserProfileService.getProfile();
-    if (!profile) {
-      toast({
-        title: "No Profile",
-        description: "Create a profile to track resonance",
-        variant: "destructive"
+    if (profile) {
+      Object.entries(programSuggestion.fieldContributions).forEach(([field, contribution]: [string, any]) => {
+        // Rating is 0-1, weight it by field's contribution strength (0-100%)
+        // Normalize to 0-1 range and clamp
+        const normalizedStrength = Math.min(1, Math.max(0, contribution.strength / 100));
+        const resonanceValue = Math.min(1, Math.max(0, rating * normalizedStrength));
+        UserProfileService.updateResonance(field as any, resonanceValue);
       });
-      return;
     }
 
-    Object.entries(programSuggestion.fieldContributions).forEach(([field, contribution]: [string, any]) => {
-      // Rating is 0-1, weight it by field's contribution strength (0-100%)
-      // Normalize to 0-1 range and clamp
-      const normalizedStrength = Math.min(1, Math.max(0, contribution.strength / 100));
-      const resonanceValue = Math.min(1, Math.max(0, rating * normalizedStrength));
-      UserProfileService.updateResonance(field as any, resonanceValue);
-    });
+    // Record rating in workspace session (works for active or most recent session)
+    WorkspaceManager.rateCurrentSession(rating);
 
     setFeedbackGiven(true);
     toast({
       title: "Feedback Recorded",
-      description: "Your resonance profile has been updated"
+      description: profile 
+        ? "Your resonance profile and session rating have been updated"
+        : "Session rating has been recorded"
     });
   };
 

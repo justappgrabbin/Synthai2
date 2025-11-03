@@ -3,7 +3,16 @@
 ## Overview
 YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
 
-## Recent Updates (v2.0.5-Profile)
+## Recent Updates (v2.1.0-Workspace)
+- **Live Workspace Orchestration COMPLETE** (Week 5-6 Complete): Program activation and session tracking
+  - **One-Click Program Activation**: Activate growth programs directly from Guard Dog assistant
+  - **Mode Indicator**: Persistent visual indicator shows active workspace mode (Focus, Creative, Collaborate, Reflect, Integrate)
+  - **Session Tracking**: Complete history of activated programs with duration, ratings, and mode breakdown
+  - **Session Analytics**: Visualize program usage patterns, average ratings, total time spent per mode
+  - **Workspace Manager**: Centralized state management for active programs with localStorage persistence
+  - **Mode-Specific Configurations**: Each mode has unique color, icon, and tool recommendations
+  - **Mobile-Responsive**: All new components optimized for mobile and desktop with adaptive layouts
+  - Bug fixes: Event-driven state updates ensure real-time UI synchronization
 - **User Profile System COMPLETE** (Week 4 Complete): Personalized consciousness-aware development
   - Complete UserProfile schema with birth data, field assignments, and resonance history
   - ProfileBuilder UI component in Settings → Consciousness tab with birth data form and field configuration

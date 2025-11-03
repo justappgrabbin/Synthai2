@@ -69,6 +69,9 @@ export class WorkspaceManager {
       const endTime = new Date();
       const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
 
+      // Get cached rating if exists
+      const cachedRating = (state.activeProgram as any).cachedRating;
+
       // Create session record
       const session: ProgramSession = {
         programId: state.activeProgram.programId,
@@ -77,7 +80,7 @@ export class WorkspaceManager {
         startTime: state.activeProgram.activatedAt,
         endTime: endTime.toISOString(),
         duration,
-        userRating: null,
+        userRating: cachedRating !== undefined ? cachedRating : null,
         fieldResonances: {}
       };
 
@@ -97,23 +100,28 @@ export class WorkspaceManager {
     const state = this.getState();
     
     if (state.activeProgram) {
-      // Update resonance for active program fields
-      const profile = UserProfileService.getProfile();
-      if (profile) {
-        Object.entries(state.activeProgram.fieldContributions).forEach(([field, contribution]: [string, any]) => {
-          const normalizedStrength = Math.min(1, Math.max(0, contribution.strength / 100));
-          const resonanceValue = Math.min(1, Math.max(0, rating * normalizedStrength));
-          UserProfileService.updateResonance(field as FieldName, resonanceValue);
-        });
-      }
+      // Cache rating on active program for when session ends
+      const updatedProgram = {
+        ...state.activeProgram,
+        cachedRating: rating
+      } as ActiveProgram & { cachedRating?: number };
+      
+      this.saveState({ activeProgram: updatedProgram });
 
-      // Update the most recent session with rating
+      // Also update the most recent session with rating if it exists
       if (state.programHistory.length > 0) {
         const latestSession = state.programHistory[0];
         if (latestSession.programId === state.activeProgram.programId) {
           latestSession.userRating = rating;
           this.saveState({ programHistory: state.programHistory });
         }
+      }
+    } else {
+      // No active program - update the most recent session
+      if (state.programHistory.length > 0) {
+        const latestSession = state.programHistory[0];
+        latestSession.userRating = rating;
+        this.saveState({ programHistory: state.programHistory });
       }
     }
   }

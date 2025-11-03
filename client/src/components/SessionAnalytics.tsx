@@ -112,22 +112,22 @@ export function SessionAnalytics() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Overall Stats */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Total Sessions</div>
-              <div className="text-2xl font-bold" data-testid="text-total-sessions">
+              <div className="text-xs sm:text-sm text-muted-foreground">Total Sessions</div>
+              <div className="text-xl sm:text-2xl font-bold" data-testid="text-total-sessions">
                 {stats.totalSessions}
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Total Time</div>
-              <div className="text-2xl font-bold" data-testid="text-total-duration">
+              <div className="text-xs sm:text-sm text-muted-foreground">Total Time</div>
+              <div className="text-xl sm:text-2xl font-bold" data-testid="text-total-duration">
                 {formatDuration(stats.totalDuration)}
               </div>
             </div>
             <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Avg Rating</div>
-              <div className="text-2xl font-bold" data-testid="text-avg-rating">
+              <div className="text-xs sm:text-sm text-muted-foreground">Avg Rating</div>
+              <div className="text-xl sm:text-2xl font-bold" data-testid="text-avg-rating">
                 {stats.averageRating > 0 ? (stats.averageRating * 100).toFixed(0) + '%' : 'N/A'}
               </div>
             </div>
@@ -174,12 +174,13 @@ export function SessionAnalytics() {
               <Clock className="w-5 h-5" />
               Session History
             </CardTitle>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               <Button
                 variant={sortBy === 'recent' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortBy('recent')}
                 data-testid="button-sort-recent"
+                className="text-xs sm:text-sm"
               >
                 Recent
               </Button>
@@ -188,6 +189,7 @@ export function SessionAnalytics() {
                 size="sm"
                 onClick={() => setSortBy('duration')}
                 data-testid="button-sort-duration"
+                className="text-xs sm:text-sm"
               >
                 Duration
               </Button>
@@ -196,6 +198,7 @@ export function SessionAnalytics() {
                 size="sm"
                 onClick={() => setSortBy('rating')}
                 data-testid="button-sort-rating"
+                className="text-xs sm:text-sm"
               >
                 Rating
               </Button>

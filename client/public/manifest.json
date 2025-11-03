@@ -1,8 +1,8 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "version": "2.2.0-Continuity",
-  "description": "Living creative ecosystem with Presentation Planner (Jupyter notebook export), Continuity Glyphs (cross-device sync), AI Guard Dog, consciousness calibration (Trinity Charts), GAN training, game development, and portable workspace states. Full-stack IDE with consciousness operating system.",
+  "version": "2.1.0-Workspace",
+  "description": "Living creative ecosystem with live workspace orchestration, personalized growth programs, AI Guard Dog with program activation, consciousness-aware development profiles, session analytics, GAN training, game development, and 7-layer semantic framework. Full-stack IDE with consciousness operating system.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",

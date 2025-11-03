@@ -57,16 +57,16 @@ export function ModeIndicator() {
 
   if (!isExpanded) {
     return (
-      <div className="fixed top-20 right-4 z-50">
+      <div className="fixed top-16 sm:top-20 right-2 sm:right-4 z-50">
         <Button
           size="icon"
           variant="default"
           onClick={() => setIsExpanded(true)}
-          className="rounded-full shadow-lg"
+          className="rounded-full shadow-lg h-10 w-10 sm:h-12 sm:w-12"
           style={{ backgroundColor: modeConfig.color }}
           data-testid="button-expand-mode"
         >
-          <IconComponent className="h-5 w-5" />
+          <IconComponent className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
     );
@@ -74,7 +74,7 @@ export function ModeIndicator() {
 
   return (
     <Card 
-      className="fixed top-20 right-4 z-50 p-4 shadow-lg max-w-sm border-2 animate-in slide-in-from-right duration-300"
+      className="fixed top-16 sm:top-20 right-2 sm:right-4 z-50 p-3 sm:p-4 shadow-lg w-[calc(100vw-1rem)] sm:w-auto sm:max-w-sm border-2 animate-in slide-in-from-right duration-300"
       style={{ borderColor: modeConfig.color }}
       data-testid="card-mode-indicator"
     >
