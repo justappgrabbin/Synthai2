@@ -3,7 +3,15 @@
 ## Overview
 YOU–N–I–VERSE Studio (The Indyverse) is a browser-based creative development environment that integrates an IDE, game creation tools, ZIP file management, and AI-powered assistance. It features a cosmic-themed interface with a persistent AI assistant ("Guard Dog") and multiple creative workspaces accessible from a central dashboard. The platform includes ZIP file playback, merge functionality, 7-layer consciousness calibration, semantic world generation, and community marketplace features.
 
-## Recent Updates (v2.0.3-ERN)
+## Recent Updates (v2.0.4-GPE)
+- **Growth Program Engine DEPLOYED** (Week 2-3 Complete): Transit-aware workflow orchestration system
+  - 5 archetypal growth programs with declarative trigger conditions (Focus Sprint, Creative Flow, Collaborative Surge, Reflective Depth, Integration Mode)
+  - Rules Engine evaluates transit conditions against program triggers using AND/OR/NOT logic
+  - Directive Synthesis blends multiple field signals into unified workspace modes
+  - API endpoints: `/api/programs/suggest` (user-based), `/api/programs/demo` (demo mode), `/api/programs/all`
+  - Guard Dog AI assistant now displays program suggestions based on current cosmic transits
+  - Seamless integration with Transit Cache Layer for real-time field vector analysis
+  - Bug fixes: FieldName alignment in TransitCache, improved error handling
 - **ERN Organism Deployed**: Complete Python-based Energetic Resonance Network organized as living organism
   - `/core`: Nervous system (ConsciousnessOscillator, ERNController, ERNOracle, TalkingERN, UnifiedCognitiveEngine)
   - `/engines`: Organs (BioenergeticGeometryEngine, FairyGANmatter, ElementCodonShapeGeometry)
