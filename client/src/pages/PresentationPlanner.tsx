@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, Plus, Trash2, MoveUp, MoveDown, Sparkles, Download, Eye, Save } from "lucide-react";
+import { Play, Plus, Trash2, MoveUp, MoveDown, Sparkles, Download, Eye, Save, FileCode, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -100,6 +100,88 @@ export default function PresentationPlanner() {
     toast({ title: "Presentation exported!" });
   };
 
+  const exportToNotebook = () => {
+    // Generate Jupyter notebook with app features as concepts
+    const notebook = {
+      cells: [
+        {
+          cell_type: "markdown",
+          metadata: {},
+          source: [
+            `# ${scenes.length > 0 ? scenes[0].title : "Presentation"} - Interactive Notebook\n`,
+            `\n`,
+            `This notebook was generated from YOU-N-I-VERSE Presentation Planner.\n`,
+            `Each scene is a concept that can be executed interactively.\n`
+          ]
+        },
+        {
+          cell_type: "code",
+          execution_count: null,
+          metadata: {},
+          outputs: [],
+          source: [
+            "# Setup and imports\n",
+            "import json\n",
+            "import sys\n",
+            "from IPython.display import display, HTML, Markdown\n",
+            "print('✅ Notebook initialized')\n"
+          ]
+        },
+        ...scenes.map((scene, index) => ([
+          {
+            cell_type: "markdown",
+            metadata: {},
+            source: [
+              `## Scene ${index + 1}: ${scene.title}\n`,
+              `\n`,
+              `${scene.description}\n`,
+              scene.narration ? `\n> **Narration:** ${scene.narration}\n` : ""
+            ]
+          },
+          {
+            cell_type: "code",
+            execution_count: null,
+            metadata: {},
+            outputs: [],
+            source: scene.code ? scene.code.split('\n').map(line => line + '\n') : ["# No code for this scene\npass\n"]
+          }
+        ])).flat()
+      ],
+      metadata: {
+        kernelspec: {
+          display_name: "Python 3",
+          language: "python",
+          name: "python3"
+        },
+        language_info: {
+          name: "python",
+          version: "3.10.0"
+        }
+      },
+      nbformat: 4,
+      nbformat_minor: 5
+    };
+
+    const data = JSON.stringify(notebook, null, 2);
+    const blob = new Blob([data], { type: 'application/x-ipynb+json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'presentation_notebook.ipynb';
+    a.click();
+    toast({ 
+      title: "Notebook exported!",
+      description: "Open in Jupyter, Google Colab, or any notebook environment"
+    });
+  };
+
+  const generateOverview = () => {
+    const overview = scenes.map((scene, i) => 
+      `${i + 1}. ${scene.title} (${scene.duration}s)\n   ${scene.description}`
+    ).join('\n\n');
+    return overview;
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
@@ -112,7 +194,11 @@ export default function PresentationPlanner() {
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={exportPresentation} data-testid="button-export">
               <Download className="h-4 w-4 mr-2" />
-              Export
+              Export JSON
+            </Button>
+            <Button variant="outline" onClick={exportToNotebook} data-testid="button-export-notebook">
+              <FileCode className="h-4 w-4 mr-2" />
+              Export Notebook
             </Button>
             <Button onClick={playPresentation} data-testid="button-play">
               <Play className="h-4 w-4 mr-2" />
@@ -190,6 +276,27 @@ export default function PresentationPlanner() {
         <div className="flex-1 overflow-auto">
           {selectedScene && (
             <div className="p-6 space-y-6">
+              {/* Step-by-Step Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <List className="h-5 w-5" />
+                    Step-by-Step Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <pre className="whitespace-pre-wrap text-sm font-mono">
+                      {generateOverview()}
+                    </pre>
+                  </div>
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    <p><strong>Total Duration:</strong> {scenes.reduce((sum, s) => sum + s.duration, 0)} seconds</p>
+                    <p><strong>Total Scenes:</strong> {scenes.length}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Scene Details</CardTitle>
