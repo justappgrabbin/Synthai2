@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIService } from "@/lib/AIService";
+import { UserProfileService } from "@/lib/userProfileService";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -148,9 +149,32 @@ export function PersistentAssistant() {
   const fetchProgramSuggestion = async () => {
     setSuggestionLoading(true);
     try {
-      const response = await fetch("/api/programs/demo");
-      const data = await response.json();
-      setProgramSuggestion(data.directive);
+      const profile = UserProfileService.getProfile();
+      
+      if (profile && profile.birthData.date && profile.birthData.latitude !== undefined && profile.birthData.longitude !== undefined) {
+        // Use personalized endpoint with user's profile
+        const response = await fetch("/api/programs/suggest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: profile.id,
+            birthData: {
+              date: profile.birthData.date,
+              latitude: profile.birthData.latitude,
+              longitude: profile.birthData.longitude
+            },
+            fieldAssignments: profile.fieldAssignments,
+            resonanceHistory: profile.resonanceHistory
+          })
+        });
+        const data = await response.json();
+        setProgramSuggestion(data.directive);
+      } else {
+        // Fall back to demo mode if no profile or incomplete profile
+        const response = await fetch("/api/programs/demo");
+        const data = await response.json();
+        setProgramSuggestion(data.directive);
+      }
     } catch (error) {
       console.error("Failed to fetch program suggestion:", error);
     } finally {
