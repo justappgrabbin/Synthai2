@@ -588,8 +588,8 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
   if (!isOpen) return null;
 
   return (
-    <>(
-        <div 
+    <>
+      <div 
           className="fixed bottom-6 right-6 w-[95vw] sm:w-96 h-[500px] bg-card border rounded-lg shadow-xl z-[100] flex flex-col"
           data-testid="panel-assistant"
         >
@@ -934,7 +934,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
               Press Enter to send, Shift+Enter for new line
             </p>
           </div>
-        </div>
+      </div>
     </>
   );
 }
