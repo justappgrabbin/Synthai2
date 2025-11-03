@@ -1,8 +1,8 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "version": "2.0.3-ERN",
-  "description": "Living consciousness ecosystem: Browser IDE, game creator, ERN Oracle (birthday-based resonance engine), 7-layer consciousness calibration with codon mapping, AI semantic universes, ZIP playback & merge. Fully responsive mobile-optimized interface.",
+  "version": "2.1.0-AI",
+  "description": "Full-stack development IDE with AI Guard Dog assistant. Game creation, GAN training, consciousness calibration (Trinity Charts + Stellar Proximology), semantic universe builder, ZIP previewer/player, built-in terminal, and multi-agent resonance system. Mobile-optimized consciousness operating system.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",
@@ -60,36 +60,43 @@
     {
       "name": "Launch IDE",
       "short_name": "IDE",
-      "description": "Open the code editor",
+      "description": "Full-stack code editor with terminal",
       "url": "/ide",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Game Creator",
+      "short_name": "Games",
+      "description": "Visual game development studio",
+      "url": "/game-creator",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "GAN Trainer",
+      "short_name": "AI",
+      "description": "Train AI models and GANs",
+      "url": "/gan-trainer",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Trinity Charts",
+      "short_name": "Charts",
+      "description": "Consciousness calibration & Stellar Proximology",
+      "url": "/consciousness-calibrator",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Agents",
+      "short_name": "Agents",
+      "description": "Create and manage AI assistants",
+      "url": "/agents",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "ZIP Studio",
       "short_name": "ZIP",
-      "description": "Upload, play & manage ZIP files",
+      "description": "Preview, play & manage ZIP files",
       "url": "/zip-manager",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "ERN Oracle & Charts",
-      "short_name": "Oracle",
-      "description": "Birthday-based resonance engine with 7-layer consciousness charts, codon mapping & voice synthesis",
-      "url": "/consciousness-calibrator",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Universe Creator",
-      "short_name": "Universe",
-      "description": "Generate semantic universes from text",
-      "url": "/universe-creator",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Grove Store",
-      "short_name": "Store",
-      "description": "Browse community marketplace",
-      "url": "/grove-store",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
