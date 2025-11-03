@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import { Copy, Check, FileCode, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,20 @@ interface AssistantMessageProps {
 
 export function AssistantMessage({ content, thinking, messageIndex }: AssistantMessageProps) {
   const [copiedBlock, setCopiedBlock] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    checkTheme();
+    
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
 
   const copyToClipboard = (text: string, blockId: string) => {
     navigator.clipboard.writeText(text);
@@ -113,7 +126,7 @@ export function AssistantMessage({ content, thinking, messageIndex }: AssistantM
                   </div>
                   <SyntaxHighlighter
                     language={language}
-                    style={oneDark}
+                    style={isDark ? oneDark : oneLight}
                     customStyle={{
                       margin: 0,
                       borderRadius: "0.375rem",
