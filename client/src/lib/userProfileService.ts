@@ -73,12 +73,17 @@ export class UserProfileService {
     const existing = resonanceHistory[field] || 0.5;
     const updated = existing * 0.8 + resonanceValue * 0.2; // 80/20 blend
     
-    return this.saveProfile({
+    const result = this.saveProfile({
       resonanceHistory: {
         ...resonanceHistory,
         [field]: updated,
       },
     });
+    
+    // Emit custom event to notify components of profile update
+    window.dispatchEvent(new CustomEvent('userProfileUpdated', { detail: result }));
+    
+    return result;
   }
 
   static updatePreferences(preferences: Partial<UserProfile['preferences']>): UserProfile {

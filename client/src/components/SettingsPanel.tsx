@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIBackendSelector } from "./AIBackendSelector";
 import { ProfileBuilder } from "./ProfileBuilder";
+import { ResonanceTracker } from "./ResonanceTracker";
 import { TopNav } from "@/components/TopNav";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun, Palette, Brain, Zap, XCircle, AlertTriangle, Sparkles, CheckCircle, Shield, ShieldOff, ShieldCheck } from "lucide-react";
@@ -678,6 +679,7 @@ export function SettingsPanel() {
 
           <TabsContent value="consciousness" className="space-y-6">
             <ProfileBuilder />
+            <ResonanceTracker />
           </TabsContent>
 
           <TabsContent value="about" className="space-y-6">

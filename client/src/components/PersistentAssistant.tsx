@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -52,6 +52,7 @@ export function PersistentAssistant() {
   const [programSuggestion, setProgramSuggestion] = useState<any>(null);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(true);
+  const [feedbackGiven, setFeedbackGiven] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
@@ -148,6 +149,7 @@ export function PersistentAssistant() {
 
   const fetchProgramSuggestion = async () => {
     setSuggestionLoading(true);
+    setFeedbackGiven(false);
     try {
       const profile = UserProfileService.getProfile();
       
@@ -180,6 +182,42 @@ export function PersistentAssistant() {
     } finally {
       setSuggestionLoading(false);
     }
+  };
+
+  const provideFeedback = (rating: number) => {
+    if (!programSuggestion || !programSuggestion.fieldContributions) {
+      toast({
+        title: "No Program Data",
+        description: "Cannot record feedback without program data",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Update resonance for each field based on their contribution and the rating
+    const profile = UserProfileService.getProfile();
+    if (!profile) {
+      toast({
+        title: "No Profile",
+        description: "Create a profile to track resonance",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    Object.entries(programSuggestion.fieldContributions).forEach(([field, contribution]: [string, any]) => {
+      // Rating is 0-1, weight it by field's contribution strength (0-100%)
+      // Normalize to 0-1 range and clamp
+      const normalizedStrength = Math.min(1, Math.max(0, contribution.strength / 100));
+      const resonanceValue = Math.min(1, Math.max(0, rating * normalizedStrength));
+      UserProfileService.updateResonance(field as any, resonanceValue);
+    });
+
+    setFeedbackGiven(true);
+    toast({
+      title: "Feedback Recorded",
+      description: "Your resonance profile has been updated"
+    });
   };
 
   const createNewConversation = () => {
@@ -674,6 +712,48 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                             </span>
                           ))}
                         </div>
+                      </div>
+                    )}
+                    
+                    {/* Feedback Section */}
+                    {UserProfileService.hasProfile() && (
+                      <div className="mt-3 border-t pt-3">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">
+                          {feedbackGiven ? "Thanks for your feedback!" : "How well did this program work for you?"}
+                        </p>
+                        {!feedbackGiven && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => provideFeedback(1.0)}
+                              data-testid="button-feedback-positive"
+                              className="gap-1 flex-1"
+                            >
+                              <ThumbsUp className="h-3 w-3" />
+                              Great
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => provideFeedback(0.7)}
+                              data-testid="button-feedback-neutral"
+                              className="flex-1"
+                            >
+                              Okay
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => provideFeedback(0.3)}
+                              data-testid="button-feedback-negative"
+                              className="gap-1 flex-1"
+                            >
+                              <ThumbsDown className="h-3 w-3" />
+                              Not Much
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </CollapsibleContent>
