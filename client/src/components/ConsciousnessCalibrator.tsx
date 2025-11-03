@@ -70,10 +70,8 @@ export default function ConsciousnessCalibrator() {
 
   const calibrateMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/consciousness/calibrate', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('POST', '/api/consciousness/calibrate', data);
+      return await response.json();
     },
     onSuccess: (data) => {
       setResult(data);
