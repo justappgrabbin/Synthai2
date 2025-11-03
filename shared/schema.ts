@@ -173,3 +173,60 @@ export const mergeZipsSchema = z.object({
 export type ZipUpload = z.infer<typeof zipUploadSchema>;
 export type ZipAnalysis = z.infer<typeof zipAnalysisSchema>;
 export type MergeZips = z.infer<typeof mergeZipsSchema>;
+
+// User Profile for Growth Program Engine
+import type { FieldName, ChartType } from "./transit-system";
+
+export interface UserProfile {
+  id: string;
+  birthData: {
+    date: string;           // ISO date string
+    time: string;           // "HH:MM" format
+    location: string;       // City name for display
+    latitude: number;
+    longitude: number;
+    timezone: string;       // IANA timezone (e.g., "America/New_York")
+  };
+  fieldAssignments: {
+    [K in FieldName]: {
+      chartType: ChartType;
+      sensitiveGates: number[];  // Gates 1-64 user is responsive to
+    };
+  };
+  resonanceHistory: {
+    [K in FieldName]: number;    // 0.0-1.0: Running average of engagement
+  };
+  preferences: {
+    autoActivatePrograms: boolean;
+    notificationsEnabled: boolean;
+    defaultView: 'simple' | 'advanced';
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const userProfileSchema = z.object({
+  id: z.string(),
+  birthData: z.object({
+    date: z.string(),
+    time: z.string(),
+    location: z.string(),
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    timezone: z.string(),
+  }),
+  fieldAssignments: z.record(z.object({
+    chartType: z.enum(["Sidereal", "Tropical", "Draconic"]),
+    sensitiveGates: z.array(z.number().min(1).max(64)),
+  })),
+  resonanceHistory: z.record(z.number().min(0).max(1)),
+  preferences: z.object({
+    autoActivatePrograms: z.boolean(),
+    notificationsEnabled: z.boolean(),
+    defaultView: z.enum(['simple', 'advanced']),
+  }),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type InsertUserProfile = Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>;
