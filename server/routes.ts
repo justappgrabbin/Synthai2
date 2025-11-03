@@ -8,6 +8,7 @@ import { deployToNetlify } from "./lib/netlifyService";
 import { orchestrateWorldGeneration, checkTokenAvailability, consumeToken } from "./services/world-orchestrator";
 import { ConsciousnessCalibrator, ChartInterpreter, type BirthData } from "./services/chart-calculators";
 import { generateLayeredConsciousnessVoice } from "./services/gan-integrations";
+import { transitCache } from "./services/TransitCache";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -16,6 +17,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", service: "YOU-N-I-VERSE Studio API" });
+  });
+
+  // ========== Transit & Growth Program API ==========
+  
+  // Get current transit summary (human-readable)
+  app.get("/api/transits/summary", (_req, res) => {
+    try {
+      const summary = transitCache.getTransitSummary();
+      res.json({ summary });
+    } catch (error) {
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to get transit summary" 
+      });
+    }
+  });
+
+  // Get raw transit data (all three projections)
+  app.get("/api/transits/current", (_req, res) => {
+    try {
+      const transits = transitCache.getCurrentTransits();
+      if (!transits) {
+        return res.status(503).json({ error: "Transit data not yet available" });
+      }
+      res.json(transits);
+    } catch (error) {
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to get transits" 
+      });
+    }
+  });
+
+  // Get field vectors for a user (requires user chart signature)
+  app.post("/api/transits/field-vectors", async (req, res) => {
+    try {
+      const schema = z.object({
+        userId: z.string(),
+        birthData: z.object({
+          date: z.string().transform(str => new Date(str)),
+          latitude: z.number(),
+          longitude: z.number()
+        }),
+        fieldAssignments: z.record(z.object({
+          chartType: z.enum(["Sidereal", "Tropical", "Draconic"]),
+          sensitiveGates: z.array(z.number())
+        })).optional(),
+        resonanceHistory: z.record(z.number()).optional()
+      });
+
+      const userChart = schema.parse(req.body);
+      
+      // Apply defaults if not provided
+      const fullChart = {
+        ...userChart,
+        fieldAssignments: userChart.fieldAssignments || {},
+        resonanceHistory: userChart.resonanceHistory || {}
+      };
+
+      const fieldVectors = transitCache.getFieldVectors(fullChart as any);
+      res.json({ fieldVectors });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to compute field vectors" 
+      });
+    }
   });
 
   // Token status - check available tokens for current month

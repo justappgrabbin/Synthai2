@@ -1,8 +1,12 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { transitCache } from "./services/TransitCache";
 
 const app = express();
+
+// Start Transit Cache Service (hourly updates)
+transitCache.start();
 
 declare module 'http' {
   interface IncomingMessage {
