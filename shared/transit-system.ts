@@ -2,7 +2,17 @@
 // Handles multi-chart projections and field vector computation
 
 export type ChartType = "Sidereal" | "Tropical" | "Draconic";
-export type FieldName = "Mind" | "Body" | "Heart" | "Soul" | "Spirit" | "Essence" | "Shadow" | "Design" | "Expression";
+// 9 Consciousness Bodies (Human Design Centers mapped to field names)
+export type FieldName = 
+  | "Mind"              // Head/Ajna - Mental awareness
+  | "Ajna"              // Ajna - Conceptual processing  
+  | "ThroatExpression"  // Throat - Communication & manifestation
+  | "SolarIdentity"     // G-Center - Identity & direction
+  | "Will"              // Heart/Ego - Willpower & commitment
+  | "SacralLife"        // Sacral - Life force & creativity
+  | "Emotions"          // Solar Plexus - Emotional awareness
+  | "Instinct"          // Spleen - Intuition & survival
+  | "Root";             // Root - Pressure & drive
 export type Planet = "Sun" | "Moon" | "Mercury" | "Venus" | "Mars" | "Jupiter" | "Saturn" | "Uranus" | "Neptune" | "Pluto" | "NorthNode" | "Chiron";
 
 export interface PlanetaryPosition {
@@ -61,14 +71,14 @@ export interface UserChartSignature {
 // Field → Chart Type mapping (default assignments)
 export const FIELD_CHART_MAPPING: { [key in FieldName]: ChartType } = {
   Mind: "Sidereal",
-  Body: "Tropical", 
-  Heart: "Tropical",
-  Soul: "Draconic",
-  Spirit: "Draconic",
-  Essence: "Sidereal",
-  Shadow: "Draconic",
-  Design: "Tropical",
-  Expression: "Sidereal"
+  Ajna: "Sidereal",
+  ThroatExpression: "Tropical",
+  SolarIdentity: "Draconic",
+  Will: "Tropical",
+  SacralLife: "Tropical",
+  Emotions: "Draconic",
+  Instinct: "Sidereal",
+  Root: "Tropical"
 };
 
 // Gate → Degree ranges (each gate = 5.625 degrees)
