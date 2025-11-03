@@ -9,6 +9,8 @@ import { orchestrateWorldGeneration, checkTokenAvailability, consumeToken } from
 import { ConsciousnessCalibrator, ChartInterpreter, type BirthData } from "./services/chart-calculators";
 import { generateLayeredConsciousnessVoice } from "./services/gan-integrations";
 import { transitCache } from "./services/TransitCache";
+import { growthProgramEngine } from "./services/GrowthProgramEngine";
+import { getAllPrograms } from "../shared/growth-programs";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -85,6 +87,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.status(500).json({ 
         error: error instanceof Error ? error.message : "Failed to compute field vectors" 
+      });
+    }
+  });
+
+  // ========== Growth Program Engine API ==========
+
+  // Get all available programs (metadata only)
+  app.get("/api/programs/all", (_req, res) => {
+    try {
+      const programs = getAllPrograms();
+      res.json({ programs });
+    } catch (error) {
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to get programs" 
+      });
+    }
+  });
+
+  // Get workspace directive recommendation
+  app.post("/api/programs/suggest", async (req, res) => {
+    try {
+      const schema = z.object({
+        userId: z.string(),
+        birthData: z.object({
+          date: z.string().transform(str => new Date(str)),
+          latitude: z.number(),
+          longitude: z.number()
+        }),
+        fieldAssignments: z.record(z.object({
+          chartType: z.enum(["Sidereal", "Tropical", "Draconic"]),
+          sensitiveGates: z.array(z.number())
+        })).optional(),
+        resonanceHistory: z.record(z.number()).optional()
+      });
+
+      const userChart = schema.parse(req.body);
+      
+      // Apply defaults
+      const fullChart = {
+        ...userChart,
+        fieldAssignments: userChart.fieldAssignments || {},
+        resonanceHistory: userChart.resonanceHistory || {}
+      };
+
+      // Get current transits
+      const transits = transitCache.getCurrentTransits();
+      if (!transits) {
+        return res.status(503).json({ error: "Transit data not yet available" });
+      }
+
+      // Get field vectors
+      const fieldVectors = transitCache.getFieldVectors(fullChart as any);
+
+      // Get workspace directive
+      const directive = growthProgramEngine.getWorkspaceDirective(
+        fieldVectors,
+        transits.projections
+      );
+
+      res.json({ directive });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to get program suggestion" 
+      });
+    }
+  });
+
+  // Get detailed program activations (for debugging/advanced UI)
+  app.post("/api/programs/activations", async (req, res) => {
+    try {
+      const schema = z.object({
+        userId: z.string(),
+        birthData: z.object({
+          date: z.string().transform(str => new Date(str)),
+          latitude: z.number(),
+          longitude: z.number()
+        }),
+        fieldAssignments: z.record(z.object({
+          chartType: z.enum(["Sidereal", "Tropical", "Draconic"]),
+          sensitiveGates: z.array(z.number())
+        })).optional(),
+        resonanceHistory: z.record(z.number()).optional()
+      });
+
+      const userChart = schema.parse(req.body);
+      
+      const fullChart = {
+        ...userChart,
+        fieldAssignments: userChart.fieldAssignments || {},
+        resonanceHistory: userChart.resonanceHistory || {}
+      };
+
+      const transits = transitCache.getCurrentTransits();
+      if (!transits) {
+        return res.status(503).json({ error: "Transit data not yet available" });
+      }
+
+      const fieldVectors = transitCache.getFieldVectors(fullChart as any);
+
+      const activations = growthProgramEngine.getProgramActivations(
+        fieldVectors,
+        transits.projections
+      );
+
+      res.json({ activations });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to get program activations" 
       });
     }
   });
