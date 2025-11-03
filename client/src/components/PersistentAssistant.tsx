@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -48,6 +48,9 @@ export function PersistentAssistant() {
   const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
   const [currentConversationId, setCurrentConversationId] = useState<string>("");
   const [savedConversations, setSavedConversations] = useState<Conversation[]>([]);
+  const [programSuggestion, setProgramSuggestion] = useState<any>(null);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [suggestionOpen, setSuggestionOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
@@ -134,6 +137,26 @@ export function PersistentAssistant() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Fetch program suggestion when assistant opens
+  useEffect(() => {
+    if (isOpen && !programSuggestion && !suggestionLoading) {
+      fetchProgramSuggestion();
+    }
+  }, [isOpen]);
+
+  const fetchProgramSuggestion = async () => {
+    setSuggestionLoading(true);
+    try {
+      const response = await fetch("/api/programs/demo");
+      const data = await response.json();
+      setProgramSuggestion(data.directive);
+    } catch (error) {
+      console.error("Failed to fetch program suggestion:", error);
+    } finally {
+      setSuggestionLoading(false);
+    }
+  };
 
   const createNewConversation = () => {
     const newId = Date.now().toString();
@@ -581,6 +604,59 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
           </div>
 
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+            {/* Program Suggestion Panel */}
+            {programSuggestion && (
+              <div className="mb-4">
+                <Collapsible open={suggestionOpen} onOpenChange={setSuggestionOpen}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between hover-elevate"
+                      data-testid="button-toggle-program-suggestion"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span className="font-medium">Growth Program: {programSuggestion.primaryMode}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {suggestionOpen ? "Hide" : "Show"}
+                      </span>
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 bg-muted/30 border border-border rounded-md p-3 space-y-2">
+                    <div className="text-sm whitespace-pre-line">
+                      {programSuggestion.synthesis}
+                    </div>
+                    {programSuggestion.blendedActions && programSuggestion.blendedActions.length > 0 && (
+                      <div className="mt-3 border-t pt-2">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Suggested Actions:</p>
+                        <ul className="text-xs space-y-1">
+                          {programSuggestion.blendedActions.map((action: string, idx: number) => (
+                            <li key={idx} className="flex gap-2">
+                              <span className="text-primary">→</span>
+                              <span>{action}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {programSuggestion.toolRecommendations && programSuggestion.toolRecommendations.length > 0 && (
+                      <div className="mt-2 border-t pt-2">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Recommended Tools:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {programSuggestion.toolRecommendations.map((tool: string, idx: number) => (
+                            <span key={idx} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                              {tool}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            )}
+
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                 <Bot className="h-12 w-12 mb-3 opacity-20" />

@@ -92,8 +92,8 @@ export class TransitCacheService {
     }
     
     const fields: FieldName[] = [
-      "Mind", "Body", "Heart", "Soul", "Spirit",
-      "Essence", "Shadow", "Design", "Expression"
+      "Mind", "Ajna", "ThroatExpression", "SolarIdentity", "Will",
+      "SacralLife", "Emotions", "Instinct", "Root"
     ];
     
     return fields.map(field => this.computeFieldVector(field, userChart, transits));

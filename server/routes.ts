@@ -105,6 +105,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get program suggestion in DEMO mode (no user data required)
+  app.get("/api/programs/demo", (_req, res) => {
+    try {
+      const transits = transitCache.getCurrentTransits();
+      if (!transits) {
+        return res.status(503).json({ error: "Transit data not yet available" });
+      }
+
+      console.log("[DEBUG] Transits fetched successfully");
+
+      // Create demo user profile with default resonance
+      const demoFieldVectors = transitCache.getFieldVectors({
+        userId: "demo",
+        birthData: {
+          date: new Date("1990-01-01"), // Default birth date
+          latitude: 0,
+          longitude: 0
+        },
+        fieldAssignments: {
+          Mind: { chartType: "Sidereal" as const, sensitiveGates: [] },
+          Ajna: { chartType: "Sidereal" as const, sensitiveGates: [] },
+          ThroatExpression: { chartType: "Tropical" as const, sensitiveGates: [] },
+          SolarIdentity: { chartType: "Draconic" as const, sensitiveGates: [] },
+          Will: { chartType: "Tropical" as const, sensitiveGates: [] },
+          SacralLife: { chartType: "Tropical" as const, sensitiveGates: [] },
+          Emotions: { chartType: "Draconic" as const, sensitiveGates: [] },
+          Instinct: { chartType: "Sidereal" as const, sensitiveGates: [] },
+          Root: { chartType: "Tropical" as const, sensitiveGates: [] }
+        },
+        resonanceHistory: {
+          Mind: 0.5,
+          Ajna: 0.5,
+          ThroatExpression: 0.5,
+          SolarIdentity: 0.5,
+          Will: 0.5,
+          SacralLife: 0.5,
+          Emotions: 0.5,
+          Instinct: 0.5,
+          Root: 0.5
+        }
+      });
+
+      console.log("[DEBUG] Field vectors computed:", demoFieldVectors.length);
+
+      const directive = growthProgramEngine.getWorkspaceDirective(
+        demoFieldVectors,
+        transits.projections
+      );
+
+      console.log("[DEBUG] Directive generated successfully");
+
+      res.json({ directive, note: "Demo mode - using default user profile" });
+    } catch (error) {
+      console.error("[ERROR] Demo endpoint failed:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to get demo suggestion",
+        stack: error instanceof Error ? error.stack : undefined
+      });
+    }
+  });
+
   // Get workspace directive recommendation
   app.post("/api/programs/suggest", async (req, res) => {
     try {
