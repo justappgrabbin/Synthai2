@@ -14,6 +14,19 @@ interface Scene {
   code?: string;
   narration?: string;
   duration: number;
+  consciousnessTag?: {
+    gate?: number;
+    field?: string;
+    resonance?: string;
+  };
+}
+
+interface PresentationGlyph {
+  id: string;
+  code: string;
+  scenes: Scene[];
+  created: Date;
+  symbol: string;
 }
 
 export default function PresentationPlanner() {
@@ -29,6 +42,9 @@ export default function PresentationPlanner() {
   const [selectedSceneId, setSelectedSceneId] = useState<string>("1");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [playbackMode, setPlaybackMode] = useState<"manual" | "auto" | "rehearsal">("manual");
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [currentGlyph, setCurrentGlyph] = useState<PresentationGlyph | null>(null);
   const { toast } = useToast();
 
   const selectedScene = scenes.find(s => s.id === selectedSceneId);
@@ -100,8 +116,58 @@ export default function PresentationPlanner() {
     toast({ title: "Presentation exported!" });
   };
 
+  const generateGlyphCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 12; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+      if (i === 3 || i === 7) code += '-';
+    }
+    return code;
+  };
+
+  const generateGlyphSymbol = () => {
+    const symbols = ["◉", "◎", "◈", "◇", "◆", "◊", "○", "●", "◐", "◑", "◒", "◓", "⬡", "⬢", "⬣", "⬤", "⬥", "⬦"];
+    return symbols[Math.floor(Math.random() * symbols.length)];
+  };
+
+  const saveAsGlyph = () => {
+    const glyph: PresentationGlyph = {
+      id: Date.now().toString(),
+      code: generateGlyphCode(),
+      scenes: scenes,
+      created: new Date(),
+      symbol: generateGlyphSymbol()
+    };
+    
+    setCurrentGlyph(glyph);
+    
+    // Save to localStorage
+    const savedGlyphs = JSON.parse(localStorage.getItem('presentation-glyphs') || '[]');
+    savedGlyphs.push(glyph);
+    localStorage.setItem('presentation-glyphs', JSON.stringify(savedGlyphs));
+    
+    toast({ 
+      title: "Glyph Generated!",
+      description: `Code: ${glyph.code} ${glyph.symbol}`
+    });
+  };
+
   const exportToNotebook = () => {
-    // Generate Jupyter notebook with app features as concepts
+    // Auto-save as glyph before export
+    const exportGlyph = currentGlyph || {
+      id: Date.now().toString(),
+      code: generateGlyphCode(),
+      scenes: scenes,
+      created: new Date(),
+      symbol: generateGlyphSymbol()
+    };
+
+    if (!currentGlyph) {
+      setCurrentGlyph(exportGlyph);
+    }
+
+    // Generate Jupyter notebook with app features as concepts + glyph metadata
     const notebook = {
       cells: [
         {
@@ -111,7 +177,25 @@ export default function PresentationPlanner() {
             `# ${scenes.length > 0 ? scenes[0].title : "Presentation"} - Interactive Notebook\n`,
             `\n`,
             `This notebook was generated from YOU-N-I-VERSE Presentation Planner.\n`,
-            `Each scene is a concept that can be executed interactively.\n`
+            `Each scene is a concept that can be executed interactively.\n`,
+            `\n`,
+            `**Glyph Code:** \`${exportGlyph.code}\` ${exportGlyph.symbol}\n`,
+            `**Created:** ${new Date(exportGlyph.created).toLocaleString()}\n`
+          ]
+        },
+        {
+          cell_type: "code",
+          execution_count: null,
+          metadata: {
+            tags: ["glyph-metadata"],
+            collapsed: true
+          },
+          outputs: [],
+          source: [
+            "# GLYPH METADATA - DO NOT EDIT\n",
+            "# This cell contains session continuity data\n",
+            `GLYPH_DATA = ${JSON.stringify(exportGlyph, null, 2)}\n`,
+            "print(f'✅ Glyph {GLYPH_DATA[\"code\"]} loaded')\n"
           ]
         },
         {
@@ -135,7 +219,8 @@ export default function PresentationPlanner() {
               `## Scene ${index + 1}: ${scene.title}\n`,
               `\n`,
               `${scene.description}\n`,
-              scene.narration ? `\n> **Narration:** ${scene.narration}\n` : ""
+              scene.narration ? `\n> **Narration:** ${scene.narration}\n` : "",
+              scene.consciousnessTag ? `\n**Consciousness Tag:** Gate ${scene.consciousnessTag.gate || "?"} | Field: ${scene.consciousnessTag.field || "Unknown"} | Resonance: ${scene.consciousnessTag.resonance || "Neutral"}\n` : ""
             ]
           },
           {
@@ -195,6 +280,10 @@ export default function PresentationPlanner() {
             <Button variant="outline" onClick={exportPresentation} data-testid="button-export">
               <Download className="h-4 w-4 mr-2" />
               Export JSON
+            </Button>
+            <Button variant="outline" onClick={saveAsGlyph} data-testid="button-save-glyph">
+              <Save className="h-4 w-4 mr-2" />
+              Save as Glyph {currentGlyph && `(${currentGlyph.symbol})`}
             </Button>
             <Button variant="outline" onClick={exportToNotebook} data-testid="button-export-notebook">
               <FileCode className="h-4 w-4 mr-2" />
@@ -367,6 +456,70 @@ export default function PresentationPlanner() {
 
               <Card>
                 <CardHeader>
+                  <CardTitle>Consciousness Tagging (Optional)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Tag this scene with consciousness metadata for deeper resonance tracking
+                  </p>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Gate (1-64)</label>
+                      <Input
+                        type="number"
+                        value={selectedScene.consciousnessTag?.gate || ''}
+                        onChange={(e) => updateScene(selectedScene.id, { 
+                          consciousnessTag: { 
+                            ...selectedScene.consciousnessTag, 
+                            gate: parseInt(e.target.value) || undefined 
+                          }
+                        })}
+                        placeholder="47"
+                        min={1}
+                        max={64}
+                        data-testid="input-consciousness-gate"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Field</label>
+                      <Input
+                        value={selectedScene.consciousnessTag?.field || ''}
+                        onChange={(e) => updateScene(selectedScene.id, { 
+                          consciousnessTag: { 
+                            ...selectedScene.consciousnessTag, 
+                            field: e.target.value 
+                          }
+                        })}
+                        placeholder="Mind, Body, Heart..."
+                        data-testid="input-consciousness-field"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Resonance</label>
+                      <Input
+                        value={selectedScene.consciousnessTag?.resonance || ''}
+                        onChange={(e) => updateScene(selectedScene.id, { 
+                          consciousnessTag: { 
+                            ...selectedScene.consciousnessTag, 
+                            resonance: e.target.value 
+                          }
+                        })}
+                        placeholder="High, Low, Neutral..."
+                        data-testid="input-consciousness-resonance"
+                      />
+                    </div>
+                  </div>
+                  {selectedScene.consciousnessTag?.gate && (
+                    <div className="p-3 bg-primary/10 rounded border border-primary/20 text-sm">
+                      ✨ Scene resonating at Gate {selectedScene.consciousnessTag.gate}
+                      {selectedScene.consciousnessTag.field && ` in ${selectedScene.consciousnessTag.field} field`}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle>Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -399,10 +552,38 @@ export default function PresentationPlanner() {
         <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
           <div className="max-w-4xl w-full p-8">
             <div className="mb-8 flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Scene {currentSceneIndex + 1} of {scenes.length}
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-muted-foreground">
+                  Scene {currentSceneIndex + 1} of {scenes.length}
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant={playbackMode === "manual" ? "default" : "outline"}
+                    onClick={() => setPlaybackMode("manual")}
+                  >
+                    Manual
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant={playbackMode === "auto" ? "default" : "outline"}
+                    onClick={() => {
+                      setPlaybackMode("auto");
+                      setIsAutoPlaying(true);
+                    }}
+                  >
+                    Auto-Play
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant={playbackMode === "rehearsal" ? "default" : "outline"}
+                    onClick={() => setPlaybackMode("rehearsal")}
+                  >
+                    Rehearsal
+                  </Button>
+                </div>
               </div>
-              <Button variant="outline" onClick={() => setIsPlaying(false)} data-testid="button-stop-presentation">
+              <Button variant="outline" onClick={() => { setIsPlaying(false); setIsAutoPlaying(false); }} data-testid="button-stop-presentation">
                 Stop Presentation
               </Button>
             </div>
