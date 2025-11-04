@@ -70,10 +70,8 @@ export default function ConsciousnessCalibrator() {
 
   const calibrateMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/consciousness/calibrate', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('POST', '/api/consciousness/calibrate', data);
+      return await response.json();
     },
     onSuccess: (data) => {
       setResult(data);
@@ -505,7 +503,7 @@ export default function ConsciousnessCalibrator() {
                         </span>
                       </div>
                       <Progress value={activation.amplitude * 100} className="h-2" />
-                      <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-xs text-muted-foreground">
                         <div>Phase: {activation.phase.toFixed(2)}</div>
                         <div>Frequency: {activation.frequency.toFixed(2)}Hz</div>
                         <div>Amplitude: {activation.amplitude.toFixed(3)}</div>

@@ -4,13 +4,14 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play, Code, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIService } from "@/lib/AIService";
 import { UserProfileService } from "@/lib/userProfileService";
 import { WorkspaceManager } from "@/lib/workspaceManager";
+import { FileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -22,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CONSCIOUSNESS_KNOWLEDGE } from "@/lib/consciousnessKnowledge";
+import { AssistantMessage } from "@/components/AssistantMessage";
 
 interface Message {
   role: "user" | "assistant";
@@ -47,16 +49,25 @@ export function PersistentAssistant() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(() => {
+    const saved = localStorage.getItem("ai-speech-enabled");
+    return saved ? JSON.parse(saved) : true;
+  });
   const [currentConversationId, setCurrentConversationId] = useState<string>("");
   const [savedConversations, setSavedConversations] = useState<Conversation[]>([]);
   const [programSuggestion, setProgramSuggestion] = useState<any>(null);
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(true);
   const [feedbackGiven, setFeedbackGiven] = useState(false);
+  const [liveThinking, setLiveThinking] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
+
+  // Save speech preference when it changes
+  useEffect(() => {
+    localStorage.setItem("ai-speech-enabled", JSON.stringify(isSpeechEnabled));
+  }, [isSpeechEnabled]);
 
   // Text-to-speech function
   const speakText = (text: string) => {
@@ -71,6 +82,11 @@ export function PersistentAssistant() {
     utterance.volume = 1.0;
     
     window.speechSynthesis.speak(utterance);
+  };
+
+  const toggleSpeech = () => {
+    window.speechSynthesis.cancel(); // Stop any current speech
+    setIsSpeechEnabled(!isSpeechEnabled);
   };
 
   // Load conversations from localStorage on mount
@@ -661,11 +677,11 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                 data-testid="button-toggle-speech"
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsSpeechEnabled(!isSpeechEnabled)}
+                onClick={toggleSpeech}
                 title={isSpeechEnabled ? "Disable speech" : "Enable speech"}
               >
                 {isSpeechEnabled ? (
-                  <Volume2 className="h-4 w-4" />
+                  <Volume2 className="h-4 w-4 text-primary" />
                 ) : (
                   <VolumeX className="h-4 w-4" />
                 )}
@@ -811,52 +827,47 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                     data-testid={`message-${msg.role}-${idx}`}
                   >
                     {msg.role === "assistant" && (
-                      <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
                         <Bot className="h-3 w-3 text-primary-foreground" />
                       </div>
                     )}
-                    <div
-                      className={`max-w-[80%] ${
-                        msg.role === "user"
-                          ? "bg-primary text-primary-foreground rounded-lg px-3 py-2 text-sm"
-                          : "space-y-1"
-                      }`}
-                    >
-                      {msg.role === "assistant" && msg.thinking && (
-                        <Collapsible>
-                          <CollapsibleTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs gap-1 px-2 mb-1"
-                              data-testid={`button-toggle-thinking-${idx}`}
-                            >
-                              <Brain className="h-3 w-3" />
-                              <span className="text-muted-foreground">View thinking</span>
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="bg-muted/50 border border-border rounded-md px-2 py-1.5 text-xs text-muted-foreground mb-1">
-                            {msg.thinking}
-                          </CollapsibleContent>
-                        </Collapsible>
+                    <div className="max-w-[85%]">
+                      {msg.role === "user" ? (
+                        <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2.5 text-sm">
+                          {msg.content}
+                        </div>
+                      ) : (
+                        <AssistantMessage 
+                          content={msg.content} 
+                          thinking={msg.thinking}
+                          messageIndex={idx}
+                        />
                       )}
-                      <div className={msg.role === "assistant" ? "bg-muted rounded-lg px-3 py-2 text-sm" : ""}>
-                        {msg.content}
-                      </div>
                     </div>
                   </div>
                 ))}
                 {isLoading && (
                   <div className="flex gap-2 justify-start">
-                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
                       <Bot className="h-3 w-3 text-primary-foreground animate-pulse" />
                     </div>
-                    <div className="bg-muted rounded-lg px-3 py-2 text-sm">
-                      <span className="inline-flex gap-1">
-                        <span className="animate-bounce">●</span>
-                        <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>●</span>
-                        <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>●</span>
-                      </span>
+                    <div className="space-y-2 max-w-[85%]">
+                      {liveThinking && (
+                        <div className="bg-muted/50 border border-border rounded-md px-3 py-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Brain className="h-3 w-3 animate-pulse" />
+                            <span className="font-medium">Thinking...</span>
+                          </div>
+                          <div>{liveThinking}</div>
+                        </div>
+                      )}
+                      <div className="bg-muted rounded-lg px-4 py-3 text-sm">
+                        <span className="inline-flex gap-1">
+                          <span className="animate-bounce">●</span>
+                          <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>●</span>
+                          <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>●</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}

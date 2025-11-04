@@ -191,20 +191,21 @@ export function SettingsPanel() {
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
-            <TabsTrigger value="ai" data-testid="tab-ai">AI Config</TabsTrigger>
-            <TabsTrigger value="autonomy" data-testid="tab-autonomy">
-              Autonomy
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5">
+            <TabsTrigger value="general" data-testid="tab-general" className="text-xs sm:text-sm">General</TabsTrigger>
+            <TabsTrigger value="ai" data-testid="tab-ai" className="text-xs sm:text-sm">AI</TabsTrigger>
+            <TabsTrigger value="autonomy" data-testid="tab-autonomy" className="text-xs sm:text-sm">
+              <span className="hidden sm:inline">Autonomy</span>
+              <span className="sm:hidden">Auto</span>
               {pendingCount > 0 && (
-                <Badge variant="destructive" className="ml-2 h-5 px-1.5 text-xs">{pendingCount}</Badge>
+                <Badge variant="destructive" className="ml-1 sm:ml-2 h-4 sm:h-5 px-1 sm:px-1.5 text-[10px] sm:text-xs">{pendingCount}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="consciousness" data-testid="tab-consciousness">
-              <Sparkles className="h-4 w-4 mr-1" />
-              ERN
+            <TabsTrigger value="consciousness" data-testid="tab-consciousness" className="text-xs sm:text-sm">
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              <span className="hidden sm:inline">ERN</span>
             </TabsTrigger>
-            <TabsTrigger value="about" data-testid="tab-about">About</TabsTrigger>
+            <TabsTrigger value="about" data-testid="tab-about" className="text-xs sm:text-sm">About</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-6">
@@ -217,13 +218,13 @@ export function SettingsPanel() {
                 <CardDescription>Choose your preferred color scheme</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {(Object.keys(THEME_PRESETS) as ColorTheme[]).map((themeKey) => (
                     <button
                       key={themeKey}
                       data-testid={`button-theme-${themeKey}`}
                       onClick={() => handleColorThemeChange(themeKey)}
-                      className={`p-4 rounded-lg border-2 transition-all hover-elevate ${
+                      className={`p-3 sm:p-4 rounded-lg border-2 transition-all hover-elevate ${
                         colorTheme === themeKey 
                           ? 'border-primary bg-primary/10' 
                           : 'border-border bg-card'
