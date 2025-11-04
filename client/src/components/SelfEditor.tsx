@@ -133,28 +133,24 @@ export function SelfEditor({ onFileModified }: SelfEditorProps) {
   };
 
   return (
-    <div className="flex flex-col h-full p-2 sm:p-4 gap-2">
+    <div className="flex flex-col h-full p-4 gap-2">
       <Tabs defaultValue="inject" className="flex-1 overflow-hidden flex flex-col">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="inject" data-testid="tab-inject" className="text-xs sm:text-sm">
-            <Upload className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Inject</span>
-            <span className="sm:hidden">Inj</span>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="inject" data-testid="tab-inject">
+            <Upload className="h-4 w-4 mr-2" />
+            Inject
           </TabsTrigger>
-          <TabsTrigger value="search" data-testid="tab-search" className="text-xs sm:text-sm">
-            <Search className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Search</span>
-            <span className="sm:hidden">Srch</span>
+          <TabsTrigger value="search" data-testid="tab-search">
+            <Search className="h-4 w-4 mr-2" />
+            Search
           </TabsTrigger>
-          <TabsTrigger value="replace" data-testid="tab-replace" className="text-xs sm:text-sm">
-            <Code className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Replace</span>
-            <span className="sm:hidden">Rpl</span>
+          <TabsTrigger value="replace" data-testid="tab-replace">
+            <Code className="h-4 w-4 mr-2" />
+            Replace
           </TabsTrigger>
-          <TabsTrigger value="analyze" data-testid="tab-analyze" className="text-xs sm:text-sm">
-            <FileCode className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Analyze</span>
-            <span className="sm:hidden">Anl</span>
+          <TabsTrigger value="analyze" data-testid="tab-analyze">
+            <FileCode className="h-4 w-4 mr-2" />
+            Analyze
           </TabsTrigger>
         </TabsList>
 

@@ -1,12 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Network, Rocket, Sparkles, Presentation, QrCode, PawPrint } from "lucide-react";
+import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Network, Rocket, Sparkles, Presentation, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun } from "lucide-react";
-
-interface GlobalNavProps {
-  onGuardDogClick?: () => void;
-}
 
 const NAV_ITEMS = [
   { path: "/", icon: Home, label: "Dashboard" },
@@ -26,7 +22,7 @@ const NAV_ITEMS = [
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
-export function GlobalNav({ onGuardDogClick }: GlobalNavProps) {
+export function GlobalNav() {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
 
@@ -59,31 +55,19 @@ export function GlobalNav({ onGuardDogClick }: GlobalNavProps) {
           })}
         </div>
 
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onGuardDogClick}
-            data-testid="button-open-guard-dog"
-            title="Guard Dog Planning Assistant"
-          >
-            <PawPrint className="h-4 w-4" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            data-testid="button-toggle-theme"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          data-testid="button-toggle-theme"
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </Button>
       </div>
     </nav>
   );

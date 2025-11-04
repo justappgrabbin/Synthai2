@@ -1,8 +1,8 @@
 {
   "name": "YOU–N–I–VERSE Studio",
   "short_name": "Indyverse",
-  "version": "2.2.1",
-  "description": "Living creative ecosystem with one-click program activation, real-time workspace mode switching, session analytics with rating system, personalized growth programs powered by cosmic transits, AI Guard Dog assistant, consciousness-aware profiles, GAN training, game development, and 7-layer semantic framework. Full-stack IDE with consciousness operating system. Now fully mobile-responsive with optimized layouts for phones and tablets.",
+  "version": "2.2.0",
+  "description": "Living creative ecosystem with one-click program activation, real-time workspace mode switching, session analytics with rating system, personalized growth programs powered by cosmic transits, AI Guard Dog assistant, consciousness-aware profiles, GAN training, game development, and 7-layer semantic framework. Full-stack IDE with consciousness operating system.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1f25",
