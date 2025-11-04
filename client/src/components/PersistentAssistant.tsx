@@ -929,7 +929,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                                         </Button>
                                       </div>
                                     </div>
-                                    <pre className="bg-card border rounded-md p-2 overflow-x-auto text-xs font-mono text-foreground">
+                                    <pre className="bg-slate-100 dark:bg-slate-900 border rounded-md p-2 overflow-x-auto text-xs font-mono text-slate-900 dark:text-slate-100">
                                       <code>{block.code}</code>
                                     </pre>
                                   </div>
