@@ -4,13 +4,14 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play, Code2, Copy, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AIService } from "@/lib/AIService";
 import { UserProfileService } from "@/lib/userProfileService";
 import { WorkspaceManager } from "@/lib/workspaceManager";
+import { FileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -71,6 +72,52 @@ export function PersistentAssistant() {
     utterance.volume = 1.0;
     
     window.speechSynthesis.speak(utterance);
+  };
+
+  // Parse code blocks from markdown
+  const parseCodeBlocks = (text: string) => {
+    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+    const blocks: Array<{ language: string; code: string; index: number }> = [];
+    let match;
+    
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      blocks.push({
+        language: match[1] || 'text',
+        code: match[2].trim(),
+        index: match.index
+      });
+    }
+    
+    return blocks;
+  };
+
+  // Send code to IDE
+  const sendCodeToIDE = (code: string, language: string) => {
+    const extension = language === 'javascript' || language === 'js' ? 'js' 
+      : language === 'typescript' || language === 'ts' ? 'ts'
+      : language === 'html' ? 'html'
+      : language === 'css' ? 'css'
+      : language === 'python' || language === 'py' ? 'py'
+      : language === 'json' ? 'json'
+      : 'txt';
+    
+    const filename = `ai-code-${Date.now()}.${extension}`;
+    FileSystem.createFile('', filename);
+    FileSystem.saveFile(filename, code);
+    
+    toast({
+      title: "Code sent to IDE!",
+      description: `File "${filename}" created in the file explorer`
+    });
+  };
+
+  // Copy code to clipboard
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: "Copied!",
+      description: "Code copied to clipboard"
+    });
   };
 
   // Load conversations from localStorage on mount
@@ -840,8 +887,61 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                           </CollapsibleContent>
                         </Collapsible>
                       )}
-                      <div className={msg.role === "assistant" ? "bg-muted rounded-lg px-3 py-2 text-sm" : ""}>
-                        {msg.content}
+                      <div className={msg.role === "assistant" ? "bg-muted rounded-lg px-3 py-2 text-sm space-y-2" : ""}>
+                        {msg.role === "assistant" ? (
+                          <>
+                            {parseCodeBlocks(msg.content).length > 0 ? (
+                              <>
+                                {msg.content.split(/```(\w+)?\n/).map((part, partIdx) => {
+                                  const codeBlocks = parseCodeBlocks(msg.content);
+                                  const isCodeBlock = codeBlocks.some(block => msg.content.includes('```') && part.includes(block.code));
+                                  
+                                  if (partIdx === 0 && !part.startsWith('```')) {
+                                    return <div key={partIdx} className="whitespace-pre-wrap">{part}</div>;
+                                  }
+                                  
+                                  return null;
+                                })}
+                                {parseCodeBlocks(msg.content).map((block, blockIdx) => (
+                                  <div key={blockIdx} className="space-y-1">
+                                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                                      <span className="font-mono">{block.language}</span>
+                                      <div className="flex gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-6 px-2"
+                                          onClick={() => copyCode(block.code)}
+                                          data-testid={`button-copy-code-${idx}-${blockIdx}`}
+                                        >
+                                          <Copy className="h-3 w-3 mr-1" />
+                                          Copy
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-6 px-2"
+                                          onClick={() => sendCodeToIDE(block.code, block.language)}
+                                          data-testid={`button-send-to-ide-${idx}-${blockIdx}`}
+                                        >
+                                          <FileCode className="h-3 w-3 mr-1" />
+                                          Send to IDE
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <pre className="bg-background border rounded-md p-2 overflow-x-auto text-xs font-mono">
+                                      <code>{block.code}</code>
+                                    </pre>
+                                  </div>
+                                ))}
+                              </>
+                            ) : (
+                              <div className="whitespace-pre-wrap">{msg.content}</div>
+                            )}
+                          </>
+                        ) : (
+                          msg.content
+                        )}
                       </div>
                     </div>
                   </div>
