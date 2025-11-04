@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Terminal } from "@/components/Terminal";
 import { SelfEditor } from "@/components/SelfEditor";
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -2307,209 +2308,237 @@ const result = await handlePayment({
         </div>
       </div>
 
-      <div className={`flex overflow-hidden relative ${showTerminal ? 'flex-1' : 'flex-1'}`}>
-        {showFilePanel && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setShowFilePanel(false)}
-          />
-        )}
-        
-        <aside className={`
-          fixed lg:relative lg:block
-          w-64 h-full border-r bg-background
-          p-4 space-y-2 overflow-y-auto
-          z-50 lg:z-auto
-          transition-transform duration-300
-          ${showFilePanel ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FolderTree className="h-4 w-4 text-primary" />
-              <h3 className="font-medium text-sm">Files</h3>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                data-testid="button-new-file"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => setShowNewFileInput(!showNewFileInput)}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-              <Button
-                data-testid="button-close-files"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
+      <ResizablePanelGroup 
+        direction="vertical" 
+        className={`flex-1 overflow-hidden ${showTerminal ? 'flex-1' : 'flex-1'}`}
+      >
+        <ResizablePanel defaultSize={70} minSize={30}>
+          <ResizablePanelGroup direction="horizontal" className="h-full">
+            {showFilePanel && (
+              <div 
+                className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                 onClick={() => setShowFilePanel(false)}
-                title="Close File Panel"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          
-          {showNewFileInput && (
-            <div className="flex gap-1 mb-2">
-              <Input
-                data-testid="input-new-filename"
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                placeholder="filename.js"
-                className="h-7 text-xs"
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
               />
-              <Button
-                data-testid="button-create-file"
-                size="sm"
-                className="h-7"
-                onClick={handleCreateFile}
-              >
-                Add
-              </Button>
-            </div>
-          )}
-          
-          {files.map((file, idx) => (
-            <FileTreeNode
-              key={idx}
-              file={file}
-              currentPath={currentFile?.path}
-              onOpen={openFile}
-              onDelete={handleDeleteFile}
-            />
-          ))}
-        </aside>
-
-        <div className={`flex-1 flex flex-col ${showPreview && 'hidden sm:flex'}`}>
-          <div className="border-b p-2 flex items-center justify-between gap-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Code2 className="h-3 w-3" />
-              <span className="truncate">{currentFile?.name || 'No file selected'}</span>
-            </div>
-            {currentFile && (
-              <Button
-                data-testid="button-close-editor"
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => {
-                  setCurrentFile(null);
-                  setCode('');
-                }}
-                title="Close File"
-              >
-                <X className="h-4 w-4" />
-              </Button>
             )}
-          </div>
-          <Textarea
-            data-testid="textarea-code-editor"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="flex-1 font-mono text-sm resize-none border-0 focus-visible:ring-0 rounded-none"
-            placeholder="Start coding..."
-            disabled={!currentFile}
-          />
-        </div>
-
-        <aside className={`
-          w-full sm:w-96 border-l flex flex-col
-          ${showPreview ? 'block sm:block' : 'hidden lg:flex'}
-        `}>
-          <div className="border-b p-2 flex items-center justify-between gap-2 text-sm">
-            <div className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-primary" />
-              <span className="font-medium">Preview</span>
-            </div>
-            <Button
-              data-testid="button-close-preview"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setShowPreview(false)}
-              title="Close Preview"
+            
+            <ResizablePanel 
+              defaultSize={20} 
+              minSize={15} 
+              maxSize={40}
+              className={`
+                fixed lg:relative lg:block
+                h-full bg-background
+                z-50 lg:z-auto
+                transition-transform duration-300
+                ${showFilePanel ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+              `}
             >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex-1 bg-white overflow-auto">
-            {previewContent ? (
-              <iframe
-                data-testid="iframe-preview"
-                srcDoc={previewContent}
-                className="w-full h-full border-0"
-                sandbox="allow-scripts allow-same-origin allow-forms"
-                title="Preview"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full p-8 text-center bg-muted/20">
-                <div className="text-muted-foreground">
-                  <Globe className="h-16 w-16 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">Preview will appear here</p>
-                  <p className="text-xs mt-2">Click "Run" to execute code</p>
+              <aside className="h-full border-r p-4 space-y-2 overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <FolderTree className="h-4 w-4 text-primary" />
+                    <h3 className="font-medium text-sm">Files</h3>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      data-testid="button-new-file"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => setShowNewFileInput(!showNewFileInput)}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      data-testid="button-close-files"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 lg:hidden"
+                      onClick={() => setShowFilePanel(false)}
+                      title="Close File Panel"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+                
+                {showNewFileInput && (
+                  <div className="flex gap-1 mb-2">
+                    <Input
+                      data-testid="input-new-filename"
+                      value={newFileName}
+                      onChange={(e) => setNewFileName(e.target.value)}
+                      placeholder="filename.js"
+                      className="h-7 text-xs"
+                      onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
+                    />
+                    <Button
+                      data-testid="button-create-file"
+                      size="sm"
+                      className="h-7"
+                      onClick={handleCreateFile}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                )}
+                
+                {files.map((file, idx) => (
+                  <FileTreeNode
+                    key={idx}
+                    file={file}
+                    currentPath={currentFile?.path}
+                    onOpen={openFile}
+                    onDelete={handleDeleteFile}
+                  />
+                ))}
+              </aside>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle className="hidden lg:flex" />
+
+            <ResizablePanel defaultSize={50} minSize={30}>
+              <div className={`h-full flex flex-col ${showPreview && 'hidden sm:flex'}`}>
+                <div className="border-b p-2 flex items-center justify-between gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Code2 className="h-3 w-3" />
+                    <span className="truncate">{currentFile?.name || 'No file selected'}</span>
+                  </div>
+                  {currentFile && (
+                    <Button
+                      data-testid="button-close-editor"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        setCurrentFile(null);
+                        setCode('');
+                      }}
+                      title="Close File"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <Textarea
+                  data-testid="textarea-code-editor"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="flex-1 font-mono text-sm resize-none border-0 focus-visible:ring-0 rounded-none"
+                  placeholder="Start coding..."
+                  disabled={!currentFile}
+                />
               </div>
-            )}
-          </div>
-        </aside>
-      </div>
+            </ResizablePanel>
 
-      {showTerminal && (
-        <div className="h-64 border-t flex-shrink-0">
-          <Terminal onClose={() => setShowTerminal(false)} />
-        </div>
-      )}
+            <ResizableHandle withHandle className="hidden lg:flex" />
 
-      {showSelfEditor && (
-        <div className="h-96 border-t flex-shrink-0 bg-background flex flex-col">
-          <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="font-medium text-sm">Self-Editor & Code Injection</span>
-            </div>
-            <Button
-              data-testid="button-close-self-editor"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setShowSelfEditor(false)}
-              title="Close Self-Editor"
+            <ResizablePanel 
+              defaultSize={30} 
+              minSize={20} 
+              maxSize={50}
+              className={`${showPreview ? 'block sm:block' : 'hidden lg:block'}`}
             >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <SelfEditor onFileModified={handleFileModified} />
-          </div>
-        </div>
-      )}
+              <aside className="h-full border-l flex flex-col">
+                <div className="border-b p-2 flex items-center justify-between gap-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-primary" />
+                    <span className="font-medium">Preview</span>
+                  </div>
+                  <Button
+                    data-testid="button-close-preview"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => setShowPreview(false)}
+                    title="Close Preview"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex-1 bg-white overflow-auto">
+                  {previewContent ? (
+                    <iframe
+                      data-testid="iframe-preview"
+                      srcDoc={previewContent}
+                      className="w-full h-full border-0"
+                      sandbox="allow-scripts allow-same-origin allow-forms"
+                      title="Preview"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full p-8 text-center bg-muted/20">
+                      <div className="text-muted-foreground">
+                        <Globe className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                        <p className="text-sm">Preview will appear here</p>
+                        <p className="text-xs mt-2">Click "Run" to execute code</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </aside>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
 
-      {showWorkspace && (
-        <div className="h-96 border-t flex-shrink-0 bg-background flex flex-col">
-          <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
-            <div className="flex items-center gap-2">
-              <FolderTree className="h-4 w-4 text-blue-500" />
-              <span className="font-medium text-sm">Workspace Organizer</span>
-            </div>
-            <Button
-              data-testid="button-close-workspace"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setShowWorkspace(false)}
-              title="Close Workspace Organizer"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <WorkspaceOrganizer />
-          </div>
-        </div>
-      )}
+        {(showTerminal || showSelfEditor || showWorkspace) && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={30} minSize={15} maxSize={60}>
+              {showTerminal && (
+                <div className="h-full border-t flex-shrink-0">
+                  <Terminal onClose={() => setShowTerminal(false)} />
+                </div>
+              )}
+              {showSelfEditor && (
+                <div className="h-full border-t flex-shrink-0 bg-background flex flex-col">
+                  <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-sm">Self-Editor & Code Injection</span>
+                    </div>
+                    <Button
+                      data-testid="button-close-self-editor"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => setShowSelfEditor(false)}
+                      title="Close Self-Editor"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <SelfEditor onFileModified={handleFileModified} />
+                  </div>
+                </div>
+              )}
+              {showWorkspace && (
+                <div className="h-full border-t flex-shrink-0 bg-background flex flex-col">
+                  <div className="border-b p-2 flex items-center justify-between gap-2 bg-background">
+                    <div className="flex items-center gap-2">
+                      <FolderTree className="h-4 w-4 text-blue-500" />
+                      <span className="font-medium text-sm">Workspace Organizer</span>
+                    </div>
+                    <Button
+                      data-testid="button-close-workspace"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => setShowWorkspace(false)}
+                      title="Close Workspace Organizer"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <WorkspaceOrganizer />
+                  </div>
+                </div>
+              )}
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
 
       {/* Bottom Toolbar - Quick Actions */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card/95 backdrop-blur border rounded-full px-4 py-2 shadow-lg">
