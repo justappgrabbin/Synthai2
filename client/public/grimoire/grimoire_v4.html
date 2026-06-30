@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Grimoire — Synth AI Notebook v4.0</title>
+  <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.min.css">
+  <style>
+    :root {
+      --void: #050508; --deep: #0a0614; --surface: #0d0d16; --surface-raised: #141424;
+      --text: #f0e6ff; --text-muted: #94a3b8; --purple: #8b5cf6; --cyan: #06b6d4;
+      --emerald: #10b981; --hot: #ff4757; --gold: #f59e0b; --teal: #2dd4bf;
+      --border: rgba(139, 92, 246, 0.25); --jupyter-cell: #1e1e2e; --jupyter-border: #2d2d44;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--void); color: var(--text); height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+
+    /* HEADER */
+    header { height: 56px; background: rgba(13, 13, 22, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; flex-shrink: 0; z-index: 20; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.1)); border: 1px solid rgba(251, 191, 36, 0.3); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .brand-title { color: var(--gold); font-weight: bold; font-size: 14px; letter-spacing: 1px; }
+    .brand-sub { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .view-toggle { display: flex; background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 2px; border: 1px solid rgba(255,255,255,0.05); }
+    .view-btn { padding: 6px 12px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; border-radius: 6px; transition: all 0.2s; }
+    .view-btn:hover { color: var(--text); }
+    .view-btn.active { background: rgba(51, 65, 85, 0.8); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .action-btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px; background: rgba(139, 92, 246, 0.1); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .action-btn:hover { filter: brightness(1.2); border-color: var(--cyan); }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .action-btn.iching { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.3); color: #fb7185; }
+    .action-btn.synth { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.3); color: #818cf8; }
+    .action-btn.builder { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--emerald); }
+    .action-btn.jupyter { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: var(--gold); }
+
+    /* MAIN */
+    main { flex: 1; display: flex; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar { width: 260px; background: rgba(13, 13, 22, 0.4); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+    .sidebar-section { padding: 16px; }
+    .sidebar-section + .sidebar-section { border-top: 1px solid rgba(255,255,255,0.05); }
+    .sidebar-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 12px; }
+    .type-btn { width: 100%; text-align: left; padding: 10px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .type-btn:hover { background: rgba(30, 41, 59, 0.5); }
+    .type-btn.active-observation { background: rgba(30, 58, 138, 0.3); border-color: rgba(96, 165, 250, 0.3); }
+    .type-btn.active-hypothesis { background: rgba(88, 28, 135, 0.3); border-color: rgba(192, 132, 252, 0.3); }
+    .type-btn.active-spell { background: rgba(120, 53, 15, 0.3); border-color: rgba(251, 191, 36, 0.3); }
+    .type-btn.active-reflection { background: rgba(6, 78, 59, 0.3); border-color: rgba(52, 211, 153, 0.3); }
+    .type-btn.active-code { background: rgba(22, 78, 99, 0.3); border-color: rgba(34, 211, 238, 0.3); }
+    .type-btn.active-canvas { background: rgba(131, 24, 67, 0.3); border-color: rgba(244, 114, 182, 0.3); }
+    .type-btn.active-situation { background: rgba(19, 78, 74, 0.3); border-color: rgba(45, 212, 191, 0.3); }
+    .type-btn.active-jupyter { background: rgba(245, 158, 11, 0.3); border-color: rgba(245, 158, 11, 0.3); }
+    .type-btn.active-builder { background: rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.3); }
+    .type-icon { font-size: 16px; }
+    .type-name { font-size: 12px; font-weight: 500; }
+    .type-desc { font-size: 10px; color: var(--text-muted); }
+    .stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 8px; }
+    .stat-label { color: var(--text-muted); }
+    .stat-value { font-family: monospace; font-weight: bold; }
+    .pattern-alert { margin: 0 12px 12px; padding: 12px; background: rgba(19, 78, 74, 0.2); border: 1px solid rgba(45, 212, 191, 0.2); border-radius: 8px; }
+    .pattern-alert-title { font-size: 10px; color: var(--teal); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 4px; }
+    .pattern-alert-type { font-size: 12px; color: var(--text); margin-bottom: 4px; }
+    .pattern-alert-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+    .pattern-alert-btn { width: 100%; padding: 6px; background: rgba(45, 212, 191, 0.2); border: 1px solid rgba(45, 212, 191, 0.3); border-radius: 6px; color: var(--teal); font-size: 10px; font-weight: 600; cursor: pointer; }
+    .pattern-alert-btn:hover { background: rgba(45, 212, 191, 0.3); }
+    .profile-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .profile-avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #d97706); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: var(--void); }
+    .profile-name { font-size: 12px; font-weight: 500; }
+    .profile-detail { font-size: 10px; color: var(--text-muted); }
+
+    /* CONTENT */
+    .content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .search-bar { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .search-input-wrapper { position: relative; }
+    .search-input { width: 100%; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px 8px 32px; color: var(--text); font-size: 12px; outline: none; }
+    .search-input:focus { border-color: rgba(148, 163, 184, 0.3); }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; }
+    .scroll-area { flex: 1; overflow-y: auto; padding: 16px; }
+
+    /* ENTRY CARDS */
+    .entry-card { border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+    .entry-card:hover { border-color: rgba(255,255,255,0.15); }
+    .entry-observation { background: rgba(30, 58, 138, 0.2); border-color: rgba(96, 165, 250, 0.2); }
+    .entry-hypothesis { background: rgba(88, 28, 135, 0.2); border-color: rgba(192, 132, 252, 0.2); }
+    .entry-spell { background: rgba(120, 53, 15, 0.2); border-color: rgba(251, 191, 36, 0.2); }
+    .entry-reflection { background: rgba(6, 78, 59, 0.2); border-color: rgba(52, 211, 153, 0.2); }
+    .entry-divination { background: rgba(136, 19, 55, 0.2); border-color: rgba(251, 113, 133, 0.2); }
+    .entry-code { background: rgba(22, 78, 99, 0.2); border-color: rgba(34, 211, 238, 0.2); }
+    .entry-canvas { background: rgba(131, 24, 67, 0.2); border-color: rgba(244, 114, 182, 0.2); }
+    .entry-synthesis { background: rgba(49, 46, 129, 0.2); border-color: rgba(129, 140, 248, 0.2); }
+    .entry-world { background: rgba(67, 56, 202, 0.2); border-color: rgba(167, 139, 250, 0.2); }
+    .entry-situation { background: rgba(19, 78, 74, 0.2); border-color: rgba(45, 212, 191, 0.2); }
+    .entry-jupyter { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); }
+    .entry-builder { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); }
+    .entry-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .entry-type-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+    .entry-time { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+    .entry-content { font-size: 13px; line-height: 1.6; color: rgba(240, 230, 255, 0.85); }
+    .entry-content h2 { font-size: 16px; margin-bottom: 8px; color: var(--text); }
+    .entry-content p { margin-bottom: 8px; }
+    .entry-content ul { margin-left: 16px; margin-bottom: 8px; }
+    .entry-content li { margin-bottom: 4px; }
+    .entry-content strong { color: var(--text); }
+    .entry-content img { max-width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+    .entry-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .entry-tag { padding: 2px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 10px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .entry-tag:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .entry-links { font-size: 10px; color: rgba(129, 140, 248, 0.7); }
+    .entry-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .resonance-bar { display: flex; align-items: center; gap: 6px; }
+    .resonance-track { width: 64px; height: 4px; background: rgba(0,0,0,0.3); border-radius: 2px; overflow: hidden; }
+    .resonance-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+    .resonance-value { font-size: 10px; color: var(--text-muted); font-family: monospace; }
+    .entry-action-btn { font-size: 10px; color: var(--text-muted); background: none; border: none; cursor: pointer; }
+    .entry-action-btn:hover { color: var(--gold); }
+    .entry-delete-btn { font-size: 10px; color: rgba(255,255,255,0.2); background: none; border: none; cursor: pointer; }
+    .entry-delete-btn:hover { color: var(--hot); }
+    .echo-box { margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 2px solid rgba(251, 191, 36, 0.3); display: flex; gap: 8px; align-items: flex-start; }
+    .echo-icon { font-size: 14px; margin-top: 2px; }
+    .echo-text { font-size: 12px; color: var(--text-muted); font-style: italic; line-height: 1.5; }
+    .video-player { width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); margin-top: 12px; }
+    .snapshot-box { margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.2); }
+    .snapshot-title { font-size: 10px; color: var(--purple); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px; color: var(--text-muted); }
+    .snapshot-grid span { color: var(--text); font-family: monospace; }
+    .snapshot-btn { margin-top: 8px; padding: 6px 12px; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 6px; color: var(--purple); font-size: 10px; cursor: pointer; }
+    .snapshot-btn:hover { background: rgba(139, 92, 246, 0.2); }
+
+    /* COMPOSER */
+    .composer { background: rgba(13, 13, 22, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .composer-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .composer-type { font-size: 12px; font-weight: 500; }
+    .composer-date { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+    .composer-textarea { width: 100%; background: transparent; border: none; color: var(--text); font-size: 13px; line-height: 1.6; resize: none; outline: none; min-height: 80px; }
+    .composer-textarea::placeholder { color: rgba(148, 163, 184, 0.4); }
+    .composer-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .composer-meta { font-size: 10px; color: var(--text-muted); }
+    .composer-record { padding: 8px 20px; background: var(--text); color: var(--void); border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .composer-record:hover { background: white; }
+    .composer-record:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 64px 16px; color: var(--text-muted); }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state-title { font-size: 14px; margin-bottom: 4px; }
+    .empty-state-sub { font-size: 12px; }
+
+    /* VIEWPORT */
+    .viewport { flex: 1; position: relative; background: var(--void); }
+    .viewport canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    /* FORGE */
+    .forge-panel { position: absolute; top: 0; left: 0; right: 0; background: rgba(13, 13, 22, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 12px 16px; z-index: 10; }
+    .forge-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    .forge-row:last-child { margin-bottom: 0; }
+    .forge-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .forge-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 4px 8px; color: var(--text); font-size: 12px; outline: none; width: 100px; }
+    .forge-input:focus { border-color: var(--purple); }
+    .forge-select { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 4px 8px; color: var(--text); font-size: 12px; outline: none; }
+    .forge-range { width: 80px; }
+    .forge-btn { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+    .forge-btn-primary { background: rgba(139, 92, 246, 0.2); border-color: rgba(139, 92, 246, 0.3); color: var(--purple); }
+    .forge-btn-primary:hover { background: rgba(139, 92, 246, 0.3); }
+    .forge-btn-danger { background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.3); color: #fb7185; }
+    .forge-btn-danger:hover { background: rgba(244, 63, 94, 0.3); }
+    .forge-btn-record { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3); color: var(--emerald); }
+    .forge-btn-record:hover { background: rgba(16, 185, 129, 0.3); }
+    .forge-btn-record.recording { background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.3); color: #fb7185; animation: pulse 1.5s infinite; }
+    .forge-btn-amber { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.3); color: var(--gold); }
+    .forge-btn-amber:hover { background: rgba(245, 158, 11, 0.3); }
+    .forge-telemetry { display: flex; gap: 16px; font-size: 10px; color: var(--text-muted); }
+    .forge-telemetry span { color: var(--cyan); font-family: monospace; }
+    .narrative-log { position: absolute; bottom: 0; left: 0; right: 0; height: 120px; background: rgba(13, 13, 22, 0.9); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 12px 16px; overflow-y: auto; z-index: 10; }
+    .narrative-title { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .narrative-line { font-size: 11px; color: var(--cyan); margin-bottom: 4px; font-family: monospace; line-height: 1.5; }
+    .narrative-line:first-child { color: var(--text); }
+    .narrative-line:first-child::before { content: "▸ "; color: var(--purple); }
+    .phase-bar { display: flex; gap: 2px; margin-bottom: 4px; }
+    .phase-segment { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+    .phase-segment.active { background: var(--purple); }
+    .insight-box { position: absolute; bottom: 120px; left: 0; right: 0; background: rgba(13, 13, 22, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(245, 158, 11, 0.2); padding: 12px 16px; z-index: 10; }
+    .insight-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .insight-textarea { width: 100%; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; color: var(--text); font-size: 12px; resize: none; outline: none; min-height: 60px; }
+    .insight-textarea::placeholder { color: rgba(148, 163, 184, 0.4); }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* JUPYTER NOTEBOOK STYLE */
+    .jupyter-notebook { padding: 16px; overflow-y: auto; flex: 1; }
+    .jupyter-cell { border: 1px solid var(--jupyter-border); border-radius: 8px; margin-bottom: 12px; background: var(--jupyter-cell); overflow: hidden; }
+    .jupyter-cell-header { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--jupyter-border); }
+    .jupyter-cell-num { font-family: monospace; font-size: 11px; color: var(--text-muted); min-width: 30px; text-align: right; }
+    .jupyter-cell-type { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(245, 158, 11, 0.2); color: var(--gold); }
+    .jupyter-cell-type.markdown { background: rgba(139, 92, 246, 0.2); color: var(--purple); }
+    .jupyter-cell-actions { margin-left: auto; display: flex; gap: 4px; }
+    .jupyter-cell-btn { font-size: 10px; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background: transparent; color: var(--text-muted); cursor: pointer; }
+    .jupyter-cell-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .jupyter-cell-input { padding: 8px 12px; min-height: 40px; font-family: 'Fira Code', 'Consolas', monospace; font-size: 13px; color: var(--text); background: transparent; border: none; width: 100%; resize: vertical; outline: none; line-height: 1.6; }
+    .jupyter-cell-output { padding: 8px 12px; border-top: 1px solid var(--jupyter-border); background: rgba(0,0,0,0.15); min-height: 20px; font-family: 'Fira Code', 'Consolas', monospace; font-size: 12px; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }
+    .jupyter-cell-output.error { color: #fb7185; border-left: 2px solid #fb7185; }
+    .jupyter-cell-output.success { color: var(--emerald); }
+    .jupyter-cell-output img { max-width: 100%; border-radius: 4px; }
+    .jupyter-toolbar { display: flex; gap: 8px; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(13,13,22,0.6); }
+    .jupyter-toolbar-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.5); color: var(--text); font-size: 11px; cursor: pointer; transition: all 0.2s; }
+    .jupyter-toolbar-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .jupyter-add-cell { padding: 8px 16px; text-align: center; color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .jupyter-add-cell:hover { color: var(--gold); }
+    .jupyter-kernel-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--emerald); }
+    .jupyter-kernel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); animation: pulse 2s infinite; }
+    .jupyter-kernel-status.busy .jupyter-kernel-dot { background: var(--gold); }
+    .jupyter-kernel-status.busy { color: var(--gold); }
+    .jupyter-monaco-container { height: 120px; border: 1px solid var(--jupyter-border); }
+
+    /* WIX BUILDER */
+    .builder-canvas { flex: 1; position: relative; background: linear-gradient(45deg, #0a0a14 25%, transparent 25%), linear-gradient(-45deg, #0a0a14 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0a0a14 75%), linear-gradient(-45deg, transparent 75%, #0a0a14 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; overflow: hidden; }
+    .builder-canvas.drag-over { background-color: rgba(139, 92, 246, 0.05); }
+    .builder-sidebar { width: 240px; background: rgba(13,13,22,0.6); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+    .builder-component { padding: 12px; margin: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.3); cursor: grab; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+    .builder-component:hover { border-color: var(--purple); background: rgba(30,41,59,0.5); }
+    .builder-component:active { cursor: grabbing; }
+    .builder-component-icon { font-size: 20px; }
+    .builder-component-info { flex: 1; }
+    .builder-component-name { font-size: 12px; font-weight: 500; }
+    .builder-component-desc { font-size: 10px; color: var(--text-muted); }
+    .builder-dropped { position: absolute; cursor: move; user-select: none; border: 1px solid transparent; transition: border-color 0.2s; }
+    .builder-dropped:hover { border-color: var(--purple); }
+    .builder-dropped.selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+    .builder-dropped-content { padding: 8px; }
+    .builder-resize-handle { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; bottom: -4px; right: -4px; cursor: nwse-resize; opacity: 0; transition: opacity 0.2s; }
+    .builder-dropped:hover .builder-resize-handle, .builder-dropped.selected .builder-resize-handle { opacity: 1; }
+    .builder-delete-btn { position: absolute; top: -8px; right: -8px; width: 16px; height: 16px; border-radius: 50%; background: var(--hot); color: white; border: none; font-size: 10px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+    .builder-dropped:hover .builder-delete-btn, .builder-dropped.selected .builder-delete-btn { display: flex; }
+    .builder-properties { width: 220px; background: rgba(13,13,22,0.6); border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; }
+    .builder-prop-row { margin-bottom: 12px; }
+    .builder-prop-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .builder-prop-input { width: 100%; background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 8px; color: var(--text); font-size: 12px; outline: none; }
+    .builder-prop-input:focus { border-color: var(--purple); }
+    .builder-prop-color { width: 100%; height: 32px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; background: transparent; }
+    .builder-prop-select { width: 100%; background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 8px; color: var(--text); font-size: 12px; outline: none; }
+    .builder-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; pointer-events: none; }
+    .builder-toolbar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(13,13,22,0.9); border: 1px solid var(--border); border-radius: 8px; padding: 6px; z-index: 10; }
+    .builder-toolbar-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: var(--text-muted); font-size: 11px; cursor: pointer; transition: all 0.2s; }
+    .builder-toolbar-btn:hover { color: var(--text); background: rgba(30,41,59,0.5); }
+    .builder-toolbar-btn.active { color: var(--gold); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.1); }
+
+    /* MONACO EDITOR INTEGRATION */
+    .monaco-wrapper { border: 1px solid var(--jupyter-border); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+    .monaco-toolbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--jupyter-border); }
+    .monaco-lang-select { background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 2px 8px; color: var(--text); font-size: 11px; outline: none; }
+    .monaco-run-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.1); color: var(--emerald); font-size: 11px; cursor: pointer; }
+    .monaco-run-btn:hover { background: rgba(16,185,129,0.2); }
+    .monaco-container { height: 200px; }
+    .monaco-output { padding: 8px 12px; background: rgba(0,0,0,0.15); border-top: 1px solid var(--jupyter-border); font-family: 'Fira Code', monospace; font-size: 12px; color: var(--text-muted); min-height: 30px; white-space: pre-wrap; }
+    .monaco-output.error { color: #fb7185; }
+    .monaco-output.success { color: var(--emerald); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📖</div>
+      <div>
+        <div class="brand-title">THE GRIMOIRE</div>
+        <div class="brand-sub">Synth AI Notebook v4.0</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="feed" onclick="switchView('feed')">📜</button>
+        <button class="view-btn" data-view="graph" onclick="switchView('graph')">🕸</button>
+        <button class="view-btn" data-view="canvas" onclick="switchView('canvas')">🎨</button>
+        <button class="view-btn" data-view="jupyter" onclick="switchView('jupyter')">📓</button>
+        <button class="view-btn" data-view="builder" onclick="switchView('builder')">🏗️</button>
+        <button class="view-btn" data-view="forge" onclick="switchView('forge')">🎭</button>
+      </div>
+      <button class="action-btn jupyter" onclick="switchView('jupyter')" id="jupyterBtn">📓 Jupyter</button>
+      <button class="action-btn builder" onclick="switchView('builder')" id="builderBtn">🏗️ Builder</button>
+      <button class="action-btn iching" onclick="castIChing()" id="ichingBtn">☯ Cast I Ching</button>
+      <button class="action-btn synth" onclick="synthesize()" id="synthBtn">🔀 Synthesize</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Entry Type</div>
+        <button class="type-btn active-observation" data-type="observation" onclick="setEntryType('observation')">
+          <span class="type-icon">👁</span>
+          <div><div class="type-name">Observation</div><div class="type-desc">Record what you see</div></div>
+        </button>
+        <button class="type-btn" data-type="hypothesis" onclick="setEntryType('hypothesis')">
+          <span class="type-icon">🔮</span>
+          <div><div class="type-name">Hypothesis</div><div class="type-desc">Propose an idea</div></div>
+        </button>
+        <button class="type-btn" data-type="spell" onclick="setEntryType('spell')">
+          <span class="type-icon">✨</span>
+          <div><div class="type-name">Spell</div><div class="type-desc">Command or invocation</div></div>
+        </button>
+        <button class="type-btn" data-type="reflection" onclick="setEntryType('reflection')">
+          <span class="type-icon">💭</span>
+          <div><div class="type-name">Reflection</div><div class="type-desc">Contemplate and learn</div></div>
+        </button>
+        <button class="type-btn" data-type="code" onclick="setEntryType('code')">
+          <span class="type-icon">⚡</span>
+          <div><div class="type-name">Code</div><div class="type-desc">Write and execute</div></div>
+        </button>
+        <button class="type-btn" data-type="canvas" onclick="setEntryType('canvas')">
+          <span class="type-icon">🎨</span>
+          <div><div class="type-name">Canvas</div><div class="type-desc">Draw and create</div></div>
+        </button>
+        <button class="type-btn" data-type="jupyter" onclick="switchView('jupyter')">
+          <span class="type-icon">📓</span>
+          <div><div class="type-name">Jupyter Notebook</div><div class="type-desc">Interactive code cells</div></div>
+        </button>
+        <button class="type-btn" data-type="builder" onclick="switchView('builder')">
+          <span class="type-icon">🏗️</span>
+          <div><div class="type-name">Visual Builder</div><div class="type-desc">Drag & drop components</div></div>
+        </button>
+        <button class="type-btn" data-type="situation" onclick="switchView('forge')">
+          <span class="type-icon">🎭</span>
+          <div><div class="type-name">Situation Simulator</div><div class="type-desc">See your patterns played out</div></div>
+        </button>
+      </div>
+
+      <div id="patternAlert"></div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Resonance Stats</div>
+        <div class="stat-row"><span class="stat-label">Total Entries</span><span class="stat-value" id="statTotal" style="color:var(--text)">0</span></div>
+        <div class="stat-row"><span class="stat-label">Divinations</span><span class="stat-value" style="color:#fb7185">0</span></div>
+        <div class="stat-row"><span class="stat-label">Simulations</span><span class="stat-value" style="color:var(--teal)">0</span></div>
+        <div class="stat-row"><span class="stat-label">Keystones</span><span class="stat-value" style="color:var(--gold)">0</span></div>
+        <div class="stat-row"><span class="stat-label">Avg Resonance</span><span class="stat-value" style="color:var(--emerald)">0%</span></div>
+        <div class="stat-row"><span class="stat-label">Connections</span><span class="stat-value" style="color:#818cf8">0</span></div>
+      </div>
+
+      <div class="sidebar-section" style="margin-top:auto;">
+        <div class="profile-row">
+          <div class="profile-avatar">M</div>
+          <div class="profile-name">Manifestor</div>
+        </div>
+        <div class="profile-detail">Authority: Emotional</div>
+        <div class="profile-detail">Strategy: Inform</div>
+      </div>
+    </aside>
+
+    <div class="content" id="contentArea">
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search your grimoire..." oninput="filterEntries()">
+        </div>
+      </div>
+      <div class="scroll-area" id="scrollArea"></div>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js"></script>
+  <script>
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  THE GRIMOIRE 4.0 — Pure JavaScript Engine
+//  Features: Feed, Graph, Canvas, Jupyter, Builder, Forge, Monaco Editor
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let entries = JSON.parse(localStorage.getItem('grimoire_entries') || '[]');
+let currentType = 'observation';
+let currentView = 'feed';
+let canvasData = null;
+let isTyping = false;
+let detectedPattern = null;
+let simEngine = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+
+// ─── JUPYTER NOTEBOOK STATE ──────────────────────────────────────────────────
+let jupyterCells = JSON.parse(localStorage.getItem('grimoire_jupyter') || '[]');
+let jupyterCellId = parseInt(localStorage.getItem('grimoire_jupyter_cell_id') || '0');
+let monacoEditors = {};
+let monacoReady = false;
+
+// ─── BUILDER STATE ───────────────────────────────────────────────────────────
+let builderComponents = JSON.parse(localStorage.getItem('grimoire_builder') || '[]');
+let selectedBuilderComponent = null;
+let isDraggingBuilder = false;
+let builderDragOffset = { x: 0, y: 0 };
+let isResizingBuilder = false;
+let builderResizeStart = { x: 0, y: 0, w: 0, h: 0 };
+
+// ─── MONACO EDITOR SETUP ───────────────────────────────────────────────────
+function initMonaco(callback) {
+  if (monacoReady) { callback(); return; }
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/' }});
+  window.MonacoEnvironment = {
+    getWorkerUrl: function(workerId, label) {
+      return `data:text/javascript;charset=utf-8,${encodeURIComponent(`
+        self.MonacoEnvironment = { baseUrl: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/" };
+        importScripts("https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/base/worker/workerMain.min.js");
+      `)}`;
+    }
+  };
+  require(["vs/editor/editor.main"], function() {
+    monacoReady = true;
+    if (callback) callback();
+  });
+}
+
+// ─── HEXAGRAM SCENARIO DATA ─────────────────────────────────────────────────
+const HEXAGRAM_SCENARIOS = {
+  1: {
+    name: "Ch'ien / The Creative",
+    meaning: "The Creative works sublime success, furthering through perseverance.",
+    setting: "A vast open field at dawn. The sun is rising but something blocks its path.",
+    metaphor: "You are the sun. The obstacle is your own hesitation. The field is your potential.",
+    characters: [
+      { archetype: 'sun', role: "The Protagonist (you)", behavior: "Rises slowly, brightens when moving, dims when stopped" },
+      { archetype: 'mountain', role: "The Block", behavior: "Casts shadow. Shrinks when approached with steady light. Grows when avoided" },
+      { archetype: 'wind', role: "The Catalyst", behavior: "Appears when you move. Pushes you forward. Dies when you stop" },
+    ],
+    revelation: "The mountain only looks immovable because you're standing still. Walk toward it and it becomes a hill.",
+    interaction: "Click the mountain to approach it. Hold to push through. The sun brightens with each step.",
+  },
+  2: {
+    name: "K'un / The Receptive",
+    meaning: "The Receptive brings sublime success. Yield to receive.",
+    setting: "A valley during rain. Water pools where the ground is lowest.",
+    metaphor: "You are the valley. The rain is opportunity. Your depth determines what you can hold.",
+    characters: [
+      { archetype: 'river', role: "The Flow (opportunity)", behavior: "Follows the lowest path. Avoids high ground. Finds you when you lower your walls" },
+      { archetype: 'tree', role: "The Rigid One", behavior: "Stands tall, catches rain but cannot store it. Eventually cracks" },
+      { archetype: 'mirror', role: "The Reflection", behavior: "Shows you what you receive. Distorts when you resist. Clarifies when you yield" },
+    ],
+    revelation: "The tree that won't bend breaks. The valley that receives becomes a lake. Your stubbornness is your drought.",
+    interaction: "Lower your ground to receive the river. Raise it and the water flows past you. Watch the tree crack.",
+  },
+  6: {
+    name: "Sung / Conflict",
+    meaning: "Conflict. Choose battles wisely.",
+    setting: "Two ducks on a pond. One bread crumb. Both hungry.",
+    metaphor: "You and Joe are the ducks. The bread is the issue. The pond is your shared life.",
+    characters: [
+      { archetype: 'duck', role: "You", behavior: "Paddles toward bread. Gets aggressive when blocked. Doesn't see the second crumb" },
+      { archetype: 'duck', role: "Joe", behavior: "Mirrors you. Same hunger. Same blindness. Same desperation" },
+      { archetype: 'mirror', role: "The Observer", behavior: "Shows you both ducks from above. Reveals the second crumb neither sees" },
+    ],
+    revelation: "There are two crumbs. You're fighting over one. The pond is big enough. Your hunger makes you blind.",
+    interaction: "Click to chase the bread. The other duck chases too. Click the mirror to see from above. Spot the second crumb.",
+  },
+  11: {
+    name: "T'ai / Peace",
+    meaning: "Heaven and earth unite. The moment of harmony.",
+    setting: "A bridge between two cliffs. One side is sun, one is shadow. They meet in the middle.",
+    metaphor: "Your inner conflict (sun vs shadow) becomes your strength when they connect.",
+    characters: [
+      { archetype: 'sun', role: "Your Ambition", behavior: "Bright, demanding, burns what it touches. Needs the shadow to rest" },
+      { archetype: 'mountain', role: "Your Shadow", behavior: "Solid, dark, immovable. Needs the sun to be seen. Defines the valley" },
+      { archetype: 'bridge', role: "The Integration", behavior: "Appears when both sides are acknowledged. Carries you across" },
+    ],
+    revelation: "You've been trying to kill your shadow. But the shadow is what makes the sun visible. The bridge is self-acceptance.",
+    interaction: "Acknowledge the shadow — it stops growing. Let the sun rest — it stops burning. The bridge appears.",
+  },
+  24: {
+    name: "Fu / Return",
+    meaning: "The turning point. What was lost returns. The cycle completes.",
+    setting: "A spiral path. You've walked it before. This time you notice the flowers.",
+    metaphor: "You're in a loop. But loops aren't traps — they're spirals. You're higher each time.",
+    characters: [
+      { archetype: 'mirror', role: "The Loop", behavior: "Shows you the same path. But each reflection adds detail you missed before" },
+      { archetype: 'sun', role: "The Elevation", behavior: "Rises with each cycle. What was dark is now lit. You see what you couldn't see" },
+      { archetype: 'door', role: "The Exit", behavior: "Was invisible before. Appears when you stop running and start walking" },
+    ],
+    revelation: "You think you're stuck in the same fight. But you're not — you're on a spiral. The fight looks the same, but you're different. The door was always there.",
+    interaction: "Run the loop — stays the same. Walk slowly — notice flowers. Stop — the door appears.",
+  },
+  29: {
+    name: "K'an / The Abysmal",
+    meaning: "The abyss. Do not fear the depths. Learn to swim in darkness.",
+    setting: "Deep water. You can't see the bottom. Something glows below.",
+    metaphor: "Your fear is the water. The glow is what you need. The surface is your comfort zone.",
+    characters: [
+      { archetype: 'river', role: "The Depth", behavior: "Dark, cold, unknown. But buoyant. Holds you up if you stop thrashing" },
+      { archetype: 'sun', role: "The Surface", behavior: "Warm, familiar, distant. Calls you back. But the glow is below" },
+      { archetype: 'mirror', role: "The Glow", behavior: "Your truth. Faint. Requires depth to see. Disappears when you look directly" },
+    ],
+    revelation: "You keep swimming back to the surface. But the glow — your answer — is below. Stop thrashing. Let the water hold you. Look sideways.",
+    interaction: "Swim up — warmth, no answers. Dive down — cold, find the glow. Stop moving — the glow finds you.",
+  },
+  36: {
+    name: "Ming I / Darkening of the Light",
+    meaning: "Protect your light in dark times. Concealment is strategy.",
+    setting: "A lantern in a storm. The wind wants to extinguish it. You must shield it.",
+    metaphor: "Your energy is the flame. The storm is the situation. Your hand is your boundary.",
+    characters: [
+      { archetype: 'sun', role: "Your Flame", behavior: "Flickers. Needs protection. Dies if exposed. Burns if contained too tightly" },
+      { archetype: 'wind', role: "The Storm", behavior: "Blows unpredictably. Tests your grip. Not evil — just force without direction" },
+      { archetype: 'mountain', role: "Your Hand (boundary)", behavior: "Shields the flame. But blocks light too. Must move, not stay" },
+    ],
+    revelation: "You're either burning yourself out or hiding your light entirely. The hand must move — shield when the wind blows, lower when it passes. Rhythm, not rigidity.",
+    interaction: "Hold the shield up — flame survives but room stays dark. Lower it — flame brightens but flickers. Find the rhythm.",
+  },
+  39: {
+    name: "Chien / Obstruction",
+    meaning: "The obstacle is the path. Climb.",
+    setting: "A mountain path. A boulder blocks the way. A stream goes around it.",
+    metaphor: "Your obstacle is the boulder. Your strategy is the stream. Your goal is the summit.",
+    characters: [
+      { archetype: 'mountain', role: "The Boulder", behavior: "Immovable. But climbable. Has handholds you can't see from below" },
+      { archetype: 'river', role: "The Stream (alternative)", behavior: "Flows around. Takes longer. But reaches the same place. No shame in the long way" },
+      { archetype: 'tree', role: "The Ladder", behavior: "Grows on the boulder. Each branch is a step. Created by those who climbed before" },
+    ],
+    revelation: "You're trying to push the boulder or waiting for it to move. But it's a ladder. Someone else climbed it. The stream is also valid. Your insistence on one path is the real obstacle.",
+    interaction: "Push the boulder — nothing. Climb it — progress. Follow the stream — slower but sure. The tree grows as you climb.",
+  },
+  44: {
+    name: "Kou / Coming to Meet",
+    meaning: "An unexpected encounter. Be alert to what arrives unbidden.",
+    setting: "A crossroads at dusk. A figure approaches. You can't tell if it's friend or shadow.",
+    metaphor: "The encounter is your pattern repeating. The figure is your unrecognized self. The dusk is your uncertainty.",
+    characters: [
+      { archetype: 'mirror', role: "The Figure", behavior: "Moves like you. Speaks your words back to you. Is you, but you don't recognize it" },
+      { archetype: 'wind', role: "The Dusk", behavior: "Obscures details. Makes familiar strange. Required for the encounter to happen" },
+      { archetype: 'door', role: "The Recognition", behavior: "Opens when you name the figure. Stays closed while you fear it" },
+    ],
+    revelation: "The person who triggers you IS you. The figure at the crossroads is your shadow wearing their face. Name it and the door opens.",
+    interaction: "Run from the figure — it follows. Fight it — it mirrors you. Name it — the door opens. Walk through.",
+  },
+  47: {
+    name: "K'un / Oppression",
+    meaning: "Find the source of the blockage. The swamp runs dry.",
+    setting: "A well with a lid. Water below. Thirst above. The lid is rusted shut.",
+    metaphor: "Your need is the thirst. Your resource is the water. Your belief is the rusted lid.",
+    characters: [
+      { archetype: 'river', role: "The Water (your resource)", behavior: "Always there. Pure. But unreachable while the lid stays" },
+      { archetype: 'mountain', role: "The Lid (your belief)", behavior: "Looks solid. Is rusted. Would open with a push. But you assume it's locked" },
+      { archetype: 'sun', role: "The Thirst", behavior: "Grows. Distracts. Makes you desperate. But also motivates the push" },
+    ],
+    revelation: "You've been dying of thirst next to a well because you assume the lid is locked. It's rusted. One push. Your belief in your own helplessness is the only lock.",
+    interaction: "Stare at the lid — thirst grows. Push the lid — it opens. Drink. The water was always there.",
+  },
+  49: {
+    name: "Ko / Revolution",
+    meaning: "The old must burn for the new to rise. Transformation, not destruction.",
+    setting: "A forest fire. The old trees burn. The seeds in the cones need the heat to open.",
+    metaphor: "Your crisis is the fire. Your old self is the trees. Your new self is the seeds.",
+    characters: [
+      { archetype: 'fire', role: "The Crisis", behavior: "Consumes what is dry. Spares what is green. Necessary for renewal" },
+      { archetype: 'tree', role: "The Old Self", behavior: "Resists. Burns. But holds the seeds that will replace it" },
+      { archetype: 'wind', role: "The Spread", behavior: "Carries the fire. Also carries the seeds. Can't have one without the other" },
+    ],
+    revelation: "You're trying to save the old trees. But they hold your seeds. The fire doesn't destroy you — it releases you. Stop fighting the burn.",
+    interaction: "Fight the fire — exhaustion. Let it burn — the trees fall, seeds scatter. The wind plants your future.",
+  },
+  52: {
+    name: "Ken / Keeping Still",
+    meaning: "True stillness is not paralysis; it is perfect poise.",
+    setting: "A mountain lake. Perfect reflection. A stone is thrown. Ripples distort everything.",
+    metaphor: "Your mind is the lake. The stone is your reaction. The reflection is your clarity.",
+    characters: [
+      { archetype: 'mirror', role: "The Lake", behavior: "Reflects perfectly when still. Distorts when rippled. Returns to stillness if left alone" },
+      { archetype: 'mountain', role: "The Stone (your reaction)", behavior: "Small but disruptive. Creates waves that outlast the splash. You threw it" },
+      { archetype: 'sun', role: "The Reflection", behavior: "Your truth. Visible only in still water. Distorted by your ripples. Not the water's fault" },
+    ],
+    revelation: "You keep throwing stones in your own lake and wondering why you can't see clearly. The stillness is your power. The stone is your habit.",
+    interaction: "Throw a stone — ripples. Wait — they fade. The reflection returns. Throw fewer stones. See more clearly.",
+  },
+  64: {
+    name: "Wei Chi / Before Completion",
+    meaning: "The journey is the destination. Keep moving. The fox almost crosses.",
+    setting: "A river at dusk. Stepping stones. Some are submerged. The far bank is close but not reached.",
+    metaphor: "Your goal is the far bank. Your progress is the stones. Your impatience is the wet tail.",
+    characters: [
+      { archetype: 'river', role: "The Journey", behavior: "Flows beneath. Doesn't care if you cross. But will carry you if you fall" },
+      { archetype: 'bridge', role: "The Stones", behavior: "Some visible, some hidden. Each step reveals the next. Trust the process" },
+      { archetype: 'duck', role: "The Fox (you)", behavior: "Eager. Almost there. Risks the last step. Gets tail wet. Must shake and continue" },
+    ],
+    revelation: "You're one stone from the bank. But you can't see it because you're looking at your wet tail. The wet tail is proof you tried. Shake it off. Step again.",
+    interaction: "Rush the last stone — tail gets wet. Stop — dusk falls. Shake the tail, step carefully, reach the bank.",
+  },
+};
+
+function getScenario(n) {
+  return HEXAGRAM_SCENARIOS[n] || {
+    name: "The Unknown Path", meaning: "The situation is unclear.",
+    setting: "A foggy crossroads. Signs point in all directions.",
+    metaphor: "You are the traveler. The fog is your uncertainty.",
+    characters: [
+      { archetype: 'mirror', role: "The Fog", behavior: "Obscures. But equalizes. Lifts when you choose" },
+      { archetype: 'wind', role: "The Whisper", behavior: "Hints at direction. Fades when chased" },
+      { archetype: 'door', role: "The Choice", behavior: "Appears after you commit. Opens inward" },
+    ],
+    revelation: "Any path is better than standing still. The fog lifts for the walker.",
+    interaction: "Stand still — fog thickens. Choose a path — fog lifts.",
+  };
+}
+
+// ─── PATTERN DETECTION ───────────────────────────────────────────────────────
+function detectPattern() {
+  const recent = entries.slice(0, 10);
+  const allText = recent.map(e => e.content.toLowerCase()).join(' ');
+  const entities = [];
+  const nameMatches = allText.match(/\b[A-Z][a-z]+\b/g);
+  if (nameMatches) entities.push(...nameMatches.slice(0, 3));
+  const conflictWords = ['fight','argue','conflict','disagree','tension','angry','mad','frustrated','annoyed','but','however','against'];
+  const avoidanceWords = ['avoid','ignore','procrastinate','delay','later','maybe','not now','can\'t','won\'t'];
+  const repetitionWords = ['again','always','never','same','repeat','loop','cycle','every time','keeps','still'];
+  const blockedWords = ['stuck','blocked','can\'t move','dead end','no way','impossible','trapped'];
+  const powerWords = ['control','dominate','submit','power','authority','boss','forced','have to'];
+  const miscommWords = ['misunderstand','didn\'t mean','took it wrong','communication','heard','said'];
+  const counts = {
+    conflict: conflictWords.reduce((a, w) => a + (allText.includes(w) ? 1 : 0), 0),
+    avoidance: avoidanceWords.reduce((a, w) => a + (allText.includes(w) ? 1 : 0), 0),
+    repetition: repetitionWords.reduce((a, w) => a + (allText.includes(w) ? 1 : 0), 0),
+    blocked: blockedWords.reduce((a, w) => a + (allText.includes(w) ? 1 : 0), 0),
+    power: powerWords.reduce((a, w) => a + (allText.includes(w) ? 1 : 0), 0),
+    miscomm: miscommWords.reduce((a, w) => a + (allText.includes(w) ? 1 : 0), 0),
+  };
+  const maxType = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const map = {
+    conflict: { type: 'conflict_loop', hexagram: 6, metaphor: "Two ducks, one crumb" },
+    avoidance: { type: 'avoidance', hexagram: 5, metaphor: "The boat that won't sail" },
+    repetition: { type: 'repetition', hexagram: 24, metaphor: "The spiral you think is a circle" },
+    blocked: { type: 'breakthrough_blocked', hexagram: 39, metaphor: "The boulder you think is a wall" },
+    power: { type: 'power_imbalance', hexagram: 11, metaphor: "Sun and shadow refusing to meet" },
+    miscomm: { type: 'miscommunication', hexagram: 38, metaphor: "The mirror that shows different faces" },
+  };
+  const detected = map[maxType[0]] || { type: 'unknown', hexagram: 1, metaphor: "The path hidden in plain sight" };
+  let triggerPhrase = "Your recent entries suggest a pattern.";
+  const sentences = allText.split(/[.!?]/).filter(s => s.length > 10);
+  for (const s of sentences) {
+    if (maxType[0] === 'conflict' && conflictWords.some(w => s.includes(w))) { triggerPhrase = s.trim(); break; }
+    if (maxType[0] === 'repetition' && repetitionWords.some(w => s.includes(w))) { triggerPhrase = s.trim(); break; }
+    if (maxType[0] === 'avoidance' && avoidanceWords.some(w => s.includes(w))) { triggerPhrase = s.trim(); break; }
+  }
+  return {
+    type: detected.type,
+    confidence: Math.min(0.95, 0.3 + maxType[1] * 0.15),
+    entities: entities.length > 0 ? entities : ['you', 'the other'],
+    triggerPhrase,
+    suggestedHexagram: detected.hexagram,
+    metaphor: detected.metaphor,
+  };
+}
+
+// ─── ECHO GENERATOR ──────────────────────────────────────────────────────────
+const ECHOES = {
+  observation: [
+    "I see what you are seeing. This pattern connects to your prior threads. Have you considered the inverse?",
+    "Noted. The resonance here is strong. This observation feels like a seed. What would it grow into?",
+    "Your eye is sharp today. This reminds me of something you wrote earlier... the thread is there if you pull it.",
+  ],
+  hypothesis: [
+    "Bold. This hypothesis challenges your previous assumptions. The tension between them is productive.",
+    "Interesting proposition. If true, it implies a cascade. Worth testing?",
+    "Your hypothesis has a strong resonance with your current trajectory. It aligns with your deeper pattern.",
+  ],
+  spell: [
+    "The invocation is strong. I feel the intent. But spells need grounding — what is the first step after the words?",
+    "Your command carries weight. Be careful what you summon. The resonance is high — the threshold is met.",
+    "This spell reads like a contract with yourself. The universe accepts, but the terms are binding.",
+  ],
+  reflection: [
+    "This reflection has depth. You are circling something important. The pattern in your last entries suggests convergence.",
+    "You look back with clarity. What would your past self say to you now? The dialogue might surprise you.",
+    "Reflection is the compost of wisdom. This entry is rich soil. What will you plant in it?",
+  ],
+  divination: [
+    "The oracle speaks, and you listen well. This reading arrives at a crossroads — your recent entries confirm it.",
+    "The hexagram mirrors your current state with uncanny precision. The changing lines point to the path.",
+    "Divination is not prediction; it is conversation. The I Ching is responding to your accumulated resonance.",
+  ],
+  situation: [
+    "You watched your pattern play out. The ducks were you. The mountain was your fear. The mirror showed what you couldn't see alone.",
+    "The simulation is a mirror held at a distance. Close enough to recognize, far enough to be objective.",
+    "This situation will repeat until the insight lands. The video is a bookmark in your pattern.",
+  ],
+  synthesis: [
+    "This synthesis pulls threads from multiple entries. The weave is strong. The pattern is becoming visible.",
+    "You have connected the dots across time. This is the grimoire's true power — not storage, but revelation.",
+    "The synthesis resonates at a higher frequency than its parts. This is emergence. This is alive.",
+  ],
+  world: [
+    "A world has been born from your seed. It carries your frequency. Watch it evolve.",
+    "The lattice walker traverses 69,120 nodes. The video is the artifact; the snapshot is the truth.",
+  ],
+  jupyter: [
+    "Your code cell executed. The output is a new truth. Each run is a ritual — the result is your oracle.",
+    "The notebook grows. Each cell is a spell. The kernel is your familiar. The output is the prophecy.",
+  ],
+  builder: [
+    "You are building something visible. The canvas is your mind made manifest. Each component is a belief placed in space.",
+    "The visual builder reveals what words cannot. Your layout is your logic. Your spacing is your silence.",
+  ],
+};
+
+function generateEcho(entry, allEntries) {
+  const echoes = ECHOES[entry.type] || ECHOES.observation;
+  let echo = echoes[Math.floor(Math.random() * echoes.length)];
+  if (entry.resonance > 0.8) echo += " This entry carries exceptional resonance. It may be a keystone.";
+  const linked = allEntries.filter(e => e.id !== entry.id && e.tags.some(t => entry.tags.includes(t)));
+  if (linked.length > 0) echo += ` It connects to ${linked.length} other entries.`;
+  return echo;
+}
+
+// ─── TAG EXTRACTION ──────────────────────────────────────────────────────────
+function extractTags(content) {
+  const hashtags = content.match(/#\w+/g) || [];
+  const words = content.toLowerCase().split(/\s+/);
+  const themes = ['code','idea','dream','plan','bug','fix','design','build','learn','create','destroy','grow','flow','block','break','connect','merge','world','seed','matrix','situation','pattern','loop','conflict','insight','jupyter','notebook','builder','component'];
+  const found = words.filter(w => themes.includes(w.replace(/[^a-z]/g, '')));
+  return [...new Set([...hashtags.map(h => h.slice(1)), ...found])].slice(0, 5);
+}
+
+// ─── TYPE STYLES ─────────────────────────────────────────────────────────────
+const TYPE_STYLES = {
+  observation: { icon: '👁', label: 'Observation', color: '#60a5fa', bg: 'entry-observation' },
+  hypothesis: { icon: '🔮', label: 'Hypothesis', color: '#c084fc', bg: 'entry-hypothesis' },
+  spell: { icon: '✨', label: 'Spell', color: '#fbbf24', bg: 'entry-spell' },
+  reflection: { icon: '💭', label: 'Reflection', color: '#34d399', bg: 'entry-reflection' },
+  divination: { icon: '☯', label: 'Divination', color: '#fb7185', bg: 'entry-divination' },
+  code: { icon: '⚡', label: 'Code', color: '#22d3ee', bg: 'entry-code' },
+  canvas: { icon: '🎨', label: 'Canvas', color: '#f472b6', bg: 'entry-canvas' },
+  synthesis: { icon: '🔀', label: 'Synthesis', color: '#818cf8', bg: 'entry-synthesis' },
+  world: { icon: '🌌', label: 'World', color: '#a78bfa', bg: 'entry-world' },
+  situation: { icon: '🎭', label: 'Situation', color: '#2dd4bf', bg: 'entry-situation' },
+  jupyter: { icon: '📓', label: 'Jupyter', color: '#f59e0b', bg: 'entry-jupyter' },
+  builder: { icon: '🏗️', label: 'Builder', color: '#10b981', bg: 'entry-builder' },
+};
+
+// ─── MARKDOWN RENDERER ───────────────────────────────────────────────────────
+function renderMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/## (.*)/g, '<h2>$1</h2>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/- (.*)/g, '<li>$1</li>')
+    .replace(/\n/g, '<p>')
+    .replace(/<p><h2>/g, '<h2>')
+    .replace(/<\/h2><p>/g, '</h2>')
+    .replace(/<p><li>/g, '<ul><li>')
+    .replace(/<\/li><p>/g, '</li></ul>')
+    .replace(/<p><p>/g, '<p>')
+    .replace(/<\/p><\/p>/g, '</p>');
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────────────────────────
+function saveEntries() {
+  localStorage.setItem('grimoire_entries', JSON.stringify(entries));
+  updateStats();
+  checkPattern();
+}
+
+function saveJupyter() {
+  localStorage.setItem('grimoire_jupyter', JSON.stringify(jupyterCells));
+  localStorage.setItem('grimoire_jupyter_cell_id', String(jupyterCellId));
+}
+
+function saveBuilder() {
+  localStorage.setItem('grimoire_builder', JSON.stringify(builderComponents));
+}
+
+// ─── ADD ENTRY ─────────────────────────────────────────────────────────────────
+function addEntry(content, type, metadata) {
+  const tags = extractTags(content);
+  const resonance = Math.min(0.95, 0.3 + Math.random() * 0.5 + (tags.length * 0.05));
+  const entry = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+    timestamp: new Date().toISOString(),
+    type,
+    content,
+    echo: generateEcho({ type, content, tags, resonance }, entries),
+    tags,
+    resonance,
+    links: [],
+    metadata: metadata || null,
+  };
+  const linked = entries.filter(e => e.id !== entry.id && e.tags.some(t => tags.includes(t)));
+  entry.links = linked.slice(0, 3).map(e => e.id);
+  entries.unshift(entry);
+  saveEntries();
+  renderFeed();
+}
+
+// ─── I CHING ─────────────────────────────────────────────────────────────────
+function castIChing() {
+  document.getElementById('ichingBtn').disabled = true;
+  document.getElementById('ichingBtn').innerHTML = '☯ Casting...';
+  setTimeout(() => {
+    const lines = Array.from({ length: 6 }, () => {
+      const total = [2,2,2,3,3,3,3,3,3][Math.floor(Math.random() * 9)];
+      if (total === 6) return { value: 6, type: "old_yin", changing: true, symbol: "---x---" };
+      if (total === 7) return { value: 7, type: "young_yang", changing: false, symbol: "---------" };
+      if (total === 8) return { value: 8, type: "young_yin", changing: false, symbol: "--- ---" };
+      return { value: 9, type: "old_yang", changing: true, symbol: "----o----" };
+    });
+    const primary_binary = lines.map(l => String(l.value % 2)).reverse().join('');
+    const primary_number = parseInt(primary_binary, 2) + 1;
+    const scenario = getScenario(primary_number);
+    const content = `## I Ching Reading\n\n**Primary Hexagram:** ${scenario.name} (${primary_number})\n\n**Meaning:** ${scenario.meaning}\n\n**Lines:**\n${lines.map(l => `- ${l.symbol} (${l.type})`).join('\n')}\n\n**Changing Lines:** ${lines.filter(l => l.changing).map((l, i) => i + 1).join(', ') || 'None'}\n\n---\n\n*The oracle speaks to where you are, not where you think you should be.*`;
+    addEntry(content, 'divination');
+    document.getElementById('ichingBtn').disabled = false;
+    document.getElementById('ichingBtn').innerHTML = '☯ Cast I Ching';
+  }, 800);
+}
+
+// ─── SYNTHESIZE ──────────────────────────────────────────────────────────────
+function synthesize() {
+  if (entries.length < 3) return;
+  const recent = entries.slice(0, 7);
+  const allTags = [...new Set(recent.flatMap(e => e.tags))];
+  const avgRes = recent.reduce((a, b) => a + b.resonance, 0) / recent.length;
+  const pattern = detectPattern();
+  const content = `## Synthesis: ${new Date().toLocaleDateString()}\n\n**Entries Analyzed:** ${recent.length}\n**Themes:** ${allTags.slice(0, 5).join(', ')}\n**Average Resonance:** ${(avgRes * 100).toFixed(0)}%\n\n**Detected Pattern:** ${pattern.type.replace('_', ' ')} (${(pattern.confidence * 100).toFixed(0)}% confidence)\n\n**Key Insights:**\n- ${recent.filter(e => e.resonance > 0.7).length} entries carry high resonance\n- ${recent.filter(e => e.type === 'hypothesis').length} hypotheses await testing\n- ${recent.filter(e => e.type === 'situation').length} situation simulations run\n\n**The Grimoire Suggests:** ${pattern.metaphor}\n\n---\n\n*This synthesis is a living document. It evolves as you do.*`;
+  addEntry(content, 'synthesis');
+}
+
+// ─── RENDER FEED ───────────────────────────────────────────────────────────
+function renderFeed() {
+  const container = document.getElementById('scrollArea');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = entries;
+  if (search) {
+    filtered = entries.filter(e => 
+      e.content.toLowerCase().includes(search) ||
+      e.tags.some(t => t.includes(search)) ||
+      e.type.includes(search)
+    );
+  }
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📖</div>
+        <div class="empty-state-title">Your grimoire is empty.</div>
+        <div class="empty-state-sub">Begin recording observations, hypotheses, spells, and dreams.</div>
+        <div class="empty-state-sub">Write a few entries and the 🎭 Situation Simulator will detect patterns.</div>
+      </div>`;
+    return;
+  }
+  let html = `
+    <div class="composer">
+      <div class="composer-header">
+        <span style="font-size:16px">${TYPE_STYLES[currentType].icon}</span>
+        <span class="composer-type" style="color:${TYPE_STYLES[currentType].color}">${TYPE_STYLES[currentType].label}</span>
+        <span class="composer-date">${new Date().toLocaleDateString()}</span>
+      </div>
+      <textarea class="composer-textarea" id="composerText" placeholder="Enter your ${currentType}... (Markdown supported, #hashtags auto-tagged)" rows="3"></textarea>
+      ${canvasData ? `<div style="margin-top:8px"><img src="${canvasData}" style="max-height:128px;border-radius:8px;border:1px solid rgba(255,255,255,0.1)"></div>` : ''}
+      <div class="composer-footer">
+        <span class="composer-meta"><span id="typingDot"></span> <span id="charCount">0 chars</span></span>
+        <button class="composer-record" onclick="submitEntry()">Record Entry</button>
+      </div>
+    </div>
+  `;
+  for (const entry of filtered) {
+    const style = TYPE_STYLES[entry.type] || TYPE_STYLES.observation;
+    const showEcho = entry._showEcho || false;
+    html += `
+      <div class="entry-card ${style.bg}" id="entry-${entry.id}">
+        <div class="entry-header">
+          <span style="font-size:16px">${style.icon}</span>
+          <span class="entry-type-label" style="color:${style.color}">${style.label}</span>
+          <span class="entry-time">${new Date(entry.timestamp).toLocaleString()}</span>
+        </div>
+        <div class="entry-content">${renderMarkdown(entry.content)}</div>
+        ${entry.metadata && entry.metadata.videoUrl ? `<video src="${entry.metadata.videoUrl}" controls class="video-player"></video>` : ''}
+        ${entry.metadata && entry.metadata.snapshotJSON ? `
+          <div class="snapshot-box">
+            <div class="snapshot-title">World State Snapshot</div>
+            <div class="snapshot-grid">
+              <div>Seed: <span>${entry.metadata.worldSeed || '—'}</span></div>
+              <div>Coherence: <span>${entry.metadata.finalCoherence ? entry.metadata.finalCoherence.toFixed(4) : '—'}</span></div>
+              <div>Cycles: <span>${entry.metadata.cyclesCompleted || '—'}</span></div>
+              <div>Palette: <span>${entry.metadata.worldParams ? entry.metadata.worldParams.palette : '—'}</span></div>
+            </div>
+          </div>
+        ` : ''}
+        <div class="entry-footer">
+          ${entry.tags.map(t => `<span class="entry-tag" onclick="searchTag('${t}')">#${t}</span>`).join('')}
+          ${entry.links.length > 0 ? `<span class="entry-links">🔗 ${entry.links.length} linked</span>` : ''}
+          <div class="entry-actions">
+            <div class="resonance-bar">
+              <div class="resonance-track"><div class="resonance-fill" style="width:${entry.resonance * 100}%;background:${entry.resonance > 0.8 ? 'var(--gold)' : entry.resonance > 0.5 ? 'var(--cyan)' : 'var(--text-muted)'})"></div></div>
+              <span class="resonance-value">${(entry.resonance * 100).toFixed(0)}%</span>
+            </div>
+            <button class="entry-action-btn" onclick="toggleEcho('${entry.id}')">${showEcho ? 'Hide Echo' : 'Show Echo'}</button>
+            <button class="entry-delete-btn" onclick="deleteEntry('${entry.id}')">✕</button>
+          </div>
+        </div>
+        ${showEcho ? `<div class="echo-box"><span class="echo-icon">🗣</span><div class="echo-text">${entry.echo}</div></div>` : ''}
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+  const textarea = document.getElementById('composerText');
+  if (textarea) {
+    textarea.addEventListener('input', function() {
+      document.getElementById('charCount').textContent = this.value.length + ' chars';
+      if (this.value.length > 0) {
+        document.getElementById('typingDot').innerHTML = '<span style="color:var(--emerald)">●</span>';
+      }
+    });
+  }
+}
+
+function submitEntry() {
+  const text = document.getElementById('composerText').value;
+  if (!text.trim() && !canvasData) return;
+  const content = canvasData ? `![Canvas Drawing](${canvasData})\n\n${text}` : text;
+  addEntry(content, currentType);
+  canvasData = null;
+  document.getElementById('composerText').value = '';
+}
+
+function toggleEcho(id) {
+  const entry = entries.find(e => e.id === id);
+  if (entry) { entry._showEcho = !entry._showEcho; renderFeed(); }
+}
+
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  saveEntries();
+  renderFeed();
+}
+
+function searchTag(tag) {
+  document.getElementById('searchInput').value = tag;
+  filterEntries();
+}
+
+function filterEntries() { renderFeed(); }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  JUPYTER NOTEBOOK ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const JUPYTER_KERNEL = {
+  busy: false,
+  execute: function(code, language, outputId) {
+    const outputEl = document.getElementById(outputId);
+    if (!outputEl) return;
+    outputEl.innerHTML = '<span style="color:var(--text-muted)">Running...</span>';
+    outputEl.className = 'jupyter-cell-output';
+
+    setTimeout(() => {
+      try {
+        let result;
+        if (language === 'javascript' || language === 'js') {
+          // Safe eval with console capture
+          const logs = [];
+          const origLog = console.log;
+          const origError = console.error;
+          console.log = (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' '));
+          console.error = (...args) => logs.push('ERROR: ' + args.map(a => String(a)).join(' '));
+
+          try {
+            result = eval(code);
+            if (result !== undefined && logs.length === 0) {
+              logs.push(typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result));
+            }
+          } catch (e) {
+            logs.push('ERROR: ' + e.message);
+            outputEl.className = 'jupyter-cell-output error';
+          }
+
+          console.log = origLog;
+          console.error = origError;
+          outputEl.textContent = logs.join('\n') || 'undefined';
+          if (!outputEl.classList.contains('error')) outputEl.className = 'jupyter-cell-output success';
+        } else if (language === 'markdown' || language === 'md') {
+          outputEl.innerHTML = renderMarkdown(code);
+          outputEl.className = 'jupyter-cell-output success';
+        } else if (language === 'html') {
+          outputEl.innerHTML = code;
+          outputEl.className = 'jupyter-cell-output success';
+        } else if (language === 'css') {
+          const style = document.createElement('style');
+          style.textContent = code;
+          outputEl.innerHTML = '<style>' + code + '</style><div style="padding:8px;background:rgba(0,0,0,0.3);border-radius:4px">CSS applied. Preview below:</div><div style="padding:16px;background:var(--surface);border-radius:4px;margin-top:8px"><div class="css-preview" style="padding:20px;border:1px solid var(--border);border-radius:8px">Preview Element</div></div>';
+          outputEl.className = 'jupyter-cell-output success';
+        } else {
+          outputEl.textContent = `Language "${language}" execution not yet supported in browser kernel.\nSupported: javascript, markdown, html, css`;
+          outputEl.className = 'jupyter-cell-output error';
+        }
+      } catch (e) {
+        outputEl.textContent = 'ERROR: ' + e.message;
+        outputEl.className = 'jupyter-cell-output error';
+      }
+    }, 100);
+  }
+};
+
+function createJupyterCell(type = 'code', content = '', language = 'javascript') {
+  jupyterCellId++;
+  const cell = {
+    id: jupyterCellId,
+    type,
+    content,
+    language,
+    output: '',
+    outputType: '',
+    executed: false,
+  };
+  jupyterCells.push(cell);
+  saveJupyter();
+  return cell;
+}
+
+function deleteJupyterCell(id) {
+  jupyterCells = jupyterCells.filter(c => c.id !== id);
+  saveJupyter();
+  renderJupyter();
+}
+
+function moveJupyterCell(id, direction) {
+  const idx = jupyterCells.findIndex(c => c.id === id);
+  if (idx === -1) return;
+  if (direction === 'up' && idx > 0) {
+    [jupyterCells[idx], jupyterCells[idx - 1]] = [jupyterCells[idx - 1], jupyterCells[idx]];
+  } else if (direction === 'down' && idx < jupyterCells.length - 1) {
+    [jupyterCells[idx], jupyterCells[idx + 1]] = [jupyterCells[idx + 1], jupyterCells[idx]];
+  }
+  saveJupyter();
+  renderJupyter();
+}
+
+function runJupyterCell(id) {
+  const cell = jupyterCells.find(c => c.id === id);
+  if (!cell) return;
+
+  // Get content from editor if Monaco is available
+  const editor = monacoEditors['jupyter-' + id];
+  if (editor) {
+    cell.content = editor.getValue();
+  } else {
+    const textarea = document.getElementById('jupyter-input-' + id);
+    if (textarea) cell.content = textarea.value;
+  }
+
+  cell.executed = true;
+  JUPYTER_KERNEL.execute(cell.content, cell.language, 'jupyter-output-' + id);
+  saveJupyter();
+}
+
+function runAllJupyterCells() {
+  jupyterCells.forEach((cell, i) => {
+    setTimeout(() => runJupyterCell(cell.id), i * 200);
+  });
+}
+
+function clearJupyterOutputs() {
+  jupyterCells.forEach(c => { c.output = ''; c.executed = false; });
+  saveJupyter();
+  renderJupyter();
+}
+
+function exportJupyterNotebook() {
+  const notebook = {
+    metadata: { name: 'grimoire-notebook', created: new Date().toISOString() },
+    cells: jupyterCells.map(c => ({
+      cell_type: c.type === 'code' ? 'code' : 'markdown',
+      source: c.content.split('\n'),
+      outputs: c.executed ? [{ output_type: 'execute_result', data: { 'text/plain': [c.output] } }] : [],
+      execution_count: c.executed ? c.id : null,
+    }))
+  };
+  const blob = new Blob([JSON.stringify(notebook, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'grimoire-notebook.ipynb';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderJupyter() {
+  const container = document.getElementById('jupyterContainer');
+  if (!container) return;
+
+  let html = `
+    <div class="jupyter-toolbar">
+      <div class="jupyter-kernel-status" id="kernelStatus">
+        <div class="jupyter-kernel-dot"></div>
+        <span>Kernel Ready</span>
+      </div>
+      <div style="flex:1"></div>
+      <button class="jupyter-toolbar-btn" onclick="runAllJupyterCells()">▶ Run All</button>
+      <button class="jupyter-toolbar-btn" onclick="clearJupyterOutputs()">🧹 Clear Outputs</button>
+      <button class="jupyter-toolbar-btn" onclick="exportJupyterNotebook()">💾 Export .ipynb</button>
+      <button class="jupyter-toolbar-btn" onclick="addJupyterCellToGrimoire()">📖 Save to Grimoire</button>
+    </div>
+  `;
+
+  if (jupyterCells.length === 0) {
+    html += `
+      <div class="empty-state" style="padding:32px">
+        <div class="empty-state-icon">📓</div>
+        <div class="empty-state-title">Start your notebook</div>
+        <div class="empty-state-sub">Add code cells, run them, and build interactive experiments.</div>
+        <div style="margin-top:16px">
+          <button class="jupyter-toolbar-btn" onclick="addJupyterCellUI('code')">+ Code Cell</button>
+          <button class="jupyter-toolbar-btn" onclick="addJupyterCellUI('markdown')">+ Markdown Cell</button>
+        </div>
+      </div>
+    `;
+  } else {
+    jupyterCells.forEach((cell, idx) => {
+      const isMarkdown = cell.type === 'markdown';
+      html += `
+        <div class="jupyter-cell" id="jupyter-cell-${cell.id}">
+          <div class="jupyter-cell-header">
+            <span class="jupyter-cell-num">[${idx + 1}]</span>
+            <span class="jupyter-cell-type ${isMarkdown ? 'markdown' : ''}">${isMarkdown ? 'Markdown' : 'Code: ' + cell.language}</span>
+            <div class="jupyter-cell-actions">
+              <button class="jupyter-cell-btn" onclick="moveJupyterCell(${cell.id}, 'up')" ${idx === 0 ? 'disabled' : ''}>↑</button>
+              <button class="jupyter-cell-btn" onclick="moveJupyterCell(${cell.id}, 'down')" ${idx === jupyterCells.length - 1 ? 'disabled' : ''}>↓</button>
+              <button class="jupyter-cell-btn" onclick="runJupyterCell(${cell.id})">▶</button>
+              <button class="jupyter-cell-btn" onclick="deleteJupyterCell(${cell.id})">🗑</button>
+            </div>
+          </div>
+          <div class="jupyter-cell-input-area">
+            ${isMarkdown ? 
+              `<textarea class="jupyter-cell-input" id="jupyter-input-${cell.id}" rows="3" placeholder="Enter markdown...">${escapeHtml(cell.content)}</textarea>` :
+              `<div class="monaco-wrapper">
+                <div class="monaco-toolbar">
+                  <select class="monaco-lang-select" onchange="changeCellLanguage(${cell.id}, this.value)">
+                    <option value="javascript" ${cell.language === 'javascript' ? 'selected' : ''}>JavaScript</option>
+                    <option value="html" ${cell.language === 'html' ? 'selected' : ''}>HTML</option>
+                    <option value="css" ${cell.language === 'css' ? 'selected' : ''}>CSS</option>
+                    <option value="json" ${cell.language === 'json' ? 'selected' : ''}>JSON</option>
+                    <option value="typescript" ${cell.language === 'typescript' ? 'selected' : ''}>TypeScript</option>
+                  </select>
+                  <button class="monaco-run-btn" onclick="runJupyterCell(${cell.id})">▶ Run</button>
+                </div>
+                <div class="monaco-container" id="monaco-cell-${cell.id}"></div>
+              </div>`
+            }
+          </div>
+          ${cell.executed ? `<div class="jupyter-cell-output ${cell.outputType}" id="jupyter-output-${cell.id}">${cell.output || '<span style="color:var(--text-muted)">No output</span>'}</div>` : ''}
+        </div>
+      `;
+    });
+  }
+
+  html += `
+    <div class="jupyter-add-cell" onclick="showAddCellMenu()">
+      + Add Cell
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  // Initialize Monaco editors for code cells
+  if (monacoReady) {
+    jupyterCells.filter(c => c.type === 'code').forEach(cell => {
+      const container = document.getElementById('monaco-cell-' + cell.id);
+      if (container && !monacoEditors['jupyter-' + cell.id]) {
+        const editor = monaco.editor.create(container, {
+          value: cell.content || '// Enter your code here\n',
+          language: cell.language === 'typescript' ? 'typescript' : cell.language === 'json' ? 'json' : 'javascript',
+          theme: 'vs-dark',
+          minimap: { enabled: false },
+          fontSize: 13,
+          lineNumbers: 'on',
+          roundedSelection: false,
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          padding: { top: 8, bottom: 8 },
+        });
+        monacoEditors['jupyter-' + cell.id] = editor;
+        editor.onDidChangeModelContent(() => {
+          cell.content = editor.getValue();
+          saveJupyter();
+        });
+      }
+    });
+  }
+}
+
+function addJupyterCellUI(type) {
+  const cell = createJupyterCell(type, type === 'code' ? '// Your code here\n' : '# Heading\n\nWrite your markdown here.', type === 'code' ? 'javascript' : 'markdown');
+  renderJupyter();
+}
+
+function showAddCellMenu() {
+  const menu = document.createElement('div');
+  menu.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--surface-raised);border:1px solid var(--border);border-radius:12px;padding:16px;z-index:1000;box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+  menu.innerHTML = `
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px">Add Cell</div>
+    <div style="display:flex;gap:8px;flex-direction:column">
+      <button class="jupyter-toolbar-btn" onclick="addJupyterCellUI('code');this.parentElement.parentElement.remove()">📟 Code Cell</button>
+      <button class="jupyter-toolbar-btn" onclick="addJupyterCellUI('markdown');this.parentElement.parentElement.remove()">📝 Markdown Cell</button>
+    </div>
+    <button style="margin-top:12px;width:100%;padding:6px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px" onclick="this.parentElement.remove()">Cancel</button>
+  `;
+  document.body.appendChild(menu);
+}
+
+function changeCellLanguage(id, lang) {
+  const cell = jupyterCells.find(c => c.id === id);
+  if (cell) {
+    cell.language = lang;
+    saveJupyter();
+    renderJupyter();
+  }
+}
+
+function addJupyterCellToGrimoire() {
+  const allContent = jupyterCells.map((c, i) => 
+    `## Cell ${i + 1} (${c.type}${c.language !== 'markdown' ? ': ' + c.language : ''})\n\n\`\`\`${c.language === 'markdown' ? 'markdown' : c.language}\n${c.content}\n\`\`\`\n${c.executed ? '**Output:**\n\`\`\`\n' + c.output + '\n\`\`\`' : ''}`
+  ).join('\n\n---\n\n');
+
+  const content = `## Jupyter Notebook Export\n\n${allContent}\n\n---\n\n*Exported from The Grimoire Jupyter Kernel*`;
+  addEntry(content, 'jupyter');
+  switchView('feed');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  WIX-STYLE VISUAL BUILDER ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const BUILDER_COMPONENTS = [
+  { id: 'text', name: 'Text Block', icon: '📝', desc: 'Paragraph or heading text', defaultContent: 'Enter your text here...', defaultStyle: { fontSize: '14px', color: '#f0e6ff', padding: '12px' } },
+  { id: 'button', name: 'Button', icon: '🔘', desc: 'Clickable action button', defaultContent: 'Click Me', defaultStyle: { background: 'var(--purple)', color: '#fff', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' } },
+  { id: 'image', name: 'Image', icon: '🖼️', desc: 'Image placeholder or URL', defaultContent: 'https://via.placeholder.com/200x150/8b5cf6/ffffff?text=Image', defaultStyle: { width: '200px', borderRadius: '8px' } },
+  { id: 'card', name: 'Card', icon: '🃏', desc: 'Container with border', defaultContent: 'Card content', defaultStyle: { background: 'rgba(30,41,59,0.5)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', width: '250px' } },
+  { id: 'input', name: 'Input Field', icon: '⌨️', desc: 'Text input field', defaultContent: '', defaultStyle: { background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px 12px', color: '#f0e6ff', width: '200px' } },
+  { id: 'divider', name: 'Divider', icon: '➖', desc: 'Horizontal line separator', defaultContent: '', defaultStyle: { borderTop: '1px solid rgba(255,255,255,0.1)', width: '100%', height: '1px' } },
+  { id: 'chart', name: 'Chart', icon: '📊', desc: 'Simple canvas chart', defaultContent: 'bar', defaultStyle: { width: '300px', height: '200px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' } },
+  { id: 'hexagram', name: 'Hexagram', icon: '☯', desc: 'I Ching hexagram display', defaultContent: '1', defaultStyle: { width: '120px', height: '140px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '12px' } },
+];
+
+function initBuilder() {
+  renderBuilderSidebar();
+  renderBuilderCanvas();
+  renderBuilderProperties();
+  setupBuilderDragDrop();
+}
+
+function renderBuilderSidebar() {
+  const sidebar = document.getElementById('builderSidebar');
+  if (!sidebar) return;
+  let html = '<div class="sidebar-section"><div class="sidebar-label">Components</div>';
+  BUILDER_COMPONENTS.forEach(comp => {
+    html += `
+      <div class="builder-component" draggable="true" data-component-id="${comp.id}">
+        <span class="builder-component-icon">${comp.icon}</span>
+        <div class="builder-component-info">
+          <div class="builder-component-name">${comp.name}</div>
+          <div class="builder-component-desc">${comp.desc}</div>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  sidebar.innerHTML = html;
+}
+
+function renderBuilderCanvas() {
+  const canvas = document.getElementById('builderCanvas');
+  if (!canvas) return;
+
+  // Clear existing dropped components (keep canvas structure)
+  const existing = canvas.querySelectorAll('.builder-dropped');
+  existing.forEach(el => el.remove());
+
+  if (builderComponents.length === 0) {
+    const empty = canvas.querySelector('.builder-empty');
+    if (!empty) {
+      canvas.innerHTML += '<div class="builder-empty">Drag components here to build your layout</div>';
+    }
+    return;
+  } else {
+    const empty = canvas.querySelector('.builder-empty');
+    if (empty) empty.remove();
+  }
+
+  builderComponents.forEach((comp, idx) => {
+    const el = document.createElement('div');
+    el.className = 'builder-dropped' + (selectedBuilderComponent === comp.id ? ' selected' : '');
+    el.dataset.componentId = comp.id;
+    el.dataset.builderId = comp.builderId;
+    el.style.cssText = `
+      left: ${comp.x}px; top: ${comp.y}px;
+      width: ${comp.width || 'auto'}; height: ${comp.height || 'auto'};
+      ${Object.entries(comp.style || {}).map(([k, v]) => `${k.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}: ${v}`).join(';')}
+    `;
+
+    let contentHtml = '';
+    switch (comp.type) {
+      case 'text': contentHtml = `<div style="${styleToCss(comp.style)}">${comp.content}</div>`; break;
+      case 'button': contentHtml = `<button style="${styleToCss(comp.style)};width:100%">${comp.content}</button>`; break;
+      case 'image': contentHtml = `<img src="${comp.content}" style="${styleToCss(comp.style)};display:block" alt="Builder image">`; break;
+      case 'card': contentHtml = `<div style="${styleToCss(comp.style)}">${comp.content}</div>`; break;
+      case 'input': contentHtml = `<input type="text" placeholder="${comp.content || 'Enter text...'}" style="${styleToCss(comp.style)};width:100%;background:transparent;border:none;outline:none">`; break;
+      case 'divider': contentHtml = `<div style="${styleToCss(comp.style)}"></div>`; break;
+      case 'chart': contentHtml = `<canvas id="builder-chart-${comp.builderId}" width="${parseInt(comp.style.width) || 300}" height="${parseInt(comp.style.height) || 200}" style="${styleToCss(comp.style)}"></canvas>`; break;
+      case 'hexagram': contentHtml = renderHexagramSVG(comp.content); break;
+      default: contentHtml = `<div style="${styleToCss(comp.style)}">${comp.content}</div>`;
+    }
+
+    el.innerHTML = `
+      <div class="builder-dropped-content">${contentHtml}</div>
+      <div class="builder-resize-handle"></div>
+      <button class="builder-delete-btn" onclick="deleteBuilderComponent('${comp.builderId}')">×</button>
+    `;
+
+    canvas.appendChild(el);
+
+    // Setup drag on the element
+    el.addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('builder-resize-handle')) {
+        startResize(e, comp);
+      } else if (e.target.classList.contains('builder-delete-btn')) {
+        // handled by onclick
+      } else {
+        startDrag(e, comp);
+      }
+    });
+
+    // Draw chart if chart component
+    if (comp.type === 'chart') {
+      setTimeout(() => drawBuilderChart(comp), 100);
+    }
+  });
+}
+
+function styleToCss(style) {
+  return Object.entries(style || {}).map(([k, v]) => `${k.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}: ${v}`).join(';');
+}
+
+function renderHexagramSVG(number) {
+  const lines = [];
+  const n = parseInt(number) || 1;
+  for (let i = 5; i >= 0; i--) {
+    const bit = (n - 1) >> i & 1;
+    lines.push(bit ? '<div style="width:100%;height:4px;background:var(--gold);margin:4px 0;border-radius:2px"></div>' : '<div style="display:flex;gap:8px;margin:4px 0"><div style="flex:1;height:4px;background:var(--gold);border-radius:2px"></div><div style="flex:1;height:4px;background:var(--gold);border-radius:2px"></div></div>');
+  }
+  return `<div style="text-align:center"><div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Hexagram ${n}</div>${lines.join('')}</div>`;
+}
+
+function drawBuilderChart(comp) {
+  const canvas = document.getElementById('builder-chart-' + comp.builderId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Draw simple bar chart with random data
+  const data = [30, 50, 80, 40, 65, 90, 55];
+  const barWidth = (w - 40) / data.length;
+  const maxVal = Math.max(...data);
+
+  ctx.fillStyle = 'rgba(139, 92, 246, 0.3)';
+  data.forEach((val, i) => {
+    const barHeight = (val / maxVal) * (h - 40);
+    ctx.fillRect(20 + i * barWidth + 4, h - 20 - barHeight, barWidth - 8, barHeight);
+  });
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.beginPath();
+  ctx.moveTo(20, h - 20);
+  ctx.lineTo(w - 20, h - 20);
+  ctx.stroke();
+}
+
+function setupBuilderDragDrop() {
+  const canvas = document.getElementById('builderCanvas');
+  if (!canvas) return;
+
+  canvas.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    canvas.classList.add('drag-over');
+  });
+
+  canvas.addEventListener('dragleave', () => {
+    canvas.classList.remove('drag-over');
+  });
+
+  canvas.addEventListener('drop', (e) => {
+    e.preventDefault();
+    canvas.classList.remove('drag-over');
+    const componentId = e.dataTransfer.getData('component-id');
+    if (!componentId) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const template = BUILDER_COMPONENTS.find(c => c.id === componentId);
+    if (!template) return;
+
+    const comp = {
+      builderId: 'builder-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      type: template.id,
+      content: template.defaultContent,
+      style: { ...template.defaultStyle },
+      x: x - 50,
+      y: y - 20,
+      width: template.defaultStyle.width || 'auto',
+      height: template.defaultStyle.height || 'auto',
+    };
+
+    builderComponents.push(comp);
+    selectedBuilderComponent = comp.builderId;
+    saveBuilder();
+    renderBuilderCanvas();
+    renderBuilderProperties();
+  });
+
+  // Setup drag on sidebar items
+  document.querySelectorAll('.builder-component').forEach(el => {
+    el.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('component-id', el.dataset.componentId);
+    });
+  });
+}
+
+function startDrag(e, comp) {
+  isDraggingBuilder = true;
+  selectedBuilderComponent = comp.builderId;
+  builderDragOffset.x = e.clientX - comp.x;
+  builderDragOffset.y = e.clientY - comp.y;
+  renderBuilderCanvas();
+  renderBuilderProperties();
+
+  const moveHandler = (e) => {
+    if (!isDraggingBuilder) return;
+    const canvas = document.getElementById('builderCanvas');
+    const rect = canvas.getBoundingClientRect();
+    comp.x = Math.max(0, e.clientX - rect.left - builderDragOffset.x + rect.left);
+    comp.y = Math.max(0, e.clientY - rect.top - builderDragOffset.y + rect.top);
+    saveBuilder();
+    renderBuilderCanvas();
+  };
+
+  const upHandler = () => {
+    isDraggingBuilder = false;
+    document.removeEventListener('mousemove', moveHandler);
+    document.removeEventListener('mouseup', upHandler);
+  };
+
+  document.addEventListener('mousemove', moveHandler);
+  document.addEventListener('mouseup', upHandler);
+}
+
+function startResize(e, comp) {
+  e.stopPropagation();
+  isResizingBuilder = true;
+  builderResizeStart.x = e.clientX;
+  builderResizeStart.y = e.clientY;
+  builderResizeStart.w = parseInt(comp.width) || 200;
+  builderResizeStart.h = parseInt(comp.height) || 100;
+
+  const moveHandler = (e) => {
+    if (!isResizingBuilder) return;
+    const dx = e.clientX - builderResizeStart.x;
+    const dy = e.clientY - builderResizeStart.y;
+    comp.width = Math.max(50, builderResizeStart.w + dx) + 'px';
+    comp.height = Math.max(30, builderResizeStart.h + dy) + 'px';
+    if (comp.style) {
+      comp.style.width = comp.width;
+      comp.style.height = comp.height;
+    }
+    saveBuilder();
+    renderBuilderCanvas();
+  };
+
+  const upHandler = () => {
+    isResizingBuilder = false;
+    document.removeEventListener('mousemove', moveHandler);
+    document.removeEventListener('mouseup', upHandler);
+  };
+
+  document.addEventListener('mousemove', moveHandler);
+  document.addEventListener('mouseup', upHandler);
+}
+
+function deleteBuilderComponent(builderId) {
+  builderComponents = builderComponents.filter(c => c.builderId !== builderId);
+  if (selectedBuilderComponent === builderId) selectedBuilderComponent = null;
+  saveBuilder();
+  renderBuilderCanvas();
+  renderBuilderProperties();
+}
+
+function renderBuilderProperties() {
+  const panel = document.getElementById('builderProperties');
+  if (!panel) return;
+
+  if (!selectedBuilderComponent) {
+    panel.innerHTML = `
+      <div class="sidebar-section">
+        <div class="sidebar-label">Properties</div>
+        <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:32px 16px">
+          Select a component on the canvas to edit its properties
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const comp = builderComponents.find(c => c.builderId === selectedBuilderComponent);
+  if (!comp) return;
+
+  let html = `
+    <div class="sidebar-section">
+      <div class="sidebar-label">Properties: ${BUILDER_COMPONENTS.find(c => c.id === comp.type)?.name || comp.type}</div>
+
+      <div class="builder-prop-row">
+        <div class="builder-prop-label">Content</div>
+        <textarea class="builder-prop-input" rows="3" onchange="updateBuilderComponent('${comp.builderId}', 'content', this.value)">${comp.content}</textarea>
+      </div>
+
+      <div class="builder-prop-row">
+        <div class="builder-prop-label">Position X</div>
+        <input type="number" class="builder-prop-input" value="${Math.round(comp.x)}" onchange="updateBuilderComponent('${comp.builderId}', 'x', this.value)">
+      </div>
+
+      <div class="builder-prop-row">
+        <div class="builder-prop-label">Position Y</div>
+        <input type="number" class="builder-prop-input" value="${Math.round(comp.y)}" onchange="updateBuilderComponent('${comp.builderId}', 'y', this.value)">
+      </div>
+  `;
+
+  // Style properties
+  const styleProps = [
+    { key: 'background', label: 'Background' },
+    { key: 'color', label: 'Color' },
+    { key: 'fontSize', label: 'Font Size' },
+    { key: 'padding', label: 'Padding' },
+    { key: 'borderRadius', label: 'Border Radius' },
+    { key: 'border', label: 'Border' },
+  ];
+
+  styleProps.forEach(prop => {
+    if (comp.style && comp.style[prop.key] !== undefined) {
+      html += `
+        <div class="builder-prop-row">
+          <div class="builder-prop-label">${prop.label}</div>
+          <input type="text" class="builder-prop-input" value="${comp.style[prop.key]}" onchange="updateBuilderStyle('${comp.builderId}', '${prop.key}', this.value)">
+        </div>
+      `;
+    }
+  });
+
+  html += `
+      <div class="builder-prop-row" style="margin-top:16px">
+        <button class="action-btn" style="width:100%;justify-content:center" onclick="deleteBuilderComponent('${comp.builderId}')">🗑 Delete Component</button>
+      </div>
+      <div class="builder-prop-row">
+        <button class="action-btn builder" style="width:100%;justify-content:center" onclick="exportBuilderToGrimoire()">📖 Save Layout to Grimoire</button>
+      </div>
+    </div>
+  `;
+
+  panel.innerHTML = html;
+}
+
+function updateBuilderComponent(builderId, prop, value) {
+  const comp = builderComponents.find(c => c.builderId === builderId);
+  if (!comp) return;
+  if (prop === 'x' || prop === 'y') {
+    comp[prop] = parseInt(value) || 0;
+  } else {
+    comp[prop] = value;
+  }
+  saveBuilder();
+  renderBuilderCanvas();
+}
+
+function updateBuilderStyle(builderId, prop, value) {
+  const comp = builderComponents.find(c => c.builderId === builderId);
+  if (!comp || !comp.style) return;
+  comp.style[prop] = value;
+  saveBuilder();
+  renderBuilderCanvas();
+}
+
+function exportBuilderToGrimoire() {
+  const layout = builderComponents.map(c => ({
+    type: c.type,
+    content: c.content,
+    position: { x: c.x, y: c.y },
+    style: c.style,
+  }));
+
+  const content = `## Visual Builder Layout\n\n**Components:** ${builderComponents.length}\n\n**Layout:**\n\`\`\`json\n${JSON.stringify(layout, null, 2)}\n\`\`\`\n\n---\n\n*Built with the Grimoire Visual Builder*`;
+  addEntry(content, 'builder');
+  switchView('feed');
+}
+
+function clearBuilderCanvas() {
+  builderComponents = [];
+  selectedBuilderComponent = null;
+  saveBuilder();
+  renderBuilderCanvas();
+  renderBuilderProperties();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  VIEW SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════════
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`[data-view="${view}"]`)?.classList.add('active');
+  const content = document.getElementById('contentArea');
+
+  if (view === 'feed') {
+    content.innerHTML = `
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search your grimoire..." oninput="filterEntries()">
+        </div>
+      </div>
+      <div class="scroll-area" id="scrollArea"></div>
+    `;
+    renderFeed();
+  } else if (view === 'graph') {
+    content.innerHTML = `
+      <div class="viewport" id="graphViewport">
+        ${entries.length === 0 ? '<div class="empty-state" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div class="text-center"><div style="font-size:48px;margin-bottom:16px">🕸</div><p>Add entries to see your resonance web.</p></div></div>' : '<canvas id="graphCanvas"></canvas>'}
+      </div>
+    `;
+    if (entries.length > 0) initGraph();
+  } else if (view === 'canvas') {
+    content.innerHTML = `
+      <div class="viewport" id="canvasViewport">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:10;padding:12px;display:flex;gap:8px;align-items:center;background:rgba(13,13,22,0.8);border-bottom:1px solid var(--border)">
+          <button class="forge-btn forge-btn-primary" onclick="setCanvasTool('pen')">✏️ Pen</button>
+          <button class="forge-btn" onclick="setCanvasTool('eraser')">🧹 Eraser</button>
+          <div style="width:1px;height:16px;background:rgba(255,255,255,0.1);margin:0 4px"></div>
+          <button class="forge-btn" onclick="setCanvasColor('#e2e8f0')" style="background:#e2e8f0;width:20px;height:20px;border-radius:50%;padding:0"></button>
+          <button class="forge-btn" onclick="setCanvasColor('#fbbf24')" style="background:#fbbf24;width:20px;height:20px;border-radius:50%;padding:0"></button>
+          <button class="forge-btn" onclick="setCanvasColor('#f472b6')" style="background:#f472b6;width:20px;height:20px;border-radius:50%;padding:0"></button>
+          <button class="forge-btn" onclick="setCanvasColor('#22d3ee')" style="background:#22d3ee;width:20px;height:20px;border-radius:50%;padding:0"></button>
+          <input type="range" min="1" max="20" value="3" onchange="setCanvasSize(this.value)" style="width:80px">
+          <div style="flex:1"></div>
+          <button class="forge-btn" onclick="clearCanvas()">Clear</button>
+          <button class="forge-btn forge-btn-primary" onclick="saveCanvas()">Save to Entry</button>
+        </div>
+        <canvas id="drawCanvas" style="cursor:crosshair"></canvas>
+      </div>
+    `;
+    initCanvas();
+  } else if (view === 'jupyter') {
+    content.innerHTML = `
+      <div class="jupyter-notebook" id="jupyterContainer"></div>
+    `;
+    initMonaco(() => renderJupyter());
+  } else if (view === 'builder') {
+    content.innerHTML = `
+      <div style="display:flex;flex:1;overflow:hidden">
+        <div class="builder-sidebar" id="builderSidebar"></div>
+        <div style="flex:1;display:flex;flex-direction:column;position:relative">
+          <div class="builder-toolbar">
+            <button class="builder-toolbar-btn" onclick="clearBuilderCanvas()">🗑 Clear</button>
+            <button class="builder-toolbar-btn" onclick="exportBuilderToGrimoire()">📖 Save to Grimoire</button>
+            <button class="builder-toolbar-btn active" onclick="renderBuilderCanvas()">🔄 Refresh</button>
+          </div>
+          <div class="builder-canvas" id="builderCanvas"></div>
+        </div>
+        <div class="builder-properties" id="builderProperties"></div>
+      </div>
+    `;
+    initBuilder();
+  } else if (view === 'forge') {
+    if (detectedPattern && detectedPattern.confidence > 0.5) {
+      content.innerHTML = `
+        <div class="viewport" id="forgeViewport">
+          <div class="forge-panel" id="forgePanel"></div>
+          <canvas id="simCanvas" style="cursor:pointer"></canvas>
+          <div class="narrative-log" id="narrativeLog" style="display:none"></div>
+        </div>
+      `;
+      initForge();
+    } else {
+      content.innerHTML = `
+        <div class="viewport" style="display:flex;align-items:center;justify-content:center">
+          <div class="empty-state">
+            <div class="empty-state-icon">🎭</div>
+            <div class="empty-state-title">Not enough data to simulate.</div>
+            <div class="empty-state-sub">Write at least 3 entries describing a situation or conflict.</div>
+            <div class="empty-state-sub">The grimoire will detect patterns and offer to simulate them.</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  GRAPH ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+function initGraph() {
+  const canvas = document.getElementById('graphCanvas');
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  canvas.width = parent.offsetWidth * 2;
+  canvas.height = parent.offsetHeight * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  const w = parent.offsetWidth;
+  const h = parent.offsetHeight;
+
+  const nodes = entries.map(e => ({
+    id: e.id,
+    x: w / 2 + (Math.random() - 0.5) * w * 0.6,
+    y: h / 2 + (Math.random() - 0.5) * h * 0.6,
+    vx: 0, vy: 0,
+    entry: e,
+    radius: 4 + e.resonance * 12,
+  }));
+
+  const mouse = { x: 0, y: 0 };
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    for (const node of nodes) {
+      const dx = x - node.x, dy = y - node.y;
+      if (Math.sqrt(dx * dx + dy * dy) < node.radius + 5) {
+        switchView('feed');
+        setTimeout(() => {
+          const el = document.getElementById(`entry-${node.id}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+        break;
+      }
+    }
+  });
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const shared = a.entry.tags.filter(t => b.entry.tags.includes(t));
+        if (shared.length > 0 || a.entry.links.includes(b.id) || b.entry.links.includes(a.id)) {
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const opacity = Math.max(0, 1 - dist / 200) * 0.3;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(148, 163, 184, ${opacity})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    for (const node of nodes) {
+      for (const other of nodes) {
+        if (other === node) continue;
+        const dx = node.x - other.x, dy = node.y - other.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = 800 / (dist * dist);
+        node.vx += (dx / dist) * force * 0.01;
+        node.vy += (dy / dist) * force * 0.01;
+      }
+      node.vx += (w / 2 - node.x) * 0.0005;
+      node.vy += (h / 2 - node.y) * 0.0005;
+      const mdx = node.x - mouse.x, mdy = node.y - mouse.y;
+      const mdist = Math.sqrt(mdx * mdx + mdy * mdy) || 1;
+      if (mdist < 100) {
+        node.vx += (mdx / mdist) * 0.5;
+        node.vy += (mdy / mdist) * 0.5;
+      }
+      node.vx *= 0.92; node.vy *= 0.92;
+      node.x += node.vx; node.y += node.vy;
+      node.x = Math.max(node.radius, Math.min(w - node.radius, node.x));
+      node.y = Math.max(node.radius, Math.min(h - node.radius, node.y));
+
+      const style = TYPE_STYLES[node.entry.type] || TYPE_STYLES.observation;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+      ctx.fillStyle = style.color;
+      ctx.globalAlpha = 0.7;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      if (node.entry.resonance > 0.8) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = style.color;
+        ctx.globalAlpha = 0.2;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  DRAWING CANVAS
+// ═══════════════════════════════════════════════════════════════════════════════
+let canvasTool = 'pen';
+let canvasColor = '#e2e8f0';
+let canvasSize = 3;
+let isDrawing = false;
+let drawCtx = null;
+
+function initCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  canvas.width = parent.offsetWidth * 2;
+  canvas.height = parent.offsetHeight * 2;
+  drawCtx = canvas.getContext('2d');
+  drawCtx.scale(2, 2);
+  drawCtx.fillStyle = '#0f172a';
+  drawCtx.fillRect(0, 0, parent.offsetWidth, parent.offsetHeight);
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+}
+
+function getDrawPos(e) {
+  const canvas = document.getElementById('drawCanvas');
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function startDraw(e) {
+  isDrawing = true;
+  const pos = getDrawPos(e);
+  drawCtx.beginPath();
+  drawCtx.moveTo(pos.x, pos.y);
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  const pos = getDrawPos(e);
+  drawCtx.lineTo(pos.x, pos.y);
+  drawCtx.strokeStyle = canvasTool === 'eraser' ? '#0f172a' : canvasColor;
+  drawCtx.lineWidth = canvasSize;
+  drawCtx.lineCap = 'round';
+  drawCtx.lineJoin = 'round';
+  drawCtx.stroke();
+}
+
+function stopDraw() {
+  isDrawing = false;
+  if (drawCtx) drawCtx.beginPath();
+}
+
+function setCanvasTool(tool) { canvasTool = tool; }
+function setCanvasColor(color) { canvasColor = color; }
+function setCanvasSize(size) { canvasSize = parseInt(size); }
+
+function clearCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  if (!canvas || !drawCtx) return;
+  drawCtx.fillStyle = '#0f172a';
+  drawCtx.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+}
+
+function saveCanvas() {
+  const canvas = document.getElementById('drawCanvas');
+  if (!canvas) return;
+  canvasData = canvas.toDataURL('image/png');
+  switchView('feed');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SITUATION SIMULATOR ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+function initForge() {
+  const pattern = detectedPattern;
+  const scenarioData = getScenario(pattern.suggestedHexagram);
+
+  const panel = document.getElementById('forgePanel');
+  panel.innerHTML = `
+    <div class="forge-row">
+      <div>
+        <div class="forge-label">Detected Pattern</div>
+        <div style="font-size:13px;font-weight:500">${pattern.type.replace('_', ' ')}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="forge-label">Confidence</div>
+        <div style="font-size:18px;font-weight:bold;color:var(--purple)">${(pattern.confidence * 100).toFixed(0)}%</div>
+      </div>
+    </div>
+    <div class="forge-row">
+      <div style="font-size:11px;color:var(--text-muted);font-style:italic">"${pattern.triggerPhrase}"</div>
+    </div>
+    <div class="forge-row">
+      <div class="forge-label">Cast:</div>
+      ${pattern.entities.slice(0, 3).map((e, i) => `
+        <span style="font-size:11px;padding:2px 8px;background:rgba(0,0,0,0.3);border-radius:4px;border:1px solid rgba(255,255,255,0.1)">
+          ${['🦆','⛰','☀','≈','◊','⛩'][i % 6]} ${e}
+        </span>
+      `).join('')}
+    </div>
+    <div class="forge-row">
+      <div class="forge-label">Duration:</div>
+      <div style="display:flex;background:rgba(0,0,0,0.3);border-radius:6px;padding:2px">
+        <button class="forge-btn ${simDuration === '30s' ? 'forge-btn-primary' : ''}" onclick="setSimDuration('30s')" style="border:none">30s Clip</button>
+        <button class="forge-btn ${simDuration === '5min' ? 'forge-btn-primary' : ''}" onclick="setSimDuration('5min')" style="border:none">5min Journey</button>
+      </div>
+      <button class="forge-btn forge-btn-primary" onclick="startSimulation()">🎬 Start Simulation</button>
+      <button class="forge-btn forge-btn-record" id="recordBtn" onclick="toggleRecording()">🔴 Record</button>
+      <button class="forge-btn forge-btn-amber" id="logBtn" onclick="logInsight()" style="display:none">✓ Log Insight</button>
+    </div>
+    <div class="forge-telemetry" id="forgeTelemetry"></div>
+  `;
+
+  const canvas = document.getElementById('simCanvas');
+  const parent = canvas.parentElement;
+  canvas.width = parent.offsetWidth * 2;
+  canvas.height = (parent.offsetHeight - panel.offsetHeight) * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  canvas.addEventListener('click', handleSimClick);
+}
+
+let simDuration = '30s';
+let simRunning = false;
+let simRecording = false;
+let simPhase = 'intro';
+let simPhaseTimer = 0;
+let simFrame = 0;
+let simChars = [];
+let simProps = [];
+let simNarrative = [];
+let simInsight = '';
+let simAnimId = 0;
+let simScenario = null;
+
+function setSimDuration(d) { simDuration = d; initForge(); }
+
+function startSimulation() {
+  if (simRunning) { stopSimulation(); return; }
+
+  const pattern = detectedPattern;
+  const scenarioData = getScenario(pattern.suggestedHexagram);
+  simScenario = {
+    title: `${scenarioData.name} — ${pattern.metaphor}`,
+    hexagram: pattern.suggestedHexagram,
+    setting: scenarioData.setting,
+    cast: scenarioData.characters.map((c, i) => ({
+      role: i === 0 && pattern.entities[0] ? `${pattern.entities[0]} (as ${c.role})` : c.role,
+      archetype: c.archetype,
+      behavior: c.behavior,
+    })),
+    interaction: scenarioData.interaction,
+    revelation: scenarioData.revelation,
+    duration: simDuration,
+  };
+
+  const canvas = document.getElementById('simCanvas');
+  const w = canvas.width / 2;
+  const h = canvas.height / 2;
+
+  simChars = simScenario.cast.map((c, i) => ({
+    id: c.role,
+    x: w * 0.3 + (i * w * 0.25),
+    y: h * 0.6,
+    vx: 0, vy: 0,
+    state: 'idle',
+    emotion: 0.5,
+    archetype: c.archetype,
+  }));
+
+  simProps = [];
+  if (simScenario.setting.includes('pond') || simScenario.setting.includes('water')) {
+    simProps.push({ id: 'water', x: w / 2, y: h * 0.7, state: 'calm', value: 0 });
+    simProps.push({ id: 'bread', x: w / 2, y: h * 0.5, state: 'floating', value: 1 });
+  }
+  if (simScenario.setting.includes('mountain') || simScenario.setting.includes('boulder')) {
+    simProps.push({ id: 'boulder', x: w * 0.7, y: h * 0.5, state: 'solid', value: 1 });
+  }
+  if (simScenario.setting.includes('door') || simScenario.setting.includes('exit')) {
+    simProps.push({ id: 'door', x: w * 0.85, y: h * 0.4, state: 'closed', value: 0 });
+  }
+  if (simScenario.setting.includes('bridge')) {
+    simProps.push({ id: 'bridge', x: w / 2, y: h * 0.5, state: 'fragile', value: 0.3 });
+  }
+  if (simScenario.setting.includes('fire') || simScenario.setting.includes('burn')) {
+    simProps.push({ id: 'fire', x: w * 0.3, y: h * 0.6, state: 'burning', value: 0.7 });
+  }
+  if (simScenario.setting.includes('mirror') || simScenario.setting.includes('lake') || simScenario.setting.includes('reflection')) {
+    simProps.push({ id: 'mirror', x: w / 2, y: h * 0.5, state: 'clear', value: 1 });
+  }
+
+  simRunning = true;
+  simPhase = 'intro';
+  simPhaseTimer = 0;
+  simFrame = 0;
+  simNarrative = [];
+
+  document.getElementById('narrativeLog').style.display = 'block';
+  advancePhase('intro');
+  simLoop();
+
+  const panel = document.getElementById('forgePanel');
+  const btn = panel.querySelector('[onclick="startSimulation()"]');
+  if (btn) { btn.textContent = '⏹ Stop'; btn.classList.add('forge-btn-danger'); }
+}
+
+function stopSimulation() {
+  simRunning = false;
+  cancelAnimationFrame(simAnimId);
+  if (simRecording) toggleRecording();
+
+  const panel = document.getElementById('forgePanel');
+  const btn = panel.querySelector('.forge-btn-danger');
+  if (btn) { btn.textContent = '🎬 Start Simulation'; btn.classList.remove('forge-btn-danger'); }
+}
+
+function advancePhase(phase) {
+  simPhase = phase;
+  simPhaseTimer = 0;
+
+  const narratives = {
+    intro: [`Scene: ${simScenario.setting}`, `You see ${simScenario.cast.map(c => c.role.toLowerCase()).join(', ')}.`, simScenario.metaphor],
+    setup: [`${simScenario.cast[0]?.role} begins to act...`, `The situation unfolds as it always has.`, `Watch carefully. Do you recognize this?`],
+    conflict: [`The tension rises. The pattern activates.`, `${simScenario.cast[0]?.role} and ${simScenario.cast[1]?.role} are in the same loop.`, `Neither can see what you can see from here.`],
+    revelation: [simScenario.revelation, `This is your pattern, shown in symbols.`, `The characters don't know they're in a story. But you do.`],
+    resolution: [`The scene ends. The pattern is visible now.`, `What will you do with this recognition?`, `The grimoire has recorded your insight.`],
+  };
+
+  const lines = narratives[phase] || ['...'];
+  lines.forEach((line, i) => { setTimeout(() => addNarrative(line), i * 1500); });
+
+  if (phase === 'resolution') {
+    document.getElementById('logBtn').style.display = 'inline-block';
+  }
+}
+
+function addNarrative(text) {
+  simNarrative.unshift(text);
+  if (simNarrative.length > 20) simNarrative.pop();
+
+  const log = document.getElementById('narrativeLog');
+  if (log) {
+    log.innerHTML = `
+      <div class="narrative-title">Scene Narrative</div>
+      ${simNarrative.map((line, i) => `<div class="narrative-line" style="${i === 0 ? 'color:var(--text)' : ''}">${i === 0 ? '▸ ' : ''}${line}</div>`).join('')}
+    `;
+  }
+}
+
+function simLoop() {
+  if (!simRunning) return;
+  simFrame++;
+  simPhaseTimer++;
+
+  const canvas = document.getElementById('simCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width / 2;
+  const h = canvas.height / 2;
+
+  ctx.fillStyle = 'rgba(5, 5, 8, 0.15)';
+  ctx.fillRect(0, 0, w, h);
+
+  const phaseDuration = simDuration === '30s' ? 180 : 1800;
+  if (simPhaseTimer > phaseDuration / 5) {
+    const phases = ['intro', 'setup', 'conflict', 'revelation', 'resolution'];
+    const currentIdx = phases.indexOf(simPhase);
+    if (currentIdx < phases.length - 1) {
+      advancePhase(phases[currentIdx + 1]);
+    }
+  }
+
+  drawSetting(ctx, w, h);
+  simChars.forEach((char, i) => { updateSimChar(char, i, w, h); drawSimChar(ctx, char, i); });
+  simProps.forEach(prop => { updateSimProp(prop); drawSimProp(ctx, prop); });
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.fillRect(10, h - 20, (simPhaseTimer / (phaseDuration / 5)) * 100, 3);
+
+  const telemetry = document.getElementById('forgeTelemetry');
+  if (telemetry) {
+    telemetry.innerHTML = `
+      <span>Phase: <span>${simPhase}</span></span>
+      <span>Frame: <span>${simFrame}</span></span>
+    `;
+  }
+
+  simAnimId = requestAnimationFrame(simLoop);
+}
+
+function drawSetting(ctx, w, h) {
+  if (simScenario.setting.includes('pond') || simScenario.setting.includes('water')) {
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.05)';
+    ctx.fillRect(0, h * 0.6, w, h * 0.4);
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.ellipse(w / 2, h * 0.75 + i * 15, 60 + i * 20 + Math.sin(simFrame * 0.05) * 5, 10 + i * 3, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(6, 182, 212, ${0.05 - i * 0.01})`;
+      ctx.stroke();
+    }
+  }
+  if (simScenario.setting.includes('mountain') || simScenario.setting.includes('field')) {
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.03)';
+    ctx.fillRect(0, h * 0.5, w, h * 0.5);
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.5);
+    ctx.lineTo(w, h * 0.5);
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.1)';
+    ctx.stroke();
+  }
+  if (simScenario.setting.includes('fire') || simScenario.setting.includes('burn')) {
+    ctx.fillStyle = `rgba(239, 68, 68, ${0.03 + Math.sin(simFrame * 0.1) * 0.02})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+}
+
+function updateSimChar(char, i, w, h) {
+  const cast = simScenario.cast[i];
+  if (!cast) return;
+  switch (simPhase) {
+    case 'intro': char.emotion = 0.5; char.vx *= 0.9; char.vy *= 0.9; break;
+    case 'setup':
+      if (cast.behavior.includes('toward') || cast.behavior.includes('approach')) char.vx += 0.1;
+      if (cast.behavior.includes('mirror') || cast.behavior.includes('follow')) {
+        const other = simChars[(i + 1) % simChars.length];
+        if (other) { char.vx += (other.x - char.x) * 0.001; char.vy += (other.y - char.y) * 0.001; }
+      }
+      break;
+    case 'conflict':
+      char.emotion = Math.min(1, char.emotion + 0.01);
+      if (cast.behavior.includes('aggressive') || cast.behavior.includes('fight')) {
+        const other = simChars[(i + 1) % simChars.length];
+        if (other) { char.vx += (other.x - char.x) * 0.003; char.vy += (other.y - char.y) * 0.003; }
+      }
+      if (cast.behavior.includes('avoid') || cast.behavior.includes('retreat')) {
+        const other = simChars[(i + 1) % simChars.length];
+        if (other) { char.vx -= (other.x - char.x) * 0.002; char.vy -= (other.y - char.y) * 0.002; }
+      }
+      break;
+    case 'revelation': char.emotion = Math.max(0, char.emotion - 0.02); char.vx *= 0.95; char.vy *= 0.95; break;
+    case 'resolution': char.vx *= 0.9; char.vy *= 0.9; break;
+  }
+  char.x += char.vx; char.y += char.vy;
+  char.x = Math.max(20, Math.min(w - 20, char.x));
+  char.y = Math.max(20, Math.min(h - 20, char.y));
+}
+
+function drawSimChar(ctx, char, i) {
+  const cast = simScenario.cast[i];
+  if (!cast) return;
+  const x = char.x, y = char.y;
+  const size = 12 + char.emotion * 4;
+
+  if (char.emotion > 0.7) {
+    ctx.beginPath();
+    ctx.arc(x, y, size + 8, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(239, 68, 68, ${(char.emotion - 0.7) * 0.3})`;
+    ctx.fill();
+  }
+
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  const colors = { duck: '#fbbf24', mountain: '#78716c', sun: '#f59e0b', river: '#06b6d4', tree: '#22c55e', wind: '#94a3b8', fire: '#ef4444', mirror: '#e2e8f0', door: '#a855f7', bridge: '#d97706' };
+  ctx.fillStyle = colors[cast.archetype] || '#94a3b8';
+  ctx.fill();
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = `${size}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const symbols = { duck: '🦆', mountain: '⛰', sun: '☀', river: '≈', tree: '🌳', wind: '〜', fire: '🔥', mirror: '◊', door: '⛩', bridge: '═' };
+  ctx.fillText(symbols[cast.archetype] || '●', x, y);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.font = '8px sans-serif';
+  ctx.fillText(cast.role.split('(')[0].trim(), x, y + size + 10);
+
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(x - 10, y - size - 8, 20, 3);
+  ctx.fillStyle = char.emotion > 0.7 ? '#ef4444' : char.emotion > 0.4 ? '#fbbf24' : '#22c55e';
+  ctx.fillRect(x - 10, y - size - 8, 20 * char.emotion, 3);
+}
+
+function updateSimProp(prop) {
+  switch (prop.id) {
+    case 'water': prop.value = Math.sin(simFrame * 0.03) * 0.5 + 0.5; break;
+    case 'bread': if (simPhase === 'conflict') prop.value = Math.max(0, prop.value - 0.005); break;
+    case 'fire': prop.value = 0.5 + Math.sin(simFrame * 0.1) * 0.3; break;
+    case 'mirror': if (simPhase === 'revelation') prop.value = Math.min(1, prop.value + 0.02); break;
+    case 'door': if (simPhase === 'resolution') prop.value = Math.min(1, prop.value + 0.03); break;
+    case 'bridge': if (simPhase === 'revelation') prop.value = Math.min(1, prop.value + 0.02); break;
+  }
+}
+
+function drawSimProp(ctx, prop) {
+  const x = prop.x, y = prop.y;
+  switch (prop.id) {
+    case 'water':
+      ctx.fillStyle = `rgba(6, 182, 212, ${0.1 + prop.value * 0.1})`;
+      ctx.fillRect(0, y, ctx.canvas.width / 2, ctx.canvas.height / 2 - y);
+      break;
+    case 'bread':
+      if (prop.value > 0.1) { ctx.fillStyle = '#d97706'; ctx.fillRect(x - 5, y - 3, 10 * prop.value, 6); }
+      break;
+    case 'boulder':
+      ctx.fillStyle = '#57534e';
+      ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#78716c'; ctx.font = '20px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('🪨', x, y + 5);
+      break;
+    case 'door':
+      ctx.fillStyle = `rgba(168, 85, 247, ${prop.value * 0.5})`;
+      ctx.fillRect(x - 15, y - 25, 30, 50);
+      ctx.strokeStyle = `rgba(168, 85, 247, ${0.3 + prop.value * 0.7})`;
+      ctx.lineWidth = 2; ctx.strokeRect(x - 15, y - 25, 30, 50);
+      if (prop.value > 0.5) { ctx.fillStyle = '#a855f7'; ctx.font = '12px monospace'; ctx.fillText('EXIT', x, y); }
+      break;
+    case 'bridge':
+      ctx.strokeStyle = `rgba(217, 119, 6, ${0.3 + prop.value * 0.7})`;
+      ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - 40, y); ctx.lineTo(x + 40, y); ctx.stroke();
+      ctx.strokeStyle = `rgba(217, 119, 6, ${prop.value * 0.5})`;
+      ctx.beginPath(); ctx.moveTo(x - 30, y); ctx.lineTo(x - 30, y + 20); ctx.moveTo(x + 30, y); ctx.lineTo(x + 30, y + 20); ctx.stroke();
+      break;
+    case 'fire':
+      ctx.fillStyle = `rgba(239, 68, 68, ${prop.value * 0.3})`;
+      ctx.beginPath(); ctx.arc(x, y, 20 + Math.sin(simFrame * 0.2) * 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(251, 191, 36, ${prop.value * 0.5})`;
+      ctx.beginPath(); ctx.arc(x, y - 5, 12 + Math.sin(simFrame * 0.3) * 3, 0, Math.PI * 2); ctx.fill();
+      break;
+    case 'mirror':
+      ctx.fillStyle = `rgba(226, 232, 240, ${prop.value * 0.2})`;
+      ctx.fillRect(x - 30, y - 40, 60, 80);
+      ctx.strokeStyle = `rgba(226, 232, 240, ${0.2 + prop.value * 0.5})`;
+      ctx.lineWidth = 2; ctx.strokeRect(x - 30, y - 40, 60, 80);
+      if (prop.value > 0.7) { ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.fillRect(x - 20, y - 30, 40, 60); }
+      break;
+  }
+}
+
+function handleSimClick(e) {
+  if (!simRunning) return;
+  const canvas = document.getElementById('simCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * 2;
+  const my = (e.clientY - rect.top) * 2;
+
+  for (const char of simChars) {
+    const dx = mx - char.x, dy = my - char.y;
+    if (Math.sqrt(dx * dx + dy * dy) < 20) {
+      char.emotion = Math.min(1, char.emotion + 0.2);
+      addNarrative(`${char.id} reacts to your attention...`);
+      return;
+    }
+  }
+
+  for (const prop of simProps) {
+    const dx = mx - prop.x, dy = my - prop.y;
+    if (Math.sqrt(dx * dx + dy * dy) < 30) {
+      if (prop.id === 'door') { prop.value = Math.min(1, prop.value + 0.3); addNarrative('The door responds to your push...'); }
+      if (prop.id === 'boulder') { prop.x += 2; addNarrative('The boulder shifts slightly. But it is heavy.'); }
+      if (prop.id === 'mirror') { prop.value = Math.min(1, prop.value + 0.2); addNarrative('The reflection clarifies. You see more clearly.'); }
+      return;
+    }
+  }
+
+  simPhaseTimer += 30;
+}
+
+function toggleRecording() {
+  const btn = document.getElementById('recordBtn');
+  if (!simRecording) {
+    const canvas = document.getElementById('simCanvas');
+    recordedChunks = [];
+    const stream = canvas.captureStream(30);
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+    mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const videoUrl = URL.createObjectURL(blob);
+      addSituationEntry(simInsight, blob, videoUrl);
+    };
+    mediaRecorder.start(1000);
+    simRecording = true;
+    btn.textContent = '⏹ Stop Recording';
+    btn.classList.add('recording');
+  } else {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    simRecording = false;
+    btn.textContent = '🔴 Record';
+    btn.classList.remove('recording');
+  }
+}
+
+function logInsight() {
+  const viewport = document.getElementById('forgeViewport');
+  const existing = viewport.querySelector('.insight-box');
+  if (!existing) {
+    const div = document.createElement('div');
+    div.className = 'insight-box';
+    div.innerHTML = `
+      <div class="insight-label">Your Insight</div>
+      <textarea class="insight-textarea" id="insightText" placeholder="What did you see in the simulation? How does it relate to your situation?" rows="2"></textarea>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button class="forge-btn forge-btn-amber" onclick="submitInsight()">✓ Save Insight</button>
+        <button class="forge-btn" onclick="skipInsight()">Skip</button>
+      </div>
+    `;
+    viewport.appendChild(div);
+  }
+}
+
+function submitInsight() {
+  simInsight = document.getElementById('insightText').value;
+  if (simRecording) toggleRecording();
+  else { addSituationEntry(simInsight, null, null); }
+}
+
+function skipInsight() {
+  simInsight = '';
+  if (simRecording) toggleRecording();
+  else addSituationEntry('', null, null);
+}
+
+function addSituationEntry(insight, blob, videoUrl) {
+  const content = `## Situation Simulation: ${simScenario.title}\n\n**Pattern:** ${simScenario.hexagram} — ${simScenario.setting}\n\n**Revelation:**\n${simScenario.revelation}\n\n**Your Insight:**\n${insight || "(No insight recorded yet)"}\n\n**Cast:**\n${simScenario.cast.map(c => `- ${c.role}: ${c.behavior}`).join('\n')}\n\n*The simulation was generated from your journal entries. The characters represent real people in your life, abstracted into archetypes. The scenario reveals the pattern you couldn't see from inside it.*`;
+
+  const entry = {
+    id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+    timestamp: new Date().toISOString(),
+    type: 'situation',
+    content,
+    echo: generateEcho({ type: 'situation', content: insight, tags: ['situation', 'simulation', 'pattern', 'insight'], resonance: 0.92 }, entries),
+    tags: ['situation', 'simulation', 'pattern', 'insight', `hexagram-${simScenario.hexagram}`],
+    resonance: 0.92,
+    links: [],
+    metadata: videoUrl ? { videoUrl, scenarioTitle: simScenario.title, hexagram: simScenario.hexagram } : null,
+  };
+  entries.unshift(entry);
+  saveEntries();
+  switchView('feed');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PATTERN CHECK & STATS
+// ═══════════════════════════════════════════════════════════════════════════════
+function checkPattern() {
+  if (entries.length >= 3) {
+    detectedPattern = detectPattern();
+    if (detectedPattern.confidence > 0.5) {
+      const alert = document.getElementById('patternAlert');
+      alert.innerHTML = `
+        <div class="pattern-alert">
+          <div class="pattern-alert-title">Pattern Detected</div>
+          <div class="pattern-alert-type">${detectedPattern.type.replace('_', ' ')}</div>
+          <div class="pattern-alert-meta">${detectedPattern.metaphor}</div>
+          <button class="pattern-alert-btn" onclick="switchView('forge')">🎭 Simulate This</button>
+        </div>
+      `;
+    }
+  }
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = entries.length;
+  const divs = entries.filter(e => e.type === 'divination').length;
+  const sims = entries.filter(e => e.type === 'situation').length;
+  const jupys = entries.filter(e => e.type === 'jupyter').length;
+  const builds = entries.filter(e => e.type === 'builder').length;
+  const keystones = entries.filter(e => e.resonance > 0.8).length;
+  const avg = entries.length > 0 ? (entries.reduce((a, b) => a + b.resonance, 0) / entries.length * 100).toFixed(0) : '0';
+  const links = entries.reduce((a, b) => a + b.links.length, 0);
+
+  const section = document.querySelector('.sidebar-section:nth-of-type(3)');
+  if (section) {
+    section.innerHTML = `
+      <div class="sidebar-label">Resonance Stats</div>
+      <div class="stat-row"><span class="stat-label">Total Entries</span><span class="stat-value" style="color:var(--text)">${entries.length}</span></div>
+      <div class="stat-row"><span class="stat-label">Divinations</span><span class="stat-value" style="color:#fb7185">${divs}</span></div>
+      <div class="stat-row"><span class="stat-label">Simulations</span><span class="stat-value" style="color:var(--teal)">${sims}</span></div>
+      <div class="stat-row"><span class="stat-label">Notebooks</span><span class="stat-value" style="color:var(--gold)">${jupys}</span></div>
+      <div class="stat-row"><span class="stat-label">Layouts</span><span class="stat-value" style="color:var(--emerald)">${builds}</span></div>
+      <div class="stat-row"><span class="stat-label">Keystones</span><span class="stat-value" style="color:var(--gold)">${keystones}</span></div>
+      <div class="stat-row"><span class="stat-label">Avg Resonance</span><span class="stat-value" style="color:var(--emerald)">${avg}%</span></div>
+      <div class="stat-row"><span class="stat-label">Connections</span><span class="stat-value" style="color:#818cf8">${links}</span></div>
+    `;
+  }
+}
+
+// ─── ENTRY TYPE SWITCHING ────────────────────────────────────────────────────
+function setEntryType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.className = 'type-btn';
+    if (btn.dataset.type === type) btn.classList.add(`active-${type}`);
+  });
+  if (currentView !== 'feed') switchView('feed');
+  else renderFeed();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function init() {
+  updateStats();
+  checkPattern();
+  renderFeed();
+}
+
+init();
+  </script>
+</body>
+</html>
