@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, type LucideIcon } from "lucide-react";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
 import {
@@ -15,6 +15,9 @@ import {
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import { SelfEditor } from "@/components/SelfEditor";
 import { CommandCenter } from "@/components/CommandCenter";
+import { getMeshStatus, publishMeshEvent, type MeshStatus } from "@/lib/meshEvents";
+import { systemApi, type AppRunResult, type McpStatus, type MountedApp, type StudioHealth } from "@/lib/systemApi";
+import { publishMeshNode } from "@/lib/meshAddressing";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -39,9 +42,9 @@ const CORE_APPS: AppModule[] = [
   },
   {
     id: "zip-manager",
-    name: "ZIP Archive Studio",
-    description: "Upload, manage, play & stitch ZIP files - all in one place",
-    path: "/zip-manager",
+    name: "Ingest & Mount",
+    description: "Upload, analyze, preserve, regenerate, and mount files",
+    path: "/ingest",
     icon: FolderTree,
     variant: "primary",
     type: "core",
@@ -119,6 +122,31 @@ export function Dashboard() {
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
   const [showSelfEditorDialog, setShowSelfEditorDialog] = useState(false);
   const [showCommandCenterDialog, setShowCommandCenterDialog] = useState(false);
+  const [meshStatus, setMeshStatus] = useState<MeshStatus | null>(null);
+  const [health, setHealth] = useState<StudioHealth | null>(null);
+  const [mcpStatus, setMcpStatus] = useState<McpStatus | null>(null);
+  const [mountedApps, setMountedApps] = useState<MountedApp[]>([]);
+  const [smokeRun, setSmokeRun] = useState<AppRunResult | null>(null);
+  const [systemError, setSystemError] = useState("");
+  const [isSystemBusy, setIsSystemBusy] = useState(false);
+
+  const refreshSystemStatus = async () => {
+    setSystemError("");
+    try {
+      const [nextMesh, nextHealth, nextMcp, nextApps] = await Promise.all([
+        getMeshStatus(),
+        systemApi.health(),
+        systemApi.mcpStatus(),
+        systemApi.apps(),
+      ]);
+      setMeshStatus(nextMesh);
+      setHealth(nextHealth);
+      setMcpStatus(nextMcp);
+      setMountedApps(nextApps.apps || []);
+    } catch (error) {
+      setSystemError(error instanceof Error ? error.message : String(error));
+    }
+  };
 
   useEffect(() => {
     const customApps = AppRegistry.getInstalledApps();
@@ -127,10 +155,46 @@ export function Dashboard() {
     }
 
     setRecentlyVisited(ActivityTracker.getRecentlyVisited(4));
+    refreshSystemStatus();
   }, []);
+
+  const runSmokeMount = async () => {
+    setIsSystemBusy(true);
+    setSystemError("");
+    setSmokeRun(null);
+    try {
+      const mounted = await systemApi.mountApp({
+        name: "dashboard-smoke-app",
+        runCommand: "node hello.js",
+        files: [{ path: "hello.js", content: "console.log('mounted app ok')\n" }],
+      });
+      const result = await systemApi.runApp(mounted.app.id);
+      setSmokeRun(result);
+      await refreshSystemStatus();
+    } catch (error) {
+      setSystemError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsSystemBusy(false);
+    }
+  };
 
   const handleAppClick = (appId: string, appName: string, appType: string, path: string) => {
     ActivityTracker.recordVisit(appId, appName, appType);
+    publishMeshNode({
+      kind: "app",
+      domain: "os",
+      parent: "dashboard",
+      name: appId,
+      purpose: appName,
+      tags: [appType, "launchable"],
+      payload: { appId, appName, appType, path },
+    }, "app.launched");
+    publishMeshEvent({
+      source: "dashboard",
+      type: "studio.launch",
+      topic: appId,
+      payload: { appId, appName, appType, path },
+    });
     setLocation(path);
   };
 
@@ -146,54 +210,153 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section - Sleek & Minimal */}
-      <div className="relative overflow-hidden bg-muted/20 border-b">
+      {/* OS Home */}
+      <div className="relative overflow-hidden bg-background border-b">
         <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
-          <div className="text-center space-y-6">
-            <div className="inline-block">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div className="space-y-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">OS Home</p>
               <h1 className="text-4xl md:text-6xl font-bold text-foreground" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                YOU–N–I–VERSE Studio
+                Synthia OS
               </h1>
-              <div className="h-px bg-border mt-3" />
-            </div>
-            
-            <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto">
-              Build, create, and deploy in one unified workspace
-            </p>
+              <p className="text-lg md:text-xl text-foreground/80 max-w-2xl">
+                Phone-first command shell for your app tray, smart browser, mesh registry, and creator tools.
+              </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <Button
-                size="lg"
-                onClick={() => setLocation("/ide")}
-                data-testid="button-hero-ide"
-              >
-                <Code2 className="h-5 w-5 mr-2" />
-                Launch IDE
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setLocation("/game-creator")}
-                data-testid="button-hero-game-creator"
-              >
-                <Palette className="h-5 w-5 mr-2" />
-                Create Game
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setLocation("/zip-manager")}
-                data-testid="button-hero-zip-manager"
-              >
-                <FolderTree className="h-5 w-5 mr-2" />
-                Upload & Play
-              </Button>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Button
+                  size="lg"
+                  onClick={() => handleAppClick("ide", "IDE Studio", "core", "/ide")}
+                  data-testid="button-hero-ide"
+                >
+                  <Code2 className="h-5 w-5 mr-2" />
+                  Start Building
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => handleAppClick("mesh", "Mesh Registry", "core", "/mesh")}
+                  data-testid="button-hero-mesh"
+                >
+                  <Orbit className="h-5 w-5 mr-2" />
+                  Open Mesh
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => handleAppClick("grove-store", "App Store", "core", "/grove-store")}
+                  data-testid="button-hero-store"
+                >
+                  <Store className="h-5 w-5 mr-2" />
+                  App Store
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">App Tray</p>
+                  <p className="text-xs text-muted-foreground">Core spaces and mounted tools</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowCommandCenterDialog(true)}>
+                  Command
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {[
+                  { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
+                  { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
+                  { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
+                  { id: "games", label: "Games", icon: Gamepad2, path: "/game-creator" },
+                  { id: "store", label: "Store", icon: Store, path: "/grove-store" },
+                  { id: "setup", label: "Setup", icon: Settings, path: "/settings" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border bg-background p-3 text-center transition-colors hover:border-primary"
+                    onClick={() => handleAppClick(item.id, item.label, "tray", item.path)}
+                    data-testid={`button-app-tray-${item.id}`}
+                  >
+                    <item.icon className="mb-2 h-6 w-6 text-primary" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 pb-28">
+        <Card className="mb-6 border-primary/30" data-testid="card-os-status">
+          <CardHeader>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Orbit className="h-5 w-5 text-primary" />
+                  <CardTitle>OS Runtime Status</CardTitle>
+                </div>
+                <CardDescription>Live bridge status for Studio, mesh, Synthia, Python, Linux execution, and mounted apps</CardDescription>
+              </div>
+              <Button variant="outline" onClick={refreshSystemStatus} disabled={isSystemBusy}>
+                Refresh
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3">
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Studio</p>
+                <p className="text-lg font-semibold">{health?.status || "checking"}</p>
+                <p className="text-xs text-muted-foreground truncate">{health?.service || "API"}</p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Mesh</p>
+                <p className="text-lg font-semibold">{meshStatus?.status || health?.mesh?.status || "checking"}</p>
+                <p className="text-xs text-muted-foreground">{meshStatus?.events ?? health?.mesh?.events ?? 0} events</p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Runtime</p>
+                <p className="text-lg font-semibold">{health?.container?.enabled ? "enabled" : "checking"}</p>
+                <p className="text-xs text-muted-foreground truncate">{health?.container?.shell || "shell"}</p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Python</p>
+                <p className="text-lg font-semibold">{health?.python?.running ? "running" : "checking"}</p>
+                <p className="text-xs text-muted-foreground truncate">{health?.python?.url || "proxy pending"}</p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">MCP</p>
+                <p className="text-lg font-semibold">{mcpStatus?.ok ? "bus ready" : "checking"}</p>
+                <p className="text-xs text-muted-foreground truncate">{mcpStatus?.transport || "http-json"}</p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Mounted Apps</p>
+                <p className="text-lg font-semibold">{health?.apps?.mounted ?? mountedApps.length}</p>
+                <p className="text-xs text-muted-foreground">tray-ready</p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-background/60 p-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-medium">Proof Loop</p>
+                <p className="text-sm text-muted-foreground">
+                  Mount a tiny app into `/workspace/apps`, run it through Linux, and publish mesh events.
+                </p>
+                {smokeRun && (
+                  <p className="mt-2 font-mono text-xs text-primary">
+                    exit {smokeRun.run.code}: {smokeRun.run.stdout.trim() || smokeRun.run.stderr.trim()}
+                  </p>
+                )}
+                {systemError && <p className="mt-2 text-xs text-destructive">{systemError}</p>}
+              </div>
+              <Button onClick={runSmokeMount} disabled={isSystemBusy}>
+                {isSystemBusy ? "Running..." : "Run Mount Test"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Recently Visited */}
         {recentlyVisited.length > 0 && (
           <Card className="mb-6" data-testid="card-recent-apps">

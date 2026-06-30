@@ -1,0 +1,101 @@
+name: Review Trident and you-n-i-verse Integration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  review-integration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository read-only
+        uses: actions/checkout@v4
+
+      - name: Write integration review summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          # Trident + you-n-i-verse Integration Review
+
+          This workflow is intentionally review-only.
+
+          ## What this workflow does
+
+          - Checks out the repository.
+          - Prints the intended integration map.
+          - Makes no commits.
+          - Pushes no branches.
+          - Opens no pull requests.
+          - Deletes nothing.
+          - Overwrites nothing.
+
+          ## Existing production runtime stays first
+
+          ```text
+          server/index.js
+          npm run start
+          npm run dev
+          npm run mcp
+          ```
+
+          ## Intended files to add later, when explicitly approved
+
+          ```text
+          trident/
+            mcp_server.py
+            model.py
+            rag.py
+            signal_server.py
+            rag_client.js
+            rag_client.p2p.backup.js
+            requirements.txt
+            mcp_config.json
+
+          server/you-n-i-verse/
+            index.ts
+            db.ts
+            websocket.ts
+            websocket-init.ts
+            routers.ts
+            routers/hexagram.ts
+            routers/broadcast.ts
+            routers/agent.ts
+            routers/knowledge.ts
+
+          shared/
+            hexagram-codon-map.ts
+
+          client/src/hooks/
+            useWebSocket.ts
+
+          client/src/pages/
+            AdminPanel.tsx
+            ReceivingSide.tsx
+
+          server/scripts/
+            init-roots.mjs
+
+          docs/
+            ARCHITECTURE.md
+            research-findings.md
+            RAG_ENDPOINT_PATCH.md
+          ```
+
+          ## Alignment policy
+
+          ```text
+          Create: yes, when approved.
+          Adapt: yes, when visible.
+          Report conflicts: yes.
+          Delete: no.
+          Auto-remove: no.
+          Silent omissions: no.
+          Overwrite canon files: no.
+          ```
+
+          ## Next approved move
+
+          Add the actual uploaded files in a separate explicit commit/PR when the system owner says to proceed.
+          EOF

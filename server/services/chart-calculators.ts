@@ -13,7 +13,11 @@
  * These convert ephemeris data → Human Design gates → field activation seeds
  */
 
-import Astronomy from 'astronomy-engine';
+import { createRequire } from 'module';
+import type * as AstronomyTypes from 'astronomy-engine';
+
+const require = createRequire(import.meta.url);
+const Astronomy = require('astronomy-engine') as typeof AstronomyTypes;
 
 // LLM integration for chart interpretation
 interface ChartInterpretation {

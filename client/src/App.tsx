@@ -14,12 +14,17 @@ import { PlayerPanel } from "@/components/PlayerPanel";
 import { GroveStore } from "@/components/GroveStore";
 import { GANTrainer } from "@/components/GANTrainer";
 import { ModManager } from "@/components/ModManager";
+import { AutonomyControlCenter } from "@/components/AutonomyControlCenter";
 import { ConsciousnessCalibrationTank } from "@/components/ConsciousnessCalibrationTank";
-import ConsciousnessCalibrator from "@/components/ConsciousnessCalibrator";
 import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
+import { IngestPanel } from "@/components/IngestPanel";
+import UnifiedInterface from "@/components/UnifiedInterface";
+import NovelWriterPanel from "@/components/NovelWriterPanel";
 import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { MakerStudioPanel } from "@/components/MakerStudioPanel";
 import { ModeIndicator } from "@/components/ModeIndicator";
+import { OSBootGate } from "@/components/OSBootGate";
 import ZipManager from "@/pages/ZipManager";
 import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
@@ -36,9 +41,12 @@ function Router() {
         <Route path="/game-creator" component={GameCreator} />
         <Route path="/gan-trainer" component={GANTrainer} />
         <Route path="/mod-manager" component={ModManager} />
+        <Route path="/autonomy" component={AutonomyControlCenter} />
         <Route path="/calibration-tank" component={ConsciousnessCalibrationTank} />
-        <Route path="/consciousness-calibrator" component={ConsciousnessCalibrator} />
         <Route path="/universe-creator" component={SemanticUniverseCreator} />
+        <Route path="/ingest" component={IngestPanel} />
+        <Route path="/mesh" component={UnifiedInterface} />
+        <Route path="/novel" component={NovelWriterPanel} />
         <Route path="/settings" component={SettingsPanel} />
         <Route path="/zip-manager" component={ZipManager} />
         <Route path="/player" component={PlayerPanel} />
@@ -57,9 +65,11 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <Router />
+          <MakerStudioPanel />
           <PersistentAssistant />
           <ModeIndicator />
           <InstallPrompt />
+          <OSBootGate />
           <Toaster />
         </TooltipProvider>
       </ThemeProvider>

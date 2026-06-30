@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Gamepad2, Search, Play, Eye, X, RefreshCw, Download } from "lucide-react";
+import { Archive, Gamepad2, Search, Play, Eye, X, RefreshCw, Download } from "lucide-react";
 import { useLocation} from "wouter";
 import { GAME_TEMPLATES } from "@/lib/gameTemplates";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
+import { gameTemplateNode, publishMeshNode } from "@/lib/meshAddressing";
+import { systemApi, type GamePack } from "@/lib/systemApi";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +19,9 @@ import {
 export function GameCreator() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [gamePacks, setGamePacks] = useState<GamePack[]>([]);
+  const [packError, setPackError] = useState("");
+  const [mountingPackId, setMountingPackId] = useState<string | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
   const [iframeKey, setIframeKey] = useState(0);
   const { toast } = useToast();
@@ -25,6 +30,59 @@ export function GameCreator() {
     template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    publishMeshNode({
+      kind: "app",
+      domain: "os",
+      name: "game-creator",
+      purpose: "Game authoring and template launcher",
+      tags: ["creator-tool", "games", "templates"],
+    }, "app.opened");
+    refreshGamePacks();
+  }, []);
+
+  const refreshGamePacks = async () => {
+    setPackError("");
+    try {
+      const result = await systemApi.gamePacks();
+      setGamePacks(result.packs || []);
+    } catch (error) {
+      setPackError(error instanceof Error ? error.message : String(error));
+    }
+  };
+
+  const handleMountGamePack = async (pack: GamePack) => {
+    setMountingPackId(pack.id);
+    setPackError("");
+    try {
+      const result = await systemApi.mountGamePack(pack.id);
+      publishMeshNode({
+        kind: "game",
+        domain: "os",
+        parent: "game-packs",
+        name: pack.name,
+        purpose: "Mounted game pack source bundle",
+        tags: ["game-pack", pack.status],
+        payload: { pack, app: result.app },
+      }, "game-pack.mounted");
+
+      toast({
+        title: "Game Pack Mounted",
+        description: `${pack.name} is now available in mounted apps.`,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setPackError(message);
+      toast({
+        title: "Mount failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setMountingPackId(null);
+    }
+  };
 
   const generateExecutableHTML = (files: FileNode[]): string => {
     const indexFile = files.find(f => f.type === 'file' && f.name === 'index.html');
@@ -67,6 +125,10 @@ export function GameCreator() {
   };
 
   const handlePreviewTemplate = (templateId: string) => {
+    const template = GAME_TEMPLATES.find(t => t.id === templateId);
+    if (template) {
+      publishMeshNode(gameTemplateNode(template), "game.template.previewed");
+    }
     setPreviewTemplate(templateId);
     setIframeKey(prev => prev + 1);
   };
@@ -76,6 +138,7 @@ export function GameCreator() {
     if (!template) return;
 
     if (confirm(`This will replace all current files with the ${template.title} template. Continue?`)) {
+      publishMeshNode(gameTemplateNode(template), "game.template.loaded");
       FileSystem.loadFileTree(template.files);
 
       toast({
@@ -97,6 +160,8 @@ export function GameCreator() {
     const template = GAME_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
 
+    publishMeshNode(gameTemplateNode(template), "game.template.export.requested");
+
     toast({
       title: "Download Template",
       description: "Use the template first, then export from the IDE",
@@ -108,8 +173,88 @@ export function GameCreator() {
       <div className="p-8 max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">Game Templates</h1>
-          <p className="text-muted-foreground">Choose a template to start creating your game</p>
+          <p className="text-muted-foreground">Use built-in templates or mount your installed game packs</p>
         </div>
+
+        <section className="mb-8">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Installed Game Packs</h2>
+              <p className="text-sm text-muted-foreground">
+                Source bundles available from startup. Mount one when you want to inspect, adapt, or run it.
+              </p>
+            </div>
+            <Button variant="outline" onClick={refreshGamePacks}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Packs
+            </Button>
+          </div>
+
+          {packError && (
+            <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+              {packError}
+            </div>
+          )}
+
+          {gamePacks.length === 0 ? (
+            <Card className="p-6">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Archive className="h-5 w-5" />
+                <p className="text-sm">No game packs are registered yet.</p>
+              </div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {gamePacks.map((pack) => (
+                <Card key={pack.id} className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-md bg-primary/10 p-2 text-primary">
+                      <Archive className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold truncate">{pack.name}</h3>
+                      <p className="text-xs text-muted-foreground truncate">{pack.filename}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="rounded-md bg-muted p-2">
+                      <p className="font-semibold">{pack.sizeMb}</p>
+                      <p className="text-muted-foreground">MB</p>
+                    </div>
+                    <div className="rounded-md bg-muted p-2">
+                      <p className="font-semibold">{pack.entries}</p>
+                      <p className="text-muted-foreground">Files</p>
+                    </div>
+                    <div className="rounded-md bg-muted p-2">
+                      <p className="font-semibold">{pack.nestedZips}</p>
+                      <p className="text-muted-foreground">Nested</p>
+                    </div>
+                  </div>
+
+                  {pack.roots.length > 0 && (
+                    <p className="mt-3 text-xs text-muted-foreground truncate">
+                      Roots: {pack.roots.join(", ")}
+                    </p>
+                  )}
+                  {pack.warning && (
+                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">{pack.warning}</p>
+                  )}
+
+                  <Button
+                    className="mt-4 w-full"
+                    variant={pack.status === "ready" ? "default" : "outline"}
+                    disabled={pack.status !== "ready" || mountingPackId === pack.id}
+                    onClick={() => handleMountGamePack(pack)}
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    {mountingPackId === pack.id ? "Mounting..." : "Mount Pack"}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
 
         <div className="mb-6 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -15,6 +15,13 @@ interface TerminalProps {
   onClose?: () => void;
 }
 
+interface ContainerStatus {
+  enabled: boolean;
+  shell: string;
+  cwd: string;
+  message: string;
+}
+
 const QUICK_COMMANDS = [
   { label: "Help", cmd: "help", icon: "❓" },
   { label: "Clear", cmd: "clear", icon: "🧹" },
@@ -41,14 +48,68 @@ export function Terminal({ onClose }: TerminalProps) {
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showCommandRef, setShowCommandRef] = useState(false);
+  const [containerStatus, setContainerStatus] = useState<ContainerStatus | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/container/status")
+      .then((response) => response.json())
+      .then((status: ContainerStatus) => {
+        setContainerStatus(status);
+        if (status.enabled) {
+          setLines(prev => [...prev, {
+            type: "output",
+            content: `Connected to ${status.shell} at ${status.cwd}`,
+            timestamp: new Date()
+          }]);
+        }
+      })
+      .catch(() => {
+        setContainerStatus({
+          enabled: false,
+          shell: "browser",
+          cwd: "/workspace/youniverse-studio",
+          message: "Container bridge unavailable; using simulated terminal."
+        });
+      });
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [lines]);
+
+  const executeContainerCommand = async (cmd: string) => {
+    if (!containerStatus?.enabled) {
+      return false;
+    }
+
+    const response = await fetch("/api/container/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: cmd }),
+    });
+
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      setLines(prev => [...prev, {
+        type: "error",
+        content: result.error || "Container command failed",
+        timestamp: new Date()
+      }]);
+      return true;
+    }
+
+    const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+    setLines(prev => [...prev, {
+      type: result.code === 0 ? "output" : "error",
+      content: output || `[exit ${result.code}]`,
+      timestamp: new Date()
+    }]);
+    return true;
+  };
 
   const executeCommand = async (cmd: string) => {
     const trimmedCmd = cmd.trim();
@@ -69,12 +130,33 @@ export function Terminal({ onClose }: TerminalProps) {
     const command = parts[0].toLowerCase();
     const args = parts.slice(1);
 
+    const localOnlyCommands = new Set(["help", "clear", "history"]);
+    if (!localOnlyCommands.has(command)) {
+      try {
+        const handledByContainer = await executeContainerCommand(trimmedCmd);
+        if (handledByContainer) {
+          return;
+        }
+      } catch (error) {
+        setLines(prev => [...prev, {
+          type: "error",
+          content: error instanceof Error ? error.message : "Container bridge failed",
+          timestamp: new Date()
+        }]);
+        return;
+      }
+    }
+
     switch (command) {
       case "help":
         setLines(prev => [...prev, {
           type: "output",
           content: [
             "YOU–N–I–VERSE Terminal - Available Commands:",
+            "",
+            containerStatus?.enabled
+              ? `Linux bridge: connected to ${containerStatus.shell}`
+              : "Linux bridge: offline; simulated commands are active",
             "",
             "Navigation & Info:",
             "  pwd           - Print working directory",

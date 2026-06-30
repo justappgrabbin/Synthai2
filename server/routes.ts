@@ -5,6 +5,12 @@ import { uploadProjectToGoogleDrive, uploadFileToGoogleDrive } from "./lib/googl
 import { createOrUpdateGitHubRepo } from "./lib/githubService";
 import { importGitHubRepo } from "./lib/githubImportService";
 import { deployToNetlify } from "./lib/netlifyService";
+import { getContainerStatus, runContainerCommand } from "./lib/linuxContainerService";
+import { getMeshEvents, getMeshStatus, publishMeshEvent } from "./lib/meshEventStore";
+import { getPythonServiceStatus, proxyPythonRequest, startPythonService, stopPythonService } from "./lib/pythonService";
+import { getWorkspaceStatus, listWorkspaceFiles, readWorkspaceFile, writeWorkspaceFile } from "./lib/workspaceService";
+import { getMountedApp, getMountedAppRuns, listMountedApps, mountApp, runMountedApp } from "./lib/appMountService";
+import { listGamePacks, mountGamePack } from "./lib/gamePackService";
 import { orchestrateWorldGeneration, checkTokenAvailability, consumeToken } from "./services/world-orchestrator";
 import { ConsciousnessCalibrator, ChartInterpreter, type BirthData } from "./services/chart-calculators";
 import { generateLayeredConsciousnessVoice } from "./services/gan-integrations";
@@ -17,8 +23,314 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========== StoryForge World Generation API ==========
   
   // Health check
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", service: "YOU-N-I-VERSE Studio API" });
+  app.get("/api/health", async (_req, res) => {
+    res.json({
+      status: "ok",
+      service: "YOU-N-I-VERSE Studio API",
+      mesh: getMeshStatus(),
+      container: getContainerStatus(),
+      python: getPythonServiceStatus(),
+      workspace: getWorkspaceStatus(),
+      apps: { mounted: (await listMountedApps()).filter(Boolean).length },
+    });
+  });
+
+  if (process.env.PYTHON_API_AUTOSTART === "true") {
+    startPythonService()
+      .then((status) => publishMeshEvent({
+        source: "node-server",
+        type: "python.autostart",
+        topic: "python",
+        payload: status as unknown as Record<string, unknown>,
+      }))
+      .catch((error) => console.error("[python] autostart failed:", error));
+  }
+
+  // Persistent mesh event spine for studio actions, MCP calls, generated worlds, and container actions.
+  app.get("/api/mesh/status", (_req, res) => {
+    res.json(getMeshStatus());
+  });
+
+  app.get("/api/mesh/events", (req, res) => {
+    res.json({ success: true, events: getMeshEvents(Number(req.query.limit || 100)) });
+  });
+
+  app.post("/api/mesh/events", (req, res) => {
+    res.json({ success: true, event: publishMeshEvent(req.body || {}) });
+  });
+
+  app.get("/mcp/status", (_req, res) => {
+    res.json({
+      ok: true,
+      name: "you-n-ide-verse-mcp",
+      transport: "http-json",
+      mesh: getMeshStatus(),
+      container: getContainerStatus(),
+      python: getPythonServiceStatus(),
+      workspace: getWorkspaceStatus(),
+      tools: ["health", "mesh_events", "publish_mesh_event", "container_status", "python_status", "python_start", "python_stop", "workspace_status"],
+    });
+  });
+
+  app.post("/mcp/call", (req, res) => {
+    const tool = req.body?.tool || req.body?.name;
+    const event = publishMeshEvent({
+      source: "mcp",
+      type: "mcp.call",
+      topic: tool || "unknown",
+      payload: { args: req.body?.args || req.body?.payload || {} },
+    });
+
+    if (tool === "health") {
+      return res.json({ ok: true, event, result: { service: "YOU-N-I-VERSE Studio API", mesh: getMeshStatus(), container: getContainerStatus(), python: getPythonServiceStatus(), workspace: getWorkspaceStatus() } });
+    }
+    if (tool === "mesh_events") {
+      return res.json({ ok: true, event, result: getMeshEvents(100) });
+    }
+    if (tool === "publish_mesh_event") {
+      return res.json({ ok: true, event: publishMeshEvent({ source: "mcp", ...(req.body?.event || req.body?.args || {}) }) });
+    }
+    if (tool === "container_status") {
+      return res.json({ ok: true, event, result: getContainerStatus() });
+    }
+    if (tool === "python_status") {
+      return res.json({ ok: true, event, result: getPythonServiceStatus() });
+    }
+    if (tool === "python_start") {
+      return startPythonService().then((result) => res.json({ ok: true, event, result }));
+    }
+    if (tool === "python_stop") {
+      return res.json({ ok: true, event, result: stopPythonService() });
+    }
+    if (tool === "workspace_status") {
+      return res.json({ ok: true, event, result: getWorkspaceStatus() });
+    }
+
+    res.status(404).json({ ok: false, event, error: "unknown MCP tool" });
+  });
+
+  // Workspace upload/mount API. UI can send text content or base64 bytes.
+  app.get("/api/workspace/status", (_req, res) => {
+    res.json(getWorkspaceStatus());
+  });
+
+  app.get("/api/workspace/files", (req, res) => {
+    try {
+      res.json({ success: true, ...listWorkspaceFiles(String(req.query.dir || ".")) });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error instanceof Error ? error.message : "Failed to list workspace" });
+    }
+  });
+
+  app.post("/api/workspace/files", (req, res) => {
+    try {
+      const schema = z.object({
+        path: z.string().min(1).max(500),
+        content: z.string().optional(),
+        base64: z.string().optional(),
+      }).refine((value) => value.content !== undefined || value.base64 !== undefined, {
+        message: "Either content or base64 is required",
+      });
+
+      const file = writeWorkspaceFile(schema.parse(req.body));
+      const event = publishMeshEvent({
+        source: "workspace",
+        type: "workspace.file.written",
+        topic: file.path,
+        payload: file as unknown as Record<string, unknown>,
+      });
+
+      res.json({ success: true, file, event });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: "Invalid file payload", details: error.errors });
+      }
+      res.status(400).json({ success: false, error: error instanceof Error ? error.message : "Failed to write file" });
+    }
+  });
+
+  app.get("/api/workspace/files/:path(*)", (req, res) => {
+    try {
+      res.json({ success: true, file: readWorkspaceFile(req.params.path) });
+    } catch (error) {
+      res.status(404).json({ success: false, error: error instanceof Error ? error.message : "File not found" });
+    }
+  });
+
+  // App mount/run API for the OS tray and proof upload loop.
+  app.get("/api/apps", async (_req, res) => {
+    res.json({ success: true, apps: (await listMountedApps()).filter(Boolean) });
+  });
+
+  app.post("/api/apps/mount", async (req, res) => {
+    try {
+      const schema = z.object({
+        name: z.string().min(1).max(120),
+        icon: z.string().optional(),
+        runCommand: z.string().optional(),
+        files: z.array(z.object({
+          path: z.string().min(1).max(500),
+          content: z.string().optional(),
+          base64: z.string().optional(),
+        })).min(1),
+      });
+
+      const appEntry = await mountApp(schema.parse(req.body));
+      const event = publishMeshEvent({
+        source: "app-mount",
+        type: "app.mounted",
+        topic: appEntry.id,
+        payload: appEntry as unknown as Record<string, unknown>,
+      });
+      res.json({ success: true, app: appEntry, event });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: "Invalid app payload", details: error.errors });
+      }
+      res.status(400).json({ success: false, error: error instanceof Error ? error.message : "Failed to mount app" });
+    }
+  });
+
+  app.get("/api/apps/:id", async (req, res) => {
+    try {
+      res.json({ success: true, app: await getMountedApp(req.params.id) });
+    } catch (error) {
+      res.status(404).json({ success: false, error: error instanceof Error ? error.message : "Mounted app not found" });
+    }
+  });
+
+  app.post("/api/apps/:id/run", async (req, res) => {
+    try {
+      const result = await runMountedApp(req.params.id, req.body?.command);
+      const event = publishMeshEvent({
+        source: "app-runner",
+        type: "app.ran",
+        topic: req.params.id,
+        payload: { code: result.run.code, command: result.run.command },
+      });
+      res.json({ success: result.run.code === 0, ...result, event });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Failed to run app" });
+    }
+  });
+
+  app.get("/api/apps/:id/runs", async (req, res) => {
+    try {
+      res.json({ success: true, runs: await getMountedAppRuns(req.params.id) });
+    } catch (error) {
+      res.status(404).json({ success: false, error: error instanceof Error ? error.message : "Mounted app not found" });
+    }
+  });
+
+  // Game packs are source bundles available from startup, but mounted only when the user chooses one.
+  app.get("/api/game-packs", async (_req, res) => {
+    try {
+      res.json({ success: true, packs: await listGamePacks() });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Failed to list game packs" });
+    }
+  });
+
+  app.post("/api/game-packs/:id/mount", async (req, res) => {
+    try {
+      const appEntry = await mountGamePack(req.params.id);
+      const event = publishMeshEvent({
+        source: "game-pack",
+        type: "game-pack.mounted",
+        topic: req.params.id,
+        payload: appEntry as unknown as Record<string, unknown>,
+      });
+      res.json({ success: true, app: appEntry, event });
+    } catch (error) {
+      res.status(400).json({ success: false, error: error instanceof Error ? error.message : "Failed to mount game pack" });
+    }
+  });
+
+  // Node-managed Python ERN service controls.
+  app.get("/api/python/status", (_req, res) => {
+    res.json(getPythonServiceStatus());
+  });
+
+  app.post("/api/python/start", async (_req, res) => {
+    try {
+      const status = await startPythonService();
+      const event = publishMeshEvent({
+        source: "node-server",
+        type: "python.started",
+        topic: "python",
+        payload: status as unknown as Record<string, unknown>,
+      });
+      res.json({ success: true, status, event });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to start Python service",
+      });
+    }
+  });
+
+  app.post("/api/python/stop", (_req, res) => {
+    const status = stopPythonService();
+    const event = publishMeshEvent({
+      source: "node-server",
+      type: "python.stopped",
+      topic: "python",
+      payload: status as unknown as Record<string, unknown>,
+    });
+    res.json({ success: true, status, event });
+  });
+
+  app.all("/api/python/proxy/:path(*)", async (req, res) => {
+    try {
+      const result = await proxyPythonRequest(req.method, `/${req.params.path}`, req.body);
+      publishMeshEvent({
+        source: "node-server",
+        type: "python.proxy",
+        topic: req.params.path || "root",
+        payload: { method: req.method, status: result.status },
+      });
+      if (result.contentType.includes("application/json")) {
+        res.status(result.status).json(result.body);
+      } else {
+        res.status(result.status).type(result.contentType).send(result.body);
+      }
+    } catch (error) {
+      res.status(502).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Python service unavailable",
+      });
+    }
+  });
+
+  // Linux container bridge for the in-app Terminal and self-host shell.
+  app.get("/api/container/status", (_req, res) => {
+    res.json(getContainerStatus());
+  });
+
+  app.post("/api/container/exec", async (req, res) => {
+    try {
+      const schema = z.object({
+        command: z.string().min(1).max(4000),
+        cwd: z.string().optional(),
+      });
+
+      const { command, cwd } = schema.parse(req.body);
+      const result = await runContainerCommand(command, cwd);
+      res.json({ success: true, ...result });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid command request",
+          details: error.errors,
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to run command",
+      });
+    }
   });
 
   // ========== Transit & Growth Program API ==========
@@ -318,6 +630,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Orchestrate world generation
       const result = await orchestrateWorldGeneration(userId, rawText);
+      publishMeshEvent({
+        source: "world-orchestrator",
+        type: "world.generated",
+        topic: result.ideonSeed.id,
+        payload: {
+          userId,
+          ideonSeedId: result.ideonSeed.id,
+          worldManifestationId: result.worldManifestation.id,
+          processingTime: result.processingTime,
+        },
+      });
       
       res.json({
         success: true,

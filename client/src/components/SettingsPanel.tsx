@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIBackendSelector } from "./AIBackendSelector";
+import { OSSetupPanel } from "./OSSetupPanel";
 import { ProfileBuilder } from "./ProfileBuilder";
 import { ResonanceTracker } from "./ResonanceTracker";
 import { SessionAnalytics } from "./SessionAnalytics";
@@ -191,8 +192,9 @@ export function SettingsPanel() {
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
+            <TabsTrigger value="os" data-testid="tab-os">OS Setup</TabsTrigger>
             <TabsTrigger value="ai" data-testid="tab-ai">AI Config</TabsTrigger>
             <TabsTrigger value="autonomy" data-testid="tab-autonomy">
               Autonomy
@@ -288,6 +290,10 @@ export function SettingsPanel() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="os" className="space-y-6">
+            <OSSetupPanel />
           </TabsContent>
 
           <TabsContent value="ai" className="space-y-6">

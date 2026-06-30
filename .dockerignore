@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.config
+workspace
+work
+attached_assets
+*.zip
+*.tar.gz
+npm-debug.log
+__pycache__
+**/__pycache__

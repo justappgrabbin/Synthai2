@@ -1,0 +1,1133 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>YOU‑N‑I‑VERSE Maker Studio — Game • AI • Website • App</title>
+  <style>
+    :root{
+      --bg:#0a0a0a; --panel:#101010; --card:#131313; --ink:#f2f2f2; --muted:#b6b6b6; --line:#222;
+      --accent:#8ef0ff; --accent2:#d8b4fe;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;background:var(--bg);color:var(--ink);}
+    header{position:sticky;top:0;z-index:10;background:#0c0c0c;border-bottom:1px solid var(--line);}
+    .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;}
+    .brand{font-weight:800;letter-spacing:.3px}
+    .tabbar{display:flex;gap:6px;flex-wrap:wrap}
+    .tabbar button{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .tabbar button[aria-selected="true"]{outline:2px solid var(--accent);}
+    main{padding:16px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .col{display:flex;flex-direction:column;gap:6px}
+    input[type="text"], input[type="number"], select, textarea{
+      background:#0b0b0b;border:1px solid var(--line);color:var(--ink);padding:8px 10px;border-radius:10px;min-width:220px
+    }
+    textarea{min-height:80px;width:100%}
+    .btn{background:#141414;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .muted{color:var(--muted)}
+    .tag{display:inline-block;background:#111;border:1px solid var(--line);padding:2px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+    .pill{background:#111;border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+    .sprite{width:100%;aspect-ratio:1/1;background:#0b0b0b;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#555;margin-bottom:8px}
+    footer{padding:16px;border-top:1px solid var(--line);color:var(--muted)}
+    details{background:#0d0d0d;border:1px solid var(--line);border-radius:10px;padding:8px;margin:4px 0}
+    summary{cursor:pointer}
+    code{background:#0d0d0d;border:1px solid #1e1e1e;padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="brand">🧪 YOU‑N‑I‑VERSE <span class="muted">Maker Studio</span></div>
+      <div class="tabbar" role="tablist">
+        <button role="tab" id="tab-data" aria-selected="true">Data</button>
+        <button role="tab" id="tab-create">Create</button>
+        <button role="tab" id="tab-builder">Builder</button>
+        <button role="tab" id="tab-bundles">Bundles</button>
+        <button role="tab" id="tab-match">Match</button>
+        <button role="tab" id="tab-docs">Docs & Backup</button>
+        <button role="tab" id="tab-profiles">Profiles</button>
+        <button role="tab" id="tab-requests">Requests</button>
+        <button role="tab" id="tab-autogen">AutoGen</button>
+      </div>
+      <div class="row" style="margin-left:auto">
+        <button class="btn" id="export-app">Backup → Export App Zip</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- DATA -->
+    <section class="panel" id="panel-data">
+      <div class="row">
+        <label class="pill">
+          <input type="file" id="csvFile" accept=".csv" hidden/>
+          <span>Import CSV</span>
+        </label>
+        <span class="muted">Using: <code id="csv-name">data/gnomes.csv</code></span>
+        <input id="q" placeholder="Search (name/gate/traits)"/>
+        <select id="city">
+          <option value="">All Cities</option>
+        </select>
+        <span class="pill">Rows: <span id="count">0</span></span>
+      </div>
+      <div id="data-grid" class="grid" style="margin-top:10px"></div>
+    </section>
+
+    <!-- CREATE -->
+    <section class="panel" id="panel-create" hidden>
+      <h3>Creators</h3>
+      <details open>
+        <summary>🎮 Game Creator</summary>
+        <div class="row">
+          <select id="game-template">
+            <option value="platformer">Platformer (MarioGAN‑ready)</option>
+            <option value="sandbox">Agent Sandbox (Generative Agents‑ready)</option>
+            <option value="puzzle">Puzzle Grid</option>
+            <option value="narrative">Narrative Sim</option>
+          </select>
+          <select id="game-characters-multi" multiple size="4" style="min-width:240px"></select>
+        </div>
+        <div class="row">
+          <input id="game-title" placeholder="Game Title" value="Five City Resonance"/>
+          <select id="game-difficulty">
+            <option>Easy</option><option selected>Normal</option><option>Hard</option>
+          </select>
+          <select id="game-levelgen">
+            <option value="manual">Manual Layout</option>
+            <option value="mariogan">MarioGAN Hook</option>
+          </select>
+        </div>
+        <div class="col">
+          <textarea id="game-notes" placeholder="Notes / house rules / Technome mechanics…"></textarea>
+          <button class="btn" id="build-game">Build Game Bundle (ZIP)</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>🤖 AI Maker</summary>
+        <div class="row">
+          <input id="agent-name" placeholder="Agent Name" value="Cynthia-Node-Alpha"/>
+          <select id="agent-gnome"></select>
+          <select id="agent-llm">
+            <option value="tinyllama">TinyLlama (local)</option>
+            <option value="mistral">Mistral (local)</option>
+            <option value="phi">Phi (local)</option>
+            <option value="gpt">GPT (API)</option>
+          </select>
+          <select id="agent-skills" multiple size="4" style="min-width:240px">
+            <option value="memory">Memory/Reflection/Planning</option>
+            <option value="open-computer-use">Open‑Computer‑Use Actions</option>
+            <option value="browser">Embedded Nanobrowser</option>
+            <option value="ditto">Ditto Multi‑Agent Collab</option>
+          </select>
+        </div>
+        <div class="row">
+          <input id="agent-memory" type="number" min="32" max="8192" value="256" /> 
+          <label class="muted">Memory Tokens</label>
+          <input id="agent-reflect" type="number" min="0" max="10" value="3" />
+          <label class="muted">Reflection Depth</label>
+        </div>
+        <div class="col">
+          <textarea id="agent-goals" placeholder="Primary goals / behavior policy"></textarea>
+          <button class="btn" id="build-agent">Build AI Agent Bundle (ZIP)</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>🌐 Website Maker</summary>
+        <div class="row">
+          <input id="site-title" placeholder="Site Title" value="Resonance Portfolio"/>
+          <select id="site-theme">
+            <option value="dark">Dark Gradient</option>
+            <option value="light">Clean Light</option>
+            <option value="terminal">Terminal Neon</option>
+          </select>
+          <select id="site-template">
+            <option value="landing">Landing</option>
+            <option value="portfolio">Portfolio</option>
+            <option value="blog">Blog</option>
+          </select>
+        </div>
+        <div class="col">
+          <textarea id="site-about" placeholder="About / mission copy"></textarea>
+          <button class="btn" id="build-site">Build Website Bundle (ZIP)</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>📱 App Maker (PWA stub)</summary>
+        <div class="row">
+          <input id="app-name" placeholder="App Name" value="YOU‑N‑I‑VERSE Pocket"/>
+          <select id="app-type">
+            <option value="dashboard">Dashboard</option>
+            <option value="journal">Journal</option>
+            <option value="todo">To‑Do</option>
+            <option value="chat">Chat</option>
+          </select>
+        </div>
+        <div class="col">
+          <textarea id="app-notes" placeholder="App purpose and modules"></textarea>
+          <button class="btn" id="build-app">Build App Bundle (ZIP)</button>
+        </div>
+      </details>
+    </section>
+
+    <!-- BUNDLES -->
+    
+    <!-- BUILDER -->
+    <section class="panel" id="panel-builder" hidden>
+      <h3>Visual Builder — Websites • Apps • Game Scenes</h3>
+      <details open>
+        <summary>🌐 Website/App Builder</summary>
+        <div class="row">
+          <div class="col" style="min-width:220px">
+            <div class="pill">Palette</div>
+            <div class="row" style="gap:6px">
+              <button class="btn" data-add="heading">Heading</button>
+              <button class="btn" data-add="text">Text</button>
+              <button class="btn" data-add="button">Button</button>
+              <button class="btn" data-add="card">Card</button>
+              <button class="btn" data-add="image">Image</button>
+              <button class="btn" data-add="list">List</button>
+            </div>
+            <div class="col" style="margin-top:10px">
+              <label class="muted">Selection Props</label>
+              <textarea id="builder-props" placeholder='Edit selected JSON props...'></textarea>
+              <div class="row">
+                <button class="btn" id="builder-apply">Apply</button>
+                <button class="btn" id="builder-delete">Delete</button>
+              </div>
+              <div class="row" style="margin-top:8px">
+                <button class="btn" id="builder-export-site">Export Site ZIP</button>
+                <button class="btn" id="builder-export-app">Export App ZIP</button>
+              </div>
+            </div>
+          </div>
+          <div class="col" style="flex:1; min-width:300px">
+            <div class="pill">Canvas (click elements to select)</div>
+            <div id="builder-canvas" style="min-height:360px; border:1px dashed var(--line); border-radius:12px; padding:14px"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>🎮 Game Scene Builder (tile grid)</summary>
+        <div class="row">
+          <div class="col" style="min-width:220px">
+            <div class="pill">Entities</div>
+            <select id="scene-entities" multiple size="6" style="min-width:220px"></select>
+            <div class="row" style="margin-top:8px">
+              <button class="btn" id="scene-export">Export Level JSON</button>
+            </div>
+          </div>
+          <div class="col" style="flex:1; min-width:300px">
+            <div class="pill">Grid (click to place selected entity)</div>
+            <canvas id="scene-grid" width="640" height="360" style="border:1px solid var(--line); border-radius:12px; background:#0b0b0b"></canvas>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="panel-bundles" hidden>
+      <div class="row">
+        <span class="pill">Saved bundles are cached in your browser.</span>
+        <button class="btn" id="purge-bundles">Clear Bundles</button>
+      </div>
+      <div id="bundles-grid" class="grid" style="margin-top:10px"></div>
+    
+    <!-- MATCH -->
+    <section class="panel" id="panel-match" hidden>
+      <h3>Character Matcher</h3>
+      <div class="row">
+        <input id="match-q" placeholder="Describe or filter: e.g. 'gate:59 city:Venom stealth healer'" style="min-width:360px"/>
+        <input id="match-topk" type="number" min="1" max="200" value="20"/>
+        <label class="muted">Top K</label>
+        <button class="btn" id="match-run">Find Matches</button>
+      </div>
+      <p class="muted">Syntax tips: <code>gate:59</code>, <code>city:Prime</code>, <code>name:Zora</code>, free text boosts, multiple terms combined.</p>
+      <div id="match-results" class="grid" style="margin-top:10px"></div>
+    </section>
+</section>
+
+    <!-- DOCS -->
+    
+    <!-- PROFILES -->
+    <section class="panel" id="panel-profiles" hidden>
+      <h3>Profiles — People & Charts</h3>
+      <div class="row">
+        <div class="col" style="min-width:260px">
+          <div class="pill">Add / Edit Profile</div>
+          <input id="prof-name" placeholder="Name (e.g., River)"/>
+          <input id="prof-birth" placeholder="Birth datetime (ISO) e.g., 1994-05-17T14:22:00"/>
+          <input id="prof-place" placeholder="Birthplace (free text)"/>
+          <input id="prof-now" placeholder="Transit date (ISO) e.g., 2025-08-31"/>
+          <textarea id="prof-preferences" placeholder="Preferences (JSON), e.g. { &quot;theme&quot;:&quot;dark&quot;, &quot;likes&quot;:[&quot;puzzle&quot;] }"></textarea>
+          <div class="row">
+            <button class="btn" id="prof-save">Save/Update</button>
+            <button class="btn" id="prof-clear">Clear Form</button>
+          </div>
+        </div>
+        <div class="col" style="flex:1; min-width:320px">
+          <div class="pill">Profiles</div>
+          <div id="prof-list" class="grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REQUESTS -->
+    <section class="panel" id="panel-requests" hidden>
+      <h3>Requests — On‑Demand Builds</h3>
+      <div class="row">
+        <div class="col" style="min-width:280px">
+          <div class="pill">New Request</div>
+          <select id="req-for"></select>
+          <select id="req-type">
+            <option value="Game">Game</option>
+            <option value="Agent">Agent</option>
+            <option value="Site">Site</option>
+            <option value="App">App</option>
+          </select>
+          <input id="req-title" placeholder="Title (optional)"/>
+          <textarea id="req-notes" placeholder="Details / intent / vibe / gates"></textarea>
+          <button class="btn" id="req-add">Add to Queue</button>
+        </div>
+        <div class="col" style="flex:1; min-width:320px">
+          <div class="pill">Queue</div>
+          <div id="req-list" class="grid"></div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" id="req-run">Run Selected</button>
+            <button class="btn" id="req-clear">Clear Queue</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUTOGEN -->
+    <section class="panel" id="panel-autogen" hidden>
+      <h3>AutoGen — Pre‑Generate for Arrival</h3>
+      <p class="muted">Rules turn a person's chart + transit date into ready‑to‑go bundles before they show up.</p>
+      <div class="row">
+        <div class="col" style="min-width:280px">
+          <div class="pill">Rules (JSON)</div>
+          <textarea id="auto-rules" placeholder='[{"if":{"gate":"59"},"make":["Game","Agent"]},{"if":{"city":"Prime"},"make":["Site"]}]' style="min-height:180px"></textarea>
+          <div class="row">
+            <button class="btn" id="auto-save">Save Rules</button>
+            <button class="btn" id="auto-run">Run for Everyone Now</button>
+          </div>
+        </div>
+        <div class="col" style="flex:1; min-width:320px">
+          <div class="pill">Preview Output</div>
+          <div id="auto-preview" class="grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-docs" hidden>
+      <h3>Docs</h3>
+      <p class="muted">
+        This Maker Studio is a single‑file app. It ingests <code>data/gnomes.csv</code> and lets you generate bundles for games, agents, websites, and PWAs. 
+        Everything is client‑side; nothing leaves your device. 
+      </p>
+      <ul>
+        <li><strong>Backups:</strong> Use the “Export App Zip” button in the header anytime.</li>
+        <li><strong>MarioGAN / Generative Agents / Ditto / Open‑Computer‑Use:</strong> this UI writes config & stubs ready for those repos. Wire the hooks in later.</li>
+        <li><strong>Sprites:</strong> Put images in <code>assets/</code> and reference in CSV column <code>sprite</code>.</li>
+      </ul>
+      <h4>Generated Bundle Layouts</h4>
+      <pre><code>
+GameBundle/
+  index.html
+  game.config.json
+  data/roster.json
+  assets/.keep
+
+AgentBundle/
+  agent.json
+  skills/open_computer_use_stub.py
+  README.md
+
+SiteBundle/
+  index.html
+  styles.css
+  content.json
+
+AppBundle/
+  index.html
+  app.js
+  manifest.json
+  service-worker.js
+      </code></pre>
+    </section>
+  </main>
+
+  <footer>Built for Cynthia • YOU‑N‑I‑VERSE • Keep backups like your future depends on it (because it does).</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script>
+    const ls = {
+      get(k,f){ try{const v=localStorage.getItem(k); return v?JSON.parse(v):f}catch{return f} },
+      set(k,v){ try{localStorage.setItem(k, JSON.stringify(v))}catch{} }
+    };
+
+    const App = { rows:[], schema:[], cities:new Set(), bundles: ls.get("bundles", []) };
+
+    // --- Tabs
+    const panels = {
+      "tab-data": "panel-data",
+      "tab-create": "panel-create",
+      "tab-bundles": "panel-bundles",
+      "tab-docs": "panel-docs",
+    };
+    function switchTab(id){
+      for(const [tab,panel] of Object.entries(panels)){
+        document.getElementById(tab).setAttribute("aria-selected", tab===id ? "true" : "false");
+        document.getElementById(panel).hidden = tab!==id;
+      }
+    }
+    document.getElementById("tab-data").onclick = ()=>switchTab("tab-data");
+    document.getElementById("tab-create").onclick = ()=>switchTab("tab-create");
+    document.getElementById("tab-bundles").onclick = ()=>{ renderBundles(); switchTab("tab-bundles"); };
+    document.getElementById("tab-docs").onclick = ()=>switchTab("tab-docs");
+    document.getElementById("tab-profiles").onclick = ()=>{ renderProfiles(); switchTab("tab-profiles"); };
+    document.getElementById("tab-requests").onclick = ()=>{ renderRequests(); switchTab("tab-requests"); };
+    document.getElementById("tab-autogen").onclick = ()=>{ renderAutoGen(); switchTab("tab-autogen"); };
+    document.getElementById("tab-builder").onclick = ()=>{ renderBuilder(); renderScene(); switchTab("tab-builder"); };
+    document.getElementById("tab-match").onclick = ()=>switchTab("tab-match");
+
+    // --- CSV
+    function csvToRows(text){
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length>0);
+      const header = lines.shift().split(",").map(h=>h.trim());
+      const rows = lines.map(l=>{
+        const cols = l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+        const o={};
+        header.forEach((h,i)=>o[h]= (cols[i]||"").replace(/^"|"$/g,""));
+        return o;
+      });
+      return {header, rows};
+    }
+    async function loadBundled(){
+      try{
+        const r = await fetch("data/gnomes.csv");
+        if(r.ok){
+          document.getElementById("csv-name").textContent = "data/gnomes.csv";
+          const t = await r.text();
+          const {header, rows} = csvToRows(t);
+          App.schema=header; App.rows=rows;
+        }
+      }catch(e){ console.warn(e); }
+      hydrateCreators(); renderData();
+    }
+
+    document.getElementById("csvFile").addEventListener("change", async (e)=>{
+      const f = e.target.files?.[0]; if(!f) return;
+      document.getElementById("csv-name").textContent = f.name;
+      const t = await f.text();
+      const {header, rows} = csvToRows(t);
+      App.schema=header; App.rows=rows;
+      hydrateCreators(); renderData();
+    });
+
+    // --- Data grid
+    function applyCity(r){ return r.City || r.city || r.town || ""; }
+    function renderData(){
+      const q = document.getElementById("q").value.toLowerCase();
+      const city = document.getElementById("city").value;
+      const grid = document.getElementById("data-grid");
+      App.cities = new Set(App.rows.map(applyCity).filter(Boolean));
+      const sel = document.getElementById("city");
+      if(sel.options.length <= 1){
+        [...App.cities].sort().forEach(c => {
+          const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o);
+        });
+      }
+      const filtered = App.rows.filter(r=>{
+        if(city && applyCity(r)!==city) return false;
+        const hay = (r.name||r.Name||"").toLowerCase()+" "+JSON.stringify(r).toLowerCase();
+        return !q || hay.includes(q);
+      });
+      document.getElementById("count").textContent = filtered.length;
+      grid.innerHTML="";
+      filtered.slice(0,60).forEach(r=>{
+        const card = document.createElement("div"); card.className="card";
+        const sprite = document.createElement("div"); sprite.className="sprite";
+        const sfile = r.sprite || r.Sprite || ""; sprite.textContent = sfile? sfile : "No sprite";
+        const title = document.createElement("div"); title.innerHTML = "<strong>"+(r.name||r.Name||"Unnamed")+"</strong>";
+        const meta  = document.createElement("div"); meta.className="muted"; meta.textContent = "City: "+(applyCity(r)||"—")+" | Gate:"+(r.gate||r.Gate||"—");
+        const tags  = document.createElement("div"); tags.innerHTML = '<span class="tag">gnome</span><span class="tag">agent</span>';
+        card.append(sprite, title, meta, tags);
+        card.onclick = ()=> alert(JSON.stringify(r, null, 2));
+        grid.appendChild(card);
+      });
+    }
+    document.getElementById("q").addEventListener("input", renderData);
+    document.getElementById("city").addEventListener("change", renderData);
+
+    // --- Creators hydrate (populate selects from CSV)
+    function hydrateCreators(){
+      // Characters multi-select
+      const multi = document.getElementById("game-characters-multi");
+      multi.innerHTML="";
+      App.rows.slice(0,200).forEach((r,i)=>{
+        const opt=document.createElement("option");
+        opt.value = r.id || r.ID || r.name || r.Name || ("row"+i);
+        opt.textContent = (r.name || r.Name || ("Row "+i)) + (applyCity(r)? (" — "+applyCity(r)):"");
+        multi.appendChild(opt);
+      });
+      const agentSel = document.getElementById("agent-gnome");
+      agentSel.innerHTML="";
+      App.rows.slice(0,200).forEach((r,i)=>{
+        const opt=document.createElement("option");
+        opt.value = r.id || r.ID || r.name || r.Name || ("row"+i);
+        opt.textContent = (r.name || r.Name || ("Row "+i));
+        agentSel.appendChild(opt);
+      });
+    }
+
+    // --- Bundles
+    function addBundle(meta){
+      App.bundles.unshift({id: Date.now()+"", ...meta});
+      ls.set("bundles", App.bundles);
+      renderBundles();
+    }
+    function renderBundles(){
+      const grid = document.getElementById("bundles-grid"); grid.innerHTML="";
+      if(!App.bundles.length){ grid.innerHTML='<div class="muted">No bundles yet. Build one in the Create tab.</div>'; return; }
+      App.bundles.forEach(b=>{
+        const card=document.createElement("div"); card.className="card";
+        const h=document.createElement("div"); h.innerHTML = "<strong>"+b.kind+"</strong> • "+(b.title||b.name||b.id);
+        const m=document.createElement("div"); m.className="muted"; m.textContent = (b.desc||"") + " • "+new Date(parseInt(b.id)).toLocaleString();
+        const row=document.createElement("div"); row.className="row"; row.style.marginTop="8px";
+        const btn=document.createElement("button"); btn.className="btn"; btn.textContent = "Download ZIP";
+        btn.onclick = ()=> buildZipFromMeta(b);
+        row.appendChild(btn);
+        card.append(h,m,row);
+        grid.appendChild(card);
+      });
+    }
+    document.getElementById("purge-bundles").onclick = ()=>{ App.bundles=[]; ls.set("bundles", App.bundles); renderBundles(); };
+
+    // --- Build Zips (client-side)
+    async function buildZipFromMeta(b){
+      const zip = new JSZip();
+      if(b.kind==="Game"){
+        zip.folder("GameBundle").file("game.config.json", JSON.stringify(b.payload.config, null, 2));
+        zip.folder("GameBundle").folder("data").file("roster.json", JSON.stringify(b.payload.roster, null, 2));
+        zip.folder("GameBundle").file("index.html", starterGameHtml(b.title));
+        zip.folder("GameBundle").folder("assets").file(".keep","");
+        const blob = await zip.generateAsync({type:"blob"});
+        saveAs(blob, sanitize((b.title||"Game")+"_Bundle.zip"));
+      } else if(b.kind==="Agent"){
+        const f = zip.folder("AgentBundle");
+        f.file("agent.json", JSON.stringify(b.payload.agent, null, 2));
+        f.folder("skills").file("open_computer_use_stub.py", ocustub());
+        f.file("README.md", agentReadme(b.payload.agent));
+        const blob = await zip.generateAsync({type:"blob"});
+        saveAs(blob, sanitize((b.title||"Agent")+"_Bundle.zip"));
+      } else if(b.kind==="Site"){
+        const f = zip.folder("SiteBundle");
+        f.file("index.html", siteIndex(b.payload));
+        f.file("styles.css", siteStyles(b.payload.theme));
+        f.file("content.json", JSON.stringify(b.payload.content,null,2));
+        const blob = await zip.generateAsync({type:"blob"});
+        saveAs(blob, sanitize((b.title||"Site")+"_Bundle.zip"));
+      } else if(b.kind==="App"){
+        const f = zip.folder("AppBundle");
+        f.file("index.html", appIndex(b.payload));
+        f.file("app.js", appJS(b.payload));
+        f.file("manifest.json", manifestJSON(b.payload));
+        f.file("service-worker.js", swJS());
+        const blob = await zip.generateAsync({type:"blob"});
+        saveAs(blob, sanitize((b.title||"App")+"_Bundle.zip"));
+      }
+    }
+
+    function sanitize(s){ return (s||"").replace(/[^\w\-]+/g,"_"); }
+
+    // --- Creator buttons → save meta & offer zip
+    document.getElementById("build-game").onclick = ()=>{
+      const title = document.getElementById("game-title").value || "Game";
+      const tmpl = document.getElementById("game-template").value;
+      const diff = document.getElementById("game-difficulty").value;
+      const lvl  = document.getElementById("game-levelgen").value;
+      const notes= document.getElementById("game-notes").value;
+      const chars= Array.from(document.getElementById("game-characters-multi").selectedOptions).map(o=>o.value);
+      const roster = App.rows.filter(r => chars.includes(r.id || r.ID || r.name || r.Name));
+      const meta = {
+        kind:"Game", title, desc:`${tmpl} • ${diff} • ${lvl}`,
+        payload: {
+          config: { title, template:tmpl, difficulty:diff, levelgen:lvl, notes },
+          roster
+        }
+      };
+      addBundle(meta); buildZipFromMeta(meta);
+    };
+
+    document.getElementById("build-agent").onclick = ()=>{
+      const name = document.getElementById("agent-name").value || "Agent";
+      const gSel = document.getElementById("agent-gnome").value;
+      const llm = document.getElementById("agent-llm").value;
+      const skills = Array.from(document.getElementById("agent-skills").selectedOptions).map(o=>o.value);
+      const mem = parseInt(document.getElementById("agent-memory").value||"256",10);
+      const refl= parseInt(document.getElementById("agent-reflect").value||"3",10);
+      const goals = document.getElementById("agent-goals").value;
+      const g = App.rows.find(r => (r.id||r.ID||r.name||r.Name)===gSel) || {};
+      const agent = {
+        name, llm, skills, memory_tokens: mem, reflection_depth: refl, goals,
+        seed: { name: g.name||g.Name||"", city: g.City||g.city||"", gate: g.gate||g.Gate||"", sprite: g.sprite||g.Sprite||"" }
+      };
+      const meta = { kind:"Agent", title:name, desc:`${llm} • ${skills.join(", ")}`, payload:{ agent } };
+      addBundle(meta); buildZipFromMeta(meta);
+    };
+
+    document.getElementById("build-site").onclick = ()=>{
+      const title = document.getElementById("site-title").value || "Site";
+      const theme = document.getElementById("site-theme").value;
+      const template = document.getElementById("site-template").value;
+      const about = document.getElementById("site-about").value;
+      const content = { title, about, template, sections:[{h:"About",p:about}]};
+      const meta = { kind:"Site", title, desc:`${template} • ${theme}`, payload:{ theme, template, content } };
+      addBundle(meta); buildZipFromMeta(meta);
+    };
+
+    document.getElementById("build-app").onclick = ()=>{
+      const name = document.getElementById("app-name").value || "App";
+      const type = document.getElementById("app-type").value;
+      const notes= document.getElementById("app-notes").value;
+      const payload = { name, type, notes };
+      const meta = { kind:"App", title:name, desc:type, payload };
+      addBundle(meta); buildZipFromMeta(meta);
+    };
+
+    // --- Backup whole app
+    document.getElementById("export-app").onclick = async ()=>{
+      const resp = await fetch(document.location.href);
+      const html = await resp.text();
+      const zip = new JSZip();
+      zip.folder("MakerStudio").file("index.html", html);
+      try{
+        const r = await fetch("data/gnomes.csv"); if(r.ok){ const t=await r.text(); zip.folder("MakerStudio").folder("data").file("gnomes.csv", t); }
+      }catch(e){}
+      zip.folder("MakerStudio").folder("assets").file(".keep","");
+      const blob = await zip.generateAsync({type:"blob"});
+      saveAs(blob, "YOU-N-I-VERSE_MakerStudio.zip");
+    };
+
+    // --- Templates
+    function starterGameHtml(title){
+      return `<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${"${title}"}</title>
+<style>body{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0}header{padding:12px 16px;border-bottom:1px solid #222;background:#0d0d0d}</style>
+</head><body>
+<header><strong>${"${title}"}</strong> <span style="color:#aaa">• starter</span></header>
+<main style="padding:16px">
+<p>This is a starter shell. Load <code>game.config.json</code> and <code>data/roster.json</code> for characters and rules.</p>
+<pre id="out"></pre>
+<script>
+Promise.all([fetch('game.config.json').then(r=>r.json()), fetch('data/roster.json').then(r=>r.json())]).then(([cfg, roster])=>{
+  document.getElementById('out').textContent = JSON.stringify({cfg, roster}, null, 2);
+});
+</script>
+</main></body></html>`;
+    }
+    function ocustub(){ return `# Open‑Computer‑Use skill stub
+# Fill in actions your agent is allowed to perform
+class OpenComputerUse:
+    def __init__(self):
+        pass
+    def click(self, selector): ...
+    def type(self, text): ...
+    def open(self, url): ...
+`; }
+    function agentReadme(agent){
+      return `# Agent Bundle
+
+Name: ${"${agent.name}"}
+LLM: ${"${agent.llm}"}
+Skills: ${"${agent.skills.join(\", \")}"}
+Memory tokens: ${"${agent.memory_tokens}"}
+Reflection depth: ${"${agent.reflection_depth}"}
+
+Seed:
+- Name: ${"${agent.seed.name}"}
+- City: ${"${agent.seed.city}"}
+- Gate: ${"${agent.seed.gate}"}
+- Sprite: ${"${agent.seed.sprite}"}
+
+## How to run
+- Use this JSON with your preferred runtime (e.g., Generative Agents, Ditto, or your own loop).
+- Plug Open‑Computer‑Use actions into your environment.
+- Keep backups.`;
+    }
+    function siteIndex(p){
+      const accent = p.theme==="light" ? "#222" : "#8ef0ff";
+      return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${"${p.content.title}"}</title>
+<link rel="stylesheet" href="styles.css"/></head>
+<body><header><h1>${"${p.content.title}"}</h1></header>
+<main><section><h2>About</h2><p>${"${(p.content.about||\"\").replace(/</g,\"&lt;\")}"}</p></section></main>
+<footer>Generated by YOU‑N‑I‑VERSE Maker Studio</footer></body></html>`;
+    }
+    function siteStyles(theme){
+      if(theme==="light"){
+        return `body{font-family:system-ui;background:#fafafa;color:#222;margin:0}
+header{padding:20px;background:#fff;border-bottom:1px solid #ddd}`;
+      } else if(theme==="terminal"){
+        return `body{font-family:ui-monospace, Menlo, Consolas;background:#000;color:#0f0;margin:0}
+header{padding:20px;border-bottom:1px solid #0f0}`;
+      }
+      return `body{font-family:system-ui;background:radial-gradient(1200px 800px at 10% 10%, #0f172a 0%, #0a0a0a 60%);color:#eef2ff;margin:0}
+header{padding:20px;background:rgba(0,0,0,.3);border-bottom:1px solid #1f2937}`;
+    }
+    function appIndex(p){
+      return `<!doctype html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="manifest" href="manifest.json"/>
+<title>${"${p.name}"}</title>
+<style>body{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0}header{padding:12px 16px;border-bottom:1px solid #222;background:#0d0d0d}</style>
+</head><body>
+<header><strong>${"${p.name}"}</strong> <span style="color:#aaa">• ${"${p.type}"}</span></header>
+<main style="padding:16px"><div id="app"></div></main>
+<script src="app.js"></script>
+</body></html>`;
+    }
+    function appJS(p){
+      return `if('serviceWorker' in navigator){ navigator.serviceWorker.register('./service-worker.js'); }
+const state = { notes: ${"${JSON.stringify(p.notes||\"\")}" } };
+document.getElementById('app').textContent = 'Hello from ${"${p.name}"} (${"${p.type}"}). Notes: ' + state.notes;`;
+    }
+    function manifestJSON(p){
+      return JSON.stringify({
+        name: p.name, short_name: p.name, start_url: ".", display:"standalone",
+        background_color:"#0b0b0b", theme_color:"#0b0b0b", icons:[]
+      }, null, 2);
+    }
+    function swJS(){
+      return `self.addEventListener('install', e=>self.skipWaiting());
+self.addEventListener('activate', e=>clients.claim());
+self.addEventListener('fetch', ()=>{});`;
+    }
+
+    
+    // --- Matcher
+    function parseFilters(text){
+      const tokens = text.trim().split(/\s+/);
+      const filters = { gate:null, city:null, name:null, raw:[] };
+      tokens.forEach(t => {
+        const m = t.match(/^(\w+):(.*)$/);
+        if(m){
+          const k = m[1].toLowerCase(), v = m[2];
+          if(k==='gate') filters.gate = v;
+          else if(k==='city') filters.city = v;
+          else if(k==='name') filters.name = v;
+          else filters.raw.push(t.toLowerCase());
+        } else {
+          filters.raw.push(t.toLowerCase());
+        }
+      });
+      return filters;
+    }
+    function scoreRow(row, filters){
+      let score = 0;
+      const blob = JSON.stringify(row).toLowerCase();
+      if(filters.gate){
+        const g = (row.gate||row.Gate||"").toString().toLowerCase();
+        if(g===filters.gate.toLowerCase()) score += 5; else if(g.includes(filters.gate.toLowerCase())) score += 3; else return -1;
+      }
+      if(filters.city){
+        const c = (row.City||row.city||"").toLowerCase();
+        if(c===filters.city.toLowerCase()) score += 3; else if(!c.includes(filters.city.toLowerCase())) return -1;
+      }
+      if(filters.name){
+        const n = (row.name||row.Name||"").toLowerCase();
+        if(n===filters.name.toLowerCase()) score += 4; else if(!n.includes(filters.name.toLowerCase())) return -1;
+      }
+      for(const t of filters.raw){
+        if(!t) continue;
+        if(blob.includes(t)) score += 1;
+      }
+      return score;
+    }
+    function runMatch(){
+      const q = document.getElementById("match-q").value || "";
+      const topk = parseInt(document.getElementById("match-topk").value||"20",10);
+      const filters = parseFilters(q);
+      const scored = App.rows.map((r,i)=>({row:r, idx:i, score:scoreRow(r, filters)}))
+                             .filter(x=>x.score>=0)
+                             .sort((a,b)=>b.score-a.score)
+                             .slice(0, topk);
+      const grid = document.getElementById("match-results"); grid.innerHTML="";
+      if(!scored.length){ grid.innerHTML = '<div class="muted">No matches.</div>'; return; }
+      scored.forEach(({row, score})=>{
+        const card = document.createElement("div"); card.className="card";
+        const title = document.createElement("div"); title.innerHTML = "<strong>"+(row.name||row.Name||"Unnamed")+"</strong> <span class='muted'>score "+score+"</span>";
+        const meta  = document.createElement("div"); meta.className="muted"; meta.textContent = "City: "+(row.City||row.city||"—")+" | Gate: "+(row.gate||row.Gate||"—");
+        const sprite = document.createElement("div"); sprite.className="sprite"; sprite.textContent = row.sprite||row.Sprite||"No sprite";
+        card.append(sprite, title, meta);
+        card.onclick = ()=> alert(JSON.stringify(row, null, 2));
+        grid.appendChild(card);
+      });
+    }
+    document.addEventListener("DOMContentLoaded", ()=>{
+      const btn = document.getElementById("match-run");
+      if(btn) btn.onclick = runMatch;
+      const input = document.getElementById("match-q");
+      if(input) input.addEventListener("keydown", (e)=>{ if(e.key==='Enter') runMatch(); });
+    });
+
+    
+    // --- Visual Builder
+    const Builder = {
+      nodes: [], sel: null,
+      mk(type){
+        const id = "n"+Date.now()+Math.floor(Math.random()*999);
+        const base = { id, type, text:type.toUpperCase(), x:0, y:0, w:12, props:{} };
+        if(type==="heading") base.text = "Your Headline";
+        if(type==="text") base.text = "Your paragraph...";
+        if(type==="button") base.text = "Click Me";
+        if(type==="card") base.text = "Card title";
+        if(type==="list") base.props.items = ["One","Two","Three"];
+        if(type==="image"){ base.props.src="https://picsum.photos/400/240"; base.props.alt="Placeholder"; base.w=12; }
+        Builder.nodes.push(base); return base;
+      },
+      render(){
+        const root = document.getElementById("builder-canvas"); if(!root) return;
+        root.innerHTML = "";
+        Builder.nodes.forEach(n => {
+          const el = document.createElement(n.type==="heading"?"h2": (n.type==="text"?"p":"div"));
+          el.className = "card";
+          if(n.type==="button"){ const b=document.createElement("button"); b.className="btn"; b.textContent=n.text; el.appendChild(b); }
+          else if(n.type==="image"){ const img=document.createElement("img"); img.src=n.props.src||""; img.alt=n.props.alt||""; img.style.maxWidth="100%"; el.appendChild(img); }
+          else if(n.type==="list"){ const ul=document.createElement("ul"); (n.props.items||[]).forEach(t=>{ const li=document.createElement("li"); li.textContent=t; ul.appendChild(li); }); el.appendChild(ul); }
+          else { el.textContent = n.text; }
+          el.style.marginBottom = "10px";
+          el.dataset.id = n.id;
+          if(Builder.sel && Builder.sel.id===n.id) el.style.outline = "2px solid var(--accent)";
+          el.onclick = (e)=>{ e.stopPropagation(); Builder.sel = n; Builder.syncProps(); Builder.render(); };
+          root.appendChild(el);
+        });
+        root.onclick = ()=>{ Builder.sel=null; Builder.syncProps(); Builder.render(); };
+      },
+      syncProps(){
+        const ta = document.getElementById("builder-props"); if(!ta) return;
+        if(!Builder.sel){ ta.value=""; return; }
+        const safe = { type:Builder.sel.type, text:Builder.sel.text, props:Builder.sel.props };
+        ta.value = JSON.stringify(safe, null, 2);
+      },
+      applyProps(){
+        const ta = document.getElementById("builder-props"); if(!ta || !Builder.sel) return;
+        try{
+          const obj = JSON.parse(ta.value);
+          if(typeof obj.text === "string") Builder.sel.text = obj.text;
+          if(typeof obj.props === "object") Builder.sel.props = obj.props;
+          Builder.render();
+        }catch(e){ alert("Invalid JSON"); }
+      },
+      siteZip(){
+        const html = Builder.exportHTML();
+        const css = "body{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:16px} .card{background:#121212;border:1px solid #222;border-radius:12px;padding:12px;margin:8px 0} .btn{background:#1a1a1a;border:1px solid #333;color:#eee;padding:8px 12px;border-radius:10px}";
+        window.buildZip([{path:"SiteBundle/index.html", text:html},{path:"SiteBundle/styles.css", text:css},{path:"SiteBundle/content.json", text:JSON.stringify({nodes:Builder.nodes},null,2)}], "Site_Bundle.zip");
+      },
+      appZip(){
+        const html = Builder.exportHTML({pwa:true});
+        const appjs = "if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js');}";
+        const mani = JSON.stringify({name:"Builder App",short_name:"Builder",start_url:".",display:"standalone",background_color:"#0b0b0b",theme_color:"#0b0b0b"},null,2);
+        const sw = "self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>clients.claim());";
+        window.buildZip([
+          {path:"AppBundle/index.html", text:html},
+          {path:"AppBundle/app.js", text:appjs},
+          {path:"AppBundle/manifest.json", text:mani},
+          {path:"AppBundle/service-worker.js", text:sw},
+          {path:"AppBundle/content.json", text:JSON.stringify({nodes:Builder.nodes},null,2)}
+        ], "App_Bundle.zip");
+      },
+      exportHTML(opts={}){
+        const body = Builder.nodes.map(n=>{
+          if(n.type==="button") return `<button class="btn">${n.text}</button>`;
+          if(n.type==="image") return `<div class="card"><img src="${n.props.src||""}" alt="${n.props.alt||""}" style="max-width:100%"/></div>`;
+          if(n.type==="list") return `<div class="card"><ul>${(n.props.items||[]).map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+          const tag = (n.type==="heading")?"h2":(n.type==="text")?"p":"div";
+          return `<${tag} class="card">${n.text}</${tag}>`;
+        }).join("\n");
+        const head = opts.pwa? `<link rel="manifest" href="manifest.json"/>` : "";
+        return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>${head}<title>Builder Output</title><link rel="stylesheet" href="styles.css"/></head><body>${body}<script src="app.js"></script></body></html>`;
+      }
+    };
+    function renderBuilder(){
+      // hydrate palette buttons
+      document.querySelectorAll('[data-add]').forEach(b=>{
+        b.onclick = ()=>{ Builder.mk(b.getAttribute('data-add')); Builder.render(); };
+      });
+      const apply = document.getElementById("builder-apply"); if(apply) apply.onclick = ()=>Builder.applyProps();
+      const del = document.getElementById("builder-delete"); if(del) del.onclick = ()=>{ if(Builder.sel){ Builder.nodes = Builder.nodes.filter(n=>n.id!==Builder.sel.id); Builder.sel=null; Builder.render(); Builder.syncProps(); }};
+      const exs = document.getElementById("builder-export-site"); if(exs) exs.onclick = ()=>Builder.siteZip();
+      const exa = document.getElementById("builder-export-app"); if(exa) exa.onclick = ()=>Builder.appZip();
+      Builder.render(); Builder.syncProps();
+    }
+    // generic zip helper using JSZip
+    window.buildZip = async function(files, name){
+      const zip = new JSZip();
+      files.forEach(f=>zip.file(f.path, f.text));
+      const blob = await zip.generateAsync({type:"blob"});
+      saveAs(blob, name);
+    };
+
+    // --- Game Scene Builder
+    const Scene = { w:32, h:18, tile:20, entities:[], placements:[] };
+    function renderScene(){
+      // fill entity list from CSV
+      const sel = document.getElementById("scene-entities"); if(!sel) return;
+      sel.innerHTML="";
+      App.rows.slice(0,100).forEach((r,i)=>{
+        const o=document.createElement("option");
+        o.value = r.id||r.ID||r.name||r.Name||("row"+i);
+        o.textContent = (r.name||r.Name||("Row "+i));
+        sel.appendChild(o);
+      });
+      const cv = document.getElementById("scene-grid"); if(!cv) return;
+      const ctx = cv.getContext("2d");
+      const draw = ()=>{
+        ctx.clearRect(0,0,cv.width,cv.height);
+        // grid
+        ctx.globalAlpha = 0.3;
+        for(let x=0;x<cv.width;x+=Scene.tile){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,cv.height); ctx.strokeStyle="#333"; ctx.stroke(); }
+        for(let y=0;y<cv.height;y+=Scene.tile){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cv.width,y); ctx.strokeStyle="#333"; ctx.stroke(); }
+        ctx.globalAlpha = 1;
+        // placements
+        ctx.fillStyle = "#8ef0ff";
+        Scene.placements.forEach(p=>{ ctx.fillRect(p.x*Scene.tile, p.y*Scene.tile, Scene.tile, Scene.tile); });
+      };
+      cv.onclick = (e)=>{
+        const rect = cv.getBoundingClientRect();
+        const gx = Math.floor((e.clientX-rect.left)/Scene.tile);
+        const gy = Math.floor((e.clientY-rect.top)/Scene.tile);
+        const picks = Array.from(sel.selectedOptions).map(o=>o.value);
+        picks.forEach(v=> Scene.placements.push({id:v, x:gx, y:gy}));
+        draw();
+      };
+      draw();
+      const ex = document.getElementById("scene-export"); if(ex) ex.onclick = ()=>{
+        const level = { grid:{w:Scene.w,h:Scene.h,tile:Scene.tile}, entities:Scene.placements };
+        window.buildZip([{path:"Level/level.json", text:JSON.stringify(level,null,2)}], "Level_JSON.zip");
+      };
+    }
+
+    
+    // --- Profiles / Requests / AutoGen store
+    const Store = {
+      profiles: ls.get("profiles", []),
+      requests: ls.get("requests", []),
+      rules: ls.get("auto_rules", [
+        {"if":{"gate":"59"},"make":["Game"]},
+        {"if":{"city":"Prime"},"make":["Agent","Site"]}
+      ]),
+      save(){ ls.set("profiles", this.profiles); ls.set("requests", this.requests); ls.set("auto_rules", this.rules); }
+    };
+
+    // --- Profiles
+    function renderProfiles(){
+      // hydrate select in Requests
+      const sel = document.getElementById("req-for"); if(sel){ sel.innerHTML=""; Store.profiles.forEach((p,i)=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; sel.appendChild(o); }); }
+      // render list
+      const grid = document.getElementById("prof-list"); if(!grid) return;
+      grid.innerHTML = "";
+      if(!Store.profiles.length){ grid.innerHTML = '<div class="muted">No profiles yet. Add one on the left.</div>'; return; }
+      Store.profiles.forEach(p=>{
+        const card = document.createElement("div"); card.className="card";
+        const t = document.createElement("div"); t.innerHTML = "<strong>"+p.name+"</strong> <span class='muted'>"+(p.now||"")+"</span>";
+        const m = document.createElement("div"); m.className="muted"; m.textContent = (p.birth||"") + " • " + (p.place||"");
+        const btns = document.createElement("div"); btns.className="row"; btns.style.marginTop="8px";
+        const gen = document.createElement("button"); gen.className="btn"; gen.textContent="Generate Now"; gen.onclick = ()=> autogenFor(p);
+        const edit = document.createElement("button"); edit.className="btn"; edit.textContent="Edit"; edit.onclick = ()=> loadProfileForm(p);
+        const del = document.createElement("button"); del.className="btn"; del.textContent="Delete"; del.onclick = ()=>{ Store.profiles = Store.profiles.filter(x=>x.id!==p.id); Store.save(); renderProfiles(); };
+        btns.append(gen, edit, del);
+        card.append(t,m,btns);
+        grid.appendChild(card);
+      });
+
+      // Bind form
+      const save = document.getElementById("prof-save");
+      if(save && !save.dataset.bound){
+        save.dataset.bound = "1";
+        save.onclick = ()=>{
+          const p = {
+            id: "p"+Date.now(),
+            name: document.getElementById("prof-name").value || "Unnamed",
+            birth: document.getElementById("prof-birth").value || "",
+            place: document.getElementById("prof-place").value || "",
+            now: document.getElementById("prof-now").value || "",
+            preferences: parseJSONsafe(document.getElementById("prof-preferences").value) || {}
+          };
+          // if editing existing (same name), update
+          const ix = Store.profiles.findIndex(x=>x.name===p.name);
+          if(ix>=0){ p.id = Store.profiles[ix].id; Store.profiles[ix] = p; } else { Store.profiles.push(p); }
+          Store.save(); clearProfileForm(); renderProfiles();
+        };
+      }
+      const clr = document.getElementById("prof-clear");
+      if(clr && !clr.dataset.bound){
+        clr.dataset.bound="1";
+        clr.onclick = ()=> clearProfileForm();
+      }
+    }
+    function loadProfileForm(p){
+      document.getElementById("prof-name").value = p.name||"";
+      document.getElementById("prof-birth").value = p.birth||"";
+      document.getElementById("prof-place").value = p.place||"";
+      document.getElementById("prof-now").value = p.now||"";
+      document.getElementById("prof-preferences").value = JSON.stringify(p.preferences||{}, null, 2);
+    }
+    function clearProfileForm(){
+      ["prof-name","prof-birth","prof-place","prof-now","prof-preferences"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+    }
+    function parseJSONsafe(txt){ try{ return JSON.parse(txt) }catch{ return null } }
+
+    // --- Requests
+    function renderRequests(){
+      // hydrate dropdown
+      const sel = document.getElementById("req-for"); if(sel){ sel.innerHTML=""; Store.profiles.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; sel.appendChild(o); }); }
+      const list = document.getElementById("req-list"); if(!list) return;
+      list.innerHTML="";
+      if(!Store.requests.length){ list.innerHTML = '<div class="muted">Queue empty. Add a request.</div>'; }
+      Store.requests.forEach((r, idx)=>{
+        const card = document.createElement("div"); card.className="card";
+        const h = document.createElement("div"); h.innerHTML = "<strong>"+r.type+"</strong> • "+(r.title||"Untitled")+" <span class='muted'>for "+(r.forName||r.forId)+"</span>";
+        const m = document.createElement("div"); m.className="muted"; m.textContent = r.notes||"";
+        const row = document.createElement("div"); row.className="row"; row.style.marginTop="8px";
+        const run = document.createElement("button"); run.className="btn"; run.textContent="Build"; run.onclick = ()=> buildFromRequest(r);
+        const rm = document.createElement("button"); rm.className="btn"; rm.textContent="Remove"; rm.onclick = ()=>{ Store.requests.splice(idx,1); Store.save(); renderRequests(); };
+        row.append(run, rm);
+        card.append(h,m,row);
+        list.appendChild(card);
+      });
+
+      const add = document.getElementById("req-add");
+      if(add && !add.dataset.bound){
+        add.dataset.bound="1";
+        add.onclick = ()=>{
+          const forId = document.getElementById("req-for").value;
+          const prof = Store.profiles.find(p=>p.id===forId) || {name:forId};
+          const r = {
+            id: "r"+Date.now(), forId, forName: prof.name,
+            type: document.getElementById("req-type").value,
+            title: document.getElementById("req-title").value,
+            notes: document.getElementById("req-notes").value
+          };
+          Store.requests.push(r); Store.save(); renderRequests();
+        };
+      }
+      const run = document.getElementById("req-run");
+      if(run && !run.dataset.bound){
+        run.dataset.bound="1";
+        run.onclick = ()=>{ (Store.requests.slice()).forEach(buildFromRequest); };
+      }
+      const clr = document.getElementById("req-clear");
+      if(clr && !clr.dataset.bound){
+        clr.dataset.bound="1";
+        clr.onclick = ()=>{ Store.requests=[]; Store.save(); renderRequests(); };
+      }
+    }
+
+    function buildFromRequest(r){
+      if(r.type==="Game"){
+        // Create a simple roster using top 8 CSV rows as a demo
+        const roster = App.rows.slice(0,8);
+        const meta = { kind:"Game", title:r.title||("Game for "+r.forName), desc:"request", payload:{ config:{ title:r.title||"Game", template:"sandbox", difficulty:"Normal", levelgen:"manual", notes:r.notes||"" }, roster } };
+        addBundle(meta); buildZipFromMeta(meta);
+      } else if(r.type==="Agent"){
+        const g = App.rows[0] || {};
+        const agent = { name:r.title||("Agent for "+r.forName), llm:"gpt", skills:["memory","browser"], memory_tokens:512, reflection_depth:3, goals:r.notes||"", seed:{ name:g.name||g.Name||"", city:g.City||g.city||"", gate:g.gate||g.Gate||"", sprite:g.sprite||g.Sprite||"" } };
+        const meta = { kind:"Agent", title:agent.name, desc:"request", payload:{ agent } };
+        addBundle(meta); buildZipFromMeta(meta);
+      } else if(r.type==="Site"){
+        const payload = { theme:"dark", template:"landing", content:{ title:r.title||("Site for "+r.forName), about:r.notes||"" } };
+        const meta = { kind:"Site", title:payload.content.title, desc:"request", payload };
+        addBundle(meta); buildZipFromMeta(meta);
+      } else if(r.type==="App"){
+        const payload = { name:r.title||("App for "+r.forName), type:"dashboard", notes:r.notes||"" };
+        const meta = { kind:"App", title:payload.name, desc:"request", payload };
+        addBundle(meta); buildZipFromMeta(meta);
+      }
+    }
+
+    // --- AutoGen
+    function renderAutoGen(){
+      const ta = document.getElementById("auto-rules");
+      if(ta && !ta.value){ ta.value = JSON.stringify(Store.rules, null, 2); }
+      const save = document.getElementById("auto-save");
+      if(save && !save.dataset.bound){
+        save.dataset.bound="1";
+        save.onclick = ()=>{
+          const rules = parseJSONsafe(document.getElementById("auto-rules").value);
+          if(Array.isArray(rules)){ Store.rules = rules; Store.save(); alert("Rules saved."); }
+          else alert("Invalid JSON rules.");
+        };
+      }
+      const run = document.getElementById("auto-run");
+      if(run && !run.dataset.bound){
+        run.dataset.bound="1";
+        run.onclick = ()=>{
+          const cards = []; 
+          Store.profiles.forEach(p => {
+            const out = autogenFor(p, {preview:true});
+            if(out.length){
+              const c = document.createElement("div"); c.className="card";
+              c.innerHTML = "<strong>"+p.name+"</strong><div class='muted'>"+out.map(x=>x.kind).join(", ")+"</div>";
+              cards.push(c);
+            }
+          });
+          const prev = document.getElementById("auto-preview"); if(prev){ prev.innerHTML=""; cards.forEach(c=>prev.appendChild(c)); }
+        };
+      }
+    }
+
+    function autogenFor(profile, opts={preview:false}){
+      // (Stub) derive "active" gates/city from CSV or preferences; in real life, compute from birth+transits.
+      const activeGate = (App.rows[0]||{}).gate || (App.rows[0]||{}).Gate || "59"; // placeholder
+      const activeCity = (App.rows[0]||{}).City || (App.rows[0]||{}).city || "Prime"; // placeholder
+      const outputs = [];
+      Store.rules.forEach(rule => {
+        const wantGate = rule.if && rule.if.gate;
+        const wantCity = rule.if && rule.if.city;
+        if( (wantGate ? ((""+activeGate).includes(""+wantGate)) : true) &&
+            (wantCity ? ((""+activeCity).toLowerCase().includes((""+wantCity).toLowerCase())) : true) ){
+          (rule.make||[]).forEach(kind => {
+            if(opts.preview){ outputs.push({kind}); return; }
+            // Build immediately
+            if(kind==="Game"){
+              const roster = App.rows.slice(0,8);
+              const meta = { kind:"Game", title:`${profile.name} — Resonance Game`, desc:"autogen", payload:{ config:{ title:`${profile.name} — Resonance`, template:"sandbox", difficulty:"Normal", levelgen:"manual", notes:`Auto for ${profile.now||"now"}` }, roster } };
+              addBundle(meta); outputs.push(meta);
+            } else if(kind==="Agent"){
+              const g = App.rows[0]||{};
+              const agent = { name:`${profile.name} — Guide`, llm:"gpt", skills:["memory","browser"], memory_tokens:512, reflection_depth:3, goals:"Be helpful to the player.", seed:{ name:g.name||g.Name||"", city:g.City||g.city||"", gate:g.gate||g.Gate||"", sprite:g.sprite||g.Sprite||"" } };
+              const meta = { kind:"Agent", title:agent.name, desc:"autogen", payload:{ agent } };
+              addBundle(meta); outputs.push(meta);
+            } else if(kind==="Site"){
+              const payload = { theme:"dark", template:"landing", content:{ title:`${profile.name} — Portal`, about:`Autogenerated portal for ${profile.name}.` } };
+              const meta = { kind:"Site", title:payload.content.title, desc:"autogen", payload };
+              addBundle(meta); outputs.push(meta);
+            } else if(kind==="App"){
+              const payload = { name:`${profile.name} — Pocket`, type:"dashboard", notes:"Autogenerated app shell" };
+              const meta = { kind:"App", title:payload.name, desc:"autogen", payload };
+              addBundle(meta); outputs.push(meta);
+            }
+          });
+        }
+      });
+      if(!opts.preview){ outputs.forEach(buildZipFromMeta); }
+      return outputs;
+    }
+
+    // boot
+    loadBundled();
+  </script>
+</body>
+</html>

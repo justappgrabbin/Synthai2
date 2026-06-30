@@ -1,8 +1,12 @@
 // Ephemeris Service - Astronomical calculations using astronomy-engine
 // Computes planetary positions for transit tracking
 
-import * as Astronomy from 'astronomy-engine';
+import { createRequire } from 'module';
+import type * as AstronomyTypes from 'astronomy-engine';
 import { Planet, PlanetaryPosition, TransitProjection, ChartType, longitudeToGate, PROJECTION_OFFSETS } from '@shared/transit-system';
+
+const require = createRequire(import.meta.url);
+const Astronomy = require('astronomy-engine') as typeof AstronomyTypes;
 
 export class EphemerisService {
   
