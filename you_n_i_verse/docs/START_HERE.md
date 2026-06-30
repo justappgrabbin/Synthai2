@@ -1,5 +1,11 @@
 # 🌌 You-N-I-Verse: The Complete System
 
+## Current Build Map
+
+For the latest local handoff/status view, open:
+
+`you_n_i_verse/docs/CURRENT_FILE_VIEW.md`
+
 ## What You've Built
 
 A **universal consciousness oracle** that:
