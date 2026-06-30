@@ -217,6 +217,14 @@ export function Dashboard() {
     setLocation(path);
   };
 
+  const launchTrayItem = (item: TrayItem) => {
+    if (item.action) {
+      item.action();
+      return;
+    }
+    handleAppClick(item.id, item.label, "tray", item.path || "/");
+  };
+
   const getIconForApp = (appId: string) => {
     const app = [...CORE_APPS, ...AppRegistry.getInstalledApps()].find(a => a.id === appId);
     return app?.icon || Code2;
@@ -228,72 +236,87 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* OS Home */}
-      <div className="relative overflow-hidden bg-background border-b">
-        <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
-          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div className="space-y-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">OS Home</p>
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                Synthia OS
-              </h1>
-              <p className="text-lg md:text-xl text-foreground/80 max-w-2xl">
-                Phone-first command shell for your app tray, smart browser, mesh registry, and creator tools.
-              </p>
+    <div className="min-h-screen bg-background" data-testid="synthia-os-shell">
+      <section className="relative min-h-screen overflow-hidden border-b bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_34%),linear-gradient(135deg,hsl(var(--background)),hsl(var(--muted)/0.72))] px-4 pb-32 pt-4 md:px-8">
+        <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-7xl flex-col">
+          <header className="flex items-center justify-between gap-3 rounded-lg border bg-background/84 px-3 py-3 shadow-sm backdrop-blur md:px-4">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Synthia OS</p>
+              <p className="truncate text-sm text-muted-foreground">Phone shell • mesh online • container bridge ready</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={refreshSystemStatus} disabled={isSystemBusy}>
+                Refresh
+              </Button>
+              <Button size="sm" onClick={() => setShowCommandCenterDialog(true)}>
+                Command
+              </Button>
+            </div>
+          </header>
 
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Button
-                  size="lg"
-                  onClick={() => handleAppClick("ide", "IDE Studio", "core", "/ide")}
-                  data-testid="button-hero-ide"
-                >
-                  <Code2 className="h-5 w-5 mr-2" />
-                  Start Building
+          <main className="grid flex-1 gap-6 py-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div className="space-y-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Home Frame</p>
+                <h1 className="mt-3 text-4xl font-bold text-foreground md:text-6xl" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                  Your OS is the start screen.
+                </h1>
+                <p className="mt-4 max-w-2xl text-base text-foreground/78 md:text-lg">
+                  Launch apps from the tray, route everything through the mesh, and keep the Verse as the slide-up reality layer instead of a separate homepage.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-lg border bg-background/82 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Mesh</p>
+                  <p className="text-lg font-semibold">{meshStatus?.status || health?.mesh?.status || "checking"}</p>
+                </div>
+                <div className="rounded-lg border bg-background/82 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Linux</p>
+                  <p className="text-lg font-semibold">{health?.container?.enabled ? "ready" : "checking"}</p>
+                </div>
+                <div className="rounded-lg border bg-background/82 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Python</p>
+                  <p className="text-lg font-semibold">{health?.python?.running ? "running" : "checking"}</p>
+                </div>
+                <div className="rounded-lg border bg-background/82 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Apps</p>
+                  <p className="text-lg font-semibold">{health?.apps?.mounted ?? mountedApps.length}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button size="lg" onClick={() => handleAppClick("ide", "IDE Studio", "core", "/ide")} data-testid="button-hero-ide">
+                  <Code2 className="mr-2 h-5 w-5" />
+                  Build
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => handleAppClick("mesh", "Mesh Registry", "core", "/mesh")}
-                  data-testid="button-hero-mesh"
-                >
-                  <Orbit className="h-5 w-5 mr-2" />
-                  Open Mesh
+                <Button size="lg" variant="outline" onClick={() => handleAppClick("ingest", "Ingest", "core", "/ingest")} data-testid="button-hero-ingest">
+                  <FolderTree className="mr-2 h-5 w-5" />
+                  Ingest
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => handleAppClick("grove-store", "App Store", "core", "/grove-store")}
-                  data-testid="button-hero-store"
-                >
-                  <Store className="h-5 w-5 mr-2" />
-                  App Store
+                <Button size="lg" variant="outline" onClick={() => setShowCommandCenterDialog(true)} data-testid="button-hero-command">
+                  <TerminalIcon className="mr-2 h-5 w-5" />
+                  Terminal
                 </Button>
               </div>
             </div>
 
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-lg border bg-card/92 p-4 shadow-lg backdrop-blur">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold">App Tray</p>
-                  <p className="text-xs text-muted-foreground">Core spaces and mounted tools</p>
+                  <p className="text-xs text-muted-foreground">The OS launches from here</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowCommandCenterDialog(true)}>
-                  Command
+                <Button variant="outline" size="sm" onClick={() => handleAppClick("mesh", "Mesh Registry", "core", "/mesh")}>
+                  Mesh
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {OS_TRAY_ITEMS.map((item) => (
                   <button
                     key={item.id}
-                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border bg-background p-3 text-center transition-colors hover:border-primary"
-                    onClick={() => {
-                      if (item.action) {
-                        item.action();
-                        return;
-                      }
-                      handleAppClick(item.id, item.label, "tray", item.path || "/");
-                    }}
+                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border bg-background p-3 text-center transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+                    onClick={() => launchTrayItem(item)}
                     data-testid={`button-app-tray-${item.id}`}
                   >
                     <item.icon className="mb-2 h-6 w-6 text-primary" />
@@ -302,9 +325,25 @@ export function Dashboard() {
                 ))}
               </div>
             </div>
-          </div>
+          </main>
         </div>
-      </div>
+
+        <nav className="fixed bottom-3 left-1/2 z-[90] w-[calc(100%-1rem)] max-w-xl -translate-x-1/2 rounded-lg border bg-background/95 px-2 py-2 shadow-xl backdrop-blur" aria-label="Synthia OS dock">
+          <div className="grid grid-cols-5 gap-1">
+            {OS_TRAY_ITEMS.filter((item) => ["mesh", "ingest", "guard", "store", "setup"].includes(item.id)).map((item) => (
+              <button
+                key={item.id}
+                className="flex h-14 flex-col items-center justify-center rounded-md px-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                onClick={() => launchTrayItem(item)}
+                data-testid={`button-os-dock-${item.id}`}
+              >
+                <item.icon className="mb-1 h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </nav>
+      </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 pb-28">
         <Card className="mb-6 border-primary/30" data-testid="card-os-status">
