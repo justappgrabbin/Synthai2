@@ -7,7 +7,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Maximize2, Orbit } from "lucide-react";
+import { Orbit } from "lucide-react";
+import { AgenticRealityLab } from "@/components/AgenticRealityLab";
 
 export function MakerStudioPanel() {
   return (
@@ -28,26 +29,12 @@ export function MakerStudioPanel() {
             <div>
               <DrawerTitle>YOU-N-I-VERSE</DrawerTitle>
               <DrawerDescription>
-                Agentic reality layer mounted from the YOU-N-I-VERSE source interface.
+                Agentic reality bridge recovered from the YOU-N-I-VERSE browser source.
               </DrawerDescription>
             </div>
-            <a
-              href="/verse/youniverse-interface.html"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-9 items-center rounded-md border px-3 text-sm hover:bg-muted"
-            >
-              <Maximize2 className="mr-2 h-4 w-4" />
-              Open Full
-            </a>
           </div>
         </DrawerHeader>
-        <iframe
-          src="/verse/youniverse-interface.html"
-          title="YOU-N-I-VERSE Agentic Reality"
-          className="h-[76vh] w-full border-0 bg-black"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        />
+        <AgenticRealityLab />
       </DrawerContent>
     </Drawer>
   );
