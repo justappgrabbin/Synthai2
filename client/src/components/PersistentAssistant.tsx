@@ -12,6 +12,7 @@ import { AIService } from "@/lib/AIService";
 import { UserProfileService } from "@/lib/userProfileService";
 import { WorkspaceManager } from "@/lib/workspaceManager";
 import { FileSystem } from "@/lib/fileSystem";
+import { setAssistantOpen, useAssistantDock } from "@/lib/assistantDock";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -44,7 +45,7 @@ const CURRENT_CONVERSATION_KEY = "ai-assistant-current";
 const WATCHDOG_LISTENER_ENABLED = false;
 
 export function PersistentAssistant() {
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = useAssistantDock();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -619,8 +620,8 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
       {!isOpen && (
         <Button
           data-testid="button-open-assistant"
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-[100]"
+          onClick={() => setAssistantOpen(true)}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-[80]"
           size="icon"
           title="AI Assistant"
         >
@@ -723,7 +724,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                 data-testid="button-close-assistant"
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsOpen(false)}
+                onClick={() => setAssistantOpen(false)}
               >
                 <X className="h-4 w-4" />
               </Button>
