@@ -4,6 +4,15 @@ This is the stop-point map for the current SynthAI / You-N-I-Verse shell before 
 
 ## Live OS Shell
 
+- `SELF_INSTALL.md`
+  - Current self-install guide.
+  - Confirms the app uses one Linux Docker container with the Studio OS, Synthia Node backend/MCP mesh, Python service, and workspace mount inside it.
+  - Explains the mobile lane: phone opens/installs the PWA shell from the self-hosted container; the phone does not run a second Linux container in this setup.
+
+- `Start-You-N-IDE-OS.ps1`
+  - Windows self-installer/launcher.
+  - Checks Docker Desktop, creates `.env` if missing, starts the container, waits for health, opens the app, and prints the mobile URL for phones on the same Wi-Fi.
+
 - `client/src/components/Dashboard.tsx`
   - Main phone-first OS home.
   - Holds tray/widgets/perspectives/customization.
