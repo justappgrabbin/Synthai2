@@ -41,6 +41,7 @@ interface Conversation {
 
 const CONVERSATIONS_KEY = "ai-assistant-conversations";
 const CURRENT_CONVERSATION_KEY = "ai-assistant-current";
+const WATCHDOG_LISTENER_ENABLED = false;
 
 export function PersistentAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +49,7 @@ export function PersistentAssistant() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
+  const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string>("");
   const [savedConversations, setSavedConversations] = useState<Conversation[]>([]);
   const [programSuggestion, setProgramSuggestion] = useState<any>(null);
@@ -188,9 +189,10 @@ export function PersistentAssistant() {
     }
   }, [messages]);
 
-  // Fetch program suggestion when assistant opens
+  // The old watchdog listener is intentionally disabled. It was auto-fetching
+  // suggestions and fighting the OS shell before the registry layer existed.
   useEffect(() => {
-    if (isOpen && !programSuggestion && !suggestionLoading) {
+    if (WATCHDOG_LISTENER_ENABLED && isOpen && !programSuggestion && !suggestionLoading) {
       fetchProgramSuggestion();
     }
   }, [isOpen]);
