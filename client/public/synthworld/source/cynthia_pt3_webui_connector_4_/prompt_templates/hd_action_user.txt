@@ -1,0 +1,3 @@
+User={name} | Type={type} | Authority={authority} | Profile={profile} | Birth={date} {time} {place}
+Focus: Gate {gate}.{line} in {field}
+Intent: {intent}

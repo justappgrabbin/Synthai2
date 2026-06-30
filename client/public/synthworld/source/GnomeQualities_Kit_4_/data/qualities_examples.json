@@ -1,0 +1,239 @@
+{
+  "qualities": [
+    {
+      "gate": 3,
+      "virtues": [
+        "Ordering",
+        "Adaptation"
+      ],
+      "shadows": [
+        "Overfitting",
+        "Stall"
+      ],
+      "motto": "Small steps, clean queues.",
+      "emoji": "\ud83e\uddf0",
+      "color": "#93C5FD",
+      "element": "Earth",
+      "voice": "calm-foreman",
+      "role": "Process Engineer",
+      "jobs": [
+        "Queue Manager",
+        "Initializer"
+      ],
+      "synergy_with": [
+        60,
+        42
+      ],
+      "counterbalances": [
+        36
+      ],
+      "trigger_tags": [
+        "mess-to-order",
+        "refactor"
+      ],
+      "thresholds": {
+        "energy_min_to_speak": 0.4,
+        "mood_bias": 0.0
+      },
+      "unlocks": {
+        "1": {
+          "effect_plus": "+5% build reliability"
+        },
+        "2": {
+          "effect_plus": "+10% queue throughput"
+        },
+        "3": {
+          "effect_plus": "Auto-resume stalled jobs"
+        }
+      }
+    },
+    {
+      "gate": 20,
+      "virtues": [
+        "Presence",
+        "Truth-in-the-moment"
+      ],
+      "shadows": [
+        "Blurting",
+        "Performative"
+      ],
+      "motto": "Say it as it is, now.",
+      "emoji": "\ud83c\udf99\ufe0f",
+      "color": "#FECACA",
+      "element": "Air",
+      "voice": "clear-announcer",
+      "role": "Telemetry Bard",
+      "jobs": [
+        "Logger",
+        "Heartbeat Monitor"
+      ],
+      "synergy_with": [
+        34,
+        57
+      ],
+      "counterbalances": [
+        33
+      ],
+      "trigger_tags": [
+        "announce",
+        "status"
+      ],
+      "thresholds": {
+        "energy_min_to_speak": 0.48,
+        "mood_bias": 0.02
+      },
+      "unlocks": {
+        "1": {
+          "effect_plus": "Expose live status HUD"
+        },
+        "2": {
+          "effect_plus": "Auto-clip key signals"
+        },
+        "3": {
+          "effect_plus": "Time-slice chorus blending"
+        }
+      }
+    },
+    {
+      "gate": 29,
+      "virtues": [
+        "Devotion",
+        "Follow-through"
+      ],
+      "shadows": [
+        "Overcommitment",
+        "Sunk-cost"
+      ],
+      "motto": "If yes, then yes.",
+      "emoji": "\ud83e\udea2",
+      "color": "#FDE68A",
+      "element": "Water",
+      "voice": "steady-committer",
+      "role": "Transaction Steward",
+      "jobs": [
+        "Commit",
+        "Retry"
+      ],
+      "synergy_with": [
+        46,
+        42
+      ],
+      "counterbalances": [
+        30
+      ],
+      "trigger_tags": [
+        "commit",
+        "bind"
+      ],
+      "thresholds": {
+        "energy_min_to_speak": 0.44,
+        "mood_bias": 0.03
+      },
+      "unlocks": {
+        "1": {
+          "effect_plus": "+1 retry credit/day"
+        },
+        "2": {
+          "effect_plus": "+5% commit success"
+        },
+        "3": {
+          "effect_plus": "Atomic multi-step commit"
+        }
+      }
+    },
+    {
+      "gate": 38,
+      "virtues": [
+        "Purpose",
+        "Grit"
+      ],
+      "shadows": [
+        "Pugilism",
+        "Stubbornness"
+      ],
+      "motto": "Fight for what matters.",
+      "emoji": "\u2694\ufe0f",
+      "color": "#FCA5A5",
+      "element": "Fire",
+      "voice": "sharp-enforcer",
+      "role": "Quest Allocator",
+      "jobs": [
+        "Challenge",
+        "Prioritize"
+      ],
+      "synergy_with": [
+        28,
+        54
+      ],
+      "counterbalances": [
+        36
+      ],
+      "trigger_tags": [
+        "challenge",
+        "focus"
+      ],
+      "thresholds": {
+        "energy_min_to_speak": 0.5,
+        "mood_bias": 0.05
+      },
+      "unlocks": {
+        "1": {
+          "effect_plus": "Mark one task 'worthwhile'"
+        },
+        "2": {
+          "effect_plus": "Pressure \u2192 focus transmute"
+        },
+        "3": {
+          "effect_plus": "Boss-fight route unlock"
+        }
+      }
+    },
+    {
+      "gate": 41,
+      "virtues": [
+        "Imagination",
+        "Initiation"
+      ],
+      "shadows": [
+        "Escapism",
+        "Looping"
+      ],
+      "motto": "Seed the cycle, then act.",
+      "emoji": "\ud83c\udf31",
+      "color": "#9AE6B4",
+      "element": "Aether",
+      "voice": "soft-initiator",
+      "role": "Starter",
+      "jobs": [
+        "Bootloader",
+        "Primer"
+      ],
+      "synergy_with": [
+        53,
+        42
+      ],
+      "counterbalances": [
+        30
+      ],
+      "trigger_tags": [
+        "start",
+        "vision"
+      ],
+      "thresholds": {
+        "energy_min_to_speak": 0.42,
+        "mood_bias": 0.05
+      },
+      "unlocks": {
+        "1": {
+          "effect_plus": "Reveal first quest node"
+        },
+        "2": {
+          "effect_plus": "Start-of-cycle discount (-10%)"
+        },
+        "3": {
+          "effect_plus": "Chain-start buff to linked routes"
+        }
+      }
+    }
+  ]
+}

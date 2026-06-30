@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Gnome Qualities Preview</title>
+<style>
+  :root{--bg:#0b0b12;--fg:#e5e7eb;--card:#141427;--muted:#9ca3af}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{padding:12px 16px;border-bottom:1px solid #1f2937;background:#0d0d16}
+  main{max-width:1000px;margin:0 auto;padding:16px}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:12px}
+  .muted{color:var(--muted);font-size:.9rem}
+  .pill{display:inline-block;padding:.1rem .5rem;border:1px solid #334155;border-radius:999px;background:#0f172a;color:#cbd5e1;font-size:.8rem;margin-right:6px}
+</style></head><body>
+<header><h2>Gnome Qualities — Preview</h2></header>
+<main>
+  <p class="muted">Load your <code>gene_gnomes_enriched.json</code> (output of merge script) to visualize.</p>
+  <input type="file" id="file" />
+  <div id="list" class="grid" style="margin-top:12px"></div>
+</main>
+<script>
+  document.getElementById('file').addEventListener('change', async (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    const text = await f.text(); const data = JSON.parse(text);
+    const list = document.getElementById('list');
+    const arr = (data.gnomes || []);
+    list.innerHTML = arr.map(g=>{
+      const q = g.qualities || {};
+      const em = (q.emoji || '🔹');
+      const v = (q.virtues||[]).map(x=>'<span class="pill">'+x+'</span>').join('');
+      const s = (q.shadows||[]).map(x=>'<span class="pill">'+x+'</span>').join('');
+      const col = (q.color||'#a78bfa');
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>#${g.gate||g.id}</b> ${g.name||''}</div>
+          <div style="font-size:22px">${em}</div>
+        </div>
+        <div class="muted" style="margin-top:6px">${g.levels? g.levels[0].effect : ''}</div>
+        <div style="margin-top:8px"><b>Virtues:</b> ${v||'-'}</div>
+        <div style="margin-top:6px"><b>Shadows:</b> ${s||'-'}</div>
+        <div style="margin-top:6px"><b>Motto:</b> ${q.motto||'-'}</div>
+        <div style="margin-top:6px"><b>Theme Color:</b> <span class="pill" style="border-color:${col};background:${col}33">${col}</span></div>
+      </div>`;
+    }).join('');
+  });
+</script>
+</body></html>

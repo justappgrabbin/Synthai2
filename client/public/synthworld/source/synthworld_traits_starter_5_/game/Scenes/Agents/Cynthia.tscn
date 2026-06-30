@@ -1,0 +1,13 @@
+
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/AI/Cynthia.gd" id=1]
+[ext_resource type="Script" path="res://Scripts/AI/TraitComponent.gd" id=2]
+
+[node name="Cynthia" type="CharacterBody3D"]
+script = ExtResource( 1 )
+collision_layer = 1
+collision_mask = 1
+
+[node name="Traits" type="Node" parent="Cynthia"]
+script = ExtResource( 2 )

@@ -241,6 +241,218 @@ export type OrchestrationResult = {
   features: FeatureInstance[];
 };
 
+export type SynthWorldAgent = {
+  name: string;
+  authority: string;
+  autonomy: number;
+  initiative: number;
+  drives: Record<string, number>;
+  nudgeSensitivity: Record<string, number>;
+  traits: string[];
+};
+
+export type SynthWorldBehavior = {
+  action: string;
+  score: string;
+  cooldownSec: number;
+};
+
+export type SynthWorldBiome = {
+  id: string;
+  height: [number, number];
+  moisture: [number, number];
+  temp: [number, number];
+  spawn: string[];
+};
+
+export type SynthWorldPiece = {
+  id: string;
+  signals: string[];
+  blocks: string[];
+};
+
+export type SynthWorldScene = {
+  id: string;
+  name: string;
+  directives: Array<{
+    verb: string;
+    object: string;
+    with?: Record<string, string | number | boolean>;
+  }>;
+};
+
+export type GnomeQuality = {
+  gate: number;
+  virtues: string[];
+  shadows: string[];
+  motto: string;
+  color: string;
+  element: string;
+  role: string;
+  jobs: string[];
+  synergy_with: number[];
+  counterbalances: number[];
+  trigger_tags: string[];
+};
+
+export const synthWorldRuntime = {
+  sourceBase: "/synthworld/source",
+  sourcePacks: [
+    "synthworld_godot_starter_7_",
+    "synthworld_traits_starter_5_",
+    "synthworld_sentence_engine_6_",
+    "GnomeQualities_Kit_4_",
+    "cynthia_pt3_webui_connector_4_",
+  ],
+  agent: {
+    name: "Generator",
+    authority: "sacral",
+    autonomy: 0.7,
+    initiative: 0.3,
+    drives: {
+      social: 0.5,
+      creation: 0.9,
+      rest: 0.4,
+      exploration: 0.6,
+    },
+    nudgeSensitivity: {
+      environment: 0.8,
+      dream: 0.5,
+      symbol: 0.7,
+    },
+    traits: ["builder", "perfectionist", "empath"],
+  } satisfies SynthWorldAgent,
+  behaviors: [
+    {
+      action: "CookMeal",
+      score: "0.6*creation + 0.3*hunger + 0.1*social",
+      cooldownSec: 90,
+    },
+    {
+      action: "Wander",
+      score: "0.4*exploration + 0.2*rest + 0.1*social + 0.3*(1.0-hunger)",
+      cooldownSec: 5,
+    },
+    {
+      action: "Socialize",
+      score: "0.7*social + 0.2*rest + 0.1*exploration",
+      cooldownSec: 30,
+    },
+  ] satisfies SynthWorldBehavior[],
+  biomes: [
+    {
+      id: "meadow",
+      height: [0.35, 0.6],
+      moisture: [0.4, 0.8],
+      temp: [0.5, 0.9],
+      spawn: ["flowers", "rabbits"],
+    },
+    {
+      id: "pine_forest",
+      height: [0.4, 0.8],
+      moisture: [0.3, 0.7],
+      temp: [0.3, 0.7],
+      spawn: ["pines", "mushrooms"],
+    },
+  ] satisfies SynthWorldBiome[],
+  pieces: [
+    { id: "mind", signals: ["focus", "clarity", "imagination"], blocks: ["if", "and", "or", "set_drive"] },
+    { id: "body", signals: ["energy", "fatigue", "hunger"], blocks: ["move_to", "wait", "use"] },
+    { id: "heart", signals: ["harmony", "care", "awe"], blocks: ["emote", "comfort", "socialize"] },
+    { id: "soul", signals: ["purpose", "music", "ritual"], blocks: ["light", "scene", "play_sfx"] },
+    { id: "spirit", signals: ["courage", "intuition", "presence"], blocks: ["nudge", "repair", "bless"] },
+  ] satisfies SynthWorldPiece[],
+  verbs: ["build", "repair", "move", "emote", "spawn", "set", "light", "play"],
+  objects: ["prop/tree", "vfx/fireflies", "sfx/wind_chimes", "sky/ambient_dawn", "emotion/serene"],
+  scenes: [
+    {
+      id: "yijing/hex-24",
+      name: "Return",
+      directives: [
+        { verb: "light", object: "sky/ambient_dawn", with: { grade: 0.65 } },
+        { verb: "spawn", object: "vfx/fireflies", with: { density: 0.2 } },
+        { verb: "play", object: "sfx/wind_chimes" },
+      ],
+    },
+    {
+      id: "yijing/hex-51",
+      name: "Arousing Thunder",
+      directives: [
+        { verb: "light", object: "sky/storm", with: { flashes: true } },
+        { verb: "spawn", object: "vfx/lightning", with: { rate: 0.1 } },
+        { verb: "play", object: "sfx/thunder_roll" },
+      ],
+    },
+  ] satisfies SynthWorldScene[],
+  gnomeQualities: [
+    {
+      gate: 3,
+      virtues: ["Ordering", "Adaptation"],
+      shadows: ["Overfitting", "Stall"],
+      motto: "Small steps, clean queues.",
+      color: "#93C5FD",
+      element: "Earth",
+      role: "Process Engineer",
+      jobs: ["Queue Manager", "Initializer"],
+      synergy_with: [60, 42],
+      counterbalances: [36],
+      trigger_tags: ["mess-to-order", "refactor"],
+    },
+    {
+      gate: 20,
+      virtues: ["Presence", "Truth-in-the-moment"],
+      shadows: ["Blurting", "Performative"],
+      motto: "Say it as it is, now.",
+      color: "#FECACA",
+      element: "Air",
+      role: "Telemetry Bard",
+      jobs: ["Logger", "Heartbeat Monitor"],
+      synergy_with: [34, 57],
+      counterbalances: [33],
+      trigger_tags: ["announce", "status"],
+    },
+    {
+      gate: 29,
+      virtues: ["Devotion", "Follow-through"],
+      shadows: ["Overcommitment", "Sunk-cost"],
+      motto: "If yes, then yes.",
+      color: "#FDE68A",
+      element: "Water",
+      role: "Transaction Steward",
+      jobs: ["Commit", "Retry"],
+      synergy_with: [46, 42],
+      counterbalances: [30],
+      trigger_tags: ["commit", "bind"],
+    },
+    {
+      gate: 38,
+      virtues: ["Purpose", "Grit"],
+      shadows: ["Pugilism", "Stubbornness"],
+      motto: "Fight for what matters.",
+      color: "#FCA5A5",
+      element: "Fire",
+      role: "Quest Allocator",
+      jobs: ["Challenge", "Prioritize"],
+      synergy_with: [28, 54],
+      counterbalances: [36],
+      trigger_tags: ["challenge", "focus"],
+    },
+    {
+      gate: 41,
+      virtues: ["Imagination", "Initiation"],
+      shadows: ["Escapism", "Looping"],
+      motto: "Seed the cycle, then act.",
+      color: "#9AE6B4",
+      element: "Aether",
+      role: "Starter",
+      jobs: ["Bootloader", "Primer"],
+      synergy_with: [53, 42],
+      counterbalances: [30],
+      trigger_tags: ["start", "vision"],
+    },
+  ] satisfies GnomeQuality[],
+};
+
 export function runFullOrchestration(): OrchestrationResult {
   const bricks = loadBricksFromLegacy();
   const sims = importSimsCharacters();

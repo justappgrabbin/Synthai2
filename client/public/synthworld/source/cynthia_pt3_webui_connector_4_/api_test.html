@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>API Test</title></head>
+<body style="background:#0b0b12;color:#e8e8ff;font-family:sans-serif;padding:20px">
+<h2>Test OpenAI-style API</h2>
+<label>Base URL:</label><br><input id="base" style="width:100%" value="http://localhost:11434"><br>
+<label>Model name:</label><br><input id="model" style="width:100%" value="llama3:8b"><br>
+<label>Prompt:</label><br><textarea id="prompt" style="width:100%;height:100px">Say hi from Cynthia.</textarea><br>
+<button id="go">Send</button>
+<pre id="out" style="white-space:pre-wrap;background:#131327;padding:10px;margin-top:10px"></pre>
+<script>
+document.getElementById("go").onclick=async()=>{
+  const base=document.getElementById("base").value.replace(/\/$/,"");
+  const model=document.getElementById("model").value;
+  const prompt=document.getElementById("prompt").value;
+  try{
+    const r=await fetch(base+"/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model,messages:[{role:"user",content:prompt}]})});
+    const j=await r.json();
+    document.getElementById("out").textContent=JSON.stringify(j,null,2);
+  }catch(e){document.getElementById("out").textContent="Error: "+e;}
+};
+</script>
+</body>
+</html>

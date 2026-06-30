@@ -1,0 +1,51 @@
+{
+  "qualities": [
+    {
+      "gate": 41,
+      "virtues": [
+        "Imagination",
+        "Initiation"
+      ],
+      "shadows": [
+        "Escapism",
+        "Looping"
+      ],
+      "motto": "Seed the cycle, but start for real.",
+      "emoji": "\ud83c\udf31",
+      "color": "#9AE6B4",
+      "element": "Aether",
+      "voice": "soft-initiator",
+      "role": "Starter",
+      "jobs": [
+        "Bootloader",
+        "Primer"
+      ],
+      "synergy_with": [
+        53,
+        42
+      ],
+      "counterbalances": [
+        30
+      ],
+      "trigger_tags": [
+        "new-beginning",
+        "vision"
+      ],
+      "thresholds": {
+        "energy_min_to_speak": 0.42,
+        "mood_bias": 0.05
+      },
+      "unlocks": {
+        "1": {
+          "effect_plus": "Reveal first quest node"
+        },
+        "2": {
+          "effect_plus": "Start-of-cycle discount (-10%)"
+        },
+        "3": {
+          "effect_plus": "Chain-start buff to linked routes"
+        }
+      }
+    }
+  ]
+}
