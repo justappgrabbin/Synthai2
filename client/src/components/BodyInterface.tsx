@@ -23,13 +23,13 @@ interface CenterDef {
 
 const CENTERS: CenterDef[] = [
   { name: 'Head', x: 0.5, y: 0.08, color: '#9b59b6', size: 28, domain: 'head' },
-  { name: 'Ajna', x: 0.5, y: 0.18, color: '#c084fc', size: 26, domain: 'ajna' },
-  { name: 'Throat', x: 0.5, y: 0.28, color: '#10d474', size: 30, domain: 'throat' },
+  { name: 'Ajna', x: 0.5, y: 0.18, color: '#3498db', size: 26, domain: 'ajna' },
+  { name: 'Throat', x: 0.5, y: 0.28, color: '#2ecc71', size: 30, domain: 'throat' },
   { name: 'G-Center', x: 0.5, y: 0.42, color: '#f1c40f', size: 32, domain: 'g-center' },
   { name: 'Heart', x: 0.36, y: 0.42, color: '#e74c3c', size: 28, domain: 'heart' },
   { name: 'Solar Plexus', x: 0.64, y: 0.42, color: '#e67e22', size: 30, domain: 'solar' },
   { name: 'Sacral', x: 0.5, y: 0.56, color: '#d35400', size: 32, domain: 'sacral' },
-  { name: 'Spleen', x: 0.34, y: 0.56, color: '#10d474', size: 26, domain: 'spleen' },
+  { name: 'Spleen', x: 0.34, y: 0.56, color: '#1abc9c', size: 26, domain: 'spleen' },
   { name: 'Root', x: 0.5, y: 0.72, color: '#c0392b', size: 30, domain: 'root' },
 ];
 
@@ -209,7 +209,7 @@ export function BodyInterface() {
 
   const viewColors: Record<ViewMode, string> = {
     body: 'from-amber-400 to-yellow-600',
-    mind: 'from-violet-400 to-purple-600',
+    mind: 'from-cyan-400 to-blue-600',
     heart: 'from-rose-400 to-red-600',
   };
 
@@ -253,13 +253,13 @@ export function BodyInterface() {
                       ? v === 'body'
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
                         : v === 'mind'
-                        ? 'bg-violet-500/20 border-violet-500/50 text-violet-300'
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
                         : 'bg-rose-500/20 border-rose-500/50 text-rose-300'
                       : 'bg-aion-void/50 border-aion-resonance text-aion-light/50 hover:text-aion-light/80 hover:border-aion-light/30'
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${
-                    v === 'body' ? 'bg-amber-400' : v === 'mind' ? 'bg-violet-400' : 'bg-rose-400'
+                    v === 'body' ? 'bg-amber-400' : v === 'mind' ? 'bg-cyan-400' : 'bg-rose-400'
                   }`} />
                   {v === 'body' ? 'Skeleton' : v === 'mind' ? 'Nervous System' : 'Circulatory'}
                 </button>

@@ -1,8 +1,8 @@
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, MessageSquare, type LucideIcon } from "lucide-react";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, MessageSquare, BookOpen, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
 import {
@@ -19,6 +19,9 @@ import { getMeshStatus, publishMeshEvent, type MeshStatus } from "@/lib/meshEven
 import { systemApi, type AppRunResult, type McpStatus, type MountedApp, type StudioHealth } from "@/lib/systemApi";
 import { publishMeshNode } from "@/lib/meshAddressing";
 import { toggleAssistant } from "@/lib/assistantDock";
+import { OSSetupPanel } from "@/components/OSSetupPanel";
+import { GrimoirePanel } from "@/components/GrimoirePanel";
+import { BodyView } from "@/components/BodyView";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -124,6 +127,9 @@ type TrayItem = {
   action?: () => void;
 };
 
+type OSPerspective = "overview" | "notebook" | "body-world" | "setup";
+type OSWidgetId = "runtime" | "proof-loop" | "recent" | "engines";
+
 const OS_TRAY_ITEMS: TrayItem[] = [
   { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
   { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
@@ -134,9 +140,41 @@ const OS_TRAY_ITEMS: TrayItem[] = [
   { id: "setup", label: "Setup", icon: Settings, path: "/settings" },
 ];
 
+const DEFAULT_TRAY_ORDER = OS_TRAY_ITEMS.map((item) => item.id);
+
+const OS_WIDGETS: Array<{ id: OSWidgetId; label: string; description: string; icon: LucideIcon }> = [
+  { id: "runtime", label: "Runtime Status", description: "Studio, mesh, Linux, Python, MCP, and mounted app status.", icon: Orbit },
+  { id: "proof-loop", label: "Proof Loop", description: "Mount and run a tiny app through the Linux bridge.", icon: Play },
+  { id: "recent", label: "Recent Activity", description: "Return to apps and tools you opened recently.", icon: Clock },
+  { id: "engines", label: "Consciousness Engine", description: "Universe, calibration, GAN, autonomy, deploy, and game creator launchers.", icon: Brain },
+];
+
+const DEFAULT_WIDGET_ORDER = OS_WIDGETS.map((item) => item.id);
+
+function readStoredStringArray(key: string, fallback: string[]) {
+  try {
+    const stored = localStorage.getItem(key);
+    if (!stored) return fallback;
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function Dashboard() {
   const [, setLocation] = useLocation();
   const [apps, setApps] = useState<AppModule[]>(CORE_APPS);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activePerspective, setActivePerspective] = useState<OSPerspective>(() => {
+    const stored = localStorage.getItem("youniverse_active_perspective");
+    return stored === "notebook" || stored === "body-world" || stored === "setup" ? stored : "overview";
+  });
+  const [isEditingShell, setIsEditingShell] = useState(false);
+  const [trayOrder, setTrayOrder] = useState<string[]>(() => readStoredStringArray("youniverse_os_tray_order", DEFAULT_TRAY_ORDER));
+  const [hiddenTrayItems, setHiddenTrayItems] = useState<string[]>(() => readStoredStringArray("youniverse_os_tray_hidden", []));
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(() => readStoredStringArray("youniverse_os_widget_order", DEFAULT_WIDGET_ORDER));
+  const [hiddenWidgets, setHiddenWidgets] = useState<string[]>(() => readStoredStringArray("youniverse_os_widget_hidden", []));
   const [recentlyVisited, setRecentlyVisited] = useState<AppActivity[]>([]);
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
   const [showSelfEditorDialog, setShowSelfEditorDialog] = useState(false);
@@ -176,6 +214,22 @@ export function Dashboard() {
     setRecentlyVisited(ActivityTracker.getRecentlyVisited(4));
     refreshSystemStatus();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("youniverse_os_tray_order", JSON.stringify(trayOrder));
+  }, [trayOrder]);
+
+  useEffect(() => {
+    localStorage.setItem("youniverse_os_tray_hidden", JSON.stringify(hiddenTrayItems));
+  }, [hiddenTrayItems]);
+
+  useEffect(() => {
+    localStorage.setItem("youniverse_os_widget_order", JSON.stringify(widgetOrder));
+  }, [widgetOrder]);
+
+  useEffect(() => {
+    localStorage.setItem("youniverse_os_widget_hidden", JSON.stringify(hiddenWidgets));
+  }, [hiddenWidgets]);
 
   const runSmokeMount = async () => {
     setIsSystemBusy(true);
@@ -225,6 +279,61 @@ export function Dashboard() {
     handleAppClick(item.id, item.label, "tray", item.path || "/");
   };
 
+  const visibleTrayItems = trayOrder
+    .map((id) => OS_TRAY_ITEMS.find((item) => item.id === id))
+    .filter((item): item is TrayItem => Boolean(item))
+    .filter((item) => !hiddenTrayItems.includes(item.id));
+
+  const availableTrayItems = OS_TRAY_ITEMS.filter((item) => hiddenTrayItems.includes(item.id));
+
+  const visibleWidgets = widgetOrder
+    .map((id) => OS_WIDGETS.find((item) => item.id === id))
+    .filter((item): item is typeof OS_WIDGETS[number] => Boolean(item))
+    .filter((item) => !hiddenWidgets.includes(item.id));
+
+  const availableWidgets = OS_WIDGETS.filter((item) => hiddenWidgets.includes(item.id));
+
+  const startShellLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+    }
+    longPressTimer.current = setTimeout(() => setIsEditingShell(true), 550);
+  };
+
+  const cancelShellLongPress = () => {
+    if (!longPressTimer.current) return;
+    clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+  };
+
+  const moveItem = (id: string, direction: -1 | 1, items: string[], setItems: (next: string[]) => void) => {
+    const index = items.indexOf(id);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= items.length) return;
+    const next = [...items];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    setItems(next);
+  };
+
+  const resetShellLayout = () => {
+    setTrayOrder(DEFAULT_TRAY_ORDER);
+    setHiddenTrayItems([]);
+    setWidgetOrder(DEFAULT_WIDGET_ORDER);
+    setHiddenWidgets([]);
+    setIsEditingShell(false);
+  };
+
+  const switchPerspective = (perspective: OSPerspective) => {
+    setActivePerspective(perspective);
+    localStorage.setItem("youniverse_active_perspective", perspective);
+    publishMeshEvent({
+      source: "dashboard",
+      type: "os.perspective.changed",
+      topic: perspective,
+      payload: { perspective },
+    });
+  };
+
   const getIconForApp = (appId: string) => {
     const app = [...CORE_APPS, ...AppRegistry.getInstalledApps()].find(a => a.id === appId);
     return app?.icon || Code2;
@@ -234,6 +343,13 @@ export function Dashboard() {
     const app = [...CORE_APPS, ...AppRegistry.getInstalledApps()].find(a => a.id === appId);
     return app?.path || `/${appId}`;
   };
+
+  const perspectiveButtons: Array<{ id: OSPerspective; label: string; icon: LucideIcon; description: string }> = [
+    { id: "overview", label: "Overview", icon: Orbit, description: "Shell status, tray, and launch surface" },
+    { id: "notebook", label: "Notebook", icon: BookOpen, description: "Grimoire as a creator notebook" },
+    { id: "body-world", label: "Body World", icon: Gamepad2, description: "Bodygraph as a traversable node map" },
+    { id: "setup", label: "Setup", icon: Settings, description: "Register and enable OS perspectives" },
+  ];
 
   return (
     <div className="min-h-screen bg-background" data-testid="synthia-os-shell">
@@ -245,11 +361,16 @@ export function Dashboard() {
               <p className="truncate text-sm text-muted-foreground">Phone shell • mesh online • container bridge ready</p>
             </div>
             <div className="flex items-center gap-2">
+              {isEditingShell && (
+                <Button variant="outline" size="sm" onClick={resetShellLayout}>
+                  Reset Layout
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={refreshSystemStatus} disabled={isSystemBusy}>
                 Refresh
               </Button>
-              <Button size="sm" onClick={() => setShowCommandCenterDialog(true)}>
-                Command
+              <Button size="sm" onClick={() => setIsEditingShell((editing) => !editing)}>
+                {isEditingShell ? "Done" : "Edit"}
               </Button>
             </div>
           </header>
@@ -299,42 +420,166 @@ export function Dashboard() {
                   Terminal
                 </Button>
               </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {perspectiveButtons.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => switchPerspective(item.id)}
+                    className={`rounded-lg border p-3 text-left transition-all ${
+                      activePerspective === item.id
+                        ? "border-primary bg-primary text-primary-foreground shadow-md"
+                        : "bg-background/82 hover:border-primary"
+                    }`}
+                    data-testid={`button-os-perspective-${item.id}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span className="text-sm font-semibold">{item.label}</span>
+                    </div>
+                    <p className={`mt-1 text-xs ${activePerspective === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                      {item.description}
+                    </p>
+                  </button>
+                ))}
+              </div>
+
+              <div
+                className="rounded-lg border bg-background/82 p-3"
+                onPointerDown={startShellLongPress}
+                onPointerUp={cancelShellLongPress}
+                onPointerLeave={cancelShellLongPress}
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">Widgets</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isEditingShell ? "Move or remove widgets." : "Long press to customize widgets."}
+                    </p>
+                  </div>
+                  {!isEditingShell && (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditingShell(true)}>
+                      Customize
+                    </Button>
+                  )}
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {visibleWidgets.map((widget) => (
+                    <div key={widget.id} className="rounded-md border bg-card p-3">
+                      {isEditingShell && (
+                        <div className="mb-2 flex gap-1">
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => moveItem(widget.id, -1, widgetOrder, setWidgetOrder)} title="Move up">
+                            ←
+                          </Button>
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => moveItem(widget.id, 1, widgetOrder, setWidgetOrder)} title="Move down">
+                            →
+                          </Button>
+                          <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setHiddenWidgets((hidden) => [...new Set([...hidden, widget.id])])} title="Remove">
+                            ×
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex items-start gap-2">
+                        <widget.icon className="mt-0.5 h-4 w-4 text-primary" />
+                        <div>
+                          <p className="text-sm font-medium">{widget.label}</p>
+                          <p className="text-xs text-muted-foreground">{widget.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {isEditingShell && availableWidgets.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {availableWidgets.map((widget) => (
+                      <Button
+                        key={widget.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setHiddenWidgets((hidden) => hidden.filter((id) => id !== widget.id))}
+                      >
+                        <widget.icon className="mr-2 h-4 w-4" />
+                        Add {widget.label}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="rounded-lg border bg-card/92 p-4 shadow-lg backdrop-blur">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold">App Tray</p>
-                  <p className="text-xs text-muted-foreground">The OS launches from here</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isEditingShell ? "Move or remove apps. Long press any tile to edit." : "Long press any tile to edit the OS."}
+                  </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => handleAppClick("mesh", "Mesh Registry", "core", "/mesh")}>
                   Mesh
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {OS_TRAY_ITEMS.map((item) => (
+                {visibleTrayItems.map((item) => (
                   <button
                     key={item.id}
                     className="flex min-h-24 flex-col items-center justify-center rounded-lg border bg-background p-3 text-center transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
                     onClick={() => launchTrayItem(item)}
+                    onPointerDown={startShellLongPress}
+                    onPointerUp={cancelShellLongPress}
+                    onPointerLeave={cancelShellLongPress}
                     data-testid={`button-app-tray-${item.id}`}
                   >
+                    {isEditingShell && (
+                      <div className="mb-2 flex gap-1" onClick={(event) => event.stopPropagation()}>
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => moveItem(item.id, -1, trayOrder, setTrayOrder)} title="Move left">
+                          ←
+                        </Button>
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => moveItem(item.id, 1, trayOrder, setTrayOrder)} title="Move right">
+                          →
+                        </Button>
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setHiddenTrayItems((hidden) => [...new Set([...hidden, item.id])])} title="Remove">
+                          ×
+                        </Button>
+                      </div>
+                    )}
                     <item.icon className="mb-2 h-6 w-6 text-primary" />
                     <span className="text-sm font-medium">{item.label}</span>
                   </button>
                 ))}
               </div>
+              {isEditingShell && availableTrayItems.length > 0 && (
+                <div className="mt-4 rounded-lg border bg-background/70 p-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Add Apps</p>
+                  <div className="flex flex-wrap gap-2">
+                    {availableTrayItems.map((item) => (
+                      <Button
+                        key={item.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setHiddenTrayItems((hidden) => hidden.filter((id) => id !== item.id))}
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </main>
         </div>
 
         <nav className="fixed bottom-3 left-1/2 z-[90] w-[calc(100%-1rem)] max-w-xl -translate-x-1/2 rounded-lg border bg-background/95 px-2 py-2 shadow-xl backdrop-blur" aria-label="Synthia OS dock">
           <div className="grid grid-cols-5 gap-1">
-            {OS_TRAY_ITEMS.filter((item) => ["mesh", "ingest", "guard", "store", "setup"].includes(item.id)).map((item) => (
+            {visibleTrayItems.filter((item) => ["mesh", "ingest", "guard", "store", "setup"].includes(item.id)).slice(0, 5).map((item) => (
               <button
                 key={item.id}
                 className="flex h-14 flex-col items-center justify-center rounded-md px-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 onClick={() => launchTrayItem(item)}
+                onPointerDown={startShellLongPress}
+                onPointerUp={cancelShellLongPress}
+                onPointerLeave={cancelShellLongPress}
                 data-testid={`button-os-dock-${item.id}`}
               >
                 <item.icon className="mb-1 h-4 w-4" />
@@ -346,6 +591,47 @@ export function Dashboard() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 pb-28">
+        {activePerspective !== "overview" && (
+          <Card className="mb-6 overflow-hidden border-primary/30" data-testid="card-os-perspective-view">
+            <CardHeader>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <CardTitle>
+                    {activePerspective === "notebook" && "Creator Notebook"}
+                    {activePerspective === "body-world" && "Body World Map"}
+                    {activePerspective === "setup" && "OS Perspective Setup"}
+                  </CardTitle>
+                  <CardDescription>
+                    {activePerspective === "notebook" && "The grimoire mounted as an OS notebook perspective."}
+                    {activePerspective === "body-world" && "The bodygraph mounted as a game-like spatial map."}
+                    {activePerspective === "setup" && "Register alternate views without turning them into scattered pages."}
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => switchPerspective("overview")}>
+                  Return to Overview
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {activePerspective === "notebook" && (
+                <div className="h-[75vh] min-h-[560px] overflow-hidden">
+                  <GrimoirePanel />
+                </div>
+              )}
+              {activePerspective === "body-world" && (
+                <div className="h-[75vh] min-h-[560px] overflow-hidden">
+                  <BodyView />
+                </div>
+              )}
+              {activePerspective === "setup" && (
+                <div className="p-4">
+                  <OSSetupPanel />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="mb-6 border-primary/30" data-testid="card-os-status">
           <CardHeader>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

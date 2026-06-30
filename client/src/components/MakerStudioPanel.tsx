@@ -7,7 +7,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Maximize2, Orbit, Sparkles, Store, Workflow } from "lucide-react";
+import { Maximize2, Orbit } from "lucide-react";
 
 export function MakerStudioPanel() {
   return (
@@ -28,43 +28,26 @@ export function MakerStudioPanel() {
             <div>
               <DrawerTitle>YOU-N-I-VERSE</DrawerTitle>
               <DrawerDescription>
-                Agentic reality layer. This is the always-available verse panel that will host worlds, agents, tools, and mounted experiences.
+                Agentic reality layer mounted from the YOU-N-I-VERSE source interface.
               </DrawerDescription>
             </div>
             <a
-              href="/maker-studio/index.html"
+              href="/verse/youniverse-interface.html"
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-9 items-center rounded-md border px-3 text-sm hover:bg-muted"
             >
               <Maximize2 className="mr-2 h-4 w-4" />
-              Raw Source
+              Open Full
             </a>
           </div>
         </DrawerHeader>
-        <div className="grid gap-4 overflow-auto p-4 md:grid-cols-3">
-          <div className="rounded-lg border bg-card p-4">
-            <Sparkles className="mb-3 h-6 w-6 text-primary" />
-            <p className="font-semibold">Agentic Reality</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              The Verse is the living layer where people, places, things, apps, and agents become navigable nodes.
-            </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <Workflow className="mb-3 h-6 w-6 text-primary" />
-            <p className="font-semibold">Addressed Mounting</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Mounted tools should enter through the registry first, then appear here when the mesh knows where they belong.
-            </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <Store className="mb-3 h-6 w-6 text-primary" />
-            <p className="font-semibold">Source Vault</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              MakerStudio and older YOU-N-I-VERSE files are preserved as source material until they are adapted into this panel.
-            </p>
-          </div>
-        </div>
+        <iframe
+          src="/verse/youniverse-interface.html"
+          title="YOU-N-I-VERSE Agentic Reality"
+          className="h-[76vh] w-full border-0 bg-black"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        />
       </DrawerContent>
     </Drawer>
   );

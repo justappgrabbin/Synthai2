@@ -322,12 +322,12 @@ function extractTags(content: string): string[] {
 
 function getEntryStyle(type: NotebookEntry['type']) {
   const styles: Record<string, { bg: string; border: string; icon: string; label: string; color: string }> = {
-    observation: { bg: 'bg-violet-950/30', border: 'border-violet-500/30', icon: '👁', label: 'Observation', color: 'text-violet-400' },
+    observation: { bg: 'bg-blue-950/30', border: 'border-blue-500/30', icon: '👁', label: 'Observation', color: 'text-blue-400' },
     hypothesis: { bg: 'bg-purple-950/30', border: 'border-purple-500/30', icon: '🔮', label: 'Hypothesis', color: 'text-purple-400' },
     spell: { bg: 'bg-amber-950/30', border: 'border-amber-500/30', icon: '✨', label: 'Spell', color: 'text-amber-400' },
     reflection: { bg: 'bg-emerald-950/30', border: 'border-emerald-500/30', icon: '💭', label: 'Reflection', color: 'text-emerald-400' },
     divination: { bg: 'bg-rose-950/30', border: 'border-rose-500/30', icon: '☯', label: 'Divination', color: 'text-rose-400' },
-    code: { bg: 'bg-emerald-950/30', border: 'border-emerald-500/30', icon: '⚡', label: 'Code', color: 'text-emerald-400' },
+    code: { bg: 'bg-cyan-950/30', border: 'border-cyan-500/30', icon: '⚡', label: 'Code', color: 'text-cyan-400' },
     canvas: { bg: 'bg-pink-950/30', border: 'border-pink-500/30', icon: '🎨', label: 'Canvas', color: 'text-pink-400' },
     synthesis: { bg: 'bg-indigo-950/30', border: 'border-indigo-500/30', icon: '🔀', label: 'Synthesis', color: 'text-indigo-400' },
     world: { bg: 'bg-violet-950/30', border: 'border-violet-500/30', icon: '🌌', label: 'World', color: 'text-violet-400' },
@@ -658,7 +658,7 @@ function WorldForge({ onSaveWorld }: { onSaveWorld: (entry: Partial<NotebookEntr
               </button>
               <button
                 onClick={downloadSnapshot}
-                className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-xs font-semibold hover:bg-emerald-500/30 transition-all"
+                className="px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg text-xs font-semibold hover:bg-cyan-500/30 transition-all"
               >
                 💾 Snapshot
               </button>
@@ -670,7 +670,7 @@ function WorldForge({ onSaveWorld }: { onSaveWorld: (entry: Partial<NotebookEntr
         {isRunning && (
           <div className="flex items-center gap-4 text-[10px] text-slate-500">
             <span>Cycles: <span className="text-violet-400 font-mono">{cycles}</span></span>
-            <span>Coherence: <span className="text-emerald-400 font-mono">{coherence.toFixed(4)}</span></span>
+            <span>Coherence: <span className="text-cyan-400 font-mono">{coherence.toFixed(4)}</span></span>
             <span>Chapters: <span className="text-amber-400 font-mono">{chapterLog.length}</span></span>
             {isRecording && <span className="text-red-400 animate-pulse">● REC</span>}
           </div>
@@ -701,7 +701,7 @@ function WorldForge({ onSaveWorld }: { onSaveWorld: (entry: Partial<NotebookEntr
           <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Auto-Novel Chapters</div>
           <div className="space-y-1">
             {chapterLog.map((ch, i) => (
-              <div key={i} className="text-[10px] text-emerald-400/80 font-mono leading-relaxed">{ch}</div>
+              <div key={i} className="text-[10px] text-cyan-400/80 font-mono leading-relaxed">{ch}</div>
             ))}
           </div>
         </div>
@@ -797,9 +797,9 @@ function ResonanceGraph({ entries, onNodeClick }: { entries: NotebookEntry[]; on
 
         const style = getEntryStyle(node.entry.type);
         const colorMap: Record<string, string> = {
-          'text-violet-400': '#a78bfa', 'text-purple-400': '#c084fc', 'text-amber-400': '#fbbf24',
-          'text-emerald-400': '#34d399', 'text-rose-400': '#fb7185',
-          'text-pink-400': '#f472b6', 'text-indigo-400': '#818cf8',
+          'text-blue-400': '#60a5fa', 'text-purple-400': '#c084fc', 'text-amber-400': '#fbbf24',
+          'text-emerald-400': '#34d399', 'text-rose-400': '#fb7185', 'text-cyan-400': '#22d3ee',
+          'text-pink-400': '#f472b6', 'text-indigo-400': '#818cf8', 'text-violet-400': '#a78bfa',
         };
         const color = colorMap[style.color] || '#94a3b8';
         ctx.beginPath();
@@ -917,8 +917,8 @@ function DrawingCanvas({ onSave }: { onSave: (dataUrl: string) => void }) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 p-3 border-b border-slate-700/50 bg-slate-900/50">
-        <button onClick={() => setTool('pen')} className={`px-3 py-1 rounded text-xs ${tool === 'pen' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>✏️ Pen</button>
-        <button onClick={() => setTool('eraser')} className={`px-3 py-1 rounded text-xs ${tool === 'eraser' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'}`}>🧹 Eraser</button>
+        <button onClick={() => setTool('pen')} className={`px-3 py-1 rounded text-xs ${tool === 'pen' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}>✏️ Pen</button>
+        <button onClick={() => setTool('eraser')} className={`px-3 py-1 rounded text-xs ${tool === 'eraser' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}>🧹 Eraser</button>
         <div className="w-px h-4 bg-slate-700 mx-1" />
         {['#e2e8f0', '#fbbf24', '#f472b6', '#22d3ee', '#34d399', '#fb7185'].map(c => (
           <button key={c} onClick={() => setColor(c)} className="w-5 h-5 rounded-full border border-slate-600" style={{ backgroundColor: c }} />
@@ -926,7 +926,7 @@ function DrawingCanvas({ onSave }: { onSave: (dataUrl: string) => void }) {
         <input type="range" min="1" max="20" value={size} onChange={e => setSize(Number(e.target.value))} className="w-20 ml-2" />
         <div className="flex-1" />
         <button onClick={clear} className="px-3 py-1 rounded text-xs text-slate-400 hover:text-red-400">Clear</button>
-        <button onClick={save} className="px-3 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30">Save to Entry</button>
+        <button onClick={save} className="px-3 py-1 rounded text-xs bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30">Save to Entry</button>
       </div>
       <div className="flex-1 relative">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full cursor-crosshair"
@@ -1112,9 +1112,7 @@ export function NotebookInterface() {
           <div className="flex bg-slate-800/50 rounded-lg p-0.5 border border-slate-700/30">
             {[
               { id: 'feed', icon: '📜', label: 'Feed' },
-              { id: 'graph', icon: '🕸', label: 'Graph' },
               { id: 'canvas', icon: '🎨', label: 'Canvas' },
-              { id: 'forge', icon: '🌌', label: 'Forge' },
             ].map(v => (
               <button key={v.id} onClick={() => setViewMode(v.id as typeof viewMode)}
                 className={`px-3 py-1.5 rounded-md text-xs transition-all ${viewMode === v.id ? 'bg-slate-700 text-slate-100 shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
@@ -1156,17 +1154,6 @@ export function NotebookInterface() {
                 </button>
               );
             })}
-            {/* World Forge shortcut */}
-            <button onClick={() => setViewMode('forge')}
-              className={`w-full text-left p-2.5 rounded-lg transition-all duration-200 group ${viewMode === 'forge' ? 'bg-violet-950/30 border border-violet-500/30' : 'hover:bg-slate-800/50 border border-transparent'}`}>
-              <div className="flex items-center gap-2.5">
-                <span className="text-base">🌌</span>
-                <div>
-                  <div className={`text-xs font-medium ${viewMode === 'forge' ? 'text-violet-400' : 'text-slate-300'}`}>World Forge</div>
-                  <div className="text-[10px] text-slate-500">Generate native video</div>
-                </div>
-              </div>
-            </button>
           </div>
 
           <div className="p-4 border-t border-slate-700/20">

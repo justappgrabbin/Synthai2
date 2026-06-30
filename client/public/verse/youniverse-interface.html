@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOU-N-I-VERSE | Consciousness Observatory</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a0a2e 0%, #0a0a1a 50%, #1a0a2e 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Animated background particles */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* Header */
+        .header {
+            height: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #9d4edd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .field-selector {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .field-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: #00ffff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .field-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+        }
+        
+        .field-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        /* Main content */
+        .main-content {
+            display: flex;
+            height: calc(100vh - 120px);
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        /* Consciousness field canvas */
+        .field-container {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        
+        .field-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .field-title {
+            color: #c77dff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .mode-btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 10px;
+        }
+        
+        .mode-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000000 100%);
+        }
+        
+        #fieldCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .canvas-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 6px;
+            font-size: 9px;
+        }
+        
+        .state-indicator {
+            color: #00ff00;
+        }
+        
+        /* Side panel */
+        .side-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-title {
+            color: #00ffff;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .gate-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .gate-badge {
+            padding: 4px 10px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 11px;
+            color: #00ffff;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .stat-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        
+        /* Bottom navigation */
+        .bottom-nav {
+            height: 70px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 20px;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 15px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+        
+        .nav-btn:hover {
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+        
+        .nav-btn.active {
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .side-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated particles -->
+    <div id="particles"></div>
+    
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="pulse-dot"></div>
+            <div class="logo-text">YOU-N-I-VERSE</div>
+        </div>
+        
+        <div class="field-selector">
+            <button class="field-btn" data-field="mind">Mind</button>
+            <button class="field-btn active" data-field="body">Body</button>
+            <button class="field-btn" data-field="heart">Heart</button>
+        </div>
+    </div>
+    
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Consciousness field visualization -->
+        <div class="field-container">
+            <div class="field-header">
+                <div class="field-title">Consciousness Field</div>
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="organic">🌊 Organic</button>
+                    <button class="mode-btn" data-mode="geometric">◇ Geometric</button>
+                    <button class="mode-btn" data-mode="neural">⚡ Neural</button>
+                </div>
+            </div>
+            
+            <div class="canvas-wrapper">
+                <canvas id="fieldCanvas"></canvas>
+                <div class="canvas-overlay">
+                    <span class="state-indicator">● ventral</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Side panel -->
+        <div class="side-panel">
+            <div class="panel-card">
+                <div class="card-title">Active Gates</div>
+                <div class="gate-container" id="gateList">
+                    <!-- Gates populated by JS -->
+                </div>
+            </div>
+            
+            <div class="panel-card">
+                <div class="card-title">Field Status</div>
+                <div class="stat-row">
+                    <span class="stat-label">Coherence:</span>
+                    <span class="stat-value">97.3%</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Resonance:</span>
+                    <span class="stat-value">432.1 Hz</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">State:</span>
+                    <span class="stat-value">Ventral</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom navigation -->
+    <div class="bottom-nav">
+        <button class="nav-btn">
+            <div class="nav-icon">💬</div>
+            <div class="nav-label">Chat</div>
+        </button>
+        <button class="nav-btn">
+            <div class="nav-icon">📤</div>
+            <div class="nav-label">Upload</div>
+        </button>
+        <button class="nav-btn">
+            <div class="nav-icon">🗜️</div>
+            <div class="nav-label">Zip</div>
+        </button>
+        <button class="nav-btn active">
+            <div class="nav-icon">▶️</div>
+            <div class="nav-label">Run</div>
+        </button>
+        <button class="nav-btn">
+            <div class="nav-icon">📜</div>
+            <div class="nav-label">History</div>
+        </button>
+        <button class="nav-btn">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">Home</div>
+        </button>
+    </div>
+
+    <script>
+        // Mock data
+        const mockData = {
+            mind: [41, 28, 14, 64, 19, 60, 3, 22, 9],
+            body: [1, 25, 44, 53, 38, 46],
+            heart: [7, 13, 29, 45, 51]
+        };
+        
+        let currentField = 'body';
+        let currentMode = 'organic';
+        
+        // Generate particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // Update active gates
+        function updateGates() {
+            const gateList = document.getElementById('gateList');
+            gateList.innerHTML = '';
+            mockData[currentField].forEach(gate => {
+                const badge = document.createElement('div');
+                badge.className = 'gate-badge';
+                badge.textContent = gate;
+                gateList.appendChild(badge);
+            });
+        }
+        
+        // Field selector
+        document.querySelectorAll('.field-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.field-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentField = btn.dataset.field;
+                updateGates();
+            });
+        });
+        
+        // Mode selector
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+            });
+        });
+        
+        // Nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        
+        // Canvas animation
+        const canvas = document.getElementById('fieldCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        const width = canvas.width / 2;
+        const height = canvas.height / 2;
+        let frame = 0;
+        
+        function drawField() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+            
+            frame += 0.02;
+            
+            const active = mockData[currentField];
+            
+            if (currentMode === 'organic') {
+                active.forEach((hex, idx) => {
+                    const hue = (hex * 5.625) % 360;
+                    const x = width / 2 + Math.sin(frame + idx) * (width / 3);
+                    const y = height / 2 + Math.cos(frame + idx * 0.7) * (height / 3);
+                    const radius = 20 + Math.sin(frame * 2 + idx) * 10;
+                    
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                    gradient.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.8)`);
+                    gradient.addColorStop(1, `hsla(${hue}, 70%, 30%, 0)`);
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (currentMode === 'geometric') {
+                ctx.strokeStyle = `hsla(${frame * 50 % 360}, 70%, 60%, 0.8)`;
+                ctx.lineWidth = 2;
+                
+                active.forEach((hex, idx) => {
+                    const sides = 3 + (hex % 5);
+                    const radius = 30 + (hex % 40);
+                    const rotation = frame + idx * 0.5;
+                    const x = width / 2 + Math.cos(idx * 0.5) * (width / 4);
+                    const y = height / 2 + Math.sin(idx * 0.5) * (height / 4);
+                    
+                    ctx.beginPath();
+                    for (let i = 0; i <= sides; i++) {
+                        const angle = (i / sides) * Math.PI * 2 + rotation;
+                        const px = x + Math.cos(angle) * radius;
+                        const py = y + Math.sin(angle) * radius;
+                        if (i === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.stroke();
+                });
+            } else if (currentMode === 'neural') {
+                const nodes = active.map((hex, idx) => ({
+                    x: (width / 2) + Math.cos(idx * 0.8 + frame * 0.3) * (width / 3),
+                    y: (height / 2) + Math.sin(idx * 0.8 + frame * 0.3) * (height / 3),
+                    hex
+                }));
+                
+                ctx.strokeStyle = 'rgba(100, 200, 255, 0.2)';
+                ctx.lineWidth = 1;
+                nodes.forEach((n1, i) => {
+                    nodes.slice(i + 1).forEach(n2 => {
+                        const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
+                        if (dist < 150) {
+                            ctx.beginPath();
+                            ctx.moveTo(n1.x, n1.y);
+                            ctx.lineTo(n2.x, n2.y);
+                            ctx.stroke();
+                        }
+                    });
+                });
+                
+                nodes.forEach(node => {
+                    const hue = (node.hex * 5.625) % 360;
+                    ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, 4 + Math.sin(frame * 3) * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = `hsla(${hue}, 90%, 80%, ${Math.sin(frame * 4 + node.hex) * 0.5 + 0.5})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, 8 + Math.sin(frame * 3) * 4, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+            }
+            
+            requestAnimationFrame(drawField);
+        }
+        
+        updateGates();
+        drawField();
+    </script>
+</body>
+</html>
