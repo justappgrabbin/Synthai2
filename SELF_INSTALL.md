@@ -54,9 +54,13 @@ http://localhost:5000/api/health
 http://localhost:10000/health
 ```
 
-## Mobile
+## Mobile Self-Host
 
-The phone does not run the Linux container in this setup. The computer or self-host box runs the container, and the phone opens the mobile OS shell.
+There are now two mobile modes.
+
+### Mode A: Phone Connects To Computer
+
+The computer runs the Docker Linux container, and the phone opens the mobile OS shell from the computer.
 
 1. Start the container on the computer with `Start-You-N-IDE-OS.ps1`.
 2. Keep the phone on the same Wi-Fi.
@@ -70,11 +74,24 @@ http://YOUR-COMPUTER-IP:5000
    - Android Chrome: menu, then Install app or Add to Home screen.
    - iPhone Safari: Share, then Add to Home Screen.
 
-## APK Later
+### Mode B: Phone Works Without Computer
 
-The current mobile path is PWA-style install from the self-hosted container.
+Android can run the local backend through Termux, and the APK opens the phone-local app at `http://127.0.0.1:5000`.
 
-An APK can be added as a wrapper later. That APK should point to the self-hosted OS URL or bundle a local WebView launcher. The backend remains the Docker container unless we intentionally build a separate Android/Termux packaging lane.
+Use:
+
+```text
+mobile/PHONE_SELF_HOST.md
+```
+
+That path gives you:
+
+- APK wrapper through Capacitor.
+- Phone-local Studio OS on `127.0.0.1:5000`.
+- Phone-local Synthia Node/MCP mesh on `127.0.0.1:10000`.
+- Termux bootstrap for installing/updating the local backend.
+
+The desktop Docker container remains the best full-power self-host option. The Android self-host lane is the phone-contained option.
 
 ## Stop
 

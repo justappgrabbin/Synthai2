@@ -7,7 +7,22 @@ This is the stop-point map for the current SynthAI / You-N-I-Verse shell before 
 - `SELF_INSTALL.md`
   - Current self-install guide.
   - Confirms the app uses one Linux Docker container with the Studio OS, Synthia Node backend/MCP mesh, Python service, and workspace mount inside it.
-  - Explains the mobile lane: phone opens/installs the PWA shell from the self-hosted container; the phone does not run a second Linux container in this setup.
+  - Explains both mobile lanes: phone connects to the desktop/self-host container, or Android self-hosts through Termux and the APK opens `127.0.0.1:5000`.
+
+- `mobile/PHONE_SELF_HOST.md`
+  - Android no-computer setup guide.
+  - Uses Termux for the phone-local backend and a Capacitor APK as the launcher shell.
+
+- `mobile/termux-bootstrap.sh`
+  - Installs the phone-local backend from GitHub into Termux.
+  - Creates `mobile-start.sh` so the phone can start Studio OS and Synthia Node/MCP mesh locally.
+
+- `capacitor.config.json`
+  - APK wrapper configuration.
+  - Points the Android WebView shell at `http://127.0.0.1:5000`, which is the local phone server.
+
+- `.github/workflows/build-android-apk.yml`
+  - GitHub Actions workflow for building a debug APK artifact.
 
 - `Start-You-N-IDE-OS.ps1`
   - Windows self-installer/launcher.
