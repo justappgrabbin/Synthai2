@@ -1,0 +1,48 @@
+{
+  "locked": true,
+  "total_glyphs": 3,
+  "initialization_order": [
+    "PlayerSystem",
+    "QuestSystem",
+    "ResonanceEngine"
+  ],
+  "glyphs": {
+    "1": {
+      "module": "PlayerSystem",
+      "field": "Mind",
+      "trigram": "upper",
+      "hexagram_name": "The Creative",
+      "properties": {
+        "priority": "high",
+        "core_system": true
+      },
+      "declared_at": "2025-12-11T00:48:32.287903"
+    },
+    "3": {
+      "module": "QuestSystem",
+      "field": "Heart",
+      "trigram": "lower",
+      "hexagram_name": "Difficulty at the Beginning",
+      "properties": {
+        "generates_content": true
+      },
+      "declared_at": "2025-12-11T00:48:32.288044"
+    },
+    "61": {
+      "module": "ResonanceEngine",
+      "field": "Soul",
+      "trigram": "both",
+      "hexagram_name": "Inner Truth",
+      "properties": {
+        "background_process": true,
+        "calculates_fields": true
+      },
+      "declared_at": "2025-12-11T00:48:32.288065"
+    }
+  },
+  "module_index": {
+    "PlayerSystem": 1,
+    "QuestSystem": 3,
+    "ResonanceEngine": 61
+  }
+}

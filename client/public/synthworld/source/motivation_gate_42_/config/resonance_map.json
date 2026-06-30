@@ -1,0 +1,17 @@
+{
+  "primaryField": "heart",
+  "fieldWeights": {
+    "zer": 0.1,
+    "mind": 0.2,
+    "body": 0.3,
+    "heart": 0.8,
+    "soul": 0.9,
+    "spirit": 0.4
+  },
+  "coherenceThreshold": 0.6,
+  "activationConditions": {
+    "minCoherence": 0.5,
+    "requiredGates": [1],
+    "blockedBy": []
+  }
+}

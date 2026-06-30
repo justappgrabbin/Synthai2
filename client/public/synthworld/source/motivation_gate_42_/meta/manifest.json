@@ -1,0 +1,12 @@
+{
+  "id": "motivation_gate_42",
+  "name": "Motivation Gate 42",
+  "version": "1.0.0",
+  "description": "Activates Gate 42: The Completion Gene. This module helps you find motivation through rest and completion cycles, honoring natural rhythms of growth and integration.",
+  "author": "YOUNIVERSE Core",
+  "type": "gate",
+  "gates": [42],
+  "requiredFields": ["heart", "soul"],
+  "dependencies": [],
+  "tags": ["motivation", "rest", "completion", "cycles", "integration"]
+}

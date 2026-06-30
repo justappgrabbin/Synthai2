@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Boxes, Brain, CircleDot, Dices, FolderOpen, Map, Play, Sparkles, Users } from "lucide-react";
+import { Boxes, Brain, CircleDot, Dices, FolderOpen, Map, Network, Play, Sparkles, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import {
   type FeatureInstance,
 } from "@/lib/agenticRealityOrchestrator";
 
-type LabTab = "world" | "run" | "agents" | "bricks" | "grammar" | "source";
+type LabTab = "world" | "network" | "run" | "agents" | "bricks" | "grammar" | "source";
 
 export function AgenticRealityLab() {
   const [activeTab, setActiveTab] = useState<LabTab>("world");
@@ -70,6 +70,7 @@ export function AgenticRealityLab() {
         <div className="flex gap-2 overflow-x-auto border-b border-slate-800 pb-2">
           {[
             ["world", "World"],
+            ["network", "Network"],
             ["run", "Run"],
             ["agents", "Agents"],
             ["bricks", "Bricks"],
@@ -154,6 +155,57 @@ export function AgenticRealityLab() {
                   ))}
                 </CardContent>
               </Card>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "network" && (
+          <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+            <Card className="border-fuchsia-500/20 bg-slate-950/80 text-slate-100">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Network className="h-5 w-5 text-fuchsia-300" />
+                  <CardTitle>Journey Network</CardTitle>
+                </div>
+                <CardDescription className="text-slate-400">
+                  Companion game first, then people, tasks, groups, opportunities, and unlocks through resonance.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-slate-400">
+                <p>The user gets a game and companion for the journey. As more people join, more of the OS becomes available.</p>
+                <p>Autoling handles structure and address prep. Resonance Foundry handles matching. Glyph Game handles quests.</p>
+                <p>Autocoder stays a later gap-filler after registry, preview, diff, approval, rollback, and mesh logs exist.</p>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              {synthWorldRuntime.networkLayers.map((layer) => (
+                <Card key={layer.id} className="border-slate-800 bg-slate-950/80 text-slate-100">
+                  <CardHeader>
+                    <div className="flex items-center justify-between gap-3">
+                      <CardTitle className="text-base">{layer.title}</CardTitle>
+                      <Badge variant="outline">{layer.status}</Badge>
+                    </div>
+                    <CardDescription className="text-slate-400">{layer.role}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-1">
+                      {layer.pieces.map((piece) => (
+                        <Badge key={piece} className="bg-fuchsia-500/15 text-fuchsia-100 hover:bg-fuchsia-500/25">{piece}</Badge>
+                      ))}
+                    </div>
+                    <a
+                      href={getSourceHref(layer.sourcePack)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 text-xs text-violet-200 hover:text-violet-100"
+                    >
+                      <FolderOpen className="h-3 w-3" />
+                      Open preserved source
+                    </a>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         )}
@@ -293,7 +345,7 @@ export function AgenticRealityLab() {
               {synthWorldRuntime.sourcePacks.map((pack) => (
                 <a
                   key={pack}
-                  href={`${synthWorldRuntime.sourceBase}/${pack}/README.md`}
+                  href={getSourceHref(pack)}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-3 rounded-md border border-slate-800 bg-slate-900/70 p-3 text-sm hover:border-violet-400"
@@ -309,6 +361,17 @@ export function AgenticRealityLab() {
       </div>
     </div>
   );
+}
+
+function getSourceHref(pack: string): string {
+  const paths: Record<string, string> = {
+    resonance_foundry_4_: "client_src/pages/matching.tsx",
+    you_and_i_first_3_: "universe_builder/parser/file_classifier.py",
+    glyph_game_system_1_: "README.md",
+    motivation_gate_42_: "meta/manifest.json",
+  };
+
+  return `${synthWorldRuntime.sourceBase}/${pack}/${paths[pack] || "README.md"}`;
 }
 
 function MetricCard({ icon: Icon, label, value }: { icon: typeof Boxes; label: string; value: string | number }) {
