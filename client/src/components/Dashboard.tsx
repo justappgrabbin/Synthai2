@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, type LucideIcon } from "lucide-react";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, MessageSquare, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
 import {
@@ -18,6 +18,7 @@ import { CommandCenter } from "@/components/CommandCenter";
 import { getMeshStatus, publishMeshEvent, type MeshStatus } from "@/lib/meshEvents";
 import { systemApi, type AppRunResult, type McpStatus, type MountedApp, type StudioHealth } from "@/lib/systemApi";
 import { publishMeshNode } from "@/lib/meshAddressing";
+import { toggleAssistant } from "@/lib/assistantDock";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -113,6 +114,24 @@ const FLAGSHIP_FEATURES = [
     icon: Palette,
     path: "/game-creator"
   }
+];
+
+type TrayItem = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path?: string;
+  action?: () => void;
+};
+
+const OS_TRAY_ITEMS: TrayItem[] = [
+  { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
+  { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
+  { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
+  { id: "games", label: "Games", icon: Gamepad2, path: "/game-creator" },
+  { id: "guard", label: "Guard", icon: MessageSquare, action: toggleAssistant },
+  { id: "store", label: "Store", icon: Store, path: "/grove-store" },
+  { id: "setup", label: "Setup", icon: Settings, path: "/settings" },
 ];
 
 export function Dashboard() {
@@ -264,18 +283,17 @@ export function Dashboard() {
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {[
-                  { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
-                  { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
-                  { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
-                  { id: "games", label: "Games", icon: Gamepad2, path: "/game-creator" },
-                  { id: "store", label: "Store", icon: Store, path: "/grove-store" },
-                  { id: "setup", label: "Setup", icon: Settings, path: "/settings" },
-                ].map((item) => (
+                {OS_TRAY_ITEMS.map((item) => (
                   <button
                     key={item.id}
                     className="flex min-h-24 flex-col items-center justify-center rounded-lg border bg-background p-3 text-center transition-colors hover:border-primary"
-                    onClick={() => handleAppClick(item.id, item.label, "tray", item.path)}
+                    onClick={() => {
+                      if (item.action) {
+                        item.action();
+                        return;
+                      }
+                      handleAppClick(item.id, item.label, "tray", item.path || "/");
+                    }}
                     data-testid={`button-app-tray-${item.id}`}
                   >
                     <item.icon className="mb-2 h-6 w-6 text-primary" />
