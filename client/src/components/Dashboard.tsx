@@ -22,6 +22,7 @@ import { toggleAssistant } from "@/lib/assistantDock";
 import { OSSetupPanel } from "@/components/OSSetupPanel";
 import { GrimoirePanel } from "@/components/GrimoirePanel";
 import { BodyView } from "@/components/BodyView";
+import { CynthiaBodyLayer } from "@/components/CynthiaBodyLayer";
 
 const CORE_APPS: AppModule[] = [
   {
@@ -129,6 +130,7 @@ type TrayItem = {
 
 type OSPerspective = "overview" | "notebook" | "body-world" | "setup";
 type OSWidgetId = "runtime" | "proof-loop" | "recent" | "engines";
+type BodyLayer = "map" | "story";
 
 const OS_TRAY_ITEMS: TrayItem[] = [
   { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
@@ -175,6 +177,7 @@ export function Dashboard() {
   const [hiddenTrayItems, setHiddenTrayItems] = useState<string[]>(() => readStoredStringArray("youniverse_os_tray_hidden", []));
   const [widgetOrder, setWidgetOrder] = useState<string[]>(() => readStoredStringArray("youniverse_os_widget_order", DEFAULT_WIDGET_ORDER));
   const [hiddenWidgets, setHiddenWidgets] = useState<string[]>(() => readStoredStringArray("youniverse_os_widget_hidden", []));
+  const [bodyLayer, setBodyLayer] = useState<BodyLayer>("story");
   const [recentlyVisited, setRecentlyVisited] = useState<AppActivity[]>([]);
   const [showWorkspaceDialog, setShowWorkspaceDialog] = useState(false);
   const [showSelfEditorDialog, setShowSelfEditorDialog] = useState(false);
@@ -620,7 +623,17 @@ export function Dashboard() {
               )}
               {activePerspective === "body-world" && (
                 <div className="h-[75vh] min-h-[560px] overflow-hidden">
-                  <BodyView />
+                  <div className="flex h-12 items-center gap-2 border-b bg-background px-3">
+                    <Button variant={bodyLayer === "story" ? "default" : "outline"} size="sm" onClick={() => setBodyLayer("story")}>
+                      Cynthia Story
+                    </Button>
+                    <Button variant={bodyLayer === "map" ? "default" : "outline"} size="sm" onClick={() => setBodyLayer("map")}>
+                      Body Map
+                    </Button>
+                  </div>
+                  <div className="h-[calc(75vh-3rem)] min-h-[512px] overflow-hidden">
+                    {bodyLayer === "story" ? <CynthiaBodyLayer /> : <BodyView />}
+                  </div>
                 </div>
               )}
               {activePerspective === "setup" && (
