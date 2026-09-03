@@ -28,6 +28,8 @@ import { OSBootGate } from "@/components/OSBootGate";
 import ZipManager from "@/pages/ZipManager";
 import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
+import HumanDesignStudio from "@/pages/HumanDesignStudio";
+import "@/lib/registerHumanDesignApp";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -53,6 +55,7 @@ function Router() {
         <Route path="/agents" component={AgentPanel} />
         <Route path="/presentation-planner" component={PresentationPlanner} />
         <Route path="/continuity-glyph" component={ContinuityGlyph} />
+        <Route path="/human-design" component={HumanDesignStudio} />
         <Route component={NotFound} />
       </Switch>
     </>
