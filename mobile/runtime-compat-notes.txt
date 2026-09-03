@@ -1,0 +1,6 @@
+Native Synthia v0.4.5 compatibility requirements:
+- keep Android package/signing identity from donor APK
+- native service supplies PORT=3000 and DATA_DIR=/opt/synthia/data
+- native WebView expects local Synthia server availability before loading app
+- build must preserve existing native classes and runtime assets while replacing the unfinished app/server payload
+- server must honor process.env.PORT and process.env.DATA_DIR
