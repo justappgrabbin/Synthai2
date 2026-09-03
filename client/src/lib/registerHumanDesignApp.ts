@@ -18,7 +18,6 @@ export const HUMAN_DESIGN_APP: AppModuleData = {
     entry: "/human-design",
     permissions: ["storage"],
     author: "verified",
-    signature: "synthia-core-human-design-v1",
     description: "Local deterministic Human Design calculation and exploration studio",
   },
 };
@@ -27,7 +26,7 @@ export function registerHumanDesignApp() {
   if (typeof window === "undefined") return false;
   const existing = AppRegistry.getInstalledApps().find((app) => app.id === HUMAN_DESIGN_APP.id);
   if (existing?.version === HUMAN_DESIGN_APP.version) return true;
-  return AppRegistry.installApp(HUMAN_DESIGN_APP, true);
+  return AppRegistry.installApp(HUMAN_DESIGN_APP);
 }
 
 registerHumanDesignApp();
