@@ -621,7 +621,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
         <Button
           data-testid="button-open-assistant"
           onClick={() => setAssistantOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-[80]"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full z-[80] bg-gradient-to-br from-violet-600 via-purple-700 to-fuchsia-700 text-white border border-violet-300/30 shadow-[0_0_24px_rgba(139,92,246,0.45)] hover:from-violet-500 hover:via-purple-600 hover:to-fuchsia-600"
           size="icon"
           title="AI Assistant"
         >
@@ -631,12 +631,12 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
 
       {isOpen && (
         <div 
-          className="fixed bottom-6 right-6 w-[95vw] sm:w-96 h-[500px] bg-card border rounded-lg shadow-xl z-[100] flex flex-col"
+          className="fixed bottom-6 right-6 w-[95vw] sm:w-96 h-[500px] bg-card border border-violet-500/35 rounded-lg shadow-[0_0_36px_rgba(109,40,217,0.22)] z-[100] flex flex-col"
           data-testid="panel-assistant"
         >
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-700 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               <div>
