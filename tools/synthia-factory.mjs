@@ -223,6 +223,41 @@ async function repairLoop(){
   return {ok:sweep.ok,blocked:sweep.ok?null:"REPAIR_BUDGET_EXHAUSTED",loops,sweep};
 }
 
+async function repairFindings(label,findings){
+  const paths=[...new Set((findings||[]).map(x=>x?.path).filter(Boolean).filter(safePath))];
+  const payload=await callModel("Builder",
+    `The independent audit rejected the current work. Repair every actionable finding below, then leave the repository buildable. Return {"summary":"...","actions":[{"type":"write","path":"relative/path","content":"complete replacement file"}],"remaining":[]} and do not merely explain.\n\nFINDINGS:\n${JSON.stringify(findings||[],null,2)}`,
+    coreContext(paths.slice(0,12)));
+  if(payload.blocked) return {ok:false,blocked:payload.blocked,changed:[]};
+  const changed=applyActions(payload,label);
+  const sweep=runEngineeringSweep();
+  emit({event:"AUDIT_REPAIR",label,ok:sweep.ok,changed,summary:payload.summary||""});
+  return {ok:sweep.ok,changed,blocked:null};
+}
+
+async function auditUntilAccepted(state,label){
+  for(let cycle=1;cycle<=MAX_LOOPS;cycle++){
+    const changed=changedAgainstOrigin();
+    const review=await reviewer(changed);
+    state.phases.push({name:`${label}_REVIEW`,cycle,ok:!!review.pass,blocked:review.blocked||null,findings:review.findings||[]});
+    if(review.blocked) return {ok:false,blocked:review.blocked};
+    if(!review.pass){
+      const repaired=await repairFindings(`${label}_REVIEW_REPAIR`,review.findings||[]);
+      if(repaired.blocked) return {ok:false,blocked:repaired.blocked};
+      if(!repaired.ok && !repaired.changed.length) return {ok:false,blocked:"REVIEW_REPAIR_STALLED"};
+      continue;
+    }
+    const verify=await verifier(review,changed);
+    state.phases.push({name:`${label}_VERIFY_REVIEWER`,cycle,ok:!!verify.pass,blocked:verify.blocked||null,findings:verify.findings||[]});
+    if(verify.blocked) return {ok:false,blocked:verify.blocked};
+    if(verify.pass) return {ok:true,review,verify};
+    const repaired=await repairFindings(`${label}_VERIFIER_REPAIR`,verify.findings||[]);
+    if(repaired.blocked) return {ok:false,blocked:repaired.blocked};
+    if(!repaired.ok && !repaired.changed.length) return {ok:false,blocked:"VERIFIER_REPAIR_STALLED"};
+  }
+  return {ok:false,blocked:"AUDIT_REPAIR_BUDGET_EXHAUSTED"};
+}
+
 async function reviewer(changed){
   const context=coreContext(changed.slice(0,12));
   const payload=await callModel("Independent Reviewer",
@@ -282,21 +317,11 @@ async function main(){
     jwrite(REPORT,state); jwrite(APPLY,{files:[]}); console.log(JSON.stringify(state,null,2)); process.exitCode=2; return;
   }
 
-  let changed=changedAgainstOrigin();
-  const review=await reviewer(changed);
-  state.phases.push({name:"REVIEW_BUILDER",ok:!!review.pass,blocked:review.blocked||null,findings:review.findings||[]});
-  if(!review.pass){
-    state.state=review.blocked?"BLOCKED_CREDENTIAL":"REVIEW_REJECTED";
-    if(review.blocked) state.blocked.push(review.blocked);
+  const engineeringAudit=await auditUntilAccepted(state,"ENGINEERING");
+  if(!engineeringAudit.ok){
+    state.state=String(engineeringAudit.blocked||"").includes("API_KEY")?"BLOCKED_CREDENTIAL":"BLOCKED_ENGINEERING_AUDIT";
+    if(engineeringAudit.blocked) state.blocked.push(engineeringAudit.blocked);
     jwrite(REPORT,state); jwrite(APPLY,{files:[]}); console.log(JSON.stringify(state,null,2)); process.exitCode=3; return;
-  }
-
-  const verify=await verifier(review,changed);
-  state.phases.push({name:"VERIFY_REVIEWER",ok:!!verify.pass,blocked:verify.blocked||null,findings:verify.findings||[]});
-  if(!verify.pass){
-    state.state=verify.blocked?"BLOCKED_CREDENTIAL":"VERIFIER_REJECTED";
-    if(verify.blocked) state.blocked.push(verify.blocked);
-    jwrite(REPORT,state); jwrite(APPLY,{files:[]}); console.log(JSON.stringify(state,null,2)); process.exitCode=4; return;
   }
 
   const apk=buildApk();
@@ -308,11 +333,9 @@ async function main(){
     ["client/src/App.tsx","client/src/main.tsx"]);
   state.phases.push({name:"MONETIZE",ok:monetization.ok,blocked:monetization.blocked||null,remaining:monetization.remaining||[]});
   if(monetization.ok){
-    const mSweep=runEngineeringSweep();
-    const mReview=await reviewer(changedAgainstOrigin());
-    const mVerify=await verifier(mReview,changedAgainstOrigin());
-    state.phases.push({name:"VERIFY_MONETIZATION",ok:mSweep.ok&&!!mReview.pass&&!!mVerify.pass});
-    if(!(mSweep.ok&&mReview.pass&&mVerify.pass)) state.blocked.push("MONETIZATION_REQUIRES_REPAIR");
+    const monetizationAudit=await auditUntilAccepted(state,"MONETIZATION");
+    state.phases.push({name:"VERIFY_MONETIZATION",ok:monetizationAudit.ok,blocked:monetizationAudit.blocked||null});
+    if(!monetizationAudit.ok) state.blocked.push(monetizationAudit.blocked||"MONETIZATION_REQUIRES_REPAIR");
   } else if(monetization.blocked) state.blocked.push(monetization.blocked);
 
   const creative=await productStage("CREATIVE",
@@ -325,12 +348,11 @@ async function main(){
   state.phases.push({name:"ADVERTISE_PREP",ok:advertising.ok,blocked:advertising.blocked||null,remaining:advertising.remaining||[]});
   if(advertising.blocked) state.blocked.push(advertising.blocked);
 
+  const finalAudit=await auditUntilAccepted(state,"FINAL");
   const finalSweep=runEngineeringSweep();
   const finalChanged=changedAgainstOrigin();
-  const finalReview=await reviewer(finalChanged);
-  const finalVerify=await verifier(finalReview,finalChanged);
   const noInternalBlocks=state.blocked.filter(x=>!String(x).includes("API_KEY")).length===0;
-  const quiescent=finalSweep.ok && finalReview.pass && finalVerify.pass && noInternalBlocks;
+  const quiescent=finalSweep.ok && finalAudit.ok && noInternalBlocks;
 
   state.changed=finalChanged;
   state.phases.push({name:"FINAL_AUDIT",ok:quiescent,files:finalChanged.length});
