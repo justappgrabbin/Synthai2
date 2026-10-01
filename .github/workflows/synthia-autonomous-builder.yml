@@ -7,6 +7,8 @@ on:
       - '.github/workflows/synthia-autonomous-builder.yml'
       - 'tools/sovereign-builder.mjs'
       - 'tools/synthia-finish-agent.mjs'
+      - 'synthia-server/server/**'
+      - 'synthia-server/test/**'
   workflow_dispatch:
     inputs:
       target:
