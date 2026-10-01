@@ -1,0 +1,102 @@
+name: Synthia Autonomous Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Repository path to repair/build"
+        required: false
+        default: "."
+      build_apk:
+        description: "Also attempt Android APK when available"
+        required: false
+        type: boolean
+        default: true
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  actions: read
+  issues: write
+
+concurrency:
+  group: synthia-builder-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'synthia-build'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TARGET: ${{ inputs.target || '.' }}
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: synthai-autobuilder-2026-10-01
+          fetch-depth: 0
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Java for Android
+        if: ${{ inputs.build_apk != false }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Create isolated source copy
+        shell: bash
+        run: |
+          rm -rf .synthia-input
+          mkdir -p .synthia-input
+          rsync -a --exclude='.git' --exclude='.synthai-builder' --exclude='.synthia-input' ./ .synthia-input/repository/
+          node tools/sovereign-builder.mjs ingest .synthia-input/repository github-worktree
+
+      - name: Autonomous build and verification
+        id: builder
+        continue-on-error: true
+        run: node tools/sovereign-builder.mjs build
+
+      - name: Attempt APK from verified repository capabilities
+        if: ${{ inputs.build_apk != false }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          CANDIDATE=$(find .synthai-builder/workspace -name package.json -not -path '*/node_modules/*' -print -quit | xargs -r dirname)
+          if [ -n "$CANDIDATE" ]; then
+            cd "$CANDIDATE"
+            if node -e "const p=require('./package.json');process.exit(p.scripts&&p.scripts['mobile:apk']?0:1)"; then
+              npm run mobile:apk
+            fi
+          fi
+
+      - name: Collect evidence and products
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p synthia-output
+          cp -r .synthai-builder synthia-output/builder-state 2>/dev/null || true
+          find .synthai-builder/workspace -type f \( -name '*.apk' -o -name '*.aab' -o -name '*.zip' \) -exec cp --parents {} synthia-output/ \; 2>/dev/null || true
+          printf '%s\n' "run=${GITHUB_RUN_ID}" "commit=${GITHUB_SHA}" "builder_outcome=${{ steps.builder.outcome }}" > synthia-output/RUN.txt
+
+      - name: Publish build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthia-builder-${{ github.run_number }}
+          path: synthia-output/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail when builder requires repair
+        if: steps.builder.outcome != 'success'
+        run: |
+          echo "Synthia did not pass verification. Evidence was preserved in the workflow artifact."
+          exit 1
