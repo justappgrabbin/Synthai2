@@ -170,6 +170,31 @@ app.get('/admin', (_req, res) => res.redirect('/terminal'));
 app.get('/client', (_req, res) => res.redirect('/terminal'));
 app.get('/terminal', (_req, res) => res.type('html').send(terminalPage()));
 app.get('/api/status', (_req, res) => res.json(status()));
+app.post('/api/intent', (req, res) => {
+  const intent = safe(req.body?.intent || '', 4000).trim();
+  if (!intent) return res.status(400).json({ ok: false, error: 'intent_required' });
+
+  const context = req.body?.context && typeof req.body.context === 'object' ? req.body.context : {};
+  const target = context.target || req.body?.target || 'chatgpt';
+  const message = sendMessage('intent', {
+    source: context.source || req.body?.source || 'alexis',
+    target,
+    subject: context.subject || 'intent',
+    text: intent,
+    intent,
+    context
+  });
+
+  res.json({
+    ok: true,
+    mode: NODE_MODE,
+    intent,
+    routed: true,
+    route: message.route,
+    morph: message.morph,
+    message_id: message.id
+  });
+});
 app.get('/health', (_req, res) => res.json({ ...status(), status: 'healthy' }));
 app.get('/poc/overview', (_req, res) => res.json({ ok: true, counts: status().counts, latest_route: state.routes[0] || null, latest_morph: state.morphs[0] || null, projects: [{ id: 'mcp-bus', name: 'Everyone connector', status: 'active' }], mcp: state.mcp, terminal: state.terminal }));
 app.get('/poc/projects', (_req, res) => res.json({ ok: true, projects: [{ id: 'mcp-bus', name: 'Everyone connector', status: 'active' }] }));
