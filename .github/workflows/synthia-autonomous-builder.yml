@@ -1,6 +1,12 @@
 name: Synthia Autonomous Builder
 
 on:
+  push:
+    branches: [synthai-autobuilder-2026-10-01]
+    paths:
+      - '.github/workflows/synthia-autonomous-builder.yml'
+      - 'tools/sovereign-builder.mjs'
+      - 'tools/synthia-finish-agent.mjs'
   workflow_dispatch:
     inputs:
       target:
@@ -26,7 +32,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'synthia-build'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.label.name == 'synthia-build'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
