@@ -1,25 +1,17 @@
-name: Synthia Autonomous Builder
+name: Synthia Autonomous Product Factory
 
 on:
   push:
     branches: [synthai-autobuilder-2026-10-01]
     paths:
       - '.github/workflows/synthia-autonomous-builder.yml'
-      - 'tools/sovereign-builder.mjs'
-      - 'tools/synthia-finish-agent.mjs'
+      - 'tools/synthia-factory.mjs'
   workflow_dispatch:
     inputs:
-      target:
-        description: "Repository path to repair/build"
+      max_loops:
+        description: "Maximum autonomous repair cycles before declaring a genuine block"
         required: false
-        default: "."
-      build_apk:
-        description: "Also attempt Android APK when available"
-        required: false
-        type: boolean
-        default: true
-  issues:
-    types: [labeled]
+        default: "8"
 
 permissions:
   contents: write
@@ -27,82 +19,103 @@ permissions:
   issues: write
 
 concurrency:
-  group: synthia-builder-${{ github.ref }}
+  group: synthia-product-factory
   cancel-in-progress: false
 
 jobs:
-  build:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.label.name == 'synthia-build'
+  factory:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     env:
-      TARGET: ${{ inputs.target || '.' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      SYNTHIA_MODEL: ${{ vars.SYNTHIA_MODEL }}
+      SYNTHIA_MAX_LOOPS: ${{ inputs.max_loops || '8' }}
+
     steps:
-      - name: Checkout working branch
+      - name: Checkout sovereign working branch
         uses: actions/checkout@v4
         with:
           ref: synthai-autobuilder-2026-10-01
           fetch-depth: 0
 
-      - name: Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "24"
           cache: npm
 
-      - name: Java for Android
-        if: ${{ inputs.build_apk != false }}
+      - name: Setup Java for APK verification
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Create isolated source copy
-        shell: bash
-        run: |
-          rm -rf .synthia-input
-          mkdir -p .synthia-input
-          rsync -a --exclude='.git' --exclude='.synthai-builder' --exclude='.synthia-input' ./ .synthia-input/repository/
-          node tools/sovereign-builder.mjs ingest .synthia-input/repository github-worktree
-
-      - name: Autonomous build and verification
-        id: builder
+      - name: Run autonomous factory until quiescent or genuinely blocked
+        id: factory
         continue-on-error: true
-        run: node tools/sovereign-builder.mjs build
+        run: node tools/synthia-factory.mjs
 
-      - name: Attempt APK from verified repository capabilities
-        if: ${{ inputs.build_apk != false }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          CANDIDATE=$(find .synthai-builder/workspace -name package.json -not -path '*/node_modules/*' -print -quit | xargs -r dirname)
-          if [ -n "$CANDIDATE" ]; then
-            cd "$CANDIDATE"
-            if node -e "const p=require('./package.json');process.exit(p.scripts&&p.scripts['mobile:apk']?0:1)"; then
-              npm run mobile:apk
-            fi
-          fi
-
-      - name: Collect evidence and products
+      - name: Persist only independently verified changes
+        id: persist
         if: always()
         shell: bash
         run: |
-          mkdir -p synthia-output
-          cp -r .synthai-builder synthia-output/builder-state 2>/dev/null || true
-          find .synthai-builder/workspace -type f \( -name '*.apk' -o -name '*.aab' -o -name '*.zip' \) -exec cp --parents {} synthia-output/ \; 2>/dev/null || true
-          printf '%s\n' "run=${GITHUB_RUN_ID}" "commit=${GITHUB_SHA}" "builder_outcome=${{ steps.builder.outcome }}" > synthia-output/RUN.txt
+          node <<'NODE'
+          const fs=require('fs'), path=require('path');
+          const manifestPath='.synthia-factory/apply-manifest.json';
+          if(!fs.existsSync(manifestPath)){ console.log('No apply manifest'); process.exit(0); }
+          const manifest=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
+          const source=path.resolve('.synthia-factory/workspace/repository');
+          let count=0;
+          for(const rel of manifest.files||[]){
+            const from=path.resolve(source,rel);
+            const to=path.resolve(rel);
+            if(!from.startsWith(source+path.sep) || !fs.existsSync(from)) continue;
+            fs.mkdirSync(path.dirname(to),{recursive:true});
+            fs.copyFileSync(from,to);
+            count++;
+          }
+          console.log('Persisted verified files:',count);
+          NODE
+          git config user.name "Synthia Factory"
+          git config user.email "synthia-factory@users.noreply.github.com"
+          git add -A -- ':!.synthia-factory'
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Synthia: persist independently verified product work"
+            git push origin HEAD:synthai-autobuilder-2026-10-01
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Publish build evidence
+      - name: Collect compact evidence and release products
+        if: always()
+        shell: bash
+        run: |
+          rm -rf synthia-output
+          mkdir -p synthia-output/evidence synthia-output/products
+          cp .synthia-factory/report.json synthia-output/evidence/ 2>/dev/null || true
+          cp .synthia-factory/ledger.jsonl synthia-output/evidence/ 2>/dev/null || true
+          cp .synthia-factory/apply-manifest.json synthia-output/evidence/ 2>/dev/null || true
+          find .synthia-factory/workspace/repository -type f \( -name '*.apk' -o -name '*.aab' \) -exec cp {} synthia-output/products/ \; 2>/dev/null || true
+          if [ -d .synthia-factory/workspace/repository/marketing ]; then
+            cp -r .synthia-factory/workspace/repository/marketing synthia-output/products/marketing
+          fi
+          printf '%s\n' "run=${GITHUB_RUN_ID}" "commit=${GITHUB_SHA}" "factory_outcome=${{ steps.factory.outcome }}" "persisted=${{ steps.persist.outputs.changed }}" > synthia-output/evidence/RUN.txt
+
+      - name: Publish evidence and product package
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: synthia-builder-${{ github.run_number }}
+          name: synthia-product-factory-${{ github.run_number }}
           path: synthia-output/
           if-no-files-found: error
           retention-days: 30
+          compression-level: 6
 
-      - name: Fail when builder requires repair
-        if: steps.builder.outcome != 'success'
+      - name: Require quiescent independently verified state
+        if: steps.factory.outcome != 'success'
         run: |
-          echo "Synthia did not pass verification. Evidence was preserved in the workflow artifact."
+          echo "Synthia still has actionable work or a genuine external block. Evidence is preserved."
+          cat .synthia-factory/report.json 2>/dev/null || true
           exit 1
