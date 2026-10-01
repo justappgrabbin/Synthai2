@@ -14,7 +14,12 @@
     "docker:down": "docker compose down",
     "mobile:sync": "npm run build && npx cap sync android",
     "mobile:add": "npx cap add android",
-    "mobile:apk": "npm run mobile:sync && cd android && ./gradlew assembleDebug"
+    "mobile:apk": "npm run mobile:sync && cd android && ./gradlew assembleDebug",
+    "synthai": "tsx tools/synthai/cli.ts",
+    "synthai:finish": "tsx tools/synthai/cli.ts finish",
+    "synthai:monetize": "tsx tools/synthai/cli.ts monetize",
+    "synthai:advertise": "tsx tools/synthai/cli.ts advertise",
+    "synthai:launch": "tsx tools/synthai/cli.ts launch"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
