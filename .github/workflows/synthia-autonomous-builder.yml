@@ -2,7 +2,7 @@ name: Synthia Autonomous Builder
 
 on:
   push:
-    branches: [synthai-autobuilder-2026-10-01]
+    branches: [synthai-autobuilder-fix-2026-10-01]
     paths:
       - '.github/workflows/synthia-autonomous-builder.yml'
       - 'tools/sovereign-builder.mjs'
@@ -38,20 +38,20 @@ jobs:
     env:
       TARGET: ${{ inputs.target || '.' }}
     steps:
-      - name: Checkout working branch
+      - name: Checkout repair branch
         uses: actions/checkout@v4
         with:
-          ref: synthai-autobuilder-2026-10-01
+          ref: synthai-autobuilder-fix-2026-10-01
           fetch-depth: 0
 
-      - name: Node
+      - name: Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Java for Android
-        if: ${{ inputs.build_apk != false }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_apk }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -65,13 +65,13 @@ jobs:
           rsync -a --exclude='.git' --exclude='.synthai-builder' --exclude='.synthia-input' ./ .synthia-input/repository/
           node tools/sovereign-builder.mjs ingest .synthia-input/repository github-worktree
 
-      - name: Autonomous build and verification
+      - name: Autonomous repair build and verification
         id: builder
         continue-on-error: true
         run: node tools/sovereign-builder.mjs build
 
       - name: Attempt APK from verified repository capabilities
-        if: ${{ inputs.build_apk != false }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_apk }}
         continue-on-error: true
         shell: bash
         run: |
@@ -83,26 +83,30 @@ jobs:
             fi
           fi
 
-      - name: Collect evidence and products
+      - name: Collect repaired products and evidence
         if: always()
         shell: bash
         run: |
+          rm -rf synthia-output
           mkdir -p synthia-output
-          cp -r .synthai-builder synthia-output/builder-state 2>/dev/null || true
-          find .synthai-builder/workspace -type f \( -name '*.apk' -o -name '*.aab' -o -name '*.zip' \) -exec cp --parents {} synthia-output/ \; 2>/dev/null || true
+          cp .synthai-builder/completion.json synthia-output/COMPLETION.json 2>/dev/null || true
+          cp .synthai-builder/provenance.jsonl synthia-output/PROVENANCE.jsonl 2>/dev/null || true
+          cp .synthai-builder/dna.json synthia-output/DNA.json 2>/dev/null || true
+          find .synthai-builder/workspace -type f \( -name '*.apk' -o -name '*.aab' -o -name '*.zip' \) -not -path '*/node_modules/*' -exec cp --parents {} synthia-output/ \; 2>/dev/null || true
+          find .synthai-builder/workspace -type d -path '*/dist' -prune -exec cp -r --parents {} synthia-output/ \; 2>/dev/null || true
           printf '%s\n' "run=${GITHUB_RUN_ID}" "commit=${GITHUB_SHA}" "builder_outcome=${{ steps.builder.outcome }}" > synthia-output/RUN.txt
 
-      - name: Publish build evidence
+      - name: Publish repaired applications
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: synthia-builder-${{ github.run_number }}
+          name: synthia-finished-${{ github.run_number }}
           path: synthia-output/
           if-no-files-found: error
           retention-days: 30
 
-      - name: Fail when builder requires repair
+      - name: Completion gate
         if: steps.builder.outcome != 'success'
         run: |
-          echo "Synthia did not pass verification. Evidence was preserved in the workflow artifact."
+          echo "Autonomous passes completed but at least one app still requires repair. See COMPLETION.json and PROVENANCE.jsonl."
           exit 1
