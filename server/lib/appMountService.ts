@@ -44,6 +44,10 @@ function resolveAppPath(id: string) {
   return target;
 }
 
+export function getMountedAppDirectory(id: string) {
+  return resolveAppPath(id);
+}
+
 function resolveInside(root: string, filePath: string) {
   const normalized = filePath.replace(/\\/g, "/").replace(/^\/+/, "");
   if (!normalized || normalized.includes("../")) {
@@ -138,6 +142,63 @@ async function detectRunCommand(appDir: string) {
   const js = files.find((file) => file.toLowerCase().endsWith(".js"));
   if (js) return `node ${JSON.stringify(js)}`;
   return "ls -la";
+}
+
+export async function mountAppArchiveBuffer(input: {
+  name: string;
+  archive: Buffer;
+  runCommand?: string;
+  icon?: string;
+}) {
+  if (!Buffer.isBuffer(input.archive) || input.archive.byteLength === 0) {
+    throw new Error("Archive bytes are required");
+  }
+
+  const id = createAppId(input.name);
+  const appDir = resolveAppPath(id);
+  await ensureDir(appDir);
+
+  try {
+    const written = await extractZip(input.archive, appDir);
+    const organismRoot = path.join(appDir, "organism");
+    const resonanceMarkers = [
+      path.join(organismRoot, "README.md"),
+      path.join(organismRoot, "backend", "main.py"),
+      path.join(organismRoot, "frontend", "package.json"),
+      path.join(organismRoot, "run-backend-with-opportunities.sh"),
+    ];
+
+    if (!resonanceMarkers.every((file) => fs.existsSync(file))) {
+      throw new Error("Archive does not match the canonical Resonance Network organism/ layout");
+    }
+
+    const manifest = {
+      id,
+      name: input.name,
+      icon: input.icon || "Network",
+      status: "mounted",
+      path: path.relative(process.env.LINUX_CONTAINER_WORKDIR || process.cwd(), appDir).replace(/\\/g, "/"),
+      runCommand: input.runCommand || "managed:resonance-network",
+      profile: {
+        kind: "resonance-network",
+        root: "organism",
+        archivePreserved: true,
+        backendPort: 8811,
+        opportunityPort: 8812,
+        frontendPort: 8813,
+      },
+      files: await listFiles(appDir),
+      written,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await writeJson(path.join(appDir, ".you-n-i-verse-app.json"), manifest);
+    return manifest;
+  } catch (error) {
+    await fsp.rm(appDir, { recursive: true, force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function mountApp(input: MountedAppInput) {
