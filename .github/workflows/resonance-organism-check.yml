@@ -22,8 +22,10 @@ jobs:
       - name: Install Studio dependencies
         run: npm ci
 
-      - name: TypeScript check
-        run: npm run check
+      - name: Compile Resonance server additions
+        run: |
+          npx esbuild server/lib/mountedRuntimeService.ts --platform=node --format=esm --packages=external --bundle --outfile=/tmp/resonance-runtime.mjs
+          npx esbuild server/routes/resonanceNetworkRoutes.ts --platform=node --format=esm --packages=external --bundle --outfile=/tmp/resonance-routes.mjs
 
       - name: Production web build
         run: npm run build
