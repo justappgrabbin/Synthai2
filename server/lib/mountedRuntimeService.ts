@@ -73,8 +73,10 @@ if ! "$PYTHON_BIN" -c "import fastapi,uvicorn,skyfield,pydantic" >/dev/null 2>&1
   fi
   PYTHON_BIN="$RUNTIME_DIR/venv/bin/python"
 fi
-if [ ! -d frontend/node_modules ]; then
-  if [ -f frontend/package-lock.json ]; then
+if [ ! -e frontend/node_modules ]; then
+  if [ -d /opt/resonance-web-runtime/node_modules ]; then
+    ln -s /opt/resonance-web-runtime/node_modules frontend/node_modules
+  elif [ -f frontend/package-lock.json ]; then
     (cd frontend && npm ci --no-audit --no-fund)
   else
     (cd frontend && npm install --no-audit --no-fund)
