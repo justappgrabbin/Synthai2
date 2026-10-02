@@ -27,6 +27,14 @@ jobs:
           npx esbuild server/lib/mountedRuntimeService.ts --platform=node --format=esm --packages=external --bundle --outfile=/tmp/resonance-runtime.mjs
           npx esbuild server/routes/resonanceNetworkRoutes.ts --platform=node --format=esm --packages=external --bundle --outfile=/tmp/resonance-routes.mjs
 
+      - name: Test byte-safe Resonance transport
+        run: |
+          mkdir -p /tmp/resonance-source /tmp/resonance-parts
+          dd if=/dev/urandom of=/tmp/resonance-source/test.zip bs=1048576 count=5 status=none
+          RESONANCE_PART_BYTES=1048576 node scripts/resonance-bundle.mjs split /tmp/resonance-source/test.zip /tmp/resonance-parts
+          node scripts/resonance-bundle.mjs join /tmp/resonance-parts /tmp/resonance-rebuilt.zip
+          cmp /tmp/resonance-source/test.zip /tmp/resonance-rebuilt.zip
+
       - name: Production web build
         run: npm run build
 
