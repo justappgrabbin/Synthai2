@@ -18,8 +18,11 @@ import { transitCache } from "./services/TransitCache";
 import { growthProgramEngine } from "./services/GrowthProgramEngine";
 import { getAllPrograms } from "../shared/growth-programs";
 import { z } from "zod";
+import { registerResonanceNetworkRoutes } from "./routes/resonanceNetworkRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  registerResonanceNetworkRoutes(app);
+
   // ========== StoryForge World Generation API ==========
   
   // Health check
