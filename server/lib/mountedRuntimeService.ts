@@ -62,7 +62,7 @@ export SYNTHIA_OPPORTUNITY_PORT=${opportunityPort}
 export RESONANCE_PORT=${backendPort}
 export VITE_API_BASE_URL=http://127.0.0.1:${backendPort}/api
 RUNTIME_DIR="$PWD/.synthia-runtime"
-PYTHON_BIN="${RESONANCE_PYTHON_BIN:-python3}"
+PYTHON_BIN="\${RESONANCE_PYTHON_BIN:-python3}"
 if ! "$PYTHON_BIN" -c "import fastapi,uvicorn,skyfield,pydantic" >/dev/null 2>&1; then
   if [ ! -x "$RUNTIME_DIR/venv/bin/python" ]; then
     mkdir -p "$RUNTIME_DIR"
