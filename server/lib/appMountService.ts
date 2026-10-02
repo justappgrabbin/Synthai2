@@ -98,21 +98,24 @@ async function listFiles(dir: string, base = dir, acc: string[] = []) {
 async function extractZip(buffer: Buffer, destination: string) {
   const zip = await JSZip.loadAsync(buffer);
   const extracted: string[] = [];
-  const writes: Promise<void>[] = [];
+  const entries: Array<{ relativePath: string; file: JSZip.JSZipObject }> = [];
 
   zip.forEach((relativePath, file) => {
-    if (file.dir) return;
-    const normalized = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
-    if (!normalized || normalized.includes("../")) return;
-    writes.push((async () => {
-      const target = resolveInside(destination, normalized);
-      await ensureDir(path.dirname(target));
-      await fsp.writeFile(target, await file.async("nodebuffer"));
-      extracted.push(normalized);
-    })());
+    if (!file.dir) entries.push({ relativePath, file });
   });
 
-  await Promise.all(writes);
+  // Intentionally write one entry at a time. Large organism archives can
+  // expand to several times their compressed size; Promise.all on every
+  // entry can materialize the whole archive in memory at once.
+  for (const { relativePath, file } of entries) {
+    const normalized = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
+    if (!normalized || normalized.includes("../")) continue;
+    const target = resolveInside(destination, normalized);
+    await ensureDir(path.dirname(target));
+    await fsp.writeFile(target, await file.async("nodebuffer"));
+    extracted.push(normalized);
+  }
+
   return extracted;
 }
 
