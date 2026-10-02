@@ -61,18 +61,36 @@ cd ${quoted}
 export SYNTHIA_OPPORTUNITY_PORT=${opportunityPort}
 export RESONANCE_PORT=${backendPort}
 export VITE_API_BASE_URL=http://127.0.0.1:${backendPort}/api
-if [ ! -d frontend/node_modules ]; then
-  (cd frontend && npm install --no-audit --no-fund)
+RUNTIME_DIR="$PWD/.synthia-runtime"
+PYTHON_BIN="${RESONANCE_PYTHON_BIN:-python3}"
+if ! "$PYTHON_BIN" -c "import fastapi,uvicorn,skyfield,pydantic" >/dev/null 2>&1; then
+  if [ ! -x "$RUNTIME_DIR/venv/bin/python" ]; then
+    mkdir -p "$RUNTIME_DIR"
+    "$PYTHON_BIN" -m venv "$RUNTIME_DIR/venv"
+  fi
+  if ! "$RUNTIME_DIR/venv/bin/python" -c "import fastapi,uvicorn,skyfield,pydantic" >/dev/null 2>&1; then
+    "$RUNTIME_DIR/venv/bin/python" -m pip install --disable-pip-version-check -r backend/requirements.txt
+  fi
+  PYTHON_BIN="$RUNTIME_DIR/venv/bin/python"
 fi
-PATH="$PWD/backend/venv/bin:$PATH" sh ./run-backend-with-opportunities.sh &
+if [ ! -d frontend/node_modules ]; then
+  if [ -f frontend/package-lock.json ]; then
+    (cd frontend && npm ci --no-audit --no-fund)
+  else
+    (cd frontend && npm install --no-audit --no-fund)
+  fi
+fi
+node external-opportunity/service.mjs &
+OPP_PID=$!
+(cd backend && "$PYTHON_BIN" -m uvicorn main:app --host 0.0.0.0 --port ${backendPort}) &
 BACK_PID=$!
 (cd frontend && npm run dev -- --host 0.0.0.0 --port ${frontendPort}) &
 FRONT_PID=$!
 cleanup() {
-  kill "$FRONT_PID" "$BACK_PID" 2>/dev/null || true
+  kill "$FRONT_PID" "$BACK_PID" "$OPP_PID" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
-wait -n "$BACK_PID" "$FRONT_PID"`;
+wait -n "$OPP_PID" "$BACK_PID" "$FRONT_PID"`;
 }
 
 async function probe(url: string) {
