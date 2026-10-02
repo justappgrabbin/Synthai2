@@ -207,7 +207,7 @@ export async function stopMountedRuntime(appId: string) {
 }
 
 process.once("exit", () => {
-  for (const runtime of runtimes.values()) {
+  runtimes.forEach((runtime) => {
     if (!runtime.process.killed && runtime.process.pid) {
       try {
         if (os.platform() !== "win32") process.kill(-runtime.process.pid, "SIGTERM");
@@ -216,5 +216,5 @@ process.once("exit", () => {
         // best effort shutdown
       }
     }
-  }
+  });
 });
