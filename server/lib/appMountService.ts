@@ -18,6 +18,20 @@ export interface MountedAppInput {
   icon?: string;
 }
 
+export interface MountedAppManifest extends Record<string, unknown> {
+  id: string;
+  name: string;
+  path: string;
+  runCommand?: string;
+  files: string[];
+  status?: string;
+  icon?: string;
+  profile?: Record<string, unknown>;
+  written?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 function getAppsRoot() {
   const workspace = process.env.LINUX_CONTAINER_WORKDIR || path.join(process.cwd(), "workspace");
   return path.resolve(workspace, "apps");
@@ -241,9 +255,9 @@ export async function listMountedApps() {
     .map((entry) => readJson(path.join(getAppsRoot(), entry.name, ".you-n-i-verse-app.json"), null)));
 }
 
-export async function getMountedApp(id: string) {
+export async function getMountedApp(id: string): Promise<MountedAppManifest> {
   const appDir = resolveAppPath(id);
-  const manifest = await readJson<Record<string, unknown> | null>(path.join(appDir, ".you-n-i-verse-app.json"), null);
+  const manifest = await readJson<MountedAppManifest | null>(path.join(appDir, ".you-n-i-verse-app.json"), null);
   if (!manifest) throw new Error("Mounted app not found");
   return { ...manifest, files: await listFiles(appDir) };
 }
