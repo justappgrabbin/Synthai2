@@ -2,13 +2,19 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -31,6 +37,15 @@ jobs:
 
       - name: Build web app
         run: npm run build
+
+      - name: Bundle app screens for offline launch
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          const config = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+          if (config.server) delete config.server.url;
+          fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2));
+          JS
 
       - name: Add Android project
         run: |
