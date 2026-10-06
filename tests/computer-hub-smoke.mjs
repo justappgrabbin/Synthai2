@@ -20,7 +20,7 @@ try{
  await hub.locator('[data-desktop-app="synthia"]').click();
  await hub.frameLocator('iframe[title="Synthia phone app"]').getByRole('navigation',{name:'Main navigation'}).waitFor();
  await page.getByLabel('Quick launch').selectOption('assistant');
- await page.frameLocator('iframe[title="Synthia assistant"]').getByText('Synthia assistant',{exact:true}).first().waitFor();
+ await page.frameLocator('iframe[title="Synthia assistant"]').getByRole('heading',{name:'Ask Synthia',exact:true}).waitFor();
  await page.getByRole('button',{name:'Workspace',exact:true}).click();
  await page.getByText('Available on your phone',{exact:true}).waitFor();
  const backup={format:'synthia-workspace-backup',version:1,createdAt:new Date().toISOString(),entries:{'synthia-computer-background':'{"kind":"night"}'}};
