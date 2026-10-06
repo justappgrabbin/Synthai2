@@ -1,0 +1,24 @@
+name: Computer hub build
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npx tsc --noEmit --jsx react-jsx --skipLibCheck --lib dom,es2022 --moduleResolution bundler --module esnext client/src/components/ComputerBackgroundControl.tsx
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/computer-hub-smoke.mjs
