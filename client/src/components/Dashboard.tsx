@@ -1,3 +1,4 @@
+import {ComputerBackgroundControl,readComputerBackground,computerBackgroundStyle} from "@/components/ComputerBackgroundControl";
 import { useLocation } from "wouter";
 import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -166,6 +167,7 @@ function readStoredStringArray(key: string, fallback: string[]) {
 
 export function Dashboard() {
   const [, setLocation] = useLocation();
+  const [background,setBackground]=useState(readComputerBackground);
   const [apps, setApps] = useState<AppModule[]>(CORE_APPS);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activePerspective, setActivePerspective] = useState<OSPerspective>(() => {
@@ -356,14 +358,15 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background" data-testid="synthia-os-shell">
-      <section className="relative min-h-screen overflow-hidden border-b bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_34%),linear-gradient(135deg,hsl(var(--background)),hsl(var(--muted)/0.72))] px-4 pb-32 pt-4 md:px-8">
+      <section style={computerBackgroundStyle(background)} className="relative min-h-screen overflow-hidden border-b bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.16),transparent_34%),linear-gradient(135deg,hsl(var(--background)),hsl(var(--muted)/0.72))] px-4 pb-32 pt-4 md:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-7xl flex-col">
           <header className="flex items-center justify-between gap-3 rounded-lg border bg-background/84 px-3 py-3 shadow-sm backdrop-blur md:px-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Synthia OS</p>
-              <p className="truncate text-sm text-muted-foreground">Phone shell • mesh online • container bridge ready</p>
+              <p className="truncate text-sm text-muted-foreground">Your app hub • phones and computers</p>
             </div>
             <div className="flex items-center gap-2">
+              <ComputerBackgroundControl value={background} onChange={setBackground} />
               {isEditingShell && (
                 <Button variant="outline" size="sm" onClick={resetShellLayout}>
                   Reset Layout
@@ -995,3 +998,4 @@ function PortalButton({ icon: Icon, title, description, onClick, variant = "defa
     </button>
   );
 }
+

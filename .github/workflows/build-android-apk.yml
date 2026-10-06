@@ -2,13 +2,19 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -29,8 +35,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Android backup plugins
+        run: npm install --save-exact --ignore-scripts @capacitor/filesystem@6.0.0 @capacitor/share@6.0.0
+
+      - name: Restore test signing key
+        uses: actions/cache@v4
+        with:
+          path: .ci-android/debug.keystore
+          key: synthai2-computer-debug-signing-v2
+
+      - name: Prepare test signing key
+        run: |
+          mkdir -p .ci-android
+          if [ ! -f .ci-android/debug.keystore ]; then
+            keytool -genkeypair -noprompt -keystore .ci-android/debug.keystore -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+          fi
+
       - name: Build web app
         run: npm run build
+
+      - name: Bundle app screens for offline launch
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          const config = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+          if (config.server) delete config.server.url;
+          fs.writeFileSync('capacitor.config.json', JSON.stringify(config, null, 2));
+          JS
 
       - name: Add Android project
         run: |
@@ -41,9 +72,44 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Set increasing Android version
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          python - <<'PY'
+          import os, re, pathlib
+          path = pathlib.Path('android/app/build.gradle')
+          text = path.read_text()
+          number = int(os.environ['BUILD_NUMBER'])
+          text, codes = re.subn(r'versionCode\s+\d+', 'versionCode ' + str(1000 + number), text)
+          text, names = re.subn(r'versionName\s+"[^"]*"', 'versionName "1.1.' + str(number) + '"', text)
+          assert codes == 1 and names == 1, 'Android version fields not found'
+          text += '''
+          android {
+              signingConfigs {
+                  debug {
+                      storeFile rootProject.file("../.ci-android/debug.keystore")
+                      storePassword "android"
+                      keyAlias "androiddebugkey"
+                      keyPassword "android"
+                  }
+              }
+          }
+          '''
+          path.write_text(text)
+          PY
+
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
+
+      - name: Verify APK signing and record checksum
+        run: |
+          APK_PATH=android/app/build/outputs/apk/debug/app-debug.apk
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)
+          "$BUILD_TOOLS/apksigner" verify --print-certs "$APK_PATH"
+          "$BUILD_TOOLS/aapt" dump badging "$APK_PATH" | sed -n '1p'
+          sha256sum "$APK_PATH"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

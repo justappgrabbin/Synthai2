@@ -5,6 +5,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun } from "lucide-react";
 
 const NAV_ITEMS = [
+  {path:"/computer-desktop",icon:Layers,label:"Computer"},
   { path: "/", icon: Home, label: "Dashboard" },
   { path: "/grove-store", icon: Store, label: "Store" },
   { path: "/ide", icon: Code2, label: "IDE" },
@@ -37,7 +38,7 @@ export function GlobalNav() {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
 
-  if (location === "/") {
+  if (location === "/" || location === "/computer-desktop") {
     return null;
   }
 
@@ -111,3 +112,4 @@ export function GlobalNav() {
     </>
   );
 }
+

@@ -1,0 +1,3 @@
+import {AppRegistry,type AppModuleData} from '@/lib/appRegistry';
+const app:AppModuleData={id:'computer-desktop',name:'Your Computer',description:'Your apps with quick launch and workspace backup',path:'/computer-desktop',iconName:'Monitor',type:'core',version:'1.1.0',manifest:{id:'synthia/computer-desktop',name:'Your Computer',version:'1.1.0',type:'core',entry:'/computer-desktop',permissions:['storage'],author:'verified',description:'Runnable app hub with custom backgrounds and reviewed backup restore'}};
+if(typeof window!=='undefined'&&!AppRegistry.getInstalledApps().some(existing=>existing.id===app.id&&existing.version===app.version))AppRegistry.installApp(app);

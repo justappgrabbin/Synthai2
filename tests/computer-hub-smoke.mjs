@@ -1,0 +1,41 @@
+import {chromium} from 'playwright';
+import {spawn} from 'node:child_process';
+import assert from 'node:assert/strict';
+const server=spawn('npx',['vite','preview','--host','127.0.0.1','--port','5174'],{stdio:'inherit'});
+const browser=await chromium.launch({headless:true});
+try{
+ for(let i=0;i<100;i++){try{if((await fetch('http://127.0.0.1:5174/')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+ const page=await browser.newPage({viewport:{width:390,height:844}});
+ await page.addInitScript(()=>localStorage.setItem('you-n-ide-os.booted','true'));
+ await page.route('**/api/**',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({status:'offline',apps:[],events:0})}));
+ await page.route('**/mcp/**',route=>route.fulfill({contentType:'application/json',body:'{"ok":false}'}));
+ await page.goto('http://127.0.0.1:5174/');
+ await page.getByRole('button',{name:'Background',exact:true}).click({timeout:30000});
+ await page.getByLabel('Choose a background').selectOption('web-linux');
+ assert(await page.evaluate(()=>document.querySelector('[data-testid="synthia-os-shell"] section').style.backgroundImage.includes('web-linux.jpg')));
+ await page.getByRole('button',{name:'Close background settings'}).click();
+ await page.goto('http://127.0.0.1:5174/computer-desktop');
+ const hub=page.frameLocator('iframe[title="Computer app hub"]');
+ await hub.getByRole('button',{name:'Log in as Guest'}).click({timeout:30000});
+ await hub.locator('[data-desktop-app="synthia"]').click();
+ await hub.frameLocator('iframe[title="Synthia phone app"]').getByRole('navigation',{name:'Main navigation'}).waitFor();
+ await page.getByLabel('Quick launch').selectOption('assistant');
+ await page.frameLocator('iframe[title="Synthia assistant"]').getByRole('heading',{name:'Ask Synthia',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Workspace',exact:true}).click();
+ await page.getByText('Available on your phone',{exact:true}).waitFor();
+ const backup={format:'synthia-workspace-backup',version:1,createdAt:new Date().toISOString(),entries:{'synthia-computer-background':'{"kind":"night"}'}};
+ await page.getByLabel('Restore a workspace backup').setInputFiles({name:'example.synthia-backup',mimeType:'application/octet-stream',buffer:Buffer.from(JSON.stringify(backup))});
+ await page.getByRole('region',{name:'Backup preview'}).waitFor();
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('synthia-computer-background')).kind),'web-linux');
+ await page.getByRole('button',{name:'Restore this backup',exact:true}).click();
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('synthia-computer-background')).kind),'night');
+ await page.getByRole('button',{name:'Workspace',exact:true}).click();
+ const downloadPromise=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Save workspace backup',exact:true}).click();
+ assert((await downloadPromise).suggestedFilename().endsWith('.synthia-backup'));
+ await page.keyboard.press('Escape');
+ await page.getByLabel('Quick launch').selectOption('computer');
+ await hub.getByRole('button',{name:'Log in as Guest'}).click({timeout:30000});
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+ console.log('SynthAI2 background changes and runnable nested Human Design app passed. Backend availability is mocked only for this UI test.');
+}finally{await browser.close();server.kill('SIGTERM');}
