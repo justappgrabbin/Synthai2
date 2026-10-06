@@ -19,5 +19,23 @@ try{
  await hub.getByRole('button',{name:'Log in as Guest'}).click({timeout:30000});
  await hub.locator('[data-desktop-app="synthia"]').click();
  await hub.frameLocator('iframe[title="Synthia phone app"]').getByRole('navigation',{name:'Main navigation'}).waitFor();
+ await page.getByLabel('Quick launch').selectOption('assistant');
+ await page.frameLocator('iframe[title="Synthia assistant"]').getByText('Synthia assistant',{exact:true}).first().waitFor();
+ await page.getByRole('button',{name:'Workspace',exact:true}).click();
+ await page.getByText('Available on your phone',{exact:true}).waitFor();
+ const backup={format:'synthia-workspace-backup',version:1,createdAt:new Date().toISOString(),entries:{'synthia-computer-background':'{"kind":"night"}'}};
+ await page.getByLabel('Restore a workspace backup').setInputFiles({name:'example.synthia-backup',mimeType:'application/octet-stream',buffer:Buffer.from(JSON.stringify(backup))});
+ await page.getByRole('region',{name:'Backup preview'}).waitFor();
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('synthia-computer-background')).kind),'web-linux');
+ await page.getByRole('button',{name:'Restore this backup',exact:true}).click();
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('synthia-computer-background')).kind),'night');
+ await page.getByRole('button',{name:'Workspace',exact:true}).click();
+ const downloadPromise=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Save workspace backup',exact:true}).click();
+ assert((await downloadPromise).suggestedFilename().endsWith('.synthia-backup'));
+ await page.keyboard.press('Escape');
+ await page.getByLabel('Quick launch').selectOption('computer');
+ await hub.getByRole('button',{name:'Log in as Guest'}).click({timeout:30000});
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
  console.log('SynthAI2 background changes and runnable nested Human Design app passed. Backend availability is mocked only for this UI test.');
 }finally{await browser.close();server.kill('SIGTERM');}
