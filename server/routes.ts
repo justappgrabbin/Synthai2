@@ -1,8 +1,9 @@
 import type { Express } from "express";
+import { registerSynthiaChat } from "./lib/synthiaChat";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { uploadProjectToGoogleDrive, uploadFileToGoogleDrive } from "./lib/googleDriveService";
-import { createOrUpdateGitHubRepo } from "./lib/githubService";
+import { createOrUpdateGitHubRepo, getGitHubConnectionStatus } from "./lib/githubService";
 import { importGitHubRepo } from "./lib/githubImportService";
 import { deployToNetlify } from "./lib/netlifyService";
 import { getContainerStatus, runContainerCommand } from "./lib/linuxContainerService";
@@ -20,6 +21,7 @@ import { getAllPrograms } from "../shared/growth-programs";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  registerSynthiaChat(app);
   // ========== StoryForge World Generation API ==========
   
   // Health check
@@ -744,6 +746,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/github/status", async (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    try {
+      res.json({ success: true, ...(await getGitHubConnectionStatus()) });
+    } catch {
+      res.status(503).json({ success: false, error: "GitHub is not connected or its permissions have expired. Connect GitHub in Replit integrations." });
+    }
+  });
+
   // GitHub push endpoint
   app.post("/api/push/github", async (req, res) => {
     try {
@@ -1068,3 +1079,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+

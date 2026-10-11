@@ -15,6 +15,15 @@ interface AIResponse {
 }
 
 export class AIService {
+  private static providerRequest(backend: string, apiKey: string, payload: unknown): Promise<Response> {
+    return fetch("/api/synthia/chat", {
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ backend, apiKey, payload }),
+      signal: AbortSignal.timeout(65000),
+    });
+  }
+
   private static getSelectedBackend(): string {
     return localStorage.getItem("ai_backend") || "claude";
   }
@@ -101,22 +110,14 @@ export class AIService {
   }
 
   private static async callClaudeWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
+    const response = await this.providerRequest("claude", apiKey, {
         model: "claude-sonnet-4-20250514",
         max_tokens: 4096,
         messages: messages.map(m => ({
           role: m.role === "system" ? "user" : m.role,
           content: m.content
         }))
-      })
-    });
+      });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -143,18 +144,11 @@ export class AIService {
   }
 
   private static async callGPTWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
+    const response = await this.providerRequest("gpt", apiKey, {
         model: "gpt-4o",
         messages: messages,
         max_tokens: 1024
-      })
-    });
+      });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -208,18 +202,11 @@ export class AIService {
   }
 
   private static async callDeepSeekWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
+    const response = await this.providerRequest("deepseek", apiKey, {
         model: "deepseek-chat",
         messages: messages,
         max_tokens: 1024
-      })
-    });
+      });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -246,18 +233,11 @@ export class AIService {
   }
 
   private static async callGrokWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
+    const response = await this.providerRequest("grok", apiKey, {
         model: "grok-beta",
         messages: messages,
         max_tokens: 1024
-      })
-    });
+      });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -285,20 +265,13 @@ export class AIService {
   }
 
   private static async callHuggingFaceWithKey(messages: AIMessage[], apiKey: string): Promise<AIResponse> {
-    const response = await fetch("https://api.minimax.io/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
+    const response = await this.providerRequest("huggingface", apiKey, {
         model: "MiniMax-M2",
         messages: messages,
         max_tokens: 4096,
         temperature: 1.0,
         top_p: 0.95
-      })
-    });
+      });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -313,3 +286,4 @@ export class AIService {
     return { content: data.choices[0].message.content };
   }
 }
+

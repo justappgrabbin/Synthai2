@@ -1,0 +1,31 @@
+name: Synthia integration checks
+on:
+  pull_request:
+    paths:
+      - 'client/src/components/PersistentAssistant.tsx'
+      - 'client/src/components/SynthiaHoverControls.tsx'
+      - 'client/src/lib/AIService.ts'
+      - 'client/src/lib/synthiaHands.ts'
+      - 'client/src/lib/shonaMorphology.ts'
+      - 'client/src/lib/contactReasoning.ts'
+      - 'client/src/components/ShonaContactLab.tsx'
+      - 'client/src/App.tsx'
+      - 'server/**'
+      - 'tests/synthia-github.test.mjs'
+      - '.github/workflows/synthia-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node tests/synthia-github.test.mjs
+      - run: npm run check
+      - run: npm run build
