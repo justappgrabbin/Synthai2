@@ -10,7 +10,7 @@
 // ============================================================
 
 import { getKernel, SubstrateKernel } from './SubstrateKernel';
-import { COLOR_MAP, CENTER_MAP_REF } from '@/data/humanDesign';
+import { CENTER_MAP_REF } from '@/data/humanDesign';
 import type { Center, Color } from '@/types';
 
 // === CHARACTER REGISTRY ===
@@ -241,8 +241,7 @@ export class NovelWriter {
   createCharacter(config: Partial<Character> & { name: string }): Character {
     const hdColors = [1, 2, 3, 4, 5, 6] as Color[];
     const color = this.pick(hdColors);
-    const colorDef = COLOR_MAP[color];
-    const centers = Object.keys(CENTER_MAP_REF) as Center[];
+    const centers = [...new Set(Object.values(CENTER_MAP_REF))];
     const center = this.pick(centers);
 
     const character: Character = {
@@ -252,13 +251,13 @@ export class NovelWriter {
       role: config.role || 'supporting',
       goals: config.goals || [{
         id: `goal_${Date.now()}`,
-        description: `${colorDef.keynote} through ${center}`,
+        description: `Explore ${center}`,
         priority: Math.floor(this.rng() * 10) + 1,
         progress: 0,
         status: 'active',
         obstacles: []
       }],
-      traits: config.traits || [colorDef.mode[0], colorDef.mode[1], `${center}-centered`],
+      traits: config.traits || [`Color ${color}`, `${center}-centered`],
       emotionalState: {
         fear: color === 1 ? 0.8 : 0.2,
         hope: color === 2 ? 0.8 : 0.4,

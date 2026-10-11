@@ -163,7 +163,7 @@ class EphemerisCalculator {
     const speeds = [1.6, 1.2, 0.5, 0.08, 0.03, 0.01, 0.006, 0.004];
     
     planets.forEach((planet, idx) => {
-      const bodyCode = planet as Astronomy.Body;
+      const bodyCode = planet as AstronomyTypes.Body;
       const geoVector = Astronomy.GeoVector(bodyCode, astroTime, false);
       const ecliptic = Astronomy.Ecliptic(geoVector);
       
@@ -203,7 +203,7 @@ class EphemerisCalculator {
     return positions;
   }
   
-  static calculateMoonNode(astroTime: Astronomy.AstroTime): number {
+  static calculateMoonNode(astroTime: AstronomyTypes.AstroTime): number {
     // Approximate North Node calculation
     // Using simplified formula: Node = 125.04 - 0.0529539 * days from J2000
     const j2000 = Astronomy.MakeTime(new Date('2000-01-01T12:00:00Z'));

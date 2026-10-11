@@ -21,13 +21,13 @@ export const COLOR_MAP: Record<number, Color> = {
 
 // Gate → center mapping
 export const CENTER_MAP_REF: Record<number, Center> = {
-  64:  'Head',   47: 'Head',   4:  'Head',   17: 'Head',   43: 'Head',   11: 'Head',   24: 'Head',
+  64:  'Head',
   61:  'Head',   63: 'Head',
   47:  'Ajna',   4:  'Ajna',   17: 'Ajna',   43: 'Ajna',   11: 'Ajna',   24: 'Ajna',
   62:  'Throat', 23: 'Throat', 56: 'Throat', 35: 'Throat', 12: 'Throat', 45: 'Throat',
   33:  'Throat', 8:  'Throat', 31: 'Throat', 20: 'Throat', 16: 'Throat',
   1:   'G',      13: 'G',      25: 'G',      46: 'G',      2:  'G',      15: 'G',      10: 'G',
-  7:   'G',      7:  'G',
+  7:   'G',
   21:  'Heart',  40: 'Heart',  26: 'Heart',  51: 'Heart',
   36:  'SolarPlexus', 22: 'SolarPlexus', 37: 'SolarPlexus', 6: 'SolarPlexus',
   49:  'SolarPlexus', 55: 'SolarPlexus', 30: 'SolarPlexus',

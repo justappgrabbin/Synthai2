@@ -222,8 +222,11 @@ export class MorphMemoryEngine {
     this.addOperation('regenerate', artifact.id, `Regenerating ${artifact.originalName} (mode: ${mode})...`);
 
     const result = await this.orchestrator.regenerateFromMemory(
-      artifact.understanding.intent, context, mode, userId
-    );
+      artifact.understanding.intent, context, mode, artifact.userId || userId, artifact.id
+    ).catch(error => {
+      this.failOperation('regenerate', artifact.id, error);
+      throw error;
+    });
 
     const artifactNodes = this.findArtifactNodes(artifact.id);
     const relevantNodes = [...artifactNodes, ...this.findRelevantNodes(artifact.understanding.intent, context)];
@@ -389,7 +392,11 @@ export class MorphMemoryEngine {
   }> {
     this.addOperation('improvise', 'system', `Improvising: ${request}`);
 
-    const result = await this.orchestrator.improviseCode(request, baseArtifact?.id, userId);
+    const result = await this.orchestrator.improviseCode(request, baseArtifact?.id, baseArtifact?.userId || userId)
+      .catch(error => {
+        this.failOperation('improvise', 'system', error);
+        throw error;
+      });
 
     const allNodes = Array.from(this.nodes.values());
     const relevantNodes = allNodes.filter(n =>
@@ -434,7 +441,7 @@ export class MorphMemoryEngine {
         timestamp: Date.now(),
       };
 
-      const resp = await fetch(`${this.orchestrator.getMeshState ? '' : 'https://synthia-server.onrender.com'}/memory/save`, {
+      const resp = await fetch(`${this.orchestrator.getApiBase()}/memory/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -620,6 +627,11 @@ export class MorphMemoryEngine {
   private completeOperation(type: MorphOperation['type'], target: string, result: string) {
     const op = this.operations.find(o => o.type === type && o.target === target && o.status === 'running');
     if (op) { op.status = 'completed'; op.result = result; }
+  }
+
+  private failOperation(type: MorphOperation['type'], target: string, error: unknown) {
+    const op = this.operations.find(o => o.type === type && o.target === target && o.status === 'running');
+    if (op) { op.status = 'failed'; op.result = error instanceof Error ? error.message : String(error); }
   }
 
   getNodes(): GNNNode[] { return Array.from(this.nodes.values()); }

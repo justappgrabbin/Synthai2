@@ -1,0 +1,38 @@
+name: Synthia integration checks
+on:
+  pull_request:
+    paths:
+      - 'client/src/**'
+      - 'server/**'
+      - 'shared/**'
+      - 'synthia-server/aion/KleinTools.py'
+      - 'tests/**'
+      - 'tsconfig.json'
+      - 'package*.json'
+      - '.github/workflows/synthia-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  klein-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -p 'test_klein_tools.py'
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node tests/synthia-github.test.mjs
+      - run: node tests/klein-semantic.test.mjs
+      - run: node --import tsx tests/build-regressions.test.ts
+      - run: npm run check
+      - run: npm run build

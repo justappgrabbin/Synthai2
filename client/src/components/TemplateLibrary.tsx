@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Box, ListTodo, Terminal, RefreshCw, Sparkles } from "lucide-react";
-import type { Template } from "@shared/schema";
-import type { Project } from "@shared/schema";
+interface Template { id: string; category: string; icon: string; name: string; language: string; description: string; }
+interface Project { id: string; name: string; }
 import { useToast } from "@/hooks/use-toast";
 
 const iconMap: Record<string, any> = {
@@ -27,7 +27,7 @@ export function TemplateLibrary({ onProjectCreated }: { onProjectCreated: (proje
   const generateFromTemplate = useMutation({
     mutationFn: async (templateId: string) => {
       const result = await apiRequest("POST", `/api/templates/${templateId}/generate`, {});
-      return result as Project;
+      return await result.json() as Project;
     },
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -84,7 +84,7 @@ export function TemplateLibrary({ onProjectCreated }: { onProjectCreated: (proje
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {categoryTemplates.map((template) => {
-                const Icon = iconMap[template.icon] || Cube;
+                const Icon = iconMap[template.icon] || Box;
                 return (
                   <Card key={template.id} className="hover-elevate active-elevate-2">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 gap-2">

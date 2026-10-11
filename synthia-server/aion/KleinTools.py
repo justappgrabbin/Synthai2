@@ -51,14 +51,56 @@ class ToolMode:
         self.function = function
 
     def execute(self, input_data: Any) -> Any:
-        """Execute this mode's function"""
-        # Base implementation - override in subclasses
-        return {
-            'mode': self.name,
-            'dimension': self.dimension.value,
-            'input': input_data,
-            'output': f"Processed by {self.name} in {self.dimension.value} mode"
-        }
+        """Return measured evidence only; unsupported operations fail explicitly."""
+        import hashlib
+        import json
+        import re
+
+        def encode(value):
+            try:
+                return json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                  allow_nan=False, separators=(",", ":"))
+            except (TypeError, ValueError) as error:
+                raise ValueError("Klein tools require JSON-compatible input") from error
+
+        encoded = encode(input_data)
+        evidence = {}
+        if self.function == 'measure_name_place':
+            evidence = {'serialized_characters': len(encoded),
+                        'serialized_bytes': len(encoded.encode('utf-8')),
+                        'type': type(input_data).__name__,
+                        'placement': None}
+        elif self.function == 'break_into_parts':
+            if isinstance(input_data, str):
+                parts = input_data.split()
+            elif isinstance(input_data, dict):
+                parts = [{'key': key, 'value': value} for key, value in input_data.items()]
+            elif isinstance(input_data, list):
+                parts = list(input_data)
+            else:
+                raise ValueError("Decomposition requires text, an object, or a list")
+            evidence = {'parts': parts, 'part_count': len(parts)}
+        elif self.function == 'structural_analysis':
+            evidence = {'type': type(input_data).__name__,
+                        'keys': list(input_data) if isinstance(input_data, dict) else [],
+                        'element_count': len(input_data) if isinstance(input_data, (str, list, dict)) else None}
+        elif self.function == 'identity_analysis':
+            evidence = {'content_sha256': hashlib.sha256(encoded.encode('utf-8')).hexdigest(),
+                        'identity_interpretation': None}
+        elif self.function == 'language_analysis':
+            if not isinstance(input_data, str):
+                raise ValueError("Language observations require text")
+            tokens = [{'text': match.group(), 'start': match.start(), 'end': match.end()}
+                      for match in re.finditer(r"\w+(?:['’]\w+)*|[^\w\s]", input_data)]
+            evidence = {'tokens': tokens,
+                        'word_count': sum(bool(re.search(r"\w", token['text'])) for token in tokens),
+                        'language': None, 'semantic_interpretation': None}
+        else:
+            raise NotImplementedError(
+                f"{self.name}/{self.function} has no verified implementation; no result was produced")
+        return {'mode': self.name, 'dimension': self.dimension.value,
+                'status': 'observed', 'method': self.function,
+                'evidence': evidence, 'semantic_status': 'unresolved'}
 
 
 # ============================================================
@@ -87,14 +129,7 @@ class Measurer(ToolMode):
         super().__init__('MEASURER', Dimension.MOVEMENT, 'measure_name_place')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'MEASURER',
-            'action': 'measurement',
-            'size': len(str(input_data)),
-            'type': type(input_data).__name__,
-            'placement': 'mesh_node',
-            'naming': f"entity_{hash(str(input_data)) % 10000}"
-        }
+        return super().execute(input_data)
 
 class Dismember(ToolMode):
     """Evolution mode: Breaks into parts"""
@@ -102,16 +137,7 @@ class Dismember(ToolMode):
         super().__init__('DISMEMBER', Dimension.EVOLUTION, 'break_into_parts')
 
     def execute(self, input_data: Any) -> Any:
-        if isinstance(input_data, str):
-            parts = input_data.split()
-            return {
-                'mode': 'DISMEMBER',
-                'action': 'dismemberment',
-                'parts': parts,
-                'part_count': len(parts),
-                'fragments': [p[:10] for p in parts[:5]]
-            }
-        return {'mode': 'DISMEMBER', 'action': 'dismemberment', 'parts': [input_data]}
+        return super().execute(input_data)
 
 class Timer(ToolMode):
     """Being mode: Temporal analysis"""
@@ -119,14 +145,7 @@ class Timer(ToolMode):
         super().__init__('TIMER', Dimension.BEING, 'temporal_analysis')
 
     def execute(self, input_data: Any) -> Any:
-        from datetime import datetime
-        return {
-            'mode': 'TIMER',
-            'action': 'timing',
-            'timestamp': datetime.now().isoformat(),
-            'temporal_markers': ['creation', 'modification', 'access'],
-            'genetic_clock': hash(str(input_data)) % 1000000
-        }
+        return super().execute(input_data)
 
 class Analyzer(ToolMode):
     """Design mode: Structural breakdown"""
@@ -134,13 +153,7 @@ class Analyzer(ToolMode):
         super().__init__('ANALYZER', Dimension.DESIGN, 'structural_analysis')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'ANALYZER',
-            'action': 'analysis',
-            'structure': str(type(input_data)),
-            'complexity': len(str(input_data)),
-            'patterns': ['pattern_1', 'pattern_2', 'pattern_3']
-        }
+        return super().execute(input_data)
 
 class Identifier(ToolMode):
     """Space mode: Identity analysis"""
@@ -148,13 +161,7 @@ class Identifier(ToolMode):
         super().__init__('IDENTIFIER', Dimension.SPACE, 'identity_analysis')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'IDENTIFIER',
-            'action': 'identification',
-            'identity_hash': hash(str(input_data)),
-            'unique_signature': f"sig_{abs(hash(str(input_data))) % 1000000}",
-            'presence': 'detected'
-        }
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -183,13 +190,7 @@ class Router(ToolMode):
         super().__init__('ROUTER', Dimension.MOVEMENT, 'direct_flow')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'ROUTER',
-            'action': 'routing',
-            'path': 'optimal_path',
-            'direction': 'forward',
-            'channels': ['channel_1', 'channel_2']
-        }
+        return super().execute(input_data)
 
 class Linguist(ToolMode):
     """Evolution mode: Analyzes language"""
@@ -197,17 +198,7 @@ class Linguist(ToolMode):
         super().__init__('LINGUIST', Dimension.EVOLUTION, 'language_analysis')
 
     def execute(self, input_data: Any) -> Any:
-        if isinstance(input_data, str):
-            words = input_data.split()
-            return {
-                'mode': 'LINGUIST',
-                'action': 'linguistic_analysis',
-                'word_count': len(words),
-                'sentence_count': input_data.count('.') + 1,
-                'language': 'detected',
-                'structure': 'analyzed'
-            }
-        return {'mode': 'LINGUIST', 'action': 'linguistic_analysis', 'structure': 'unknown'}
+        return super().execute(input_data)
 
 class Chronologist(ToolMode):
     """Being mode: Temporal patterns"""
@@ -215,13 +206,7 @@ class Chronologist(ToolMode):
         super().__init__('CHRONOLOGIST', Dimension.BEING, 'temporal_patterns')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'CHRONOLOGIST',
-            'action': 'chronology',
-            'temporal_markers': ['past', 'present', 'future'],
-            'rhythm': 'detected',
-            'cycle': 'analyzed'
-        }
+        return super().execute(input_data)
 
 class Grammarian(ToolMode):
     """Design mode: Structural rules"""
@@ -229,13 +214,7 @@ class Grammarian(ToolMode):
         super().__init__('GRAMMARIAN', Dimension.DESIGN, 'grammar_rules')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'GRAMMARIAN',
-            'action': 'grammar_analysis',
-            'rules': ['rule_1', 'rule_2', 'rule_3'],
-            'structure': 'formal',
-            'validity': 'checked'
-        }
+        return super().execute(input_data)
 
 class Personologist(ToolMode):
     """Space mode: Identity patterns"""
@@ -243,13 +222,7 @@ class Personologist(ToolMode):
         super().__init__('PERSONOLOGIST', Dimension.SPACE, 'identity_patterns')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'PERSONOLOGIST',
-            'action': 'personology',
-            'identity_markers': ['marker_1', 'marker_2'],
-            'persona': 'detected',
-            'presence': 'analyzed'
-        }
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -278,13 +251,7 @@ class Builder(ToolMode):
         super().__init__('BUILDER', Dimension.MOVEMENT, 'construct')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'BUILDER',
-            'action': 'construction',
-            'blueprint': 'generated',
-            'components': ['component_1', 'component_2'],
-            'status': 'building'
-        }
+        return super().execute(input_data)
 
 class Reconstructor(ToolMode):
     """Evolution mode: Rebuilds from parts"""
@@ -292,15 +259,7 @@ class Reconstructor(ToolMode):
         super().__init__('RECONSTRUCTOR', Dimension.EVOLUTION, 'rebuild')
 
     def execute(self, input_data: Any) -> Any:
-        if isinstance(input_data, dict) and 'parts' in input_data:
-            return {
-                'mode': 'RECONSTRUCTOR',
-                'action': 'reconstruction',
-                'parts_used': input_data['parts'],
-                'new_form': 'assembled',
-                'integrity': 'verified'
-            }
-        return {'mode': 'RECONSTRUCTOR', 'action': 'reconstruction', 'new_form': 'assembled'}
+        return super().execute(input_data)
 
 class Scheduler(ToolMode):
     """Being mode: Timing systems"""
@@ -308,13 +267,7 @@ class Scheduler(ToolMode):
         super().__init__('SCHEDULER', Dimension.BEING, 'timing_systems')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'SCHEDULER',
-            'action': 'scheduling',
-            'timeline': 'created',
-            'triggers': ['trigger_1', 'trigger_2'],
-            'rhythm': 'established'
-        }
+        return super().execute(input_data)
 
 class Architect(ToolMode):
     """Design mode: Designs structure"""
@@ -322,13 +275,7 @@ class Architect(ToolMode):
         super().__init__('ARCHITECT', Dimension.DESIGN, 'design_structure')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'ARCHITECT',
-            'action': 'architecture',
-            'structure': 'designed',
-            'blueprint': 'complete',
-            'integrity': 'verified'
-        }
+        return super().execute(input_data)
 
 class Personifier(ToolMode):
     """Space mode: Creates identity"""
@@ -336,13 +283,7 @@ class Personifier(ToolMode):
         super().__init__('PERSONIFIER', Dimension.SPACE, 'create_identity')
 
     def execute(self, input_data: Any) -> Any:
-        return {
-            'mode': 'PERSONIFIER',
-            'action': 'personification',
-            'identity': 'created',
-            'presence': 'established',
-            'signature': f"id_{abs(hash(str(input_data))) % 1000000}"
-        }
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -371,7 +312,7 @@ class Shifter(ToolMode):
         super().__init__('SHIFTER', Dimension.MOVEMENT, 'change_position')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'SHIFTER', 'action': 'shifting', 'from': 'old_position', 'to': 'new_position'}
+        return super().execute(input_data)
 
 class Transformer(ToolMode):
     """Evolution mode: Changes form"""
@@ -379,7 +320,7 @@ class Transformer(ToolMode):
         super().__init__('TRANSFORMER', Dimension.EVOLUTION, 'change_form')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'TRANSFORMER', 'action': 'transformation', 'from_form': 'original', 'to_form': 'new'}
+        return super().execute(input_data)
 
 class Cycler(ToolMode):
     """Being mode: Temporal morphing"""
@@ -387,7 +328,7 @@ class Cycler(ToolMode):
         super().__init__('CYCLER', Dimension.BEING, 'temporal_morph')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'CYCLER', 'action': 'cycling', 'cycle': 'temporal', 'phase': 'morphing'}
+        return super().execute(input_data)
 
 class Restructurer(ToolMode):
     """Design mode: Changes structure"""
@@ -395,7 +336,7 @@ class Restructurer(ToolMode):
         super().__init__('RESTRUCTURER', Dimension.DESIGN, 'change_structure')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'RESTRUCTURER', 'action': 'restructuring', 'old_structure': 'dismantled', 'new_structure': 'assembled'}
+        return super().execute(input_data)
 
 class ShapeShifter(ToolMode):
     """Space mode: Changes identity"""
@@ -403,7 +344,7 @@ class ShapeShifter(ToolMode):
         super().__init__('SHAPESHIFTER', Dimension.SPACE, 'change_identity')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'SHAPESHIFTER', 'action': 'shapeshifting', 'old_identity': 'shed', 'new_identity': 'assumed'}
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -432,7 +373,7 @@ class Judge(ToolMode):
         super().__init__('JUDGE', Dimension.MOVEMENT, 'evaluate_placement')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'JUDGE', 'action': 'judging', 'placement': 'evaluated', 'verdict': 'appropriate'}
+        return super().execute(input_data)
 
 class Critic(ToolMode):
     """Evolution mode: Evaluates evolution"""
@@ -440,7 +381,7 @@ class Critic(ToolMode):
         super().__init__('CRITIC', Dimension.EVOLUTION, 'evaluate_evolution')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'CRITIC', 'action': 'critiquing', 'evolution': 'evaluated', 'verdict': 'progressing'}
+        return super().execute(input_data)
 
 class Clock(ToolMode):
     """Being mode: Evaluates timing"""
@@ -448,7 +389,7 @@ class Clock(ToolMode):
         super().__init__('CLOCK', Dimension.BEING, 'evaluate_timing')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'CLOCK', 'action': 'timing', 'timing': 'evaluated', 'verdict': 'timely'}
+        return super().execute(input_data)
 
 class Engineer(ToolMode):
     """Design mode: Evaluates structure"""
@@ -456,7 +397,7 @@ class Engineer(ToolMode):
         super().__init__('ENGINEER', Dimension.DESIGN, 'evaluate_structure')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'ENGINEER', 'action': 'engineering', 'structure': 'evaluated', 'verdict': 'sound'}
+        return super().execute(input_data)
 
 class Recognizer(ToolMode):
     """Space mode: Evaluates identity"""
@@ -464,7 +405,7 @@ class Recognizer(ToolMode):
         super().__init__('RECOGNIZER', Dimension.SPACE, 'evaluate_identity')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'RECOGNIZER', 'action': 'recognizing', 'identity': 'evaluated', 'verdict': 'authentic'}
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -493,7 +434,7 @@ class Navigator(ToolMode):
         super().__init__('NAVIGATOR', Dimension.MOVEMENT, 'find_paths')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'NAVIGATOR', 'action': 'navigating', 'path': 'optimal', 'direction': 'forward'}
+        return super().execute(input_data)
 
 class Selector(ToolMode):
     """Evolution mode: Chooses evolution"""
@@ -501,7 +442,7 @@ class Selector(ToolMode):
         super().__init__('SELECTOR', Dimension.EVOLUTION, 'choose_evolution')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'SELECTOR', 'action': 'selecting', 'choice': 'evolutionary', 'path': 'optimal'}
+        return super().execute(input_data)
 
 class Scheduler(ToolMode):
     """Being mode: Times routes"""
@@ -509,7 +450,7 @@ class Scheduler(ToolMode):
         super().__init__('SCHEDULER', Dimension.BEING, 'time_routes')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'SCHEDULER', 'action': 'scheduling', 'timeline': 'created', 'route': 'timed'}
+        return super().execute(input_data)
 
 class Director(ToolMode):
     """Design mode: Structures paths"""
@@ -517,7 +458,7 @@ class Director(ToolMode):
         super().__init__('DIRECTOR', Dimension.DESIGN, 'structure_paths')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'DIRECTOR', 'action': 'directing', 'structure': 'imposed', 'path': 'structured'}
+        return super().execute(input_data)
 
 class Matcher(ToolMode):
     """Space mode: Matches identity"""
@@ -525,7 +466,7 @@ class Matcher(ToolMode):
         super().__init__('MATCHER', Dimension.SPACE, 'match_identity')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'MATCHER', 'action': 'matching', 'match': 'found', 'identity': 'aligned'}
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -554,7 +495,7 @@ class Creator(ToolMode):
         super().__init__('CREATOR', Dimension.MOVEMENT, 'create_from_energy')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'CREATOR', 'action': 'creating', 'source': 'energy', 'artifact': 'generated'}
+        return super().execute(input_data)
 
 class Mutator(ToolMode):
     """Evolution mode: Creates from change"""
@@ -562,7 +503,7 @@ class Mutator(ToolMode):
         super().__init__('MUTATOR', Dimension.EVOLUTION, 'create_from_change')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'MUTATOR', 'action': 'mutating', 'source': 'change', 'artifact': 'evolved'}
+        return super().execute(input_data)
 
 class Sequencer(ToolMode):
     """Being mode: Creates from time"""
@@ -570,7 +511,7 @@ class Sequencer(ToolMode):
         super().__init__('SEQUENCER', Dimension.BEING, 'create_from_time')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'SEQUENCER', 'action': 'sequencing', 'source': 'time', 'artifact': 'timed'}
+        return super().execute(input_data)
 
 class Designer(ToolMode):
     """Design mode: Creates from structure"""
@@ -578,7 +519,7 @@ class Designer(ToolMode):
         super().__init__('DESIGNER', Dimension.DESIGN, 'create_from_structure')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'DESIGNER', 'action': 'designing', 'source': 'structure', 'artifact': 'structured'}
+        return super().execute(input_data)
 
 class Personifier(ToolMode):
     """Space mode: Creates from identity"""
@@ -586,7 +527,7 @@ class Personifier(ToolMode):
         super().__init__('PERSONIFIER', Dimension.SPACE, 'create_from_identity')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'PERSONIFIER', 'action': 'personifying', 'source': 'identity', 'artifact': 'personalized'}
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -615,7 +556,7 @@ class Narrator(ToolMode):
         super().__init__('NARRATOR', Dimension.MOVEMENT, 'tell_where')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'NARRATOR', 'action': 'narrating', 'focus': 'location', 'story': 'where_things_go'}
+        return super().execute(input_data)
 
 class Historian(ToolMode):
     """Evolution mode: Tells what"""
@@ -623,7 +564,7 @@ class Historian(ToolMode):
         super().__init__('HISTORIAN', Dimension.EVOLUTION, 'tell_what')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'HISTORIAN', 'action': 'historizing', 'focus': 'events', 'story': 'what_happened'}
+        return super().execute(input_data)
 
 class Chronicler(ToolMode):
     """Being mode: Tells when"""
@@ -631,7 +572,7 @@ class Chronicler(ToolMode):
         super().__init__('CHRONICLER', Dimension.BEING, 'tell_when')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'CHRONICLER', 'action': 'chronicling', 'focus': 'timing', 'story': 'when_things_happen'}
+        return super().execute(input_data)
 
 class Architect(ToolMode):
     """Design mode: Tells why"""
@@ -639,7 +580,7 @@ class Architect(ToolMode):
         super().__init__('ARCHITECT', Dimension.DESIGN, 'tell_why')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'ARCHITECT', 'action': 'architecting', 'focus': 'purpose', 'story': 'why_things_exist'}
+        return super().execute(input_data)
 
 class Biographer(ToolMode):
     """Space mode: Tells who"""
@@ -647,7 +588,7 @@ class Biographer(ToolMode):
         super().__init__('BIOGRAPHER', Dimension.SPACE, 'tell_who')
 
     def execute(self, input_data: Any) -> Any:
-        return {'mode': 'BIOGRAPHER', 'action': 'biographing', 'focus': 'identity', 'story': 'who_things_are'}
+        return super().execute(input_data)
 
 
 # ============================================================
@@ -665,23 +606,9 @@ class AdversarialGenerator:
         self.generator_b = generator_b
 
     def generate(self, context: Dict) -> Dict:
-        """Two generators compete, discriminator selects winner"""
-        output_a = self.generator_a.operate(context)
-        output_b = self.generator_b.operate(context)
-
-        # Discriminator judges
-        self.discriminator.arise(Dimension.EVOLUTION)  # Critic mode
-        score_a = self.discriminator.operate(output_a)
-        score_b = self.discriminator.operate(output_b)
-
-        winner = output_a if score_a.get('verdict') == 'progressing' else output_b
-
-        return {
-            'winner': winner,
-            'loser': output_b if winner == output_a else output_a,
-            'scores': {'a': score_a, 'b': score_b},
-            'mode': 'adversarial'
-        }
+        """Competition requires a real generator and an evidence-based scorer."""
+        raise NotImplementedError(
+            "Adversarial generation has no verified generator/scorer; no winner was selected")
 
 
 # Export all tools
@@ -691,3 +618,4 @@ __all__ = [
     'DISCRIMINATOR', 'ROUTER', 'GENERATOR', 'STORYTELLER',
     'AdversarialGenerator'
 ]
+

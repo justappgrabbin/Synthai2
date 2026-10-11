@@ -38,7 +38,7 @@ export class EphemerisService {
    */
   private async getPlanetPosition(planet: Planet, date: Date): Promise<PlanetaryPosition> {
     // Map our Planet type to Astronomy.Body enum
-    const bodyMap: Record<string, Astronomy.Body> = {
+    const bodyMap: Record<string, AstronomyTypes.Body> = {
       "Sun": Astronomy.Body.Sun,
       "Moon": Astronomy.Body.Moon,
       "Mercury": Astronomy.Body.Mercury,

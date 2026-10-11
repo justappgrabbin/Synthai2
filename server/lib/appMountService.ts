@@ -177,7 +177,7 @@ export async function listMountedApps() {
     .map((entry) => readJson(path.join(getAppsRoot(), entry.name, ".you-n-i-verse-app.json"), null)));
 }
 
-export async function getMountedApp(id: string) {
+export async function getMountedApp(id: string): Promise<Record<string, unknown> & { files: string[] }> {
   const appDir = resolveAppPath(id);
   const manifest = await readJson<Record<string, unknown> | null>(path.join(appDir, ".you-n-i-verse-app.json"), null);
   if (!manifest) throw new Error("Mounted app not found");

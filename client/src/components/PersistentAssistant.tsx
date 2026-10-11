@@ -4,6 +4,11 @@
  */
 
 import { useState, useRef, useEffect } from "react";
+import { SynthiaHoverControls } from "./SynthiaHoverControls";
+import { parseGitHubIntent, runGitHubIntent } from "@/lib/synthiaHands";
+import { analyzeShona, parseShonaRequest } from "@/lib/shonaMorphology";
+import { reasonAboutContact, reasoningPrompt, recordContactOutcome, needsGitHubRecheck } from "@/lib/contactReasoning";
+import { analyzeKleinContact } from "@/lib/klein/semanticContact.mjs";
 import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play, Code2, Copy, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,7 +68,7 @@ export function PersistentAssistant() {
 
   // Text-to-speech function
   const speakText = (text: string) => {
-    if (!isSpeechEnabled) return;
+    if (!isSpeechEnabled || !("speechSynthesis" in window)) return;
     
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
@@ -342,6 +347,8 @@ export function PersistentAssistant() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    const contactTrace = reasonAboutContact(input.trim(), { attachment: uploadedFile ? { name: uploadedFile.name, type: uploadedFile.type, size: uploadedFile.size } : undefined });
+    contactTrace.klein = analyzeKleinContact(input.trim(), messages.filter(message => message.role === 'user').map(message => message.content));
     let messageContent = input.trim();
     if (uploadedFile) {
       messageContent += `\n\n[Attached: ${uploadedFile.name}]`;
@@ -359,10 +366,35 @@ export function PersistentAssistant() {
     setIsLoading(true);
 
     try {
+      const shonaText = parseShonaRequest(input.trim());
+      if (shonaText !== null) {
+        const result = analyzeShona(shonaText);
+        recordContactOutcome(contactTrace, "succeeded", "Source-bounded Shona annotation completed; candidate interpretations remain unresolved.");
+        const content = "Here is a source-bounded Shona analysis. Unknown words and prefix candidates are not verified interpretations.\n\n```json\n" + JSON.stringify(result, null, 2) + "\n```";
+        setMessages(prev => [...prev, { role: "assistant", content, timestamp: new Date() }]);
+        return;
+      }
+      const intent = parseGitHubIntent(input.trim());
+      if (intent) {
+        if (intent.kind === "push" && needsGitHubRecheck()) {
+          await runGitHubIntent({ kind: "status" });
+        }
+        const content = await runGitHubIntent(intent);
+        if (intent.kind !== "help") recordContactOutcome(contactTrace, "succeeded", content);
+        setMessages(prev => [...prev, { role: "assistant", content, timestamp: new Date() }]);
+        try { speakText(content); } catch { /* The tool result remains valid if speech is unavailable. */ }
+        return;
+      }
       // System prompt that gives the AI context about the app AND consciousness knowledge
       const systemPrompt = {
         role: "system" as const,
-        content: `You are the AI Guard Dog assistant for YOU-N-I-VERSE Studio - a FULL-STACK DEVELOPMENT IDE that combines game creation, AI/GAN training, consciousness exploration, and dimensional design.
+        content: `${reasoningPrompt(contactTrace)}
+
+You are Synthia, the assistant for YOU-N-I-VERSE Studio - a FULL-STACK DEVELOPMENT IDE that combines game creation, AI/GAN training, consciousness exploration, and dimensional design.
+
+You can use a real GitHub action when the USER explicitly says "check my GitHub connection" or "push my app to GitHub as REPO_NAME". These actions are handled by the app, not by your text. Explain these exact phrases when users want GitHub help. Never claim that you uploaded, deployed, or changed a repository unless a tool result in the conversation confirms it.
+
+The USER can also say "analyze this Shona: TEXT" or "/shona analyze TEXT" to invoke a source-bounded Shona morphology layer. Direct them to /contact-lab for the original B.A.N.T.U. encoder alongside its linguistic annotations. Do not call this a general Bantu grammar or infer NSNF gates from noun classes.
 
 You are a CODING ASSISTANT with expertise in:
 - JavaScript, TypeScript, Python, HTML, CSS, and other programming languages
@@ -559,6 +591,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
       ]);
 
       if (response.error) {
+        recordContactOutcome(contactTrace, "failed", "AI provider returned an error; no action verified.");
         const assistantMessage: Message = {
           role: "assistant",
           content: `${response.error}\n\nPlease go to Settings and configure your AI backend with an API key.`,
@@ -568,6 +601,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
         return;
       }
 
+      recordContactOutcome(contactTrace, "succeeded", "AI response received; any proposed action remains unverified.");
       // Extract thinking from response
       const thinkingMatch = response.content.match(/<think>([\s\S]*?)<\/think>/);
       const thinking = thinkingMatch ? thinkingMatch[1].trim() : undefined;
@@ -589,9 +623,10 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
         console.log('Text-to-speech failed');
       }
     } catch (error) {
+      recordContactOutcome(contactTrace, "failed", "Request failed; inspect the displayed error before retrying.");
       const errorMessage: Message = {
         role: "assistant",
-        content: "Failed to reach AI service. Please go to Settings and configure your AI backend with an API key.",
+        content: (parseGitHubIntent(input.trim()) || parseShonaRequest(input.trim()) !== null) ? (error instanceof Error ? error.message : "GitHub could not complete this request.") : "I could not reach your AI service. Open Settings to configure and test your AI connection. GitHub commands can work separately from AI chat.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -617,13 +652,14 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
 
   return (
     <>
+      <SynthiaHoverControls setInput={setInput} busy={isLoading} />
       {!isOpen && (
         <Button
           data-testid="button-open-assistant"
           onClick={() => setAssistantOpen(true)}
           className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-[80]"
           size="icon"
-          title="AI Assistant"
+          title="Talk to Synthia" aria-label="Open Synthia"
         >
           <MessageSquare className="h-6 w-6" />
         </Button>
@@ -631,7 +667,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
 
       {isOpen && (
         <div 
-          className="fixed bottom-6 right-6 w-[95vw] sm:w-96 h-[500px] bg-card border rounded-lg shadow-xl z-[100] flex flex-col"
+          className="fixed bottom-6 right-6 w-[95vw] sm:w-96 h-[500px] max-h-[calc(100dvh-7rem)] bg-card border rounded-lg shadow-xl z-[100] flex flex-col"
           data-testid="panel-assistant"
         >
           <div className="flex items-center justify-between p-4 border-b">
@@ -640,8 +676,8 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                 <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">AI Assistant</h3>
-                <p className="text-xs text-muted-foreground">Ask anything</p>
+                <h3 className="font-semibold text-sm">Synthia</h3>
+                <p className="text-xs text-muted-foreground">Talk, build, and save to GitHub</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -1038,3 +1074,4 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
     </>
   );
 }
+
