@@ -309,10 +309,10 @@ export class NovelArchitectureGenerator {
 
     // Determine type from defined centers
     let type: HumanDesignChart['type'] = 'Generator';
-    if (definedCenters.includes(6)) type = 'Projector';
-    if (definedCenters.includes(2) && !definedCenters.includes(6)) type = 'Manifestor';
-    if (definedCenters.length === 0) type = 'Reflector';
-    if (definedCenters.includes(1) && definedCenters.includes(6)) type = 'Manifesting Generator';
+    if (definedCenters.has(6)) type = 'Projector';
+    if (definedCenters.has(2) && !definedCenters.has(6)) type = 'Manifestor';
+    if (definedCenters.size === 0) type = 'Reflector';
+    if (definedCenters.has(1) && definedCenters.has(6)) type = 'Manifesting Generator';
 
     const hangingGates = gates.filter(g => !channels.some(([g1, g2]) => g1 === g || g2 === g));
 
@@ -346,7 +346,7 @@ export class NovelArchitectureGenerator {
       userId,
       type,
       strategy: this.getStrategy(type),
-      authority: this.getAuthority(type, definedCenters),
+      authority: this.getAuthority(type, Array.from(definedCenters)),
       definedCenters: Array.from(definedCenters),
       undefinedCenters,
       consciousGates,
@@ -452,18 +452,22 @@ export class NovelArchitectureGenerator {
     history.push(architecture);
     this.generationHistory.set(userId, history);
 
-    // Push to orchestrator super base
-    this.orchestrator.addToSuperBase({
-      id: architecture.id,
-      address: this.orchestrator['calculateResonanceAddress'](request, { userId, birthChart: chart, preferences: {}, learningHistory: [], adaptationLevel: profile.adaptationScore }),
-      content: architecture,
-      metadata: {
-        gate: seedGates[0],
-        line: chart.consciousGates.find(g => g.gate === seedGates[0])?.line || 1,
-        timestamp: Date.now(),
-        sourceType: 'generated',
-      },
-    });
+    // Store at the selected seed activation using the existing legacy address format.
+    const seed = [...chart.consciousGates, ...chart.unconsciousGates]
+      .find(activation => activation.gate === seedGates[0]);
+    if (!seed) throw new Error('No chart activation is available for the selected seed gate');
+    const zodiacNames = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+      'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+    const zodiac = zodiacNames.indexOf(seed.zodiac);
+    if (zodiac < 0) throw new Error('The seed activation has an unknown zodiac');
+    const address: Address = {
+      mesh: this.orchestrator.getUserSignature(userId)?.preferredMeshes[0] ?? 0,
+      layer: 0, center: GATE_DNA[seed.gate].center, node: seed.gate - 1,
+      line: seed.line, color: seed.color, tone: seed.tone, base: seed.base,
+      zodiac, house: seed.house, arcDegree: seed.arcDegree,
+    };
+    this.orchestrator.addToSuperBase(this.orchestrator.createMemoryEntry(
+      architecture.id, address, architecture, 'novel_architecture', userId));
 
     // Sync to Synthia server
     this.syncToSynthia(userId, architecture);

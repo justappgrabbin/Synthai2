@@ -2,20 +2,13 @@ name: Synthia integration checks
 on:
   pull_request:
     paths:
-      - 'client/src/components/PersistentAssistant.tsx'
-      - 'client/src/components/SynthiaHoverControls.tsx'
-      - 'client/src/lib/AIService.ts'
-      - 'client/src/lib/synthiaHands.ts'
-      - 'client/src/lib/shonaMorphology.ts'
-      - 'client/src/lib/contactReasoning.ts'
-      - 'client/src/components/ShonaContactLab.tsx'
-      - 'client/src/App.tsx'
+      - 'client/src/**'
       - 'server/**'
+      - 'shared/**'
       - 'synthia-server/aion/KleinTools.py'
-      - 'tests/test_klein_tools.py'
-      - 'tests/klein-semantic.test.mjs'
-      - 'client/src/lib/klein/**'
-      - 'tests/synthia-github.test.mjs'
+      - 'tests/**'
+      - 'tsconfig.json'
+      - 'package*.json'
       - '.github/workflows/synthia-integration.yml'
   workflow_dispatch:
 permissions:
@@ -40,5 +33,6 @@ jobs:
       - run: npm ci
       - run: node tests/synthia-github.test.mjs
       - run: node tests/klein-semantic.test.mjs
+      - run: node --import tsx tests/build-regressions.test.ts
       - run: npm run check
       - run: npm run build

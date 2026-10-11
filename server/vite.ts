@@ -76,6 +76,11 @@ export function serveStatic(app: Express) {
     );
   }
 
+  // This SPA route shares its name with the supplied encoder's asset directory.
+  // Serve the rules screen here; explicit nested encoder URLs remain static.
+  app.get(['/contact-lab', '/contact-lab/'], (_req, res) => {
+    res.sendFile(path.resolve(distPath, 'index.html'));
+  });
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist

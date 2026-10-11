@@ -27,8 +27,8 @@ correctness probabilities or causal claims. No gate or personality is inferred.
 This connects two supplied algorithms to chat. Other supplied exports remain
 available in the vendor module, but are not automatically invoked or mapped to
 the older Python dimensional modes. The Python suite continues to reject its
-unfinished operations. The complete NSNF runtime and full app build are still
-outstanding; this is an inspectable rules trial, not proof of cross-scale transfer.
+unfinished operations. The complete NSNF runtime is still outstanding; the full app check and build
+now pass locally (see build-verification.md); this is an inspectable rules trial, not proof of cross-scale transfer.
 
 Validation: the supplied Klein and computational grammar test files pass locally;
 five integration regressions check actual parses, contextual distributional

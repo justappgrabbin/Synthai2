@@ -1259,10 +1259,12 @@ export function NotebookInterface() {
                           {entry.metadata.snapshotJSON && (
                             <button
                               onClick={() => {
-                                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(entry.metadata.snapshotJSON);
+                                const metadata = entry.metadata;
+                                if (!metadata?.snapshotJSON) return;
+                                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(metadata.snapshotJSON);
                                 const anchor = document.createElement('a');
                                 anchor.href = dataStr;
-                                anchor.download = `world_snapshot_${entry.metadata.worldSeed}.json`;
+                                anchor.download = `world_snapshot_${metadata.worldSeed}.json`;
                                 document.body.appendChild(anchor);
                                 anchor.click();
                                 document.body.removeChild(anchor);

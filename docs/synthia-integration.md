@@ -40,6 +40,6 @@ JS
 
 The wrapper runs the supplied CommonJS test unchanged inside this ES-module repository. Thirteen focused tests cover explicit tool intent, export contents, unsafe paths, failed GitHub calls, atomic commits, fixed AI destinations, relay routing, Shona attribution/uncertainty, contact constraints, and outcome-conditioned rechecks. These tests use mocked HTTP responses; they do not prove live credentials work.
 
-Full `npm run check`, `npm run build`, browser/microphone checks, and a live GitHub save have not been verified in this session because dependency installation did not complete. This remains a draft integration until those checks pass in the complete checkout.
+The full `npm run check` and `npm run build` now pass in the complete checkout, along with 21 JavaScript/TypeScript and 5 Python checks. Production server smoke checks verify the rules route, original encoder assets, and missing-connection responses. See `docs/build-verification.md`. Browser microphone behavior, live model requests, and a live app GitHub save still need verification; this remains a draft.
 
 Manual acceptance after deployment: configure and test an AI provider in Settings; send a normal chat message; use Talk and send its transcript; toggle hover; reload and verify shortcuts; connect GitHub in Replit; ask for connection status; save a disposable IDE project; inspect every file in the resulting commit; revoke GitHub access and verify a failure is shown. Verify the contact lab's text round trip separately.

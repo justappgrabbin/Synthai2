@@ -11,7 +11,7 @@ import {
   FileText, Users, AlertTriangle, Zap
 } from 'lucide-react';
 import { novelWriter } from '@/engine/NovelWriter';
-import { kleinAutoLing } from '@/engine/KleinAutoLing';
+import { analyzeKleinContact } from '@/lib/klein/semanticContact.mjs';
 import type { Character, Scene, WorldState, PlotArc } from '@/engine/NovelWriter';
 
 export default function NovelWriterPanel() {
@@ -27,7 +27,7 @@ export default function NovelWriterPanel() {
   const [newCharRole, setNewCharRole] = useState<'protagonist' | 'antagonist' | 'supporting'>('protagonist');
   const [chapterCount, setChapterCount] = useState(2);
   const [scenesPerChapter, setScenesPerChapter] = useState(3);
-  const [grammarResult, setGrammarResult] = useState<{text: string; coherence: number; transitions: any[]} | null>(null);
+  const [grammarResult, setGrammarResult] = useState<ReturnType<typeof analyzeKleinContact> | null>(null);
 
   const createCharacter = useCallback(() => {
     if (!newCharName.trim()) return;
@@ -89,13 +89,10 @@ export default function NovelWriterPanel() {
     }, 500);
   }, [writer, chapterCount, scenesPerChapter]);
 
+  const [grammarText, setGrammarText] = useState('tool belongs to workspace');
   const testTransitionGrammar = useCallback(() => {
-    const result = kleinAutoLing.generate(
-      'Explore the tension between structure and emergence',
-      'consciousness', 'G', 4, 'Movement', 'narrative', 8
-    );
-    setGrammarResult(result);
-  }, []);
+    setGrammarResult(analyzeKleinContact(grammarText));
+  }, [grammarText]);
 
   return (
     <div className="space-y-4">
@@ -375,19 +372,16 @@ export default function NovelWriterPanel() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card className="bg-white/5 border-white/10 p-4 space-y-3">
                 <h3 className="text-sm font-semibold flex items-center gap-2">
-                  <Zap className="w-4 h-4" /> Transition Grammar Engine
+                  <Zap className="w-4 h-4" /> AUTOLING Rule Trial
                 </h3>
                 <p className="text-xs text-white/40">
-                  State-driven generation using constraint satisfaction and goal-directed transition selection.
-                  Not template filling. Each transition is chosen based on current state, goal alignment, and coherence preservation.
+                  Check editable text against the supplied AUTOLING relation templates. Matches are candidate parses; unmatched text stays unresolved.
                 </p>
+                <Input aria-label="AUTOLING trial text" value={grammarText} onChange={event => setGrammarText(event.target.value)} />
                 <Button onClick={testTransitionGrammar} className="w-full bg-violet-600 hover:bg-violet-700 text-xs">
-                  <Play className="w-3 h-3 mr-1" /> Generate with Transition Grammar
+                  <Play className="w-3 h-3 mr-1" /> Test AUTOLING Rules
                 </Button>
-                <div className="text-xs text-white/30">
-                  States: INIT → NP_BUILD → VP_BUILD → CLAUSE_CLOSE → CONNECT → COMPLETE
-                  <br />With branches: DESCRIBE, DIALOGUE_OPEN, DIALOGUE_BODY, DIALOGUE_CLOSE
-                </div>
+
               </Card>
 
               <div className="space-y-3">
@@ -395,22 +389,10 @@ export default function NovelWriterPanel() {
                   <>
                     <Card className="bg-white/5 border-white/10 p-3">
                       <div className="flex items-center justify-between mb-2">
-                        <Badge className="bg-emerald-600/50 text-xs">Coherence: {(grammarResult.coherence * 100).toFixed(0)}%</Badge>
-                        <span className="text-[10px] text-white/30">{grammarResult.transitions.length} transitions</span>
+                        <Badge className="bg-emerald-600/50 text-xs">{grammarResult.autoling.semanticStatus}</Badge>
+                        <span className="text-[10px] text-white/30">{grammarResult.autoling.matches.length} rule matches</span>
                       </div>
-                      <pre className="text-xs text-white/60 whitespace-pre-wrap">{grammarResult.text}</pre>
-                    </Card>
-                    <Card className="bg-white/5 border-white/10 p-3">
-                      <h4 className="text-xs font-semibold text-white/40 mb-2">Transition Path</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {grammarResult.transitions.map((t, i) => (
-                          <div key={i} className="flex items-center gap-1 text-[10px]">
-                            <span className="text-violet-400">{t.from}</span>
-                            <span className="text-white/20">→</span>
-                            <span className="text-emerald-400">{t.to}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <pre className="text-xs text-white/60 whitespace-pre-wrap">{JSON.stringify(grammarResult, null, 2)}</pre>
                     </Card>
                   </>
                 )}
