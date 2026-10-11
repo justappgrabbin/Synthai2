@@ -8,6 +8,7 @@ import { SynthiaHoverControls } from "./SynthiaHoverControls";
 import { parseGitHubIntent, runGitHubIntent } from "@/lib/synthiaHands";
 import { analyzeShona, parseShonaRequest } from "@/lib/shonaMorphology";
 import { reasonAboutContact, reasoningPrompt, recordContactOutcome, needsGitHubRecheck } from "@/lib/contactReasoning";
+import { analyzeKleinContact } from "@/lib/klein/semanticContact.mjs";
 import { Bot, Send, X, MessageSquare, Upload, Brain, Volume2, VolumeX, History, Plus, Sparkles, ThumbsUp, ThumbsDown, Play, Code2, Copy, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -347,6 +348,7 @@ export function PersistentAssistant() {
     if (!input.trim() || isLoading) return;
 
     const contactTrace = reasonAboutContact(input.trim(), { attachment: uploadedFile ? { name: uploadedFile.name, type: uploadedFile.type, size: uploadedFile.size } : undefined });
+    contactTrace.klein = analyzeKleinContact(input.trim(), messages.filter(message => message.role === 'user').map(message => message.content));
     let messageContent = input.trim();
     if (uploadedFile) {
       messageContent += `\n\n[Attached: ${uploadedFile.name}]`;

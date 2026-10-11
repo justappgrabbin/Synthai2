@@ -1,0 +1,30 @@
+{
+  "source": "https://drive.google.com/file/d/1fu7J-EwWOqrDlJxP77yxKcuCvQlSTyBq/view",
+  "archive": "ATO-Core-Klein-Browser-v0.4.0-gate-content-3.zip",
+  "files": [
+    {
+      "file": "klein-tools.mjs",
+      "sha256": "415b32db25d3d59b031beebe17967dab5af177f9704d4d88c8cc5fd7fcaaab3e"
+    },
+    {
+      "file": "klein-iching.mjs",
+      "sha256": "58d2030f5e2afddac16d519c04349318732dcaabb3f3c34578ef9a56475102ca"
+    },
+    {
+      "file": "boolean-ato.mjs",
+      "sha256": "ac47508bf355be809dfb3ce87eaa463527371f70da9ba9f410aefe3500d567e4"
+    },
+    {
+      "file": "automaton.mjs",
+      "sha256": "6bea009b52bbad0d6ae37c38e0218aac3b226c47f74e37c11fa8995a5a34bdb5"
+    },
+    {
+      "file": "address-space.mjs",
+      "sha256": "112504b2174240ab545fdab7243d62e60b7c9477f39a406919bd443dc9eee1dd"
+    },
+    {
+      "file": "activation.mjs",
+      "sha256": "a4d5237d820e9b5d754f531e348394af2e6b8b0e7f5196a5fd38f2bead372219"
+    }
+  ]
+}

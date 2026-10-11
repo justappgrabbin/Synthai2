@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { analyzeShona, SHONA_SOURCE } from '@/lib/shonaMorphology';
 import { readContactHistory } from '@/lib/contactReasoning';
+import { analyzeKleinContact } from '@/lib/klein/semanticContact.mjs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -8,6 +9,7 @@ export function ShonaContactLab() {
   const [text, setText] = useState('Mwana kumhanya mumunda. Ndichakupai.');
   const [result, setResult] = useState<ReturnType<typeof analyzeShona> | null>(null);
   const [history, setHistory] = useState(readContactHistory);
+  const [klein, setKlein] = useState<ReturnType<typeof analyzeKleinContact> | null>(null);
   const bridge = useRef<HTMLIFrameElement>(null);
   const run = () => {
     setResult(analyzeShona(text));
@@ -16,7 +18,10 @@ export function ShonaContactLab() {
     if (input) { input.value = text; document?.getElementById('build')?.click(); }
   };
   return <main className="mx-auto max-w-5xl space-y-4 p-6">
-    <h1 className="text-2xl font-semibold">Synthia · Shona contact lab</h1>
+    <h1 className="text-2xl font-semibold">Synthia · Rules lab</h1>
+    <p>Test your supplied AUTOLING and DISEMINER implementations on text. Grammar matches and word similarities are candidates you can inspect and correct.</p>
+    <Button variant="outline" onClick={() => setKlein(analyzeKleinContact(text))}>Test Klein reasoning</Button>
+    {klein && <details open className="rounded border p-3"><summary>Actual Klein results · {klein.source}</summary><pre className="overflow-auto whitespace-pre-wrap text-xs">{JSON.stringify(klein, null, 2)}</pre></details>}
     <p>Analyze Shona examples with source references, then encode the same text in your original B.A.N.T.U. bridge.</p>
     <p className="text-sm text-muted-foreground">This is a bounded Shona rule layer. Prefix candidates remain unresolved until context verifies them. Linguistic tone and NSNF address mappings are separate, currently unavailable inputs.</p>
     <a href={SHONA_SOURCE} target="_blank" rel="noreferrer" className="underline">Read the Shona morphology source ↗</a>
