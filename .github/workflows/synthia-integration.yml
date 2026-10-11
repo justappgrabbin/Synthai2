@@ -11,12 +11,22 @@ on:
       - 'client/src/components/ShonaContactLab.tsx'
       - 'client/src/App.tsx'
       - 'server/**'
+      - 'synthia-server/aion/KleinTools.py'
+      - 'tests/test_klein_tools.py'
       - 'tests/synthia-github.test.mjs'
       - '.github/workflows/synthia-integration.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  klein-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -p 'test_klein_tools.py'
   verify:
     runs-on: ubuntu-latest
     steps:
