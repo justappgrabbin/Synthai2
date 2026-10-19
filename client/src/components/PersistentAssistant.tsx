@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CONSCIOUSNESS_KNOWLEDGE } from "@/lib/consciousnessKnowledge";
+import { GPT_DASH_DIRECTIVE, approvedDashContext, memoryCandidates, approveDashMemory, loadDashMemory } from "@/lib/gptDash";
 
 interface Message {
   role: "user" | "assistant";
@@ -57,6 +58,8 @@ export function PersistentAssistant() {
   const [suggestionLoading, setSuggestionLoading] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(true);
   const [feedbackGiven, setFeedbackGiven] = useState(false);
+  const [dashProposals, setDashProposals] = useState<string[]>([]);
+  const [dashApproved, setDashApproved] = useState(() => loadDashMemory());
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
@@ -549,7 +552,13 @@ ${CONSCIOUSNESS_KNOWLEDGE}
 
 ---
 
-When answering questions about consciousness, Trinity Charts, Human Design, gates, elements, or resonance - use the knowledge base above. Always be consciousness-aware and adapt your communication style to the user's field and modality preferences.`
+When answering questions about consciousness, Trinity Charts, Human Design, gates, elements, or resonance - use the knowledge base above. Always be consciousness-aware and adapt your communication style to the user's field and modality preferences.
+
+--- GPT DASH DIRECTIVE (USER AUTHORED) ---
+${GPT_DASH_DIRECTIVE}
+
+--- APPROVED LOCAL CONTINUITY ---
+${approvedDashContext()}`
       };
 
       const response = await AIService.sendMessage([
@@ -581,6 +590,7 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      setDashProposals(prev => [...new Set([...prev, ...memoryCandidates(assistantMessage.content)])].slice(-12));
       
       // Speak the response
       try {
@@ -640,8 +650,8 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
                 <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">AI Assistant</h3>
-                <p className="text-xs text-muted-foreground">Ask anything</p>
+                <h3 className="font-semibold text-sm">AI Assistant · GPT Dash</h3>
+                <p className="text-xs text-muted-foreground">UNO directive active · memory requires approval</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -968,6 +978,23 @@ When answering questions about consciousness, Trinity Charts, Human Design, gate
           </ScrollArea>
 
           <div className="p-3 border-t">
+            {dashProposals.length > 0 && (
+              <div className="max-h-28 overflow-y-auto rounded border border-purple-500/40 p-2 mb-2 space-y-1 text-xs" data-testid="gpt-dash-memory-proposals">
+                <strong>🧠 GPT Dash · proposed, not saved</strong>
+                {dashProposals.map((candidate, index) => (
+                  <div key={index} className="flex items-start gap-2 border-t pt-1">
+                    <span className="flex-1 break-words">{candidate}</span>
+                    <Button size="sm" variant="outline" onClick={() => {
+                      try { setDashApproved(approveDashMemory(candidate)); setDashProposals(prev => prev.filter(p => p !== candidate));
+                        toast({title:"Approved in local GPT Dash",description:"Saved in this browser only; not automatically shared with Cynthia."});
+                      } catch (e) { toast({title:"Unable to save memory",description:String(e),variant:"destructive"}); }
+                    }}>Approve</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setDashProposals(prev => prev.filter(p => p !== candidate))}>Dismiss</Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {dashApproved.length > 0 && <div className="text-xs text-muted-foreground mb-1">GPT Dash: {dashApproved.length} locally approved notes · used in subsequent chats</div>}
             {uploadedFile && (
               <div className="mb-2 flex items-center gap-2 text-xs bg-muted rounded-md px-2 py-1">
                 <span className="text-muted-foreground">📎 {uploadedFile.name}</span>
