@@ -28,7 +28,7 @@ jobs:
           status=$?
           set -e
           cat /tmp/continuity-tsc.log
-          if grep -E 'client/src/components/(ContinuityIDEBridge|DeveloperPanel)\\.tsx' /tmp/continuity-tsc.log; then
+          if grep -E 'client/src/components/(ContinuityIDEBridge|DeveloperPanel|UNOToolDock|PersistentAssistant)\\.tsx|client/src/lib/gptDash\\.ts' /tmp/continuity-tsc.log; then
             echo "Continuity integration introduced a TypeScript diagnostic"
             exit 1
           fi
@@ -40,5 +40,7 @@ jobs:
       - name: Verify adapter is actually mounted in the existing editor
         run: |
           grep -q 'ContinuityIDEBridge' client/src/components/DeveloperPanel.tsx
+          grep -q 'UNOToolDock' client/src/components/DeveloperPanel.tsx
+          grep -q 'GPT_DASH_DIRECTIVE' client/src/components/PersistentAssistant.tsx
           grep -q '/api/companion/library' client/src/components/ContinuityIDEBridge.tsx
           test -d dist
