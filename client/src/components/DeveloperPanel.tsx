@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Terminal } from "@/components/Terminal";
 import { SelfEditor } from "@/components/SelfEditor";
 import { ContinuityIDEBridge } from "@/components/ContinuityIDEBridge";
+import { UNOToolDock } from "@/components/UNOToolDock";
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import {
@@ -44,6 +45,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+function countActualFiles(nodes: FileNode[]): number {
+  return nodes.reduce((count,node) => count + (node.type === "file" ? 1 : countActualFiles(node.children || [])),0);
+}
 
 export function DeveloperPanel() {
   const [, setLocation] = useLocation();
@@ -2263,6 +2268,18 @@ const result = await handlePayment({
           <h2 className="text-lg font-semibold hidden sm:block">Code Editor</h2>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <UNOToolDock
+            fileName={currentFile?.name || null}
+            fileCount={countActualFiles(files)}
+            lineCount={currentFile ? code.split("\n").length : 0}
+            onTerminal={() => setShowTerminal(true)}
+            onPreview={() => { handleRun(); setShowPreview(true); }}
+            onExportZip={handleDownloadProject}
+            onSave={handleSave}
+            onNewFile={() => { setShowFilePanel(true); setShowNewFileInput(true); }}
+            onZipManager={() => setLocation("/zip-manager")}
+            onBuilder={() => setLocation("/mod-manager")}
+          />
           <Button
             data-testid="button-toggle-terminal"
             variant="outline"
