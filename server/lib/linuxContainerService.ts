@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import os from "os";
+import fs from "fs";
 
 export interface ContainerCommandResult {
   command: string;
@@ -65,24 +66,30 @@ function clampOutput(value: string) {
 }
 
 export function getContainerStatus(): ContainerStatus {
-  const enabled = process.env.LINUX_CONTAINER_ENABLED === "true";
+  const requested = process.env.LINUX_CONTAINER_ENABLED === "true";
+  const shell = getShell();
+  const shellExists = fs.existsSync(shell);
+  const authorized = !!process.env.TERMINAL_TOKEN;
+  const enabled = requested && shellExists && authorized;
   const cwd = getWorkspaceRoot();
 
   return {
     enabled,
     platform: process.platform,
-    shell: getShell(),
+    shell,
     cwd,
     node: process.version,
     message: enabled
-      ? "Linux container bridge is enabled"
-      : "Linux container bridge is disabled. Set LINUX_CONTAINER_ENABLED=true to run commands.",
+      ? "Real Linux/Termux shell configured; commands execute on the host runtime"
+      : !requested ? "Linux command bridge disabled by runtime configuration"
+      : !shellExists ? `Configured shell not found: ${shell}`
+      : "Terminal authentication token is not configured",
   };
 }
 
 export async function runContainerCommand(command: string, cwd?: string): Promise<ContainerCommandResult> {
-  if (process.env.LINUX_CONTAINER_ENABLED !== "true") {
-    throw new Error("Linux container bridge is disabled");
+  if (!getContainerStatus().enabled) {
+    throw new Error("Real shell is unavailable; check runtime configuration and terminal authorization");
   }
 
   const resolvedCwd = resolveCwd(cwd);
