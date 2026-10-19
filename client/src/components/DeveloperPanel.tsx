@@ -10,6 +10,7 @@ import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Terminal } from "@/components/Terminal";
 import { SelfEditor } from "@/components/SelfEditor";
+import { ContinuityIDEBridge } from "@/components/ContinuityIDEBridge";
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import {
@@ -2542,6 +2543,20 @@ const result = await handlePayment({
 
       {/* Bottom Toolbar - Quick Actions */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card/95 backdrop-blur border rounded-full px-4 py-2 shadow-lg">
+
+        <ContinuityIDEBridge
+          fileName={currentFile?.name || null}
+          editorText={code}
+          onReceive={(name, content) => {
+            // Import into the EXISTING SynthAi 2 IDE as a separately named file.
+            FileSystem.createFile('', name);
+            FileSystem.saveFile(name, content);
+            const imported = FileSystem.findFile(name);
+            loadFiles();
+            if (imported) openFile(imported);
+            toast({ title: 'Imported from Continuity', description: name });
+          }}
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
