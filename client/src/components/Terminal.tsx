@@ -51,6 +51,7 @@ export function Terminal({ onClose }: TerminalProps) {
   const [containerStatus, setContainerStatus] = useState<ContainerStatus | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const terminalKeyRef = useRef<string>("");
 
   useEffect(() => {
     fetch("/api/container/status")
@@ -70,7 +71,7 @@ export function Terminal({ onClose }: TerminalProps) {
           enabled: false,
           shell: "browser",
           cwd: "/workspace/youniverse-studio",
-          message: "Container bridge unavailable; using simulated terminal."
+          message: "Real command runtime unreachable. No commands are being simulated."
         });
       });
   }, []);
@@ -83,16 +84,31 @@ export function Terminal({ onClose }: TerminalProps) {
 
   const executeContainerCommand = async (cmd: string) => {
     if (!containerStatus?.enabled) {
-      return false;
+      setLines(prev => [...prev, {
+        type: "error", content: "Real Linux runtime is offline. Command not executed.", timestamp: new Date()
+      }]);
+      return true;
+    }
+
+    if (!terminalKeyRef.current) {
+      const entered = window.prompt("Enter the SynthAi 2 terminal key from Termux (~/.synthai-terminal-token):");
+      if (!entered) {
+        setLines(prev => [...prev, {
+          type: "error", content: "Terminal authorization cancelled. Command not executed.", timestamp: new Date()
+        }]);
+        return true;
+      }
+      terminalKeyRef.current = entered.trim();
     }
 
     const response = await fetch("/api/container/exec", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-synthia-terminal-token": terminalKeyRef.current },
       body: JSON.stringify({ command: cmd }),
     });
 
     const result = await response.json();
+    if (response.status === 401) terminalKeyRef.current = "";
     if (!response.ok || !result.success) {
       setLines(prev => [...prev, {
         type: "error",
@@ -152,42 +168,12 @@ export function Terminal({ onClose }: TerminalProps) {
         setLines(prev => [...prev, {
           type: "output",
           content: [
-            "YOU–N–I–VERSE Terminal - Available Commands:",
-            "",
+            "SynthAi 2 terminal: actual shell commands only.",
             containerStatus?.enabled
-              ? `Linux bridge: connected to ${containerStatus.shell}`
-              : "Linux bridge: offline; simulated commands are active",
-            "",
-            "Navigation & Info:",
-            "  pwd           - Print working directory",
-            "  ls [-la]      - List files (use -la for all files, long format)",
-            "  cd <dir>      - Change directory (simulated)",
-            "",
-            "File Operations:",
-            "  cat <file>    - Display file contents (simulated)",
-            "  mkdir <dir>   - Create directory (simulated)",
-            "  rm <file>     - Remove file (simulated)",
-            "  cp <src> <dst> - Copy file (simulated)",
-            "  mv <src> <dst> - Move/rename file (simulated)",
-            "",
-            "Text Processing:",
-            "  echo <text>   - Print text to terminal",
-            "  grep <pattern> - Search for pattern (simulated)",
-            "",
-            "System Info:",
-            "  date          - Show current date/time",
-            "  whoami        - Show current user",
-            "  uname         - Show system info",
-            "  df [-h]       - Show disk space",
-            "  ps            - Show processes (simulated)",
-            "",
-            "Utilities:",
-            "  clear         - Clear terminal",
-            "  history       - Show command history",
-            "  alias         - Show/create aliases (coming soon)",
-            "",
-            "Note: Some commands are simulated for browser environment.",
-            "Use the file explorer for actual file operations."
+              ? `Real shell configured: ${containerStatus.shell} (${containerStatus.cwd})`
+              : "Real Linux/Termux shell offline. Commands will not be simulated.",
+            "Commands execute in the configured workspace when connected.",
+            "Local UI commands: help, clear, history."
           ].join("\n"),
           timestamp: new Date()
         }]);
