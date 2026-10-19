@@ -1,0 +1,32 @@
+name: Verify SynthAi 2 IDE ↔ Continuity integration
+
+on:
+  push:
+    branches:
+      - feature/synthai-continuity-ide-20261018
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-existing-ide:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install existing SynthAi 2 dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check TypeScript of existing SynthAi 2 IDE plus Continuity adapter
+        run: npm run check
+      - name: Build existing SynthAi 2 app
+        run: npm run build
+      - name: Verify adapter is actually mounted in the existing editor
+        run: |
+          grep -q 'ContinuityIDEBridge' client/src/components/DeveloperPanel.tsx
+          grep -q '/api/companion/library' client/src/components/ContinuityIDEBridge.tsx
+          test -d dist
