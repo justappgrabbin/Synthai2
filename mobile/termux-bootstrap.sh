@@ -47,6 +47,13 @@ npm install --omit=dev --legacy-peer-deps
 
 cd "$APP_DIR"
 
+# Stable terminal authentication shared by the phone-local Studio and its UI.
+TOKEN_FILE="$HOME/.synthai-terminal-token"
+if [ ! -s "$TOKEN_FILE" ]; then
+  (umask 077; openssl rand -hex 32 > "$TOKEN_FILE")
+fi
+chmod 600 "$TOKEN_FILE"
+
 cat > "$APP_DIR/mobile-start.sh" << 'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
 set -e
@@ -66,8 +73,12 @@ export SYNTHIA_NODE_PORT="$SYNTHIA_PORT"
 export SYNTHIA_PYTHON_PORT=8001
 export VITE_SYNTHIA_API_URL="http://127.0.0.1:$SYNTHIA_PORT"
 export VITE_SYNTHIA_WS_URL="ws://127.0.0.1:$SYNTHIA_PORT/ws"
-export LINUX_CONTAINER_ENABLED=false
+# Reuse the real Termux Bash runtime, not the simulated browser terminal.
+export LINUX_CONTAINER_ENABLED=true
+export LINUX_CONTAINER_SHELL="${PREFIX:-/data/data/com.termux/files/usr}/bin/bash"
 export LINUX_CONTAINER_WORKDIR="$APP_DIR/workspace"
+export STUDIO_BIND_HOST=127.0.0.1
+export TERMINAL_TOKEN="$(cat "$HOME/.synthai-terminal-token")"
 export MESH_DATA_DIR="$APP_DIR/workspace"
 export PYTHON_API_AUTOSTART=false
 
@@ -105,3 +116,5 @@ echo "Start the phone server with:"
 echo "  $APP_DIR/mobile-start.sh"
 echo ""
 echo "Then open the APK. It points to http://127.0.0.1:$STUDIO_PORT"
+echo "For the first terminal command, the app requests your local terminal key."
+echo "Find it in Termux with: cat ~/.synthai-terminal-token"
