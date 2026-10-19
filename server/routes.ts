@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { timingSafeEqual } from "crypto";
 import { storage } from "./storage";
 import { uploadProjectToGoogleDrive, uploadFileToGoogleDrive } from "./lib/googleDriveService";
 import { createOrUpdateGitHubRepo } from "./lib/githubService";
@@ -308,6 +309,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/container/exec", async (req, res) => {
+    // Never expose an unauthenticated command shell, even on a local install.
+    // The Termux bootstrap generates a private per-install token.
+    const expected = process.env.TERMINAL_TOKEN;
+    if (!expected) {
+      return res.status(503).json({ success: false, error: "Terminal authorization is not configured" });
+    }
+    const received = req.header("x-synthia-terminal-token") || "";
+    const wantedBytes = Buffer.from(expected);
+    const givenBytes = Buffer.from(received);
+    if (wantedBytes.length !== givenBytes.length || !timingSafeEqual(wantedBytes, givenBytes)) {
+      return res.status(401).json({ success: false, error: "Terminal authorization required" });
+    }
     try {
       const schema = z.object({
         command: z.string().min(1).max(4000),
