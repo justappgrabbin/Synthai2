@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cynthia · Hover Research</title>
+<style>
+:root{color-scheme:dark;--bg:#100b1d;--panel:#1b142c;--line:#523b72;--teal:#47e4cb;--violet:#bb93ff;--muted:#c0b6d2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f6f0ff;font:15px/1.55 system-ui,sans-serif}
+header{display:flex;align-items:center;gap:12px;position:sticky;top:0;background:#100b1df2;padding:15px 18px;border-bottom:1px solid var(--line);z-index:2}
+.logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(140deg,#6629b9,#17bfae);box-shadow:0 0 15px #34cdb653;display:grid;place-items:center;font-size:22px}
+header strong{font-size:18px}small, .muted{color:var(--muted)}header small{display:block;font-size:11px;letter-spacing:.08em} .pill{margin-left:auto;border-radius:20px;border:1px solid #2c8c85;padding:4px 9px;font-size:11px;color:var(--teal)}
+main{padding:20px 16px 95px;max-width:740px;margin:auto}section[hidden]{display:none!important}
+.hero{text-align:center;padding:33px 8px 17px}.big-orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 25% 25%,#9d78ef,#6129a2 45%,#078e90);box-shadow:0 0 44px #278cca65;display:grid;place-items:center;font-size:52px;margin:0 auto 22px}
+h1{font-size:26px;margin:0 0 8px;letter-spacing:-.035em}h2{font-size:20px;margin:0 0 12px}p{margin:10px 0 15px}.intro{max-width:520px;margin:auto;color:#ccc0df}
+.panel{background:var(--panel);padding:17px;border:1px solid #46355f;border-radius:17px;margin:12px 0}
+button{font:inherit;cursor:pointer;border:1px solid #746198;background:#312345;color:#fff;border-radius:12px;padding:11px 13px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+button.primary{background:linear-gradient(100deg,#7935d0,#098f89);border-color:#36c9b9;font-weight:650}
+button:disabled{opacity:.55;cursor:wait}.actions{display:flex;gap:8px;flex-wrap:wrap}
+input,textarea{width:100%;background:#110e1e;color:#fff;border:1px solid #6a547e;border-radius:11px;padding:13px;font:inherit}
+textarea{resize:vertical;min-height:84px}label{display:block;color:var(--muted);font-size:13px;margin:10px 0 5px}
+nav{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(6,1fr);background:#160e27;border-top:1px solid var(--line);z-index:5;padding:7px 2px max(9px,env(safe-area-inset-bottom))}
+nav button{border:none;background:none;font-size:11px;padding:7px 1px;color:#b9a6d3;min-width:0}
+nav button[aria-current="page"]{color:var(--teal);background:#183a44;border-radius:9px} nav span{display:block;font-size:19px}
+.item{padding:12px;border:1px solid #514266;border-radius:13px;margin:8px 0;background:#241c35;overflow-wrap:anywhere}
+.item b{color:#e5d7ff}.item p{white-space:pre-wrap;margin:4px 0}.item small{font-size:11px}
+.msg{padding:12px;border-radius:14px;margin:10px 0;border:1px solid #514266;white-space:pre-wrap;overflow-wrap:anywhere}.msg.mine{background:#2a2044;margin-left:26px}.msg.cynthia{background:#123b3f;margin-right:26px;border-color:#2d817e}
+.citation{font-size:12px}.citation a{color:var(--teal)}
+.notice{color:#ffe4a4;font-size:12px}.status{font-size:12px;color:var(--teal)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:350px){nav button{font-size:9px}.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><div class="logo" aria-hidden="true">✦</div><div><strong>Cynthia</strong><small>HOVER · RESEARCH · LOCAL-FIRST</small></div><span id="voice-indicator" class="pill">Idle</span></header>
+<main>
+<section id="home"><div class="hero"><div class="big-orb" aria-hidden="true">✦</div><h1>Your space. Cynthia nearby.</h1><p class="intro">A clean new instance of the hover planet with real chat routing, research, tasks and inbox. This edition does not install or control Hands.</p></div>
+ <div class="panel"><h2>Start here</h2><p>Keep the planet visible while using other apps, or open Chat and ask for a specific task.</p><div class="actions"><button class="primary" onclick="show('chat')">Open chat</button><button onclick="withNative('showPlanet')">Show floating planet</button><button onclick="withNative('hidePlanet')">Hide planet</button></div><p class="muted">Microphone listening is opt-in and stops when the app moves to the background.</p></div>
+ <div class="panel"><h2>Research integrity</h2><p>The Simlish contact model analyzes compatible numeric feature observations; it is not a text generator. Chat uses a separately configured Trident server. Research keeps source links.</p><button onclick="show('settings')">Connect your own backend</button></div>
+</section>
+<section id="chat" hidden><h2>Chat with Cynthia</h2><p class="muted">No canned replies. If the model service is offline, Cynthia reports the connection error rather than inventing an answer.</p>
+ <div class="actions"><button id="wake" onclick="startWake()">🎙 Listen for “Cynthia”</button><button onclick="stopWake()">Stop microphone</button></div><p id="speech-note" class="status">Voice idle · foreground only</p>
+ <div id="chat-messages" role="log" aria-live="polite"></div><form id="chat-form"><label for="chat-input">Message</label><textarea id="chat-input" required placeholder="Ask Cynthia to investigate a question..."></textarea><div class="actions"><button id="send" type="submit" class="primary">Send to model</button><button type="button" onclick="show('research')">Research Drive</button></div></form>
+</section>
+<section id="tasks" hidden><h2>To-do</h2><p class="muted">Saved on this phone; completion never deletes the original task.</p>
+ <form id="task-form" class="panel"><label for="task-title">Task</label><input id="task-title" required maxlength="180" placeholder="What needs doing?"><label for="task-due">Reminder (optional)</label><input id="task-due" type="datetime-local"><button class="primary" type="submit">Add task</button></form><div id="task-list"></div>
+</section>
+<section id="inbox" hidden><h2>Inbox</h2><p class="muted">Research receipts, reminders and system messages. They remain until you explicitly export/clear device data.</p><div id="inbox-list"></div></section>
+<section id="research" hidden><h2>Research Drive</h2><p class="muted">Queries your authorized read-only Drive connector; source links and excerpts returned by the research service.</p>
+ <form id="research-form" class="panel"><label for="research-query">What should Cynthia investigate?</label><textarea id="research-query" required placeholder="Find the Klein operator specifications..."></textarea><button class="primary" type="submit">Search connected Drive</button></form><div id="research-results" aria-live="polite"></div></section>
+<section id="settings" hidden><h2>Connections</h2><div class="panel"><p class="notice">Use only your trusted HTTPS research service. Authentication tokens are stored in Android app-private preferences, not sent to GitHub or bundled with this APK.</p>
+ <label for="server-url">HTTPS service URL</label><input id="server-url" type="url" placeholder="https://your-trusted-server.example">
+ <label for="server-token">Service access token</label><input id="server-token" type="password" autocomplete="off" placeholder="Paste your personal token">
+ <button class="primary" onclick="saveServer()">Save secure connection</button><p id="server-status" class="status"></p></div>
+ <div class="panel"><h2>Model availability</h2><button onclick="modelStatus()">Check Simlish contact model</button><pre id="model-status" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></div>
+ <div class="panel"><h2>Voice privacy</h2><p>“Cynthia” wake detection uses Android's SpeechRecognizer while this page is open. Depending on the installed recognition provider, recognition may use network services. Continuous screen-off hotword detection is not supported by this build.</p></div>
+</section>
+</main>
+<nav aria-label="Cynthia tabs">
+<button data-page="home" aria-current="page" onclick="show('home')"><span>✦</span>Home</button>
+<button data-page="chat" onclick="show('chat')"><span>◉</span>Chat</button>
+<button data-page="tasks" onclick="show('tasks')"><span>☑</span>To-do</button>
+<button data-page="inbox" onclick="show('inbox')"><span>✉</span>Inbox</button>
+<button data-page="research" onclick="show('research')"><span>⌕</span>Drive</button>
+<button data-page="settings" onclick="show('settings')"><span>⚙</span>Setup</button>
+</nav>
+<script>
+'use strict';
+const KEY='cynthia_hover_v2_';
+const read=(key)=>{try{return JSON.parse(localStorage.getItem(KEY+key))||[]}catch{return []}};
+const write=(key,value)=>localStorage.setItem(KEY+key,JSON.stringify(value));
+let tasks=read('tasks'), inbox=read('inbox'), messages=read('messages'), pending='';
+const $=id=>document.getElementById(id);
+const native=()=>typeof window.Cynthia==='object';
+function withNative(name,...args){if(!native()){addInbox('Android required','This action uses the installed Android app.');return}window.Cynthia[name](...args)}
+function show(page){for(const id of ['home','chat','tasks','inbox','research','settings'])$(id).hidden=id!==page;document.querySelectorAll('nav button').forEach(b=>{if(b.dataset.page===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});if(page==='chat')renderMessages();if(page==='tasks')renderTasks();if(page==='inbox')renderInbox()}
+function el(tag,text,cls){const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x}
+function item(host,title,description,metadata){const box=el('div',undefined,'item');box.append(el('b',title),el('p',description||''),el('small',metadata||''));host.append(box);return box}
+function addInbox(title,description,source){inbox.unshift({id:crypto.randomUUID(),title,description,source:source||'local',at:Date.now(),read:false});write('inbox',inbox);renderInbox()}
+function renderInbox(){const host=$('inbox-list');host.replaceChildren();if(!inbox.length)host.append(el('p','Your inbox is empty.','muted'));for(const m of inbox){const box=item(host,m.title,m.description,new Date(m.at).toLocaleString()+' · '+m.source+(m.read?' · read':''));if(!m.read){const b=el('button','Mark read');b.onclick=()=>{m.read=true;write('inbox',inbox);renderInbox()};box.append(b)}}}
+function renderTasks(){const host=$('task-list');host.replaceChildren();if(!tasks.length)host.append(el('p','No tasks yet.','muted'));for(const t of tasks){const box=item(host,t.title,'Status: '+(t.done?'completed':'open'),t.due?('Due '+new Date(t.due).toLocaleString()):'No reminder');const b=el('button',t.done?'Reopen':'Mark complete');b.onclick=()=>{t.done=!t.done;t.updated=Date.now();write('tasks',tasks);renderTasks()};box.append(b)}}
+$('task-form').onsubmit=e=>{e.preventDefault();const title=$('task-title').value.trim();if(!title)return;const due=$('task-due').value?new Date($('task-due').value).getTime():null;const id=crypto.randomUUID();tasks.unshift({id,title,due,done:false,created:Date.now()});write('tasks',tasks);if(due&&Number.isFinite(due)&&due>Date.now())withNative('remind',id,title,due);$('task-form').reset();renderTasks();addInbox('Task saved',title)};
+function renderMessages(){const host=$('chat-messages');host.replaceChildren();if(!messages.length)host.append(el('p','No messages yet.','muted'));for(const m of messages){const box=el('div',m.text,'msg '+(m.role==='user'?'mine':'cynthia'));host.append(box);if(m.sources?.length){for(const s of m.sources){const a=el('a',s.name||'Source');a.href=s.url;a.rel='noopener noreferrer';a.target='_blank';a.className='citation';box.append(document.createElement('hr'),a)}}}}
+function pushMessage(role,text,sources){messages.push({role,text,sources:sources||[],at:Date.now()});write('messages',messages);renderMessages()}
+$('chat-form').onsubmit=e=>{e.preventDefault();const text=$('chat-input').value.trim();if(!text||pending)return;$('chat-input').value='';pushMessage('user',text);request('/api/chat',{text})};
+function request(route,data){if(!native()){pushMessage('assistant','Native research service unavailable. Install the Android build and configure Settings.');return}pending=route;$('send').disabled=true;window.Cynthia.call(route,JSON.stringify(data))}
+$('research-form').onsubmit=e=>{e.preventDefault();const query=$('research-query').value.trim();if(!query||pending)return;request('/api/research',{query})};
+function makeSourceCards(sources){const host=$('research-results');host.replaceChildren();for(const s of sources||[]){const box=item(host,s.title||'Untitled',s.excerpt||'',s.modified||'');if(s.url&&/^https:\/\/(drive|docs)\.google\.com\//.test(s.url)){const a=el('a','Open original ↗');a.href=s.url;a.target='_blank';a.rel='noopener noreferrer';a.style.color='var(--teal)';box.append(a)}}}
+function startWake(){if(!native())return addInbox('Voice unavailable','Voice wake requires the Android application');withNative('armVoice')}
+function stopWake(){if(native())withNative('disarmVoice');$('speech-note').textContent='Voice idle'}
+function saveServer(){const base=$('server-url').value.trim().replace(/\/+$/,'');const token=$('server-token').value;if(!/^https:\/\/[A-Za-z0-9._:-]+$/.test(base)){$('server-status').textContent='A valid HTTPS origin is required';return}withNative('saveServer',base,token);$('server-token').value=''}
+function modelStatus(){if(pending)return;$('model-status').textContent='Checking actual checkpoint...';request('/api/model/status',{})}
+window.CynthiaEvents=(event,payload)=>{
+ if(event==='voice_state'){$('voice-indicator').textContent=payload==='off'?'Idle':'Mic on';$('speech-note').textContent='Listening · '+payload+' · foreground only';return}
+ if(event==='voice_error'){$('voice-indicator').textContent='Mic off';$('speech-note').textContent=payload;return}
+ if(event==='voice_wake'){$('voice-indicator').textContent='Cynthia heard';show('chat');return}
+ if(event==='voice_command'){show('chat');$('chat-input').value=payload;$('chat-form').requestSubmit();return}
+ if(event==='settings_saved'){$('server-status').textContent='Saved in Android app preferences';return}
+ if(event==='settings_error'){$('server-status').textContent=payload;return}
+ if(event!=='response')return;
+ let result;try{result=JSON.parse(payload)}catch{result={ok:false,error:'Malformed Android response'}};
+ const route=result.route||pending;pending='';$('send').disabled=false;
+ if(!result.ok){
+  const msg=result.error||result.body?.error||'Request failed';
+  if(route==='/api/chat')pushMessage('assistant','Connection error: '+msg);
+  if(route==='/api/research')$('research-results').replaceChildren(el('p','Research unavailable: '+msg,'notice'));
+  if(route==='/api/model/status')$('model-status').textContent=msg;
+  addInbox('Service error',msg,route);return;
+ }
+ const body=result.body||{};
+ if(route==='/api/chat'){pushMessage('assistant',body.reply||'Model returned no text.',body.sources)}
+ if(route==='/api/research'){makeSourceCards(body.sources);addInbox('Research completed',body.summary||('Found '+(body.sources||[]).length+' source(s)'),'Drive research')}
+ if(route==='/api/model/status')$('model-status').textContent=JSON.stringify(body,null,2);
+};
+if(native())$('server-url').value=window.Cynthia.getServer();
+renderTasks();renderInbox();renderMessages();show('home');
+</script></body></html>
