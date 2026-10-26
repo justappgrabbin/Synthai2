@@ -8,6 +8,7 @@ import torch, torch.nn as nn, json, os
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from model import Trident, TridentConfig
+from trident_klein import batch_observe
 
 # ── Toy dataset (replace with real data) ──
 SAMPLES = {
@@ -46,7 +47,8 @@ def make_batch(head_name, batch_size=4):
     texts   = random.choices(samples, k=batch_size)
     tokens  = torch.tensor([tokenize(t) for t in texts], dtype=torch.long)
     # next-token prediction: input = tokens[:-1], target = tokens[1:]
-    return tokens[:, :-1], tokens[:, 1:]
+    klein, _trace = batch_observe(texts)
+    return tokens[:, :-1], tokens[:, 1:], klein
 
 def train(epochs=20, lr=3e-4, batch_size=4, save_path='trident.pt'):
     cfg   = TridentConfig()
@@ -67,11 +69,11 @@ def train(epochs=20, lr=3e-4, batch_size=4, save_path='trident.pt'):
 
         for head_name in head_names:
             for _ in range(4):   # 4 steps per head per epoch
-                inp, tgt = make_batch(head_name, batch_size)
+                inp, tgt, klein = make_batch(head_name, batch_size)
                 opt.zero_grad()
 
                 # Force the correct specialist head during training
-                logits = model(inp, head=head_name)  # [B, T, vocab]
+                logits = model(inp, head=head_name, klein=klein)  # [B, T, vocab]
                 loss   = crit(logits.reshape(-1, cfg.vocab_size), tgt.reshape(-1))
                 loss.backward()
                 nn.utils.clip_grad_norm_(model.parameters(), 1.0)
