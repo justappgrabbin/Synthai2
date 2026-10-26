@@ -20,16 +20,14 @@ class TridentKleinTests(unittest.TestCase):
         torch.manual_seed(31)
 
     def test_legacy_engines_actually_execute_and_eight_tools_have_evidence(self):
-        with patch.object(AUTOLING, "operate", autospec=True, wraps=None) as intercepted:
-            # The real native method is checked separately below; this patch
-            # verifies the original engine IS invoked rather than a name tag.
-            original = AUTOLING.operate
-            intercepted.side_effect = lambda self, text: original(self, text)
+        original = AUTOLING.operate
+        with patch.object(AUTOLING, "operate", autospec=True,
+                          side_effect=lambda tool, text: original(tool, text)) as intercepted:
             obs = observe("A model reads language, and words have relationships.")
             self.assertGreaterEqual(intercepted.call_count, 1)
-        with patch.object(DISEMINER, "operate", autospec=True, wraps=None) as intercepted:
-            original = DISEMINER.operate
-            intercepted.side_effect = lambda self, text: original(self, text)
+        original = DISEMINER.operate
+        with patch.object(DISEMINER, "operate", autospec=True,
+                          side_effect=lambda tool, text: original(tool, text)) as intercepted:
             observe("A model reads language.")
             self.assertGreaterEqual(intercepted.call_count, 1)
         self.assertEqual([x["name"] for x in obs["tools"]], list(TOOL_ORDER))
