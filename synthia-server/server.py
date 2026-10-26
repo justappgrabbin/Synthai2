@@ -673,7 +673,7 @@ async def trident_generate(request: Request):
         try:
             result=await asyncio.to_thread(
                 _get_trident_klein().generate, prompt,
-                head=head if head in ("code","math","research") else "research",
+                head=head if head in ("code","math","research") else "auto",
                 max_new=min(80, max(1, max_tokens)), temperature=temp)
             await _broadcast("trident:generate",result)
             return JSONResponse(result)
@@ -1749,7 +1749,7 @@ async def trident_model_generate(request: Request):
     try:
         result = await asyncio.to_thread(
             _get_trident_klein().generate, b.get("prompt", ""),
-            head=b.get("head", "research"),
+            head=b.get("head", "auto"),
             max_new=int(b.get("max_tokens", 48)),
             temperature=float(b.get("temperature", 0.8)))
         return JSONResponse(result)
