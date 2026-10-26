@@ -1077,13 +1077,7 @@ _confidence_experience: List[Dict] = []
 
 _ingest_sources: Dict[str, Dict] = {}       # source_name → {files, file_count}
 
-_trident_model_state: Dict = {
-    "param_count": 147456,
-    "trained_epochs": 0,
-    "best_loss": None,
-    "weights_saved": False,
-    "samples": {"code":0,"math":0,"research":0}
-}
+# TRIDENT status is derived from actual torch checkpoints in trident_runtime.py.
 
 # ── SEED CODE ─────────────────────────────────────────────────────────────────
 
