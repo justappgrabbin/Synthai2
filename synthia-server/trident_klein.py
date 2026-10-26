@@ -15,7 +15,8 @@ import re
 from collections import Counter
 from typing import Any
 
-from aion.KleinTools import AUTOLING, DISEMINER, Dimension
+from aion.KleinTools import (AUTOLING, DISEMINER, AUTOCODER, MORPH,
+                             DISCRIMINATOR, ROUTER, GENERATOR, STORYTELLER, Dimension)
 
 TOOL_ORDER = (
     "DISEMINER", "AUTOLING", "AUTOCODER", "MORPH",
@@ -40,12 +41,25 @@ def _meaningful(text: str, dimension: str) -> list[dict[str, Any]]:
     counts = Counter(words)
     runs = [(a, b) for a, b in zip(words, words[1:])]
 
-    diseminer = DISEMINER()
-    diseminer.arise(Dimension.EVOLUTION)
-    parts = diseminer.operate(text)["parts"]
-    autoling = AUTOLING()
-    autoling.arise(Dimension.EVOLUTION)
-    syntax = autoling.operate(text)
+    # Invoke all eight versioned AION Klein components. Six original modes
+    # currently report fixed metadata; real input-dependent structures for
+    # those are computed below instead of trusting canned "generated" claims.
+    sources = (
+        (DISEMINER, Dimension.EVOLUTION), (AUTOLING, Dimension.EVOLUTION),
+        (AUTOCODER, Dimension.DESIGN), (MORPH, Dimension.MOVEMENT),
+        (DISCRIMINATOR, Dimension.DESIGN), (ROUTER, Dimension.MOVEMENT),
+        (GENERATOR, Dimension.DESIGN), (STORYTELLER, Dimension.BEING),
+    )
+    invoked = {}
+    for cls, selected_dimension in sources:
+        original = cls()
+        original.arise(selected_dimension)
+        result = original.operate(text)
+        if not isinstance(result, dict):
+            raise TypeError(f"Native {original.name} returned no structured output")
+        invoked[original.name] = {"mode": original.get_mode_name(), "result": result}
+    parts = invoked["DISEMINER"]["result"]["parts"]
+    syntax = invoked["AUTOLING"]["result"]
 
     # Parse only; never evaluate, import or run untrusted code.
     code_like = bool(CODE_RE.search(text))
@@ -90,7 +104,7 @@ def _meaningful(text: str, dimension: str) -> list[dict[str, Any]]:
                    "control_characters": sum(ord(ch) < 32 and ch not in "\t\n\r" for ch in text)}
 
     # None of these tools claims observed clauses are verified propositions.
-    return [
+    observations = [
         {"name": "DISEMINER", "dimension": "evolution", "implementation": "aion-original+bounded-lexical",
          "data": {"parts": parts[:MAX_TOKENS], "part_count": len(parts),
                   "adjacent_pairs": [[a, b] for a, b in runs[:20]],
@@ -117,6 +131,10 @@ def _meaningful(text: str, dimension: str) -> list[dict[str, Any]]:
                   "sequence_links": [[i, i+1] for i in range(min(len(clauses)-1, 7))],
                   "epistemic": "utterance-order-only"}},
     ]
+    for item in observations:
+        item["legacy_mode_executed"] = invoked[item["name"]]["mode"]
+        item["native_component_invoked"] = True
+    return observations
 
 def observe(text: str, dimension: str = "evolution") -> dict[str, Any]:
     if not isinstance(text, str) or not text.strip() or len(text) > MAX_TEXT:
