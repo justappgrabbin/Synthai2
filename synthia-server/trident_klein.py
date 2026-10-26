@@ -15,6 +15,8 @@ import re
 from collections import Counter
 from typing import Any
 
+from semantic_evidence import analyze_semantics
+
 from aion.KleinTools import (AUTOLING, DISEMINER, AUTOCODER, MORPH,
                              DISCRIMINATOR, ROUTER, GENERATOR, STORYTELLER, Dimension)
 
@@ -144,7 +146,8 @@ def observe(text: str, dimension: str = "evolution") -> dict[str, Any]:
     result = _meaningful(text, dimension)
     return {"input_sha256": _stable_digest(text), "dimension": dimension,
             "claim_status": "unverified-utterance",
-            "tools": result, "features": _vectorize(result, dimension)}
+            "tools": result, "features": _vectorize(result, dimension),
+            "semantic_evidence": analyze_semantics(text)}
 
 def _vectorize(items: list[dict], dimension: str) -> list[list[float]]:
     features = []
