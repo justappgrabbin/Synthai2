@@ -160,12 +160,13 @@ class TridentKleinRuntime:
                     "loss": avg_loss, "saved": True,
                     "total_training_records": len(self.records)}
 
-    def generate(self, prompt: str, *, head: str = "research",
+    def generate(self, prompt: str, *, head: str = "auto",
                  max_new: int = 48, temperature: float = 0.8) -> dict:
         if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= MAX_PROMPT:
             raise ValueError("Prompt must be 1..160 characters")
-        if head not in self.model.cfg.heads:
+        if head not in (*self.model.cfg.heads, "auto", "cynthia", None):
             raise ValueError("Unknown TRIDENT head")
+        selected_head = None if head in ("auto", "cynthia", None) else head
         if not isinstance(max_new, int) or not 1 <= max_new <= MAX_GENERATED:
             raise ValueError("max_new must be 1..80")
         if not 0.1 <= temperature <= 2:
@@ -176,11 +177,14 @@ class TridentKleinRuntime:
             klein, observations = batch_observe([prompt.strip()])
             ids = torch.tensor([encode_text(prompt.strip())], dtype=torch.long)
             with torch.no_grad():
-                output = self.model.generate(ids, head=head, klein=klein,
+                _, routed = self.model(ids, klein=klein, return_router=True)
+                output = self.model.generate(ids, head=selected_head, klein=klein,
                                              max_new=max_new, temp=temperature)
             completion = decode_text(output[0, ids.shape[1]:].tolist())
             return {"generated": completion, "full": prompt.strip() + completion,
-                    "head_used": head, "provider": "local-pytorch-trident-klein",
+                    "head_used": selected_head or "auto-neural-router",
+                    "router_weights": dict(zip(self.model.cfg.heads, routed[0].tolist())),
+                    "provider": "local-pytorch-trident-klein",
                     "tokens_generated": output.shape[1] - ids.shape[1],
                     "klein": {"input_sha256": observations[0]["input_sha256"],
                               "claim_status": observations[0]["claim_status"],
