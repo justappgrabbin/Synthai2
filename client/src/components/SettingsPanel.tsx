@@ -6,6 +6,7 @@ import { OSSetupPanel } from "./OSSetupPanel";
 import { ProfileBuilder } from "./ProfileBuilder";
 import { ResonanceTracker } from "./ResonanceTracker";
 import { SessionAnalytics } from "./SessionAnalytics";
+import { WorldBuilderAddons } from "./WorldBuilderAddons";
 import { TopNav } from "@/components/TopNav";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun, Palette, Brain, Zap, XCircle, AlertTriangle, Sparkles, CheckCircle, Shield, ShieldOff, ShieldCheck } from "lucide-react";
@@ -192,7 +193,7 @@ export function SettingsPanel() {
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="flex flex-wrap h-auto w-full justify-start gap-1 p-1">
             <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
             <TabsTrigger value="os" data-testid="tab-os">OS Setup</TabsTrigger>
             <TabsTrigger value="ai" data-testid="tab-ai">AI Config</TabsTrigger>
@@ -206,6 +207,7 @@ export function SettingsPanel() {
               <Sparkles className="h-4 w-4 mr-1" />
               ERN
             </TabsTrigger>
+            <TabsTrigger value="addons" data-testid="tab-addons">Add-ons</TabsTrigger>
             <TabsTrigger value="about" data-testid="tab-about">About</TabsTrigger>
           </TabsList>
 
@@ -688,6 +690,10 @@ export function SettingsPanel() {
             <ProfileBuilder />
             <ResonanceTracker />
             <SessionAnalytics />
+          </TabsContent>
+
+          <TabsContent value="addons" className="space-y-6">
+            <WorldBuilderAddons />
           </TabsContent>
 
           <TabsContent value="about" className="space-y-6">

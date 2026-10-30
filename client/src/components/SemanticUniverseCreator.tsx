@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniverseViewer3D } from "@/components/UniverseViewer3D";
+import { HousingStudio } from "@/components/HousingStudio";
 import { TopNav } from "@/components/TopNav";
 import { AIService } from "@/lib/AIService";
 
@@ -498,7 +499,7 @@ export function SemanticUniverseCreator() {
 
       <div className="px-4 sm:px-6">
         <Tabs defaultValue="create" className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="create" data-testid="tab-create" className="text-sm sm:text-base">
               <span className="hidden sm:inline">Create Universe</span>
               <span className="sm:hidden">Create</span>
@@ -507,6 +508,7 @@ export function SemanticUniverseCreator() {
               <span className="hidden sm:inline">Universe Library ({universes.length})</span>
               <span className="sm:hidden">Library ({universes.length})</span>
             </TabsTrigger>
+            <TabsTrigger value="housing" data-testid="tab-housing" className="text-sm sm:text-base">Housing</TabsTrigger>
           </TabsList>
 
           <TabsContent value="create" className="space-y-4 sm:space-y-6">
@@ -809,6 +811,10 @@ export function SemanticUniverseCreator() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="housing" className="space-y-4 sm:space-y-6">
+          <HousingStudio worlds={universes.map(u => ({ id: u.id, name: u.name }))} />
         </TabsContent>
       </Tabs>
       

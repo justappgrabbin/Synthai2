@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { X, Maximize2, Minimize2, RotateCcw, Info } from "lucide-react";
 import { useLocation } from "wouter";
 import * as THREE from "three";
+import { HouseMesh } from "@/components/HousingStudio";
+import { readHousePlans } from "@/lib/housing";
 
 interface Universe {
   id: string;
@@ -211,6 +213,7 @@ function UniverseScene({ universe, onReset }: { universe: Universe; onReset?: ()
   const reflectiveLayer = universe.layers[4];
   const transpersonalLayer = universe.layers[5];
   const voidLayer = universe.layers[6];
+  const worldHomes = readHousePlans().filter(home => home.worldId === universe.id);
   
   const perspective = reflectiveLayer?.extractedData?.includes("first-person") ? "first" : "third";
   
@@ -275,6 +278,11 @@ function UniverseScene({ universe, onReset }: { universe: Universe; onReset?: ()
       />
       
       <TerrainMesh physicalData={physicalLayer?.extractedData} />
+      {worldHomes.map(home => (
+        <group key={home.id} position={[home.positionX, -2, home.positionZ]}>
+          <HouseMesh plan={home} />
+        </group>
+      ))}
       
       <EnergeticParticles affectiveData={energeticLayer?.extractedData} />
       
