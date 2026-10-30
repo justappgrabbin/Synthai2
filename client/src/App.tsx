@@ -20,9 +20,9 @@ import { SemanticUniverseCreator } from "@/components/SemanticUniverseCreator";
 import { IngestPanel } from "@/components/IngestPanel";
 import UnifiedInterface from "@/components/UnifiedInterface";
 import NovelWriterPanel from "@/components/NovelWriterPanel";
-import { PersistentAssistant } from "@/components/PersistentAssistant";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { MakerStudioPanel } from "@/components/MakerStudioPanel";
+import { AgentFlyUp } from "@/components/AgentFlyUp";
 import { ModeIndicator } from "@/components/ModeIndicator";
 import { OSBootGate } from "@/components/OSBootGate";
 import ZipManager from "@/pages/ZipManager";
@@ -69,7 +69,7 @@ function App() {
         <TooltipProvider>
           <Router />
           <MakerStudioPanel />
-          <PersistentAssistant />
+          <AgentFlyUp />
           <ModeIndicator />
           <InstallPrompt />
           <OSBootGate />

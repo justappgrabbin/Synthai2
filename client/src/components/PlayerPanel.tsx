@@ -1,3 +1,4 @@
+import { openFlyUp } from "@/lib/flyUps";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Upload, FileArchive, File, Folder, Trash2, History, AlertCircle, Wrench, Code2, Download, ChevronDown } from "lucide-react";
@@ -406,18 +407,13 @@ export function PlayerPanel() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => {
-                      toast({
-                        title: "Need Help?",
-                        description: "Open the AI Guard Dog assistant (bottom right) for help fixing these issues"
-                      });
-                    }}
+                    onClick={() => openFlyUp("agent")}
                     variant="outline"
                     data-testid="button-see-agent"
                     className="touch-manipulation"
                   >
                     <AlertCircle className="h-4 w-4 mr-2" />
-                    Ask Guard Dog
+                    Ask the Agent
                   </Button>
                 )}
                 <Button
@@ -718,15 +714,10 @@ export function PlayerPanel() {
                         variant="outline"
                         className="mt-3"
                         data-testid="button-open-guard-dog"
-                        onClick={() => {
-                          toast({
-                            title: "AI Guard Dog Ready",
-                            description: "Open the AI Assistant to get help fixing these issues"
-                          });
-                        }}
+                        onClick={() => openFlyUp("agent")}
                       >
                         <Wrench className="h-3 w-3 mr-2" />
-                        Ask Guard Dog for Help
+                        Ask the Agent for Help
                       </Button>
                     </AlertDescription>
                   </Alert>

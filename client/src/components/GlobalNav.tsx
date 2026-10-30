@@ -2,7 +2,8 @@ import { Link, useLocation } from "wouter";
 import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Rocket, Presentation, QrCode, Orbit, Upload, Network, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, MessageSquare } from "lucide-react";
+import { openFlyUp } from "@/lib/flyUps";
 
 const NAV_ITEMS = [
   { path: "/", icon: Home, label: "Dashboard" },
@@ -88,7 +89,7 @@ export function GlobalNav() {
       </nav>
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur md:hidden">
-        <div className="grid grid-cols-5 gap-1 px-2 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
+        <div className="grid grid-cols-7 gap-1 px-2 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
           {MOBILE_DOCK_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
@@ -106,6 +107,16 @@ export function GlobalNav() {
               </Link>
             );
           })}
+          {([
+            { id: "verse" as const, icon: Orbit, label: "Verse" },
+            { id: "agent" as const, icon: MessageSquare, label: "Agent" },
+          ]).map((item) => (
+            <Button key={item.id} variant="ghost" size="sm" className="h-12 w-full flex-col gap-1 px-1 text-[11px]"
+              onClick={() => openFlyUp(item.id)} data-testid={`mobile-nav-${item.id}`}>
+              <item.icon className="w-4 h-4" />
+              <span>{item.label}</span>
+            </Button>
+          ))}
         </div>
       </nav>
     </>

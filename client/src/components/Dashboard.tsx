@@ -18,7 +18,7 @@ import { CommandCenter } from "@/components/CommandCenter";
 import { getMeshStatus, publishMeshEvent, type MeshStatus } from "@/lib/meshEvents";
 import { systemApi, type AppRunResult, type McpStatus, type MountedApp, type StudioHealth } from "@/lib/systemApi";
 import { publishMeshNode } from "@/lib/meshAddressing";
-import { toggleAssistant } from "@/lib/assistantDock";
+import { openFlyUp } from "@/lib/flyUps";
 import { OSSetupPanel } from "@/components/OSSetupPanel";
 import { GrimoirePanel } from "@/components/GrimoirePanel";
 import { BodyView } from "@/components/BodyView";
@@ -137,7 +137,8 @@ const OS_TRAY_ITEMS: TrayItem[] = [
   { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
   { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
   { id: "games", label: "Games", icon: Gamepad2, path: "/game-creator" },
-  { id: "guard", label: "Guard", icon: MessageSquare, action: toggleAssistant },
+  { id: "verse", label: "Verse", icon: Orbit, action: () => openFlyUp("verse") },
+  { id: "agent", label: "Agent", icon: MessageSquare, action: () => openFlyUp("agent") },
   { id: "store", label: "Store", icon: Store, path: "/grove-store" },
   { id: "setup", label: "Setup", icon: Settings, path: "/settings" },
 ];
@@ -574,8 +575,8 @@ export function Dashboard() {
         </div>
 
         <nav className="fixed bottom-3 left-1/2 z-[90] w-[calc(100%-1rem)] max-w-xl -translate-x-1/2 rounded-lg border bg-background/95 px-2 py-2 shadow-xl backdrop-blur" aria-label="Synthia OS dock">
-          <div className="grid grid-cols-5 gap-1">
-            {visibleTrayItems.filter((item) => ["mesh", "ingest", "guard", "store", "setup"].includes(item.id)).slice(0, 5).map((item) => (
+          <div className="grid grid-cols-6 gap-1">
+            {visibleTrayItems.filter((item) => ["mesh", "ingest", "store", "setup", "verse", "agent"].includes(item.id)).slice(0, 6).map((item) => (
               <button
                 key={item.id}
                 className="flex h-14 flex-col items-center justify-center rounded-md px-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
