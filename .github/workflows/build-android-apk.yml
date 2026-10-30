@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - feature/worlds-housing-addons
 
 jobs:
   build-apk:
