@@ -1,0 +1,33 @@
+name: Morph visual studio checks
+on:
+  pull_request:
+    paths:
+      - 'client/src/components/MorphVisualStudio.tsx'
+      - 'client/src/components/UnifiedInterface.tsx'
+      - 'server/lib/morphImageRoutes.ts'
+      - 'server/index.ts'
+      - 'server/routes.ts'
+      - 'tests/morphVisualRoutes.test.mjs'
+      - '.github/workflows/morph-visual-checks.yml'
+  push:
+    branches:
+      - 'integration/morph-visual-video-*'
+jobs:
+  visual-morph:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run check
+      - name: Morph API integration tests
+        run: node --import tsx --test tests/morphVisualRoutes.test.mjs
+      - name: Build client and server
+        run: npm run build
