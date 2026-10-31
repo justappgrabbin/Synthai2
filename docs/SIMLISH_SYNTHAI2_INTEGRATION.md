@@ -1,25 +1,44 @@
-# SynthAi2 + Simlish — verified boundary and integration work
+# Verified Simlish + SynthAi2 integration (2026-10-31)
 
-## Existing sources (2026-10-31)
+## Source ownership and exact revisions
 
-- **SynthAi2 `main`** contains its own Game Creator, Semantic Universe Creator, Housing, Morph Memory Engine / Morph Store, Human Design Studio, and Mesh events. These are part of one repository; game world and character morph are not interchangeable.
-- **Simlish `main`** is a separate Android/Studio/player source, not bundled into the current SynthAi2 APK or website merely because the name Morph appears in both.
-- **Simlish PR #12** (`integration/synthia-autonomous-morph-20261030`) contains the original-headless morph adapter in `you-n-i-verse/morph-provider.mjs`. Its `registerWithComputer(computer)` needs a real shared runtime with `computer.morph.registerProvider`. Checks on the inspected PR head passed, but it is still a draft and not installed in SynthAi2. It changes Android default entry from studio to world; verify that change against the user's preferred startup behavior before merging.
-- **Simlish PR #9** (`integration/live-world-formations-20261017`) implements a live world and formation rendering. It targets `swarm-os-evolution-morph-apk-20261016`, **not Simlish main**, so it cannot be treated as a ready-to-merge patch to main. Other Simlish branches separately hold the full-body photo project (PR #2), Godot SynthWorld (PR #1), King Wen kernel repair (PR #8), and older Android host integrations (PR #5–#7).
-- **SynthAi2 PR #7** (Specialist Studio) and **PR #10** (North Star) showed failing latest CI, and PR #8 declares its model components not yet wired. Do not force-merge them as one change.
+SynthAi2 is the existing official computer. It remains the single React/Capacitor host.
+Simlish is not renamed, rebuilt from an invented architecture, or stripped of its own studio.
 
-## Connected now on this integration branch
+The normal \`npm run build\` now invokes \`scripts/stage-simlish.mjs\` before Vite.
+This stages the ORIGINAL source from two inspected public Simlish commits:
+- Simlish live world + executable formations + SwarmWorld: \`8cc989edd7895192f8edd834f834084f622a9ab0\` (PR #9). This contains the original Play/Create/Mission, changing object geometry, local replay persistence and test suite.
+- Simlish original headless 2D portrait/motion Morph provider: \`757a86dc3b92b7e6808b16a39c2b8ef1c7a2775a\` (PR #12), plus its tests. The full-body 3D capability is NOT supplied by this provider.
 
-1. The **existing** Human Design calculation can explicitly project documented fields into the **existing** Morph registration; nothing changes the source chart, birth input, or original store key. Registration is opt-in because Morph currently contacts a configured Synthia server.
-2. Worlds now emits `world.created` on the **existing** mesh event channel, with only observed identifiers and layer count. The tool does not synthesize unknown 13-field coordinates.
-3. The Game Creator already sends template events to the mesh. The Worlds integration makes world creation visible in that same event system when a mesh backend is available.
+The staging step checks exact Git commit IDs and expected paths, copies the entire original Simlish \`you-n-i-verse\` directory (including its source/asset/vendor files), and rejects changed upstream contracts. It patches exactly one successful-operation event in the live-world UI and loads the small device-local \`integrations/simlish/synthai2-bridge.mjs\` adapter. The original world and studio remain separate HTML experiences in one same-origin SynthAi2 app and both preserve their existing client-side stores.
 
-## Required to complete Simlish inclusion
+## Browser and Android runtime
 
-1. Inspect and preserve Simlish's existing Android WebView host and its separate local project database; do not overwrite its project files or rename SynthAi2's computer into another app.
-2. Resolve the overlap among PR #2, #9, #12, and the Android host branches against current Simlish main. A passing isolated PR check does **not** prove the combined app.
-3. Expose Simlish's original morph provider to SynthAi2 only when both components run in one actual JS context, or implement and test an explicitly authorized device-local bridge if they remain separate apps. Never send private portraits over a public API or fabricate a 3D body from a 2D preview.
-4. Verify a real player action, saved character reuse, persistent world changes, live scene update, game state transfer, and back navigation on physical Android before shipping a unified APK.
-5. Preserve the user's canonical 13 fields and keep any unverified address fields unresolved; do not replace Semantic SpaceTime with a guessed coordinate adapter.
+- \`/simlish-world\` is a real SynthAi2 route registered in its app registry and navigation, also reachable from Game Creator.
+- \`/simlish/world.html\` is the original playable Simlish live world.
+- \`/simlish/index.html\` is the original character editor.
+- In the same-origin iframe, Simlish emits a structured receipt **only after a real, successful world operation**. The SynthAi2 host checks \`event.origin\`, \`event.source\`, event marker and payload fields before forwarding a non-personal receipt to the existing Mesh event API.
+- Explicit \`Use my saved character\` click tells the Simlish frame to invoke its real \`createSimlishMorphProvider\`; it only reads local project data after consent. Source images, generated images, and birth data are never posted into Mesh. Without a saved character the original guide remains.
+- Source packaging is performed by the standard \`npm run build\` lifecycle, which is used by \`.github/workflows/build-android-apk.yml\`; Vite places assets into the Capacitor web bundle. The APK must still complete GitHub Actions build and be tested on an Android device before claiming installed functionality.
 
-**This file records a partial integration, not a claim that the Simlish world and character engines have already been incorporated into SynthAi2.**
+## Existing Human Design + Morph connections
+
+The existing local Human Design Studio and Morph Store keep their source data, separate storage keys and behavior. \`Connect to Morph\` is explicit because the existing Morph registration may contact its configured server. The field adapter preserves chart identity and the actual recorded gate/channel/center/profile/variable properties; it does not invent a traditional incarnation-cross name or absent 13-field coordinate values.
+
+Worlds publishes observed \`world.created\` events into Mesh. Game Creator already publishes template events. These receipts share an event system, not a fabricated direct mapping between Simlish's old macro state-space and the canonical 13 fields.
+
+## Verification
+
+- Source-pinned packaging is tested by \`tests/simlish-integration.test.mjs\`.
+- Original executable Simlish tests: \`world-session.test.mjs\`.
+- Original Simlish morph-provider tests: \`morph-provider.test.mjs\`.
+- Human Design-to-Morph projection tests: \`humanDesignMorphBridge.test.mjs\`.
+- Web bundle: \`npm run build\`.
+- APK: existing \`Build Android APK\` workflow.
+- Full repository \`npm run check\` currently reports unrelated pre-existing TypeScript errors; do not claim it passes until fixed.
+
+## Still outside this release
+
+The photo-based full-body generator in Simlish PR #2, Godot SynthWorld in PR #1, and standalone Android/legacy host and kernel-repair branches are **not automatically merged** into the current source-pinned web game. Those carry incompatible or optional runtimes and must be individually verified. Do not represent the 2D portrait result as full 3D body reconstruction; do not force-merge unrelated draft PRs. Simlish's source repository and its unfinished PRs remain intact.
+
+Live remote mesh persistence and personal chart-to-world behavior must be verified against an actual configured backend; no success is claimed merely by calling an API wrapper.
