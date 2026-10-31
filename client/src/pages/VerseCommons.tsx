@@ -130,7 +130,7 @@ export default function VerseCommons() {
                       {world.kind === "core" ? <BookOpen className="h-4 w-4" /> : <Gamepad2 className="h-4 w-4" />}
                       {world.title}
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground">{world.status === "starter-only" ? "Source files / not playable" : world.status === "browser-template" ? "Interactive browser template" : world.status === "bundled-runtime" ? "Bundled world runtime" : "Integrated application"}</p>
+                    <p className="text-xs text-muted-foreground">{world.status === "starter-only" ? "Source files / not playable" : world.status === "browser-template" ? "Interactive browser template" : world.status === "runtime-dependent" ? "Requires staged Simlish assets" : "Integrated application"}</p>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex flex-wrap gap-2">
