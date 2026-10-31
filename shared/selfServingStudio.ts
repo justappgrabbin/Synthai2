@@ -123,7 +123,7 @@ export function predictSmallNetwork(net: NeuralModel, x: number, y: number): num
   return sigmoid(h.reduce((s, v, j) => s + v * net.weights[1][j][0], net.biases[1][0]));
 }
 export function audit(state: StudioState, text: string, assignmentId?: string): StudioState {
-  return { ...state, activity: [{ id: uid(), at: now(), text, assignmentId }, ...state.activity].slice(0, 1000) };
+  return { ...state, activity: [{ id: uid(), at: now(), text, assignmentId }, ...state.activity] };
 }
 export function loadStudio(): StudioState {
   try {
