@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { path: "/mesh", icon: Network, label: "Mesh" },
   { path: "/novel", icon: PenTool, label: "Novel" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
+  { path: "/verse-commons", icon: Network, label: "Community" },
   { path: "/gan-trainer", icon: Palette, label: "GAN" },
   { path: "/presentation-planner", icon: Presentation, label: "Planner" },
   { path: "/continuity-glyph", icon: QrCode, label: "Glyphs" },
@@ -33,6 +34,7 @@ const MOBILE_DOCK_ITEMS = [
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
+  { path: "/verse-commons", icon: Network, label: "Social" },
   { path: "/universe-creator", icon: Layers, label: "Worlds" },
 ];
 
