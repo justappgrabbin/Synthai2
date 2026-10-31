@@ -53,9 +53,10 @@ export function OSBootGate() {
       try {
         const response = await fetch("/mcp/status", { cache: "no-store" });
         if (cancelled) return;
-        next[3] = response.ok
+        const validApi = response.ok && response.headers.get("content-type")?.includes("application/json");
+        next[3] = validApi
           ? { label: "MCP", status: "ok", detail: "MCP status route answered" }
-          : { label: "MCP", status: "warn", detail: "MCP route returned a non-ready status" };
+          : { label: "MCP", status: "warn", detail: "MCP backend is not connected; bundled studio is still available" };
       } catch {
         if (cancelled) return;
         next[3] = { label: "MCP", status: "warn", detail: "MCP bridge is pending backend wiring" };

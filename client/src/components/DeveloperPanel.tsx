@@ -163,6 +163,16 @@ export function DeveloperPanel() {
     });
   };
 
+  // The built-in terminal launches the actual current IDE preview.
+  useEffect(() => {
+    const start = () => {
+      handleRun();
+      setShowPreview(true);
+    };
+    window.addEventListener("synthia-ide-start-app", start);
+    return () => window.removeEventListener("synthia-ide-start-app", start);
+  });
+
   const handleCreateFile = () => {
     if (!newFileName.trim()) return;
     
