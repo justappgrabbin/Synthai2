@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { path: "/mesh", icon: Network, label: "Mesh" },
   { path: "/novel", icon: PenTool, label: "Novel" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
+  { path: "/simlish-world", icon: Play, label: "Simlish World" },
   { path: "/gan-trainer", icon: Palette, label: "GAN" },
   { path: "/presentation-planner", icon: Presentation, label: "Planner" },
   { path: "/continuity-glyph", icon: QrCode, label: "Glyphs" },
