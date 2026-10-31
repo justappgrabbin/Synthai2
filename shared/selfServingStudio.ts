@@ -11,7 +11,7 @@ export type Assignment = {
 };
 export type ToolBlueprint = { id: string; name: string; purpose: string; input: string; output: string; status: "built-in" | "blueprint" | "composed"; handler?: "outline" | "questions" | "terms"; pipeline?: Array<"outline" | "questions" | "terms"> };
 export type ModelBlueprint = { id: string; name: string; purpose: string; instructions: string; backend: "selected"; kind: "prompt-configuration" };
-export type NeuralModel = { id: string; name: string; kind: "2-4-1 sigmoid"; weights: number[][]; biases: number[][]; samples: number; accuracy: number; loss: number; trainedAt: string };
+export type NeuralModel = { id: string; name: string; kind: "2-4-1 sigmoid"; weights: number[][][]; biases: number[][]; samples: number; accuracy: number; loss: number; trainedAt: string };
 export type Activity = { id: string; at: string; text: string; assignmentId?: string };
 export type StudioState = { version: 1; assignments: Assignment[]; activeId: string | null; tools: ToolBlueprint[]; models: ModelBlueprint[]; networks: NeuralModel[]; activity: Activity[] };
 export const STORAGE_KEY = "synthai2-specialist-studio-v1";
