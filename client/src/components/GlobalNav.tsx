@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Rocket, Presentation, QrCode, Orbit, Upload, Network, PenTool } from "lucide-react";
+import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Rocket, Presentation, QrCode, Orbit, Upload, Network, PenTool, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun, MessageSquare } from "lucide-react";
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { path: "/autonomy", icon: Orbit, label: "Autonomy" },
   { path: "/player", icon: Play, label: "Player" },
   { path: "/agents", icon: Bot, label: "Agents" },
+  { path: "/specialists", icon: BrainCircuit, label: "Specialists" },
   { path: "/mod-manager", icon: Rocket, label: "Mods" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];

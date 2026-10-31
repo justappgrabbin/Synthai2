@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { transitCache } from "./services/TransitCache";
+import { registerSpecialistRoutes } from "./services/specialistStudio";
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false }));
+
+// Specialist runtime is part of this same server, not an external dashboard.
+registerSpecialistRoutes(app);
 
 app.use((req, res, next) => {
   const start = Date.now();

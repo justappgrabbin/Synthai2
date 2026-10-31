@@ -10,6 +10,7 @@ import { DeveloperPanel } from "@/components/DeveloperPanel";
 import { GameCreator } from "@/components/GameCreator";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AgentPanel } from "@/components/AgentPanel";
+import SelfServingStudio from "@/components/SelfServingStudio";
 import { PlayerPanel } from "@/components/PlayerPanel";
 import { GroveStore } from "@/components/GroveStore";
 import { GANTrainer } from "@/components/GANTrainer";
@@ -53,6 +54,7 @@ function Router() {
         <Route path="/zip-manager" component={ZipManager} />
         <Route path="/player" component={PlayerPanel} />
         <Route path="/agents" component={AgentPanel} />
+        <Route path="/specialists" component={SelfServingStudio} />
         <Route path="/presentation-planner" component={PresentationPlanner} />
         <Route path="/continuity-glyph" component={ContinuityGlyph} />
         <Route path="/human-design" component={HumanDesignStudio} />

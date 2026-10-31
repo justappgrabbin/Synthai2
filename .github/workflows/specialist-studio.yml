@@ -1,0 +1,28 @@
+name: Specialist Studio checks
+on:
+  pull_request:
+    paths:
+      - "shared/selfServingStudio.ts"
+      - "server/services/specialistStudio*"
+      - "client/src/components/SelfServingStudio.tsx"
+      - "client/src/App.tsx"
+      - "client/src/components/GlobalNav.tsx"
+      - "server/index.ts"
+      - ".github/workflows/specialist-studio.yml"
+  push:
+    branches:
+      - feature/self-serving-specialist-studio
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run check
+      - run: npx tsx --test server/services/specialistStudio.test.ts
+      - run: npm run build
