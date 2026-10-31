@@ -1,0 +1,37 @@
+name: Original Simlish wired into SynthAi2
+on:
+  push:
+    branches:
+      - integration/hd-morph-simlish-reconciliation-20261031
+  pull_request:
+    paths:
+      - "scripts/stage-simlish.mjs"
+      - "integrations/simlish/**"
+      - "client/src/pages/SimlishWorld.tsx"
+      - "client/src/lib/registerSimlishWorldApp.ts"
+      - "client/src/App.tsx"
+      - "client/src/components/GlobalNav.tsx"
+      - "package.json"
+      - ".github/workflows/simlish-unified.yml"
+permissions:
+  contents: read
+jobs:
+  simlish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install SynthAi2 dependencies
+        run: npm ci
+      - name: Stage pinned original Simlish sources and build SynthAi2
+        run: npm run build
+      - name: Verify original world, character provider and preserved studio
+        run: |
+          node --test client/public/simlish/world-session.test.mjs
+          node --test client/public/simlish/morph-provider.test.mjs
+          node --test tests/simlish-integration.test.mjs
+      - name: Verify Human Design to Morph projection
+        run: node --experimental-strip-types --test tests/humanDesignMorphBridge.test.mjs
