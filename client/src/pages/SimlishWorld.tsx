@@ -18,9 +18,10 @@ function isWorldReceipt(x: unknown): x is WorldReceipt {
     ["Play","Create","Mission"].includes(String(r.mode)) &&
     ["transform","move","duplicate","remove"].includes(String(r.operation)) &&
     typeof r.targetId === "string" && r.targetId.length <= 128 &&
-    Number.isSafeInteger(r.interactionCount) &&
+    typeof r.interactionCount === "number" && Number.isSafeInteger(r.interactionCount) &&
     typeof r.saved === "boolean" &&
-    Number.isFinite(r.activeObjects) && Number.isFinite(r.composites) &&
+    typeof r.activeObjects === "number" && Number.isFinite(r.activeObjects) &&
+    typeof r.composites === "number" && Number.isFinite(r.composites) &&
     (typeof r.formationRevision === "string" || typeof r.formationRevision === "number");
 }
 
