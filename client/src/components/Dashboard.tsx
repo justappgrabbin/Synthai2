@@ -145,7 +145,7 @@ const OS_TRAY_ITEMS: TrayItem[] = [
   { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
   { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
   { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
-  { id: "games", label: "Games", icon: Gamepad2, path: "/game-creator" },
+  { id: "games", label: "Worlds", icon: Globe, path: "/worlds" },
   { id: "verse", label: "Verse", icon: Orbit, action: () => openFlyUp("verse") },
   { id: "agent", label: "Agent", icon: MessageSquare, action: () => openFlyUp("agent") },
   { id: "store", label: "Store", icon: Store, path: "/grove-store" },
