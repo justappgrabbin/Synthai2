@@ -37,6 +37,39 @@ export default function SimlishWorld() {
   const [runtime, setRuntime] = useState<"checking"|"ready"|"missing">("checking");
   const [last, setLast] = useState<WorldReceipt|null>(null);
   const [character, setCharacter] = useState<CharacterStatus|null>(null);
+  const continuityEntered = useRef(false);
+
+  // Save the receipt from the original Simlish runtime, not a synthetic
+  // approximation of an action. Backend labels these as client-reported.
+  const reportWorldReceipt = useCallback(async (receipt: WorldReceipt) => {
+    try {
+      if (!continuityEntered.current) {
+        const response = await fetch("/api/verse-commons/state", { credentials: "same-origin", cache: "no-store" });
+        if (!response.ok) return;
+        const state = await response.json();
+        if (state.progress?.currentWorldId !== "simlish") {
+          const entered = await fetch("/api/verse-commons/world/enter", {
+            method: "POST", credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ worldId: "simlish" }),
+          });
+          if (!entered.ok) return;
+        }
+        continuityEntered.current = true;
+      }
+      await fetch("/api/verse-commons/world/record", {
+        method: "POST", credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          worldId: "simlish", operation: receipt.operation,
+          targetId: receipt.targetId, interactionCount: receipt.interactionCount,
+          localSaved: receipt.saved,
+        }),
+      });
+    } catch {
+      // Local Simlish world remains usable even if cloud continuity is offline.
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -57,6 +90,7 @@ export default function SimlishWorld() {
     if (data.kind === "world.operation" && isWorldReceipt(data.payload)) {
       const receipt = data.payload;
       setLast(receipt);
+      void reportWorldReceipt(receipt);
       // Existing event bus; never fake unknown canonical 13-field positions.
       void publishMeshEvent({
         source:"simlish-live-world",
@@ -73,7 +107,7 @@ export default function SimlishWorld() {
     if (data.kind === "character.status" && data.payload && typeof data.payload.status === "string") {
       setCharacter({status:data.payload.status,reason:typeof data.payload.reason === "string"?data.payload.reason:null});
     }
-  }, [page]);
+  }, [page, reportWorldReceipt]);
   useEffect(() => {
     window.addEventListener("message",onMessage);
     return () => window.removeEventListener("message",onMessage);
