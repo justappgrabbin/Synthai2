@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniverseViewer3D } from "@/components/UniverseViewer3D";
+import { publishMeshEvent } from "@/lib/meshEvents";
 import { HousingStudio } from "@/components/HousingStudio";
 import { TopNav } from "@/components/TopNav";
 import { AIService } from "@/lib/AIService";
@@ -407,6 +408,13 @@ export function SemanticUniverseCreator() {
     const updatedUniverses = [newUniverse, ...universes];
     setUniverses(updatedUniverses);
     localStorage.setItem("semantic_universes", JSON.stringify(updatedUniverses));
+    // Publish an observed lifecycle event, not an invented 13-field address.
+    await publishMeshEvent({
+      source: "semantic-universe-creator",
+      type: "world.created",
+      topic: `world:${newUniverse.id}`,
+      payload: { id: newUniverse.id, name: newUniverse.name, layerCount: newUniverse.layers.length },
+    });
 
     const newTokenCount = tokens - 1;
     setTokens(newTokenCount);
