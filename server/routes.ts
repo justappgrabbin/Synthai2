@@ -25,6 +25,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/adaptive-agent/status", (_req, res) => res.json(adaptiveStatus()));
   const localOnly = (req: import("express").Request, res: import("express").Response) => {
     const remote = req.socket.remoteAddress || "";
+    if (req.header("x-synthia-local-action") !== "adaptive-build") {
+      res.status(403).json({ ok: false, error: "Missing local action confirmation" });
+      return false;
+    }
     if (remote !== "127.0.0.1" && remote !== "::1" && remote !== "::ffff:127.0.0.1") {
       res.status(403).json({ ok: false, error: "Adaptive actions require the phone-local backend" });
       return false;

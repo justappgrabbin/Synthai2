@@ -36,7 +36,7 @@ export function AdaptiveBuildPanel() {
 
   async function command(which: "start" | "stop") {
     try {
-      const response = await fetch("/api/adaptive-agent/" + which, { method: "POST" });
+      const response = await fetch("/api/adaptive-agent/" + which, { method: "POST", headers: { "x-synthia-local-action": "adaptive-build" } });
       const value = await response.json();
       setMessage(value.ok ? (which === "start" ? "Started: inspecting, checking, then building." : "Stopping after the current step.") : (value.error || "Unable to start"));
       const next = await fetch("/api/adaptive-agent/status");
