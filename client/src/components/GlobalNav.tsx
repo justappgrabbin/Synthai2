@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { path: "/autonomy", icon: Orbit, label: "Autonomy" },
   { path: "/player", icon: Play, label: "Player" },
   { path: "/agents", icon: Bot, label: "Agents" },
+  { path: "/synthia", icon: Brain, label: "Synthia" },
   { path: "/mod-manager", icon: Rocket, label: "Mods" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
