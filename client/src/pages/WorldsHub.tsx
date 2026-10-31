@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, ArrowRight, BookOpen, Compass, Gamepad2, Globe2, Layers3, Play, Sparkles, UserRound } from "lucide-react";
 import { useMorphStore } from "@/lib/useMorphStore";
@@ -146,7 +146,7 @@ export default function WorldsHub() {
 }
 
 function WorldCard({ icon, title, detail, action, onClick }: {
-  icon: React.ReactNode; title: string; detail: string; action: string; onClick: () => void;
+  icon: ReactNode; title: string; detail: string; action: string; onClick: () => void;
 }) {
   return <button type="button" onClick={onClick} className="flex flex-col items-start rounded-2xl border bg-card p-5 text-left transition hover:border-primary/50">
     <span className="mb-4 text-primary">{icon}</span>
