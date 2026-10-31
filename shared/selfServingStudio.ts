@@ -54,9 +54,10 @@ export function makeAssignment(input: string): Assignment {
   if (!request) throw new Error("Describe what you need first.");
   const domain = detectDomain(request);
   const lead = makeSpecialist(domain), config = roles[domain], created = now();
+  const crew = signals.filter(s => s.domain !== domain && s.pattern.test(request)).slice(0, 2).map(s => makeSpecialist(s.domain));
   const steps = config.steps.map(([title, outcome, toolId]) => ({ id: uid(), title, outcome, toolId, status: "queued" as StepStatus }));
   const opening = "I'm your " + lead.name + ". My goal is to help with: " + request + "\n\nI propose four checkpoints below. I can use local text tools now; for original research, generation or external actions I need a connected capability or your material.\n\nFirst question: What would a successful result look like to you? You can answer here or open the plan and start with the current information.";
-  return { id: uid(), title: request.slice(0, 64), request, goal: request, domain, lead, crew: [], steps, messages: [msg("user", request), msg("assistant", opening)], created, updated: created };
+  return { id: uid(), title: request.slice(0, 64), request, goal: request, domain, lead, crew, steps, messages: [msg("user", request), msg("assistant", opening)], created, updated: created };
 }
 export function recruitSpecialist(a: Assignment, domain: Domain): Assignment {
   if (a.lead.domain === domain || a.crew.some(c => c.domain === domain)) return a;
