@@ -419,7 +419,7 @@ export function Dashboard() {
                   <FolderTree className="mr-2 h-5 w-5" />
                   Ingest
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => setShowCommandCenterDialog(true)} data-testid="button-hero-command">
+                <Button size="lg" variant="outline" onClick={() => { sessionStorage.setItem("synthia.ide.openTerminal", "1"); setLocation("/ide"); }} data-testid="button-hero-command">
                   <TerminalIcon className="mr-2 h-5 w-5" />
                   Terminal
                 </Button>

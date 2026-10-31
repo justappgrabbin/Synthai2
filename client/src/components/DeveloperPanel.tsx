@@ -64,12 +64,13 @@ export function DeveloperPanel() {
   const [importRepoUrl, setImportRepoUrl] = useState("");
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [showTerminal, setShowTerminal] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(() => sessionStorage.getItem("synthia.ide.openTerminal") === "1");
   const [showSelfEditor, setShowSelfEditor] = useState(false);
   const [showWorkspace, setShowWorkspace] = useState(false);
   const { toast} = useToast();
 
   useEffect(() => {
+    sessionStorage.removeItem("synthia.ide.openTerminal");
     loadFiles();
   }, []);
 
@@ -162,6 +163,16 @@ export function DeveloperPanel() {
       description: "Code executed in preview pane"
     });
   };
+
+  // The built-in terminal launches the actual current IDE preview.
+  useEffect(() => {
+    const start = () => {
+      handleRun();
+      setShowPreview(true);
+    };
+    window.addEventListener("synthia-ide-start-app", start);
+    return () => window.removeEventListener("synthia-ide-start-app", start);
+  });
 
   const handleCreateFile = () => {
     if (!newFileName.trim()) return;
