@@ -117,7 +117,18 @@ async function execute(s: StudioState, raw: unknown): Promise<ActionResult> {
     case "start": {
       const data = z.object({ request: paramsText }).parse(p);
       const a = makeAssignment(data.request);
-      s = audit({ ...s, activeId: a.id, assignments: [a, ...s.assignments] }, "Opened " + a.lead.name, a.id);
+      const significant = new Set(data.request.toLowerCase().match(/[a-z]{4,}/g) || []);
+      const best = s.models.map(m => {
+        const description = (m.name + " " + m.purpose).toLowerCase();
+        const tokens = description.match(/[a-z]{4,}/g) || [];
+        const overlap = tokens.filter(t => significant.has(t)).length;
+        return { model: m, score: overlap + (description.includes(a.domain) ? 2 : 0) };
+      }).sort((x, y) => y.score - x.score)[0];
+      if (best && best.score > 0) {
+        a.modelId = best.model.id;
+        a.messages.push(message("system", "Selected saved model profile: " + best.model.name + "."));
+      }
+      s = audit({ ...s, activeId: a.id, assignments: [a, ...s.assignments] }, "Opened " + a.lead.name + (a.modelId ? " with saved model profile" : ""), a.id);
       result = { assignmentId: a.id };
       break;
     }
@@ -141,7 +152,7 @@ async function execute(s: StudioState, raw: unknown): Promise<ActionResult> {
       const data = z.object({ assignmentId: z.string().uuid(), text: paramsText, modelId: z.string().optional() }).parse(p);
       let a = s.assignments.find(a => a.id === data.assignmentId);
       if (!a) throw new Error("Assignment not found");
-      const chosen = data.modelId ? s.models.find(m => m.id === data.modelId) : undefined;
+      const chosen = (data.modelId || a.modelId) ? s.models.find(m => m.id === (data.modelId || a.modelId)) : undefined;
       a = { ...a, messages: [...a.messages, message("user", data.text)] };
       const reply = await respond(a, chosen?.instructions || "Respond as the assigned specialist; provide one useful next action.");
       s = patchAssignment(s, a.id, () => ({ ...a!, messages: [...a!.messages, message("assistant", reply.text)] }));
