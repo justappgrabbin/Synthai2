@@ -35,7 +35,7 @@ const MAX_ENTITIES = 200000;
 const MAX_RELATIONS = 500000;
 const DATA_FILE = path.resolve(process.env.SYNTHAI_DATA_DIR || "./data", "north-star-ontology.json");
 let pending = Promise.resolve();
-const intBetween = (x: unknown, min: number, max: number) => Number.isInteger(x) && (x as number) >= min && (x as number) <= max;
+const intBetween = (x: unknown, min: number, max: number) => typeof x === "number" && Number.isInteger(x) && x >= min && x <= max;
 const numberBetween = (x: unknown, min: number, max: number) => typeof x === "number" && Number.isFinite(x) && x >= min && x < max;
 const nonempty = (v: unknown, max = 200) => typeof v === "string" && v.trim().length > 0 && v.length <= max;
 const clean = (value: string) => value.trim();
