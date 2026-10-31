@@ -11,7 +11,7 @@ export const VERSE_WORLDS = [
   { id: "platformer", title: "Platformer", kind: "game", status: "browser-template", route: "/game-creator?play=platformer", connections: ["puzzle", "space-shooter", "simlish"] },
   { id: "space-shooter", title: "Space Shooter", kind: "game", status: "browser-template", route: "/game-creator?play=space-shooter", connections: ["platformer", "puzzle", "simlish"] },
   { id: "puzzle", title: "Puzzle Game", kind: "game", status: "browser-template", route: "/game-creator?play=puzzle", connections: ["platformer", "space-shooter", "human-design"] },
-  { id: "simlish", title: "Simlish World", kind: "world", status: "bundled-runtime", route: "/simlish-world", connections: ["platformer", "space-shooter", "universe-creator"] },
+  { id: "simlish", title: "Simlish World", kind: "world", status: "runtime-dependent", route: "/simlish-world", connections: ["platformer", "space-shooter", "universe-creator"] },
   { id: "human-design", title: "Human Design", kind: "core", status: "app", route: "/human-design", connections: ["puzzle", "universe-creator", "simlish"] },
   { id: "universe-creator", title: "Universe Creator", kind: "studio", status: "creator", route: "/universe-creator", connections: ["simlish", "human-design", "platformer"] },
   { id: "godot-starter", title: "Godot Starter", kind: "source", status: "starter-only", route: "/game-creator", connections: ["simlish", "universe-creator"] },
