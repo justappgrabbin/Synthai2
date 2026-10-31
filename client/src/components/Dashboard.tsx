@@ -26,6 +26,16 @@ import { CynthiaBodyLayer } from "@/components/CynthiaBodyLayer";
 
 const CORE_APPS: AppModule[] = [
   {
+    id: "north-star",
+    name: "North Star",
+    description: "Self-hosted app services, ontological admission, and P2P device connections",
+    path: "/north-star",
+    icon: Orbit,
+    variant: "primary",
+    type: "core",
+    version: "0.1.0"
+  },
+  {
     id: "ide",
     name: "Launch IDE",
     description: "Code editor & developer environment",
