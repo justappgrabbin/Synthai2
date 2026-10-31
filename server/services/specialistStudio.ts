@@ -95,6 +95,19 @@ function parseAction(raw: unknown): { type: string; [key: string]: unknown } {
   const base = z.object({ type: z.string().min(1).max(40) }).passthrough().parse(raw);
   return base;
 }
+function executeTool(tool: ToolBlueprint, input: string): string {
+  if (tool.status === "built-in" && tool.handler) return runLocalTool(tool.handler, input);
+  if (tool.status === "composed" && tool.pipeline?.length) {
+    let working = input;
+    const stages: string[] = [];
+    for (const handler of tool.pipeline) {
+      working = runLocalTool(handler, working);
+      stages.push(handler + " result:\\n" + working);
+    }
+    return stages.join("\\n\\n");
+  }
+  throw new Error("No executable handler is attached to this tool");
+}
 async function execute(s: StudioState, raw: unknown): Promise<ActionResult> {
   const action = parseAction(raw);
   const p = action as Record<string, unknown>;
@@ -159,17 +172,17 @@ async function execute(s: StudioState, raw: unknown): Promise<ActionResult> {
       break;
     }
     case "new-tool": {
-      const data = z.object({ name: z.string().trim().min(1).max(120), purpose: paramsText, input: paramsText, output: paramsText }).parse(p);
-      const tool: ToolBlueprint = { id: randomUUID(), name: data.name, purpose: data.purpose, input: data.input, output: data.output, status: "blueprint" };
+      const data = z.object({ name: z.string().trim().min(1).max(120), purpose: paramsText, input: paramsText, output: paramsText, pipeline: z.array(z.enum(["outline", "questions", "terms"])).min(1).max(6) }).parse(p);
+      const tool: ToolBlueprint = { id: randomUUID(), name: data.name, purpose: data.purpose, input: data.input, output: data.output, status: "composed", pipeline: data.pipeline };
       s = audit({ ...s, tools: [...s.tools, tool] }, "Created tool specification: " + tool.name);
-      result = tool; note = "Tool specification saved. It requires an implementation before execution.";
+      result = tool; note = "Tool assembled from runnable, registered local operations.";
       break;
     }
     case "run-tool": {
       const data = z.object({ toolId: z.string(), input: paramsText }).parse(p);
       const tool = s.tools.find(t => t.id === data.toolId);
-      if (!tool || !tool.handler || tool.status !== "built-in") throw new Error("This tool is only a blueprint; no executable handler exists");
-      result = { output: runLocalTool(tool.handler, data.input) };
+      if (!tool) throw new Error("Tool not found");
+      result = { output: executeTool(tool, data.input) };
       s = audit(s, "Ran local tool " + tool.name); break;
     }
     case "new-model": {
