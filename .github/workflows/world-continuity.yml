@@ -1,0 +1,30 @@
+name: I Ching world continuity experiment
+on:
+  pull_request:
+    paths:
+      - "server/lib/ichingWorldShaper.ts"
+      - "server/lib/verseCommonsService.ts"
+      - "client/src/pages/VerseCommons.tsx"
+      - "client/src/pages/SimlishWorld.tsx"
+      - "tests/world-continuity.integration.test.ts"
+      - ".github/workflows/world-continuity.yml"
+permissions:
+  contents: read
+jobs:
+  world-continuity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Test save/re-entry contract
+        run: npx tsx --test tests/world-continuity.integration.test.ts
+      - name: Parse shaper and server
+        run: npx esbuild server/lib/verseCommonsService.ts --bundle --packages=external --platform=node --outfile=/tmp/verse-service.js
+      - name: Parse journey and Simlish UI
+        run: |
+          npx esbuild client/src/pages/VerseCommons.tsx --bundle --packages=external --platform=browser --outfile=/tmp/verse-ui.js
+          npx esbuild client/src/pages/SimlishWorld.tsx --bundle --packages=external --platform=browser --outfile=/tmp/simlish-ui.js
