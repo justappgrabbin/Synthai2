@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useRef, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, MessageSquare, BookOpen, type LucideIcon } from "lucide-react";
+import { Code2, Play, Bot, Settings, Store, Clock, Sparkles, ArrowRight, FileEdit, FolderTree, Terminal as TerminalIcon, Zap, Brain, Orbit, Rocket, Globe, Cpu, Palette, Gamepad2, MessageSquare, BookOpen, Heart, type LucideIcon } from "lucide-react";
 import { AppRegistry, type AppModule } from "@/lib/appRegistry";
 import { ActivityTracker, type AppActivity } from "@/lib/activityTracker";
 import {
@@ -61,6 +61,15 @@ const CORE_APPS: AppModule[] = [
     description: "Build & manage AI agents",
     path: "/agents",
     icon: Bot,
+    type: "core",
+    version: "1.0.0"
+  },
+  {
+    id: "synthia",
+    name: "Synthia & Resonance Quest",
+    description: "Recovered YOU-N-I-VERSE companion, field quests & existing tools",
+    path: "/synthia",
+    icon: Heart,
     type: "core",
     version: "1.0.0"
   },
