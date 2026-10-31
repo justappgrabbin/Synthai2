@@ -1,0 +1,38 @@
+name: I Ching shaped Worlds branch
+on:
+  push:
+    branches:
+      - integration/iching-shaped-life-worlds-20261031
+  pull_request:
+    paths:
+      - "client/src/lib/ichingWorldShaper.ts"
+      - "client/src/lib/worldLife.ts"
+      - "client/src/pages/WorldsHub.tsx"
+      - "client/src/pages/SimlishWorld.tsx"
+      - "integrations/simlish/synthai2-bridge.mjs"
+      - "client/src/App.tsx"
+      - "client/src/components/GlobalNav.tsx"
+      - "tests/iching-world-life.test.ts"
+      - ".github/workflows/iching-worlds.yml"
+permissions:
+  contents: read
+jobs:
+  life-loop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install original app dependencies
+        run: npm ci
+      - name: Verify deterministic I Ching shapes and actual mission receipts
+        run: node --import tsx --test tests/iching-world-life.test.ts
+      - name: Build the original app with pinned Simlish runtime
+        run: npm run build
+      - name: Verify original Simlish simulation
+        run: |
+          node --test client/public/simlish/world-session.test.mjs
+          node --test client/public/simlish/morph-provider.test.mjs
+          node --test tests/simlish-integration.test.mjs

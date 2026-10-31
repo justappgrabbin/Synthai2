@@ -31,6 +31,8 @@ import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import HumanDesignStudio from "@/pages/HumanDesignStudio";
 import SimlishWorld from "@/pages/SimlishWorld";
+import WorldsHub from "@/pages/WorldsHub";
+import { AgenticRealityLab } from "@/components/AgenticRealityLab";
 import SynthiaExperience from "@/pages/SynthiaExperience";
 import "@/lib/registerHumanDesignApp";
 import "@/lib/registerSimlishWorldApp";
@@ -45,6 +47,8 @@ function Router() {
         <Route path="/grove-store" component={GroveStore} />
         <Route path="/ide" component={DeveloperPanel} />
         <Route path="/game-creator" component={GameCreator} />
+        <Route path="/worlds" component={WorldsHub} />
+        <Route path="/agent-world" component={AgenticRealityLab} />
         <Route path="/gan-trainer" component={GANTrainer} />
         <Route path="/mod-manager" component={ModManager} />
         <Route path="/autonomy" component={AutonomyControlCenter} />
