@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { publishMeshEvent } from "./meshEventStore";
+import { getContainerStatus } from "./linuxContainerService";
 
 export const ONTOLOGY_FIELDS = [
   "planetary", "dimension", "gate", "line", "color", "tone", "base",
@@ -138,7 +139,8 @@ export function registerNorthStarRoutes(app: Express): void {
     res.json({ ok: true, ontology: { writeEnabled: ADMIN_TOKEN.length >= 24, persistent: true, addressFields: [...ONTOLOGY_FIELDS] },
       autoapp: { status: autoapp, launchUrl: autoapp === "reachable" ? autoappLaunch() : null },
       p2p: { mode: "browser-webrtc-manual-signaling", iceUrls: p2pIce(), remotePeersRequireNetworkPath: true },
-      hosting: "self-hosted-linux-container" });
+      container: { bridgeEnabled: getContainerStatus().enabled, platform: getContainerStatus().platform },
+      hosting: "self-host-capable" });
   });
   app.post("/api/north-star/entities", async (req, res) => {
     if (!requireAdmin(req, res)) return;
