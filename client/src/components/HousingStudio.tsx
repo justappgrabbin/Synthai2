@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Home, Save, Plus, Download, Trash2, Settings2 } from "lucide-react";
 import { DEFAULT_HOUSE, type HousePlan, readHousePlans, writeHousePlans, downloadHousePlan } from "@/lib/housing";
 import { Link } from "wouter";
+import { PASCAL_URL_KEY } from "@/components/WorldBuilderAddons";
 
 /** Shared 3D mesh: used by Housing and the actual Worlds viewer. */
 export function HouseMesh({ plan }: { plan: HousePlan }) {
@@ -85,12 +86,15 @@ type WorldOption = { id: string; name: string };
 export function HousingStudio({ worlds }: { worlds: WorldOption[] }) {
   const { toast } = useToast();
   const [plans, setPlans] = useState<HousePlan[]>(readHousePlans);
+  const [pascalEditorUrl, setPascalEditorUrl] = useState(() => localStorage.getItem(PASCAL_URL_KEY) || "");
   const [draft, setDraft] = useState<HousePlan>({ ...DEFAULT_HOUSE });
 
   useEffect(() => {
     const refresh = () => setPlans(readHousePlans());
     window.addEventListener("synthai-housing-changed", refresh);
-    return () => window.removeEventListener("synthai-housing-changed", refresh);
+    const refreshPascal = () => setPascalEditorUrl(localStorage.getItem(PASCAL_URL_KEY) || "");
+    window.addEventListener("focus", refreshPascal);
+    return () => { window.removeEventListener("synthai-housing-changed", refresh); window.removeEventListener("focus", refreshPascal); };
   }, []);
 
   const change = <K extends keyof HousePlan>(key: K, value: HousePlan[K]) =>
@@ -148,6 +152,14 @@ export function HousingStudio({ worlds }: { worlds: WorldOption[] }) {
         <Link href="/settings"><Button variant="outline" size="sm"><Settings2 className="w-4 h-4 mr-2" /> Builder Add-ons in Settings</Button></Link>
       </div>
 
+      <Card data-testid="pascal-housing-launcher">
+        <CardHeader><CardTitle>Pascal Architectural Editor</CardTitle><CardDescription>Open the optional detailed building editor from Housing. Pascal must be installed and its address configured in Settings → Add-ons; this does not automatically transfer the house or connect MCP.</CardDescription></CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button disabled={!pascalEditorUrl} onClick={() => window.open(pascalEditorUrl, "_blank", "noopener,noreferrer")}>Open Pascal Editor</Button>
+          <Link href="/settings"><Button variant="outline">Configure Pascal in Settings</Button></Link>
+          <Button variant="outline" onClick={() => window.open("https://github.com/pascalorg/editor", "_blank", "noopener,noreferrer")}>Pascal source</Button>
+        </CardContent>
+      </Card>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
