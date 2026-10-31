@@ -96,6 +96,7 @@ export default function SimlishWorld() {
         <Button variant={page==="world"?"default":"outline"} onClick={()=>{setPage("world");setCharacter(null);}}>Play World</Button>
         <Button variant={page==="studio"?"default":"outline"} onClick={()=>{setPage("studio");setCharacter(null);}}>Character Studio</Button>
         <Button variant="outline" onClick={()=>navigate("/human-design")}>Human Design</Button>
+        <Button variant="outline" onClick={()=>navigate("/verse-commons?room=world:simlish")}>World Community + Portals</Button>
         <Button variant="outline" onClick={()=>navigate("/mesh")}>Morph / Mesh</Button>
       </div>
     </header>
