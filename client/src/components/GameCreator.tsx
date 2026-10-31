@@ -174,6 +174,7 @@ export function GameCreator() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">Game Templates</h1>
           <p className="text-muted-foreground">Use built-in templates or mount your installed game packs</p>
+          <Button className="mt-3" onClick={() => setLocation("/simlish-world")}>Open the original Simlish live world and character studio</Button>
         </div>
 
         <section className="mb-8">
