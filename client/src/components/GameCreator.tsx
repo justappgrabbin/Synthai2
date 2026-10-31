@@ -32,6 +32,10 @@ export function GameCreator() {
   );
 
   useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("play");
+    if (requested && requested !== "godot-starter" && GAME_TEMPLATES.some((template) => template.id === requested)) {
+      setPreviewTemplate(requested);
+    }
     publishMeshNode({
       kind: "app",
       domain: "os",
@@ -174,7 +178,10 @@ export function GameCreator() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">Game Templates</h1>
           <p className="text-muted-foreground">Use built-in templates or mount your installed game packs</p>
-          <Button className="mt-3" onClick={() => setLocation("/simlish-world")}>Open the original Simlish live world and character studio</Button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button onClick={() => setLocation("/simlish-world")}>Open the original Simlish live world and character studio</Button>
+            <Button variant="outline" onClick={() => setLocation("/verse-commons")}>Verse Commons · Connected Games</Button>
+          </div>
         </div>
 
         <section className="mb-8">
@@ -329,6 +336,9 @@ export function GameCreator() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setLocation("/verse-commons?room=world:" + previewTemplate)}>
+                  Game community + portals
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
