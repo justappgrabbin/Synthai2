@@ -7,6 +7,7 @@ type Status = {
   hosting: string;
   container: { bridgeEnabled: boolean; platform: string };
   ontology: { writeEnabled: boolean; addressFields: string[] };
+  originalNorthStar: { status: string; launchUrl: string | null };
   autoapp: { status: string; launchUrl: string | null };
   p2p: { mode: string; iceUrls: string[] };
 };
@@ -172,13 +173,22 @@ export default function NorthStar() {
           <figure className="overflow-hidden rounded-3xl border border-fuchsia-200/15 bg-[#151125]"><img src="/north-star-network.svg" alt="North Star circular relationship map linking people, places, things, apps, tools and worlds" className="w-full"/><figcaption className="px-4 pb-4 text-xs text-slate-300">A relational field, not a list of arbitrary numeric hashes.</figcaption></figure>
           <figure className="overflow-hidden rounded-3xl border border-teal-200/15 bg-[#151125]"><img src="/north-star-cultivation.svg" alt="Nested circles showing a seed growing through understanding, discovery, connection and action" className="w-full"/><figcaption className="px-4 pb-4 text-xs text-slate-300">Self-cultivation stays at the center of the people-first vision.</figcaption></figure>
         </section>
-        <section className="grid gap-5 lg:grid-cols-3">
+        <section className="grid gap-5 lg:grid-cols-2">
+          <div className={pane}>
+            <div className="mb-3 flex items-center gap-2"><Compass className="text-fuchsia-300"/><h2 className="font-semibold">Original Resonance North Star Network</h2></div>
+            <p className="text-sm leading-6 text-slate-300">Your original social platform: personal Synthia companion, Pathways to Purpose, people and roles, missions, projects, science, enterprise, creator launcher, worlds and real-world outcomes. This is the product; the computer is its host.</p>
+            <p className="mt-3 text-xs text-teal-200">Original source: Resonance-North-Star-Production.zip · Actual backend: {status?.originalNorthStar.status || "Unknown"}</p>
+            {status?.originalNorthStar.launchUrl ?
+              <a href={status.originalNorthStar.launchUrl} target="_blank" rel="noopener noreferrer" className={btn + " mt-4 inline-block"}>Open the actual North Star Network</a> :
+              <p className="mt-4 rounded-xl border border-amber-300/25 p-3 text-xs text-amber-200">Original app preserved, but no reachable self-hosted deployment has been verified yet. Configure its Linux service before launching.</p>}
+          </div>
           <div className={pane}>
             <div className="mb-3 flex items-center gap-2"><Compass className="text-fuchsia-300"/><h2 className="font-semibold">Self-hosted services</h2></div>
             <p className="text-xs leading-5 text-slate-300">The Linux container hosts the backend. The tablet can connect over a reachable local or private network address.</p>
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between"><dt>North Star API</dt><dd>{status ? "Responding" : "Unknown"}</dd></div>
               <div className="flex justify-between"><dt>Linux command bridge</dt><dd>{status ? (status.container?.bridgeEnabled ? "Enabled" : "Disabled") : "Unknown"}</dd></div>
+              <div className="flex justify-between"><dt>Resonance North Star</dt><dd>{status?.originalNorthStar.status || "Unknown"}</dd></div>
               <div className="flex justify-between"><dt>AutoApp backend</dt><dd>{status?.autoapp.status || "Unknown"}</dd></div>
               <div className="flex justify-between"><dt>Ontology writes</dt><dd>{status?.ontology.writeEnabled ? "Configured" : "Not configured"}</dd></div>
               <div className="flex justify-between"><dt>P2P transport</dt><dd>Manual WebRTC</dd></div>
