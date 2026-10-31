@@ -1,0 +1,25 @@
+name: Modelmaker targeted components tests
+on:
+  push:
+    branches: [feature/modelmaker-full-training-20261030]
+    paths:
+      - "modelmaker/**"
+      - ".github/workflows/modelmaker-components.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime for actual model tests
+        run: python -m pip install torch jaxtyping
+      - name: Test real model forward, optimizer, LoRA, generation and checkpoint
+        run: python -m unittest discover -s modelmaker -p 'test_advanced.py' -v
+      - name: Test Klein structure registry separately
+        run: python -m unittest discover -s modelmaker -p 'test_klein_registry.py' -v
