@@ -5,6 +5,7 @@ import { ArrowLeft, Compass, Network, Database, Rocket, Copy, Send, RefreshCcw, 
 type Status = {
   ok: boolean;
   hosting: string;
+  container: { bridgeEnabled: boolean; platform: string };
   ontology: { writeEnabled: boolean; addressFields: string[] };
   autoapp: { status: string; launchUrl: string | null };
   p2p: { mode: string; iceUrls: string[] };
@@ -177,6 +178,7 @@ export default function NorthStar() {
             <p className="text-xs leading-5 text-slate-300">The Linux container hosts the backend. The tablet can connect over a reachable local or private network address.</p>
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between"><dt>North Star API</dt><dd>{status ? "Responding" : "Unknown"}</dd></div>
+              <div className="flex justify-between"><dt>Linux command bridge</dt><dd>{status ? (status.container?.bridgeEnabled ? "Enabled" : "Disabled") : "Unknown"}</dd></div>
               <div className="flex justify-between"><dt>AutoApp backend</dt><dd>{status?.autoapp.status || "Unknown"}</dd></div>
               <div className="flex justify-between"><dt>Ontology writes</dt><dd>{status?.ontology.writeEnabled ? "Configured" : "Not configured"}</dd></div>
               <div className="flex justify-between"><dt>P2P transport</dt><dd>Manual WebRTC</dd></div>
