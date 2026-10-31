@@ -99,7 +99,7 @@ export default function VerseCommons() {
 
       {error && <div role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">{error}</div>}
       {!data ? (
-        <p role="status">Connecting to the Verse Commons backend…</p>
+        <p role="status">{error ? "Community is unavailable. Games and Human Design remain accessible through the app menu." : "Connecting to the Verse Commons backend…"}</p>
       ) : (
         <>
           <section aria-label="Player identity" className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
