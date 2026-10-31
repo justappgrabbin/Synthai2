@@ -18,8 +18,28 @@ import { transitCache } from "./services/TransitCache";
 import { growthProgramEngine } from "./services/GrowthProgramEngine";
 import { getAllPrograms } from "../shared/growth-programs";
 import { z } from "zod";
+import { adaptiveStatus, startAdaptiveBuild, stopAdaptiveBuild } from "./lib/adaptiveAgentService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Read-only health is public. Execution is strictly limited to a local device.
+  app.get("/api/adaptive-agent/status", (_req, res) => res.json(adaptiveStatus()));
+  const localOnly = (req: import("express").Request, res: import("express").Response) => {
+    const remote = req.socket.remoteAddress || "";
+    if (remote !== "127.0.0.1" && remote !== "::1" && remote !== "::ffff:127.0.0.1") {
+      res.status(403).json({ ok: false, error: "Adaptive actions require the phone-local backend" });
+      return false;
+    }
+    return true;
+  };
+  app.post("/api/adaptive-agent/start", (req, res) => {
+    if (!localOnly(req, res)) return;
+    res.json(startAdaptiveBuild());
+  });
+  app.post("/api/adaptive-agent/stop", (req, res) => {
+    if (!localOnly(req, res)) return;
+    res.json(stopAdaptiveBuild());
+  });
+
   // ========== StoryForge World Generation API ==========
   
   // Health check
