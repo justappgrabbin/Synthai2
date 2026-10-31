@@ -108,7 +108,7 @@ assert(html.includes('<script type="module" src="world-ui.mjs"></script>'),"Siml
 const viewMarker = '<canvas id="liveWorld" width="720" height="390" role="img" aria-label="Current Simlish simulation objects and their actual world state"></canvas>';
 assert(html.includes(viewMarker),"Original world canvas changed");
 html=html.replace(viewMarker,viewMarker+
-'<section class="simlish-three-panel" aria-label="Rigged 3D Simlish world"><canvas id="simlish3DWorld" width="720" height="410" aria-label="Actual Simlish objects in interactive 3D"></canvas><p id="simlish3DStatus" role="status">Loading interactive 3D world and saved character…</p></section>');
+'<section class="simlish-three-panel" aria-label="Rigged 3D Simlish world"><canvas id="simlish3DWorld" width="720" height="410" aria-label="Actual Simlish objects in interactive 3D"></canvas><button id="simlish3DActivate" type="button">Build / load my 3D character</button><p id="simlish3DStatus" role="status">Loading interactive 3D world and saved character…</p></section>');
 html=html.replace("</body>",'<script type="module" src="synthai2-bridge.mjs"></script><script type="module" src="synthai2-3d-world.mjs"></script></body>');
 fs.writeFileSync(htmlPath,html);
 fs.copyFileSync(path.join(ROOT,"integrations/simlish/synthai2-bridge.mjs"),path.join(DEST,"synthai2-bridge.mjs"));
