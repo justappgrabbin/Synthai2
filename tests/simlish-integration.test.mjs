@@ -32,5 +32,5 @@ test("cross-frame event includes only real world receipts; photo access is conse
  assert.doesNotMatch(bridge,/postMessage\([^\n]*dataUrl/);
  assert.match(portal,/event\.source !== frame\.current\?\.contentWindow/);
  assert.match(portal,/publishMeshEvent/);
- assert.match(portal,/simlish-world\/source-manifest\.json/);
+ assert.match(portal,/\/simlish\/source-manifest\.json/);
 });
