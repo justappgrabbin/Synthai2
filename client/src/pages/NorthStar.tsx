@@ -167,6 +167,10 @@ export default function NorthStar() {
             </svg>
           </div>
         </header>
+        <section className="grid gap-5 md:grid-cols-2">
+          <figure className="overflow-hidden rounded-3xl border border-fuchsia-200/15 bg-[#151125]"><img src="/north-star-network.svg" alt="North Star circular relationship map linking people, places, things, apps, tools and worlds" className="w-full"/><figcaption className="px-4 pb-4 text-xs text-slate-300">A relational field, not a list of arbitrary numeric hashes.</figcaption></figure>
+          <figure className="overflow-hidden rounded-3xl border border-teal-200/15 bg-[#151125]"><img src="/north-star-cultivation.svg" alt="Nested circles showing a seed growing through understanding, discovery, connection and action" className="w-full"/><figcaption className="px-4 pb-4 text-xs text-slate-300">Self-cultivation stays at the center of the people-first vision.</figcaption></figure>
+        </section>
         <section className="grid gap-5 lg:grid-cols-3">
           <div className={pane}>
             <div className="mb-3 flex items-center gap-2"><Compass className="text-fuchsia-300"/><h2 className="font-semibold">Self-hosted services</h2></div>
