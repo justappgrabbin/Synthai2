@@ -28,7 +28,7 @@ export function inspectApkEntries(entries, opts={}) {
       "assets/public/simlish/vendor/mhr/body-lod4.glb",
       "assets/public/simlish/synthai2-3d-world.mjs",
     ],required:true,kind:"static"},
-    {id:"local-express",label:"Working local Express API process",proof:["assets/public/../index.js"],required:true,kind:"runtime"},
+    {id:"local-express",label:"Working local Express API process",proof:["assets/server/index.js"],required:true,kind:"runtime"},
     {id:"synthia-node",label:"Working Synthia Node/MCP/Mesh process",proof:["assets/synthia-server/server/lite.js"],required:true,kind:"runtime"},
     {id:"synthia-python",label:"Working Synthia Python service",proof:["assets/synthia-server/trident/mcp_server.py"],required:true,kind:"runtime"},
     {id:"terminal",label:"Live native/container command execution",proof:[],required:true,kind:"runtime"},
@@ -40,7 +40,7 @@ export function inspectApkEntries(entries, opts={}) {
     // A file's presence cannot establish that a process or tool really runs.
     const status=item.kind==="static"?(missing.length?"incomplete":"included"):
       missing.length?"not_packaged":"not_runtime_verified";
-    return {id:item.id,label:item.label,status,required:item.required,found,missing,
+    return {id:item.id,label:item.label,status,required:item.required,kind:item.kind,found,missing,
       proofKind:item.kind==="static"?"APK file paths":"Requires on-device execution proof"};
   });
   const mobileNativeNode=any(f=>/^lib\/[^/]+\/libnode(?:\.so|-\S+\.so)$/.test(f)
