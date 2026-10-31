@@ -64,12 +64,13 @@ export function DeveloperPanel() {
   const [importRepoUrl, setImportRepoUrl] = useState("");
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [showTerminal, setShowTerminal] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(() => sessionStorage.getItem("synthia.ide.openTerminal") === "1");
   const [showSelfEditor, setShowSelfEditor] = useState(false);
   const [showWorkspace, setShowWorkspace] = useState(false);
   const { toast} = useToast();
 
   useEffect(() => {
+    sessionStorage.removeItem("synthia.ide.openTerminal");
     loadFiles();
   }, []);
 
