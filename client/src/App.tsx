@@ -34,14 +34,20 @@ import SimlishWorld from "@/pages/SimlishWorld";
 import SynthiaExperience from "@/pages/SynthiaExperience";
 import "@/lib/registerHumanDesignApp";
 import "@/lib/registerSimlishWorldApp";
+import Programs from "@/pages/Programs";
+import { AgenticRealityLab } from "@/components/AgenticRealityLab";
+import { WorkspaceNavigationContext } from "@/components/WorkspaceNavigationContext";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <>
+    <WorkspaceNavigationContext.Provider value={true}>
       <GlobalNav />
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/programs" component={Programs} />
+        <Route path="/worlds" component={SimlishWorld} />
+        <Route path="/agent-world" component={AgenticRealityLab} />
         <Route path="/grove-store" component={GroveStore} />
         <Route path="/ide" component={DeveloperPanel} />
         <Route path="/game-creator" component={GameCreator} />
@@ -64,7 +70,7 @@ function Router() {
         <Route path="/synthia" component={SynthiaExperience} />
         <Route component={NotFound} />
       </Switch>
-    </>
+    </WorkspaceNavigationContext.Provider>
   );
 }
 
@@ -106,3 +112,4 @@ function App() {
 }
 
 export default App;
+
