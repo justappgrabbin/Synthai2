@@ -23,9 +23,18 @@ globalThis.addEventListener("synthai2:simlish-world-operation", event => {
   });
 });
 
+globalThis.addEventListener("synthai2:character-3d-status", event => {
+  const d=event.detail;
+  if(d && typeof d.status === "string") emit("character.status",{status:d.status,reason:d.reason ?? null,mode:"3d"});
+});
+
 globalThis.addEventListener("message", async event => {
   if (event.origin !== sameOrigin || event.source !== parentWindow) return;
   if (event.data?.source !== "synthai2-computer-v1") return;
+  if (event.data.kind === "character.3d.request") {
+    globalThis.dispatchEvent(new CustomEvent("synthai2:character-3d-request"));
+    return;
+  }
   if (event.data.kind !== "character.reuse.request") return;
   // Reuse requires an explicit click in the SynthAi2 host, never silent access.
   try {

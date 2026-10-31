@@ -79,6 +79,11 @@ export default function SimlishWorld() {
     return () => window.removeEventListener("message",onMessage);
   },[onMessage]);
 
+  const request3d = () => {
+    if(page !== "world" || runtime !== "ready") return;
+    setCharacter({status:"building-3d"});
+    frame.current?.contentWindow?.postMessage({source:"synthai2-computer-v1",kind:"character.3d.request"},window.location.origin);
+  };
   const reuseCharacter = () => {
     if (page !== "world" || runtime !== "ready") return;
     setCharacter({status:"requested"});
@@ -101,7 +106,8 @@ export default function SimlishWorld() {
     </header>
     <section className="flex flex-wrap items-center gap-3 text-sm">
       <span role="status">Simlish package: {runtime==="ready"?"pinned source found":runtime==="missing"?"not bundled in this build":"checking"}</span>
-      {page==="world" && <Button size="sm" variant="secondary" disabled={runtime!=="ready"} onClick={reuseCharacter}>Use my saved character</Button>}
+      {page==="world" && <Button size="sm" onClick={request3d} disabled={runtime!=="ready"}>Build / load 3D character</Button>}
+      {page==="world" && <Button size="sm" variant="secondary" disabled={runtime!=="ready"} onClick={reuseCharacter}>Use 2D portrait</Button>}
       {character && <span role="status">Character: {character.status}{character.reason?" ("+character.reason+")":""}</span>}
     </section>
     {runtime==="missing" ? <Card><CardContent className="p-6">This installed SynthAi2 build is missing the original Simlish assets. Rebuild from the pinned source integration; no replacement/demo world is shown.</CardContent></Card> :
