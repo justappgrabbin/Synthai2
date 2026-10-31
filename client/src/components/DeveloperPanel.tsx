@@ -3,12 +3,13 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FolderTree, Code2, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon, FileText, FolderOpen, Copy, Scissors, ClipboardPaste, Search, RotateCcw, RotateCw, Maximize, Moon, Sun, Bot, Brain, Gamepad2, Rocket } from "lucide-react";
+import { FolderTree, Code2, Box, Globe, Play, Save, Plus, Trash2, X, Menu, Sparkles, Download, Cloud, Github, Upload, MoreVertical, Store, Terminal as TerminalIcon, FileText, FolderOpen, Copy, Scissors, ClipboardPaste, Search, RotateCcw, RotateCw, Maximize, Moon, Sun, Bot, Brain, Gamepad2, Rocket } from "lucide-react";
 import { GlyphGenerator, detectDimension } from "@/lib/glyphGenerator";
 import JSZip from "jszip";
 import { FileSystem, type FileNode } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Terminal } from "@/components/Terminal";
+import { PascalEditorPanel } from "@/components/PascalEditorPanel";
 import { SelfEditor } from "@/components/SelfEditor";
 import { WorkspaceOrganizer } from "@/components/WorkspaceOrganizer";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -65,6 +66,7 @@ export function DeveloperPanel() {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
+  const [editorMode, setEditorMode] = useState<"code" | "pascal">("code");
   const [showSelfEditor, setShowSelfEditor] = useState(false);
   const [showWorkspace, setShowWorkspace] = useState(false);
   const { toast} = useToast();
@@ -2308,6 +2310,18 @@ const result = await handlePayment({
         </div>
       </div>
 
+      <div className="flex items-center gap-2 border-b border-fuchsia-300/15 bg-[#111323] px-3 py-2" role="tablist" aria-label="IDE workspaces">
+        <Button role="tab" aria-selected={editorMode === "code"} variant={editorMode === "code" ? "default" : "ghost"} size="sm" data-testid="ide-tab-code" onClick={() => setEditorMode("code")}>
+          <Code2 className="mr-1 h-4 w-4" /> Code Editor
+        </Button>
+        <Button role="tab" aria-selected={editorMode === "pascal"} variant={editorMode === "pascal" ? "default" : "ghost"} size="sm" data-testid="ide-tab-pascal" onClick={() => setEditorMode("pascal")}>
+          <Box className="mr-1 h-4 w-4" /> Pascal 3D Builder
+        </Button>
+      </div>
+
+      {editorMode === "pascal" ? (
+        <PascalEditorPanel />
+      ) : (
       <ResizablePanelGroup 
         direction="vertical" 
         className={`flex-1 overflow-hidden ${showTerminal ? 'flex-1' : 'flex-1'}`}
@@ -2539,9 +2553,10 @@ const result = await handlePayment({
           </>
         )}
       </ResizablePanelGroup>
+      )}
 
       {/* Bottom Toolbar - Quick Actions */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card/95 backdrop-blur border rounded-full px-4 py-2 shadow-lg">
+      {editorMode === "code" && <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-card/95 backdrop-blur border rounded-full px-4 py-2 shadow-lg">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -2621,7 +2636,7 @@ const result = await handlePayment({
         >
           <Cloud className="h-4 w-4" />
         </Button>
-      </div>
+      </div>}
     </div>
   );
 }
