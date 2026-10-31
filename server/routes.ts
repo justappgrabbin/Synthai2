@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import { registerMorphImageRoutes } from "./lib/morphImageRoutes";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { uploadProjectToGoogleDrive, uploadFileToGoogleDrive } from "./lib/googleDriveService";
@@ -21,6 +22,7 @@ import { z } from "zod";
 import { adaptiveStatus, startAdaptiveBuild, stopAdaptiveBuild } from "./lib/adaptiveAgentService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  registerMorphImageRoutes(app);
   // Read-only health is public. Execution is strictly limited to a local device.
   app.get("/api/adaptive-agent/status", (_req, res) => res.json(adaptiveStatus()));
   const localOnly = (req: import("express").Request, res: import("express").Response) => {
