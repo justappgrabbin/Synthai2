@@ -140,7 +140,7 @@ export function MorphVisualStudio() {
   const useImage = useCallback((next: string, label: string, edited = false) => {
     setSrc(next);
     setBranch("start");
-    setHistory(prev => [{ id: crypto.randomUUID(), src: next, prompt: label, edited }, ...prev].slice(0, 8));
+    setHistory(prev => [{ id: String(Date.now()) + Math.random().toString(36).slice(2), src: next, prompt: label, edited }, ...prev].slice(0, 8));
     setError("");
     void publishMeshEvent({
       source: "morph-visual-studio", type: "morph.image.selected", topic: "visual-morph",
