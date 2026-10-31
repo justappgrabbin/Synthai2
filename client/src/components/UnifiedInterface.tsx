@@ -11,6 +11,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react"
 import { useMorphStore } from "@/lib/useMorphStore"
+import { MorphVisualStudio } from "@/components/MorphVisualStudio"
 import { HumanDesign } from "@/engine/ResonanceOrchestrator"
 import { getMeshEvents, getMeshStatus, type MeshEvent, type MeshStatus } from "@/lib/meshEvents"
 import { publishMeshNode, type MeshNodeKind } from "@/lib/meshAddressing"
@@ -1100,6 +1101,7 @@ const UnifiedInterface: React.FC = () => {
       fontFamily: "'Inter', 'SF Mono', monospace",
     }}>
       <MeshCanvas />
+      <MorphVisualStudio />
       <UploadZone />
       <MeshRegistryPanel />
       <DesignPanel />
