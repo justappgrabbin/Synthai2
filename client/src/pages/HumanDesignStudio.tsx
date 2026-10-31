@@ -13,6 +13,8 @@ import {
   type CenterKey,
   type HumanDesignChart,
 } from "@/lib/humanDesignEngine";
+import { chartToMorphDesign } from "@/lib/humanDesignMorphBridge";
+import { useMorphStore } from "@/lib/useMorphStore";
 
 const STORAGE_KEY = "synthia-human-design-charts-v1";
 type View = "chart" | "deep" | "activations" | "compare" | "transits" | "evidence";
@@ -84,6 +86,8 @@ export default function HumanDesignStudio() {
   const [chart, setChart] = useState<HumanDesignChart | null>(null), [sensitivity, setSensitivity] = useState<ReturnType<typeof calculateBirthTimeSensitivity> | null>(null);
   const [saved, setSaved] = useState<HumanDesignChart[]>(() => readCharts()), [activeView, setActiveView] = useState<View>("chart"), [error, setError] = useState(""), [compareId, setCompareId] = useState("");
   const [transitMoment, setTransitMoment] = useState(() => new Date().toISOString().slice(0, 16));
+  const [connectingToMorph, setConnectingToMorph] = useState(false);
+  const [morphNotice, setMorphNotice] = useState("");
 
   const comparison = useMemo(() => { if (!chart || !compareId) return null; const other = saved.find((item) => item.id === compareId); return other ? { other, result: compareHumanDesign(chart, other) } : null; }, [chart, compareId, saved]);
   const transit = useMemo(() => { if (!chart) return null; const date = new Date(transitMoment); return Number.isNaN(date.getTime()) ? null : calculateTransit(date, chart, nodeType); }, [chart, transitMoment, nodeType]);
@@ -94,6 +98,22 @@ export default function HumanDesignStudio() {
     catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)); }
   };
   const saveChart = () => { if (!chart) return; const next = [chart, ...saved.filter((item) => item.id !== chart.id)]; setSaved(next); writeCharts(next); };
+  // Opt-in: the current Morph orchestrator also contacts its configured Synthia
+  // server. Never transmit a calculated design merely because a chart was saved.
+  const connectToMorph = async () => {
+    if (!chart || connectingToMorph) return;
+    setConnectingToMorph(true);
+    setMorphNotice("");
+    try {
+      const morph = useMorphStore.getState();
+      await morph.registerHumanDesign(morph.currentUserId, chartToMorphDesign(chart));
+      setMorphNotice("Derived design registered with Morph. Your full calculated chart remains in the chart library.");
+    } catch (cause) {
+      setMorphNotice(`Morph registration failed: ${cause instanceof Error ? cause.message : String(cause)}`);
+    } finally {
+      setConnectingToMorph(false);
+    }
+  };
   const loadChart = (loaded: HumanDesignChart) => { setChart(loaded); setName(loaded.subject.name); setBirthDate(loaded.subject.birthDate); setBirthTime(loaded.subject.birthTime); setTimezone(loaded.subject.timezone); setSensitivity(null); };
   const views: Array<{ id: View; label: string; icon: typeof Dna }> = [{ id: "chart", label: "Chart", icon: Dna }, { id: "deep", label: "Deep Map", icon: Orbit }, { id: "activations", label: "Activations", icon: Activity }, { id: "compare", label: "Compare", icon: Users }, { id: "transits", label: "Transits", icon: Clock3 }, { id: "evidence", label: "Evidence", icon: ShieldCheck }];
 
@@ -102,7 +122,16 @@ export default function HumanDesignStudio() {
       <div className="mx-auto max-w-7xl space-y-5">
         <header className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-3"><Button variant="outline" size="icon" onClick={() => setLocation("/")} aria-label="Back to Synthia"><ArrowLeft className="h-4 w-4" /></Button><div><div className="flex items-center gap-2"><Dna className="h-5 w-5 text-primary" /><span className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Synthia Human Design</span></div><h1 className="mt-1 text-2xl font-bold md:text-3xl">BodyGraph Studio</h1><p className="mt-1 text-sm text-muted-foreground">Deterministic charting first. Interpretation stays downstream of the facts.</p></div></div>
-          {chart && <Button onClick={saveChart}><Save className="mr-2 h-4 w-4" />Save Chart</Button>}
+          {chart && <div className="flex flex-col gap-1 md:max-w-xs">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={saveChart}><Save className="mr-2 h-4 w-4" />Save Chart</Button>
+              <Button variant="outline" onClick={connectToMorph} disabled={connectingToMorph}>
+                {connectingToMorph ? "Connecting…" : "Connect to Morph"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Optional: registers derived design traits with Morph and may contact the existing configured Synthia server. Saving a chart alone does not share it.</p>
+            {morphNotice && <p role="status" className="text-xs">{morphNotice}</p>}
+          </div>}
         </header>
 
         <Card><CardHeader><CardTitle>Birth Input</CardTitle><CardDescription>Calculated locally with the ephemeris already inside SynthAI.</CardDescription></CardHeader><CardContent>
