@@ -34,3 +34,22 @@ test("cross-frame event includes only real world receipts; photo access is conse
  assert.match(portal,/publishMeshEvent/);
  assert.match(portal,/\/simlish\/source-manifest\.json/);
 });
+
+
+test("original 2D-to-3D body, face, rig and GLB exporters are really bundled",()=>{
+ assert.equal(manifest.avatar3dCommit,"6dca1915e15a34bc39593214bb4a9494221075af");
+ assert.equal(manifest.body3dReady,true);
+ assert.ok(fs.statSync(dir+"vendor/mhr/body-lod4.glb").size>1_000_000);
+ assert.ok(fs.statSync(dir+"vendor/three/three.module.js").size>100_000);
+ for(const file of ["full-avatar.mjs","photo-3d.mjs","photo-mesh.mjs","body-proportions.mjs","body-form.mjs","photo-identity.mjs","vendor/three/GLTFExporter.js","synthai2-3d-world.mjs"])assert.ok(fs.existsSync(dir+file),file);
+ assert.match(read(dir+"studio.mjs"),/mountPhoto3D/);
+ assert.match(read(dir+"index.html"),/buildFull3d/);
+ assert.match(read(dir+"full-avatar.mjs"),/reconstructFaceSurface/);
+ assert.match(read(dir+"synthai2-3d-world.mjs"),/buildFullAvatar/);
+ assert.match(read(dir+"synthai2-3d-world.mjs"),/saveProject/);
+ assert.match(read(dir+"synthai2-3d-world.mjs"),/new THREE.WebGLRenderer/);
+ assert.match(html,/simlish3DWorld/);
+ assert.match(world,/simlish-world-snapshot/);
+ assert.match(portal,/character\.3d\.request/);
+ assert.match(bridge,/synthai2:character-3d-request/);
+});
