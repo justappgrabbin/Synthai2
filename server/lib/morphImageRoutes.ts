@@ -40,7 +40,7 @@ function limitRequest(req: Request, res: Response): boolean {
   const next = !slot || slot.reset < now ? { count: 1, reset: now + 3_600_000 } : { ...slot, count: slot.count + 1 };
   requests.set(ip, next);
   if (requests.size > 2048) {
-    for (const [key, value] of requests) if (value.reset < now) requests.delete(key);
+    requests.forEach((value, key) => { if (value.reset < now) requests.delete(key); });
   }
   if (next.count > 12) {
     res.status(429).json({ error: "Image rate limit reached. Please try again later." });
@@ -111,7 +111,7 @@ export function registerMorphImageRoutes(app: Express): void {
   app.get("/api/morph/image-status", (_req, res) => {
     res.json({
       configured: imageEnabled(),
-      models: [...IMAGE_MODELS],
+      models: Array.from(IMAGE_MODELS),
       message: imageEnabled() ? "Image provider configured" : "Upload remains available offline. A server key and MORPH_IMAGE_ENABLED=true are required for generation.",
     });
   });
