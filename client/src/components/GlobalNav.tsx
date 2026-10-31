@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { path: "/mesh", icon: Network, label: "Mesh" },
   { path: "/novel", icon: PenTool, label: "Novel" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
-  { path: "/simlish-world", icon: Play, label: "Simlish World" },
   { path: "/gan-trainer", icon: Palette, label: "GAN" },
   { path: "/presentation-planner", icon: Presentation, label: "Planner" },
   { path: "/continuity-glyph", icon: QrCode, label: "Glyphs" },
@@ -23,6 +22,8 @@ const NAV_ITEMS = [
   { path: "/autonomy", icon: Orbit, label: "Autonomy" },
   { path: "/player", icon: Play, label: "Player" },
   { path: "/agents", icon: Bot, label: "Agents" },
+  { path: "/synthia", icon: Brain, label: "Synthia" },
+  { path: "/simlish-world", icon: Play, label: "Simlish World" },
   { path: "/mod-manager", icon: Rocket, label: "Mods" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
