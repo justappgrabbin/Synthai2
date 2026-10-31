@@ -29,6 +29,7 @@ import ZipManager from "@/pages/ZipManager";
 import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import HumanDesignStudio from "@/pages/HumanDesignStudio";
+import NorthStar from "@/pages/NorthStar";
 import "@/lib/registerHumanDesignApp";
 import NotFound from "@/pages/not-found";
 
@@ -56,6 +57,7 @@ function Router() {
         <Route path="/presentation-planner" component={PresentationPlanner} />
         <Route path="/continuity-glyph" component={ContinuityGlyph} />
         <Route path="/human-design" component={HumanDesignStudio} />
+        <Route path="/north-star" component={NorthStar} />
         <Route component={NotFound} />
       </Switch>
     </>

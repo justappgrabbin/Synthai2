@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-label="Cultivation pathway: concentric circles, a growing seed and connections of support">
+<defs><linearGradient id="bg" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#100f29"/><stop offset=".65" stop-color="#301b3a"/><stop offset="1" stop-color="#122f3b"/></linearGradient><linearGradient id="leaf"><stop stop-color="#71d8cb"/><stop offset="1" stop-color="#e7aedc"/></linearGradient></defs>
+<rect width="720" height="420" rx="22" fill="url(#bg)"/>
+<g fill="none" stroke="#e6b7e5" stroke-opacity=".32"><circle cx="360" cy="207" r="65"/><circle cx="360" cy="207" r="120"/><circle cx="360" cy="207" r="178"/><ellipse cx="360" cy="207" rx="300" ry="145" transform="rotate(-19 360 207)"/></g>
+<path d="M360 287Q353 233 360 170" stroke="#7be2cc" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M360 214Q280 195 291 149Q341 145 360 214ZM360 197Q440 174 425 124Q376 139 360 197Z" fill="url(#leaf)" stroke="#fce1e9" stroke-opacity=".65"/>
+<path d="M312 292Q360 277 408 292" fill="none" stroke="#d39bbf" stroke-width="4" stroke-linecap="round"/>
+<g fill="#2d1d3b" stroke="#c6a4e6" stroke-width="3"><circle cx="181" cy="207" r="24"/><circle cx="360" cy="29" r="24"/><circle cx="539" cy="207" r="24"/><circle cx="360" cy="385" r="24"/></g>
+<path d="M181 207L300 207M360 53L360 89M419 207L515 207M360 320L360 361" stroke="#72d7d0" stroke-width="2" stroke-dasharray="5 8"/>
+<g fill="#f9e3ef" text-anchor="middle" font-family="sans-serif" font-size="17"><text x="181" y="258">Understand</text><text x="360" y="75">Discover</text><text x="539" y="258">Connect</text><text x="360" y="414">Act</text></g></svg>

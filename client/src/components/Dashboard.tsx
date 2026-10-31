@@ -26,6 +26,16 @@ import { CynthiaBodyLayer } from "@/components/CynthiaBodyLayer";
 
 const CORE_APPS: AppModule[] = [
   {
+    id: "north-star",
+    name: "Resonance North Star",
+    description: "Original social network, self-hosted services, sourced ontology and P2P links",
+    path: "/north-star",
+    icon: Orbit,
+    variant: "primary",
+    type: "core",
+    version: "0.1.0"
+  },
+  {
     id: "ide",
     name: "Launch IDE",
     description: "Code editor & developer environment",
@@ -362,7 +372,7 @@ export function Dashboard() {
           <header className="flex items-center justify-between gap-3 rounded-lg border bg-background/84 px-3 py-3 shadow-sm backdrop-blur md:px-4">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Synthia OS</p>
-              <p className="truncate text-sm text-muted-foreground">Phone shell • mesh online • container bridge ready</p>
+              <p className="truncate text-sm text-muted-foreground">Private computer • status is measured, not assumed</p>
             </div>
             <div className="flex items-center gap-2">
               {isEditingShell && (
@@ -384,12 +394,14 @@ export function Dashboard() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Home Frame</p>
                 <h1 className="mt-3 text-4xl font-bold text-foreground md:text-6xl" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                  Your OS is the start screen.
+                  Let curiosity become possibility.
                 </h1>
                 <p className="mt-4 max-w-2xl text-base text-foreground/78 md:text-lg">
-                  Launch apps from the tray, route everything through the mesh, and keep the Verse as the slide-up reality layer instead of a separate homepage.
+                  Start with the original Resonance North Star community: discover your direction, find people and opportunities, build together, and turn what you learn into real-world outcomes. Your tools are here to support that journey.
                 </p>
               </div>
+
+              <button type="button" className="block w-full overflow-hidden rounded-2xl border border-fuchsia-400/25 text-left shadow-lg" onClick={() => setLocation("/north-star")} aria-label="Open the Resonance North Star self-hosted hub"><img src="/north-star-network.svg" alt="Circular North Star relationship map connecting people, places, things and opportunities" className="max-h-52 w-full object-cover" /></button>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="rounded-lg border bg-background/82 p-3">
@@ -398,7 +410,7 @@ export function Dashboard() {
                 </div>
                 <div className="rounded-lg border bg-background/82 p-3">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Linux</p>
-                  <p className="text-lg font-semibold">{health?.container?.enabled ? "ready" : "checking"}</p>
+                  <p className="text-lg font-semibold">{health ? (health.container?.enabled ? "enabled" : "disabled") : "checking"}</p>
                 </div>
                 <div className="rounded-lg border bg-background/82 p-3">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Python</p>
@@ -411,7 +423,11 @@ export function Dashboard() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button size="lg" onClick={() => handleAppClick("ide", "IDE Studio", "core", "/ide")} data-testid="button-hero-ide">
+                <Button size="lg" onClick={() => setLocation("/north-star")} data-testid="button-hero-north-star">
+                  <Orbit className="mr-2 h-5 w-5" />
+                  Resonance Network
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => handleAppClick("ide", "IDE Studio", "core", "/ide")} data-testid="button-hero-ide">
                   <Code2 className="mr-2 h-5 w-5" />
                   Build
                 </Button>

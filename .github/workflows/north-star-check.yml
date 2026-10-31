@@ -1,0 +1,36 @@
+name: North Star self-hosted integration
+on:
+  push:
+    branches:
+      - integration/autoapp-state-space-20261030
+  pull_request:
+    paths:
+      - "server/lib/northStarRoutes.ts"
+      - "client/src/pages/NorthStar.tsx"
+      - "tests/northStarAdmission.test.ts"
+      - "server/lib/pascalEditorRoutes.ts"
+      - "server/index.ts"
+      - "client/src/components/DeveloperPanel.tsx"
+      - "client/src/components/PascalEditorPanel.tsx"
+      - "tests/pascalEditorService.test.ts"
+      - "docs/pascal-editor-self-hosted.md"
+      - ".github/workflows/north-star-check.yml"
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Test explicit 13-field admissions
+        run: npx tsx --test tests/northStarAdmission.test.ts
+      - name: Test Pascal editor service discovery
+        run: npx tsx --test tests/pascalEditorService.test.ts
+      - name: Typecheck existing app and integrations
+        run: npm run check
+      - name: Build Synthai2
+        if: always()
+        run: npm run build
