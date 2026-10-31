@@ -22,6 +22,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
   && mkdir -p /workspace /app/data
 
+# Shared web runtime for the preserved Resonance Network frontend.
+# The organism itself remains mounted unchanged; its runtime can link this
+# dependency directory instead of downloading packages on first launch.
+RUN mkdir -p /opt/resonance-web-runtime \
+  && npm install --prefix /opt/resonance-web-runtime --omit=optional --no-audit --no-fund \
+    vite@5.4.20 \
+    @vitejs/plugin-react@4.7.0 \
+    react@18.3.1 \
+    react-dom@18.3.1 \
+    react-router-dom@6.8.1 \
+    axios@1.7.9 \
+    tailwindcss@3.4.17 \
+    postcss@8.4.47 \
+    autoprefixer@10.4.20
+
 RUN pip install --no-cache-dir \
     fastapi>=0.120.4 \
     "uvicorn[standard]>=0.38.0" \
@@ -31,6 +46,7 @@ RUN pip install --no-cache-dir \
     numpy>=1.24.0 \
     pydantic>=2.12.3 \
     websockets>=12.0 \
+    skyfield==1.54 \
   && pip install --no-cache-dir onnxruntime>=1.16.0 2>/dev/null || true \
   && pip install --no-cache-dir pyswisseph>=2.10.0 2>/dev/null || true
 

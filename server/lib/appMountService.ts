@@ -18,6 +18,20 @@ export interface MountedAppInput {
   icon?: string;
 }
 
+export interface MountedAppManifest extends Record<string, unknown> {
+  id: string;
+  name: string;
+  path: string;
+  runCommand?: string;
+  files: string[];
+  status?: string;
+  icon?: string;
+  profile?: Record<string, unknown>;
+  written?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 function getAppsRoot() {
   const workspace = process.env.LINUX_CONTAINER_WORKDIR || path.join(process.cwd(), "workspace");
   return path.resolve(workspace, "apps");
@@ -42,6 +56,10 @@ function resolveAppPath(id: string) {
     throw new Error("App path must stay inside workspace apps");
   }
   return target;
+}
+
+export function getMountedAppDirectory(id: string) {
+  return resolveAppPath(id);
 }
 
 function resolveInside(root: string, filePath: string) {
@@ -94,21 +112,24 @@ async function listFiles(dir: string, base = dir, acc: string[] = []) {
 async function extractZip(buffer: Buffer, destination: string) {
   const zip = await JSZip.loadAsync(buffer);
   const extracted: string[] = [];
-  const writes: Promise<void>[] = [];
+  const entries: Array<{ relativePath: string; file: JSZip.JSZipObject }> = [];
 
   zip.forEach((relativePath, file) => {
-    if (file.dir) return;
-    const normalized = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
-    if (!normalized || normalized.includes("../")) return;
-    writes.push((async () => {
-      const target = resolveInside(destination, normalized);
-      await ensureDir(path.dirname(target));
-      await fsp.writeFile(target, await file.async("nodebuffer"));
-      extracted.push(normalized);
-    })());
+    if (!file.dir) entries.push({ relativePath, file });
   });
 
-  await Promise.all(writes);
+  // Intentionally write one entry at a time. Large organism archives can
+  // expand to several times their compressed size; Promise.all on every
+  // entry can materialize the whole archive in memory at once.
+  for (const { relativePath, file } of entries) {
+    const normalized = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
+    if (!normalized || normalized.includes("../")) continue;
+    const target = resolveInside(destination, normalized);
+    await ensureDir(path.dirname(target));
+    await fsp.writeFile(target, await file.async("nodebuffer"));
+    extracted.push(normalized);
+  }
+
   return extracted;
 }
 
@@ -138,6 +159,63 @@ async function detectRunCommand(appDir: string) {
   const js = files.find((file) => file.toLowerCase().endsWith(".js"));
   if (js) return `node ${JSON.stringify(js)}`;
   return "ls -la";
+}
+
+export async function mountAppArchiveBuffer(input: {
+  name: string;
+  archive: Buffer;
+  runCommand?: string;
+  icon?: string;
+}) {
+  if (!Buffer.isBuffer(input.archive) || input.archive.byteLength === 0) {
+    throw new Error("Archive bytes are required");
+  }
+
+  const id = createAppId(input.name);
+  const appDir = resolveAppPath(id);
+  await ensureDir(appDir);
+
+  try {
+    const written = await extractZip(input.archive, appDir);
+    const organismRoot = path.join(appDir, "organism");
+    const resonanceMarkers = [
+      path.join(organismRoot, "README.md"),
+      path.join(organismRoot, "backend", "main.py"),
+      path.join(organismRoot, "frontend", "package.json"),
+      path.join(organismRoot, "run-backend-with-opportunities.sh"),
+    ];
+
+    if (!resonanceMarkers.every((file) => fs.existsSync(file))) {
+      throw new Error("Archive does not match the canonical Resonance Network organism/ layout");
+    }
+
+    const manifest = {
+      id,
+      name: input.name,
+      icon: input.icon || "Network",
+      status: "mounted",
+      path: path.relative(process.env.LINUX_CONTAINER_WORKDIR || process.cwd(), appDir).replace(/\\/g, "/"),
+      runCommand: input.runCommand || "managed:resonance-network",
+      profile: {
+        kind: "resonance-network",
+        root: "organism",
+        archivePreserved: true,
+        backendPort: 8811,
+        opportunityPort: 8812,
+        frontendPort: 8813,
+      },
+      files: await listFiles(appDir),
+      written,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await writeJson(path.join(appDir, ".you-n-i-verse-app.json"), manifest);
+    return manifest;
+  } catch (error) {
+    await fsp.rm(appDir, { recursive: true, force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function mountApp(input: MountedAppInput) {
@@ -177,9 +255,9 @@ export async function listMountedApps() {
     .map((entry) => readJson(path.join(getAppsRoot(), entry.name, ".you-n-i-verse-app.json"), null)));
 }
 
-export async function getMountedApp(id: string) {
+export async function getMountedApp(id: string): Promise<MountedAppManifest> {
   const appDir = resolveAppPath(id);
-  const manifest = await readJson<Record<string, unknown> | null>(path.join(appDir, ".you-n-i-verse-app.json"), null);
+  const manifest = await readJson<MountedAppManifest | null>(path.join(appDir, ".you-n-i-verse-app.json"), null);
   if (!manifest) throw new Error("Mounted app not found");
   return { ...manifest, files: await listFiles(appDir) };
 }

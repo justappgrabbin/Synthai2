@@ -29,7 +29,9 @@ import ZipManager from "@/pages/ZipManager";
 import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import HumanDesignStudio from "@/pages/HumanDesignStudio";
+import ResonanceNetwork from "@/pages/ResonanceNetwork";
 import "@/lib/registerHumanDesignApp";
+import "@/lib/registerResonanceNetworkApp";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -56,6 +58,7 @@ function Router() {
         <Route path="/presentation-planner" component={PresentationPlanner} />
         <Route path="/continuity-glyph" component={ContinuityGlyph} />
         <Route path="/human-design" component={HumanDesignStudio} />
+        <Route path="/resonance-network" component={ResonanceNetwork} />
         <Route component={NotFound} />
       </Switch>
     </>
