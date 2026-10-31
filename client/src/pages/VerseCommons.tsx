@@ -11,7 +11,8 @@ type World = { id: string; title: string; kind: string; status: string; route: s
 type Room = { id: string; name: string; description: string; worldId: string | null };
 type Explorer = { id: string; displayName: string; joinedRoomIds: string[] };
 type Post = { id: string; roomId: string; worldId: string | null; message: string; createdAt: string; author: string };
-type CommonsState = { me: Explorer; worlds: World[]; rooms: Room[]; posts: Post[]; scope: string };
+type WorldProgress = { currentWorldId: string | null; visits: { worldId: string }[]; actions: { worldId: string; operation: string; targetId: string; source: string }[] };
+type CommonsState = { me: Explorer; worlds: World[]; rooms: Room[]; posts: Post[]; scope: string; progress: WorldProgress };
 
 async function readState(): Promise<CommonsState> {
   const response = await fetch("/api/verse-commons/state", { cache: "no-store", credentials: "same-origin" });
@@ -77,7 +78,17 @@ export default function VerseCommons() {
     if (ok) { setText(""); setSelectedWorld(""); }
   }
 
-  function openWorld(world: World) {
+  async function openWorld(world: World) {
+    // Persist the same explorer's visit before changing route. Never claim the
+    // visit was saved if the backend rejected it. Source-only cards stay previews.
+    if (world.status !== "starter-only") {
+      try {
+        await writeData("world/enter", { worldId: world.id });
+      } catch (cause) {
+        setError("Could not save this world entry. " + (cause instanceof Error ? cause.message : String(cause)));
+        return;
+      }
+    }
     void publishMeshEvent({
       source: "verse-commons", type: "game.portal.entered", topic: "world:" + world.id,
       payload: { worldId: world.id, fromRoom: room?.id || "commons", targetRoute: world.route },
@@ -117,6 +128,9 @@ export default function VerseCommons() {
               </>
             )}
             <span className="text-xs text-muted-foreground">Guest identity stays with this browser; no account sign-in yet.</span>
+            <span className="text-xs text-muted-foreground" data-testid="world-continuity-status">
+              {data.progress.visits.length ? "Journey saved: " + data.progress.visits.length + " visits, " + data.progress.actions.length + " reported actions" : "Journey not started yet"}
+            </span>
           </section>
 
           <section aria-labelledby="portals-heading" className="space-y-3">
