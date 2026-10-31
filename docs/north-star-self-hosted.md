@@ -26,6 +26,30 @@ npm run dev
 
 Keep the administrator token private. In North Star, enter it for writes; the page keeps it in React state only (it is not saved to browser localStorage). A reverse proxy with TLS and real user authentication is required before exposing these endpoints to the internet; **the admin token is not a substitute for multi-user account security**. Browser device connection can use a private VPN or a reachable LAN address. A Linux container on your tablet and a Linux machine elsewhere have different network routes; no tablet-specific runtime was assumed.
 
+### The ORIGINAL Resonance North Star social platform
+
+Source: [Resonance-North-Star-Production.zip on Google Drive](https://drive.google.com/file/d/1EORE6jYu1n-cFH_PqXRR44B7osVAOedE/view?usp=drivesdk), in the user's **Resonance North Star GitHub Transfer** folder. This is a distinct existing application, *not* the new North Star computer settings page.
+
+Read the original `docs/NORTH_STAR_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md` and `BUILD_REPORT.md` **inside that archive** before modifying it.
+
+Its canonical product chain is:
+
+`onboard → understand current direction → find useful person/mission → create/join project → test or commercialize → build/launch → record outcome → receive next vector`
+
+It already implements React/Express screens for onboarding, Pathways to Purpose, people/roles, missions, projects, science, enterprise, creator intake, worlds and Synthia. It has `GET /api/health` identifying service `resonance-north-star`, and two state backends: local file JSON for development and PostgreSQL in production. Do **not** replace this app with the North Star computer bridge or claim production testing has passed: its build report explicitly says full TypeScript/Vite verification was not completed.
+
+To explore it inside a **trusted local Linux workspace**, extract the original ZIP into its own directory and follow its existing documented install/start scripts (`npm ci` then `PORT=5002 START_CONSCIOUSNESS=0 npm run dev`, *after installing its dependencies*). Port 5002 is only a suggested distinct port to avoid clashing with Synthai2's usual 5000; use whatever port is genuinely free on your host. With `REPL_ID` absent the original app falls back to a **shared local development identity**, which is **not safe to expose publicly**. Before serving real users on the internet, implement production-grade user auth independent of Replit and verify authorization, privacy and build success. Do not rely on the original demo identity.
+
+On the Synthai2 backend, set (only after the app is really running):
+
+```sh
+export SYNTHAI_RESONANCE_NORTH_STAR_URL="http://127.0.0.1:5002"
+```
+
+This exact loopback example works only when the two servers share the same Linux network namespace. For the tablet-facing **Open original North Star** link, additionally set `SYNTHAI_RESONANCE_NORTH_STAR_PUBLIC_URL` to the real URL reachable from the tablet, preferably over TLS through your own private-network reverse proxy. Leave it unset until the app is truly accessible. The status endpoint probes its `/api/health` and checks the returned service identifier.
+
+**Identity integration is still pending:** the original North Star app's person/project/mission APIs must eventually pass the full 13-field admission gateway with provenance before they become members of the shared semantic state space. A launch link alone does not solve this. Preserve the original code and state first.
+
 ### AutoApp's original backend
 
 The supplied `AutoApp-main.zip` is a separate TypeScript monorepo proof of concept. It uses pnpm, PostgreSQL, Google login through Better Auth unless intentionally disabled **for local development only**, and sandbox provisioning. It is not a standalone single-file builder and is not started merely by installing this Synthai2 branch.
