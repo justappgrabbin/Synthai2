@@ -65,6 +65,15 @@ const CORE_APPS: AppModule[] = [
     version: "1.0.0"
   },
   {
+    id: "verse-commons",
+    name: "Verse Commons",
+    description: "Human Design community, game rooms, and connected worlds",
+    path: "/verse-commons",
+    icon: Globe,
+    type: "core",
+    version: "1.0.0"
+  },
+  {
     id: "synthia",
     name: "Synthia & Resonance Quest",
     description: "Recovered YOU-N-I-VERSE companion, field quests & existing tools",
@@ -146,6 +155,7 @@ const OS_TRAY_ITEMS: TrayItem[] = [
   { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
   { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
   { id: "games", label: "Games", icon: Gamepad2, path: "/game-creator" },
+  { id: "community", label: "Community", icon: Globe, path: "/verse-commons" },
   { id: "verse", label: "Verse", icon: Orbit, action: () => openFlyUp("verse") },
   { id: "agent", label: "Agent", icon: MessageSquare, action: () => openFlyUp("agent") },
   { id: "store", label: "Store", icon: Store, path: "/grove-store" },
