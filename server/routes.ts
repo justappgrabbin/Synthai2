@@ -19,8 +19,10 @@ import { growthProgramEngine } from "./services/GrowthProgramEngine";
 import { getAllPrograms } from "../shared/growth-programs";
 import { z } from "zod";
 import { adaptiveStatus, startAdaptiveBuild, stopAdaptiveBuild } from "./lib/adaptiveAgentService";
+import { registerVerseCommonsRoutes } from "./lib/verseCommonsService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  registerVerseCommonsRoutes(app);
   // Read-only health is public. Execution is strictly limited to a local device.
   app.get("/api/adaptive-agent/status", (_req, res) => res.json(adaptiveStatus()));
   const localOnly = (req: import("express").Request, res: import("express").Response) => {
