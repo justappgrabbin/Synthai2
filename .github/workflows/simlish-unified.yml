@@ -3,11 +3,13 @@ on:
   push:
     branches:
       - integration/hd-morph-simlish-reconciliation-20261031
+      - fix/restore-simlish-photo-to-3d-20261031
   pull_request:
     paths:
       - "scripts/stage-simlish.mjs"
       - "integrations/simlish/**"
       - "client/src/pages/SimlishWorld.tsx"
+      - "tests/simlish-integration.test.mjs"
       - "client/src/lib/registerSimlishWorldApp.ts"
       - "client/src/App.tsx"
       - "client/src/components/GlobalNav.tsx"
@@ -33,6 +35,12 @@ jobs:
           node --test client/public/simlish/world-session.test.mjs
           node --test client/public/simlish/morph-provider.test.mjs
           node --test tests/simlish-integration.test.mjs
+          node --test client/public/simlish/body-form.test.mjs
+          node --test client/public/simlish/photo-identity.test.mjs
+          node --test client/public/simlish/photo-mesh.test.mjs
+          node --test client/public/simlish/morph-geometry.test.mjs
+          node --test client/public/simlish/morph-library.test.mjs
+          node --test client/public/simlish/morph-project.test.mjs
       - name: Verify Human Design to Morph projection
         run: node --experimental-strip-types --test tests/humanDesignMorphBridge.test.mjs
       - name: Set up Java for integrated APK
@@ -60,6 +68,11 @@ jobs:
               "assets/public/simlish/index.html",
               "assets/public/simlish/vendor/vision/wasm/vision_wasm_internal.wasm",
               "assets/public/simlish/source-manifest.json",
+              "assets/public/simlish/full-avatar.mjs",
+              "assets/public/simlish/photo-3d.mjs",
+              "assets/public/simlish/synthai2-3d-world.mjs",
+              "assets/public/simlish/vendor/mhr/body-lod4.glb",
+              "assets/public/simlish/vendor/three/GLTFExporter.js",
           ):
               if needed not in names:
                   raise SystemExit(f"APK is missing original Simlish file: {needed}")
