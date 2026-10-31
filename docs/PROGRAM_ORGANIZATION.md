@@ -1,6 +1,6 @@
 # Organize the existing computer
 
-This change organizes access to the existing programs. It adds no starter templates, substitutes no engines, deletes no source/assets, and does not merge unrelated feature branches. Baseline: main at c933a62b531b7d8036bb23d51b99c02d2e75d9c0, including the recent Visual Morph and original Simlish rigged-3D integration.
+This change organizes access to the existing programs. It adds no starter templates, substitutes no engines, deletes no source/assets, and does not merge unrelated feature branches. Baseline: main at 3728aaeaddd73a9c31748bf92cf3a9cf18905424, including recent Visual Morph, original Simlish rigged-3D integration and the exact-APK completeness audit.
 
 ## Existing programs, explicit homes
 
@@ -21,12 +21,12 @@ The owner explicitly requires organization without simplification and no generic
 
 ## Packaging evidence
 
-scripts/package-inventory.mjs reads actual build output and writes package-inventory.json. Android CI inventories both dist/public and the assets actually copied into Capacitor, then publishes a separate synthai-package-inventory artifact. It changes no packaged files. The report uses uncompressed sizes and must not be confused with ZIP/APK compression or installed storage.
+The existing scripts/audit-computer-apk.mjs and Android completeness workflow on main are retained unchanged. They inspect actual APK entries and publish the completeness report beside an explicitly incomplete preview. See FULL_COMPUTER_APK_PRESERVATION_AUDIT_20261031.md for the separate native-runtime requirements. No second packaging checker or packaging rewrite is introduced here.
 
 Tracked main source/assets total approximately 107 MB, including approximately 91 MB of attached archives/assets. This excludes Git history, dependencies, build-staged Simlish files, and separately installed model weights. The local model client references roughly 491 MB–1.12 GB model files; declarations alone are not bundled models. Android's existing documentation says a native Node/Python host is not included. A successful APK build does not prove those runtimes exist inside it.
 
 ## Verification
 
-Run node --test tests/programNavigation.test.mjs tests/packageInventory.test.mjs. The tests protect original route discoverability, world/program relationships, query navigation, user tray preferences and inventory byte accounting. The existing Android PR workflow performs the actual production build and APK packaging.
+Run node --test tests/programNavigation.test.mjs. The four checks protect original route discoverability, world/program relationships, query navigation and user tray preferences. The existing Android PR workflow performs the actual production build and APK packaging.
 
-Manual acceptance still required: desktop and phone navigation; all original routes and panels; direct Character Studio link and browser back; saved tray preferences; original world 2D/3D controls; keyboard navigation; program search and installed apps; inspect the generated package inventory. Local full build/browser verification was unavailable because the execution environment could not reach its configured network proxy and has no project dependencies/browser installed. Do not equate the targeted Node tests with a complete visual or runtime walkthrough.
+Manual acceptance still required: desktop and phone navigation; all original routes and panels; direct Character Studio link and browser back; saved tray preferences; original world 2D/3D controls; keyboard navigation; program search and installed apps; inspect the existing APK completeness report. Local full build/browser verification was unavailable because the execution environment could not reach its configured network proxy and has no project dependencies/browser installed. Do not equate the targeted Node tests with a complete visual or runtime walkthrough.

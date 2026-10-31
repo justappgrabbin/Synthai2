@@ -9,9 +9,7 @@ on:
       - "client/src/components/TopNav.tsx"
       - "client/src/pages/Programs.tsx"
       - "client/src/App.tsx"
-      - "scripts/package-inventory.mjs"
       - "tests/programNavigation.test.mjs"
-      - "tests/packageInventory.test.mjs"
       - ".github/workflows/program-organization.yml"
 permissions:
   contents: read
@@ -23,4 +21,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - run: node --test tests/programNavigation.test.mjs tests/packageInventory.test.mjs
+      - run: node --test tests/programNavigation.test.mjs
