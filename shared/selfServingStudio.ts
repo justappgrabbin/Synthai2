@@ -6,7 +6,7 @@ export type Step = { id: string; title: string; outcome: string; status: StepSta
 export type Specialist = { id: string; name: string; domain: Domain; intent: string; promises: string[]; limits: string[] };
 export type Message = { id: string; role: "user" | "assistant" | "system"; text: string; at: string };
 export type Assignment = {
-  id: string; title: string; request: string; goal: string; domain: Domain; lead: Specialist;
+  id: string; title: string; request: string; goal: string; domain: Domain; modelId?: string; lead: Specialist;
   crew: Specialist[]; steps: Step[]; messages: Message[]; created: string; updated: string;
 };
 export type ToolBlueprint = { id: string; name: string; purpose: string; input: string; output: string; status: "built-in" | "blueprint" | "composed"; handler?: "outline" | "questions" | "terms"; pipeline?: Array<"outline" | "questions" | "terms"> };
