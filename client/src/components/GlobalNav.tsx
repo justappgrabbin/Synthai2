@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Rocket, Presentation, QrCode, Orbit, Upload, Network, PenTool } from "lucide-react";
+import { Globe2, Home, Code2, Store, FolderTree, Play, Bot, Settings, Palette, Gamepad2, Layers, Brain, Rocket, Presentation, QrCode, Orbit, Upload, Network, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import { Moon, Sun, MessageSquare } from "lucide-react";
@@ -13,7 +13,8 @@ const NAV_ITEMS = [
   { path: "/ingest", icon: Upload, label: "Ingest" },
   { path: "/mesh", icon: Network, label: "Mesh" },
   { path: "/novel", icon: PenTool, label: "Novel" },
-  { path: "/game-creator", icon: Gamepad2, label: "Games" },
+  { path: "/worlds", icon: Globe2, label: "Worlds" },
+  { path: "/game-creator", icon: Gamepad2, label: "Game Creator" },
   { path: "/gan-trainer", icon: Palette, label: "GAN" },
   { path: "/presentation-planner", icon: Presentation, label: "Planner" },
   { path: "/continuity-glyph", icon: QrCode, label: "Glyphs" },
@@ -32,8 +33,8 @@ const MOBILE_DOCK_ITEMS = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
-  { path: "/game-creator", icon: Gamepad2, label: "Games" },
-  { path: "/universe-creator", icon: Layers, label: "Worlds" },
+  { path: "/worlds", icon: Globe2, label: "Worlds" },
+  { path: "/universe-creator", icon: Layers, label: "Create" },
 ];
 
 export function GlobalNav() {
