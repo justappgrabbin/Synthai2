@@ -9,7 +9,7 @@ export type Assignment = {
   id: string; title: string; request: string; goal: string; domain: Domain; lead: Specialist;
   crew: Specialist[]; steps: Step[]; messages: Message[]; created: string; updated: string;
 };
-export type ToolBlueprint = { id: string; name: string; purpose: string; input: string; output: string; status: "built-in" | "blueprint"; handler?: "outline" | "questions" | "terms" };
+export type ToolBlueprint = { id: string; name: string; purpose: string; input: string; output: string; status: "built-in" | "blueprint" | "composed"; handler?: "outline" | "questions" | "terms"; pipeline?: Array<"outline" | "questions" | "terms"> };
 export type ModelBlueprint = { id: string; name: string; purpose: string; instructions: string; backend: "selected"; kind: "prompt-configuration" };
 export type NeuralModel = { id: string; name: string; kind: "2-4-1 sigmoid"; weights: number[][]; biases: number[][]; samples: number; accuracy: number; loss: number; trainedAt: string };
 export type Activity = { id: string; at: string; text: string; assignmentId?: string };
@@ -130,7 +130,7 @@ export function loadStudio(): StudioState {
     if (!raw) return emptyStudio();
     const parsed = JSON.parse(raw);
     if (parsed.version !== 1 || !Array.isArray(parsed.assignments) || !Array.isArray(parsed.tools) || !Array.isArray(parsed.activity) || !Array.isArray(parsed.models) || !Array.isArray(parsed.networks)) throw new Error("Invalid studio state");
-    return { ...parsed, tools: [...BUILT_IN_TOOLS, ...parsed.tools.filter((t: ToolBlueprint) => t.status === "blueprint")] };
+    return { ...parsed, tools: [...BUILT_IN_TOOLS, ...parsed.tools.filter((t: ToolBlueprint) => t.status !== "built-in")] };
   } catch (error) {
     console.warn("Studio data unavailable; not overwriting it.", error);
     return emptyStudio();
