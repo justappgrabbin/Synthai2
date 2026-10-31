@@ -8,6 +8,12 @@ on:
       - "server/lib/northStarRoutes.ts"
       - "client/src/pages/NorthStar.tsx"
       - "tests/northStarAdmission.test.ts"
+      - "server/lib/pascalEditorRoutes.ts"
+      - "server/index.ts"
+      - "client/src/components/DeveloperPanel.tsx"
+      - "client/src/components/PascalEditorPanel.tsx"
+      - "tests/pascalEditorService.test.ts"
+      - "docs/pascal-editor-self-hosted.md"
       - ".github/workflows/north-star-check.yml"
 jobs:
   verify:
@@ -21,6 +27,8 @@ jobs:
       - run: npm ci
       - name: Test explicit 13-field admissions
         run: npx tsx --test tests/northStarAdmission.test.ts
+      - name: Test Pascal editor service discovery
+        run: npx tsx --test tests/pascalEditorService.test.ts
       - name: Typecheck existing app and integrations
         run: npm run check
       - name: Build Synthai2
