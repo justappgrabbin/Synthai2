@@ -153,8 +153,8 @@ export function registerNorthStarRoutes(app: Express): void {
         ledger.entities.push(entity);
         return entity;
       });
-      publishMeshEvent({ source: "north-star", type: "ontology.entity.admitted", topic: record.id,
-        payload: { kind: record.kind, address: record.address, source: record.source } });
+      publishMeshEvent({ source: "north-star", type: "ontology.entity.admitted", topic: "ontology.admission",
+        payload: { kind: record.kind, addressed: true } });
       res.status(201).json({ ok: true, entity: record });
     } catch (error) {
       if (String(error).includes("already admitted")) { res.status(409).json({ ok: false, error: String(error) }); return; }
@@ -181,8 +181,8 @@ export function registerNorthStarRoutes(app: Express): void {
         ledger.relationships.push(link);
         return link;
       });
-      publishMeshEvent({ source: "north-star", type: "ontology.relationship.created", topic: record.from,
-        payload: { to: record.to, relation: record.relation, source: record.source } });
+      publishMeshEvent({ source: "north-star", type: "ontology.relationship.created", topic: "ontology.relationship",
+        payload: { type: "observed-link" } });
       res.status(201).json({ ok: true, relationship: record });
     } catch (error) { res.status(String(error).includes("must be admitted") ? 422 : 500).json({ ok: false, error: String(error) }); }
   });
