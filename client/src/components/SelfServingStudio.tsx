@@ -98,7 +98,7 @@ export default function SelfServingStudio() {
     return () => { live = false; };
   }, []);
   const active = useMemo(() => (!newSession && state?.activeId ? state.assignments.find(a => a.id === state.activeId) : null) || null, [newSession, state]);
-  useEffect(() => { setDraftGoal(active?.goal || ""); setStepInput(active?.request || ""); setSelectedStep(""); setProof(""); }, [active?.id]);
+  useEffect(() => { setDraftGoal(active?.goal || ""); setStepInput(active?.request || ""); setSelectedStep(""); setProof(""); setSelectedModel(active?.modelId || ""); }, [active?.id]);
   async function action(type: string, data: Record<string, unknown> = {}) {
     if (busy) return null;
     setBusy(true); setError(""); setNotice("");
