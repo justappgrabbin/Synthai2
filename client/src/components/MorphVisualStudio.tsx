@@ -6,14 +6,16 @@ import { publishMeshEvent } from "@/lib/meshEvents";
 type ImageEntry = { id: string; src: string; prompt: string; edited?: boolean };
 type Branch = "start" | "left" | "right";
 const KEYWORDS: Record<string, string[]> = {
-  "Voice & emotion": ["Emotional Micro-Expression", "Zero-Shot Vocal Persona", "Micro-Inhalation Capture", "Expressive Singing Synthesis"],
-  "Cinematic": ["Volumetric Light Ray", "85mm Cinematic Depth", "Macro Surface Microtexture", "Physical Consistency Engine"],
+  "Voice & emotion": ["Emotional Micro-Expression", "Zero-Shot Vocal Persona", "Micro-Inhalation Capture", "Sub-Harmonic Echo", "Expressive Singing Synthesis"],
+  "Cinematic": ["Volumetric Light Ray", "85mm Cinematic Depth", "Macro Surface Microtexture", "Physical Consistency Engine", "60fps Motion Capture"],
   "Worlds": ["AR-HUD Navigation Overlay", "Driver Telemetry Hologram", "Space-Acoustic Cabin Illumination", "Multi-Zone Luminescent Interface"],
-  "Materials": ["Quantized Poly-Mesh Texture", "K-V Cache Fluid Synthesis", "Sub-Harmonic Echo", "Multi-Tenant Cloud Array"],
+  "Materials": ["Quantized Poly-Mesh Texture", "K-V Cache Fluid Synthesis", "Sub-Second Streaming Render", "Multi-Tenant Cloud Array"],
 };
 const IDEAS = [
   { name: "A living forest", prompt: "An enchanted forest with towering trees, iridescent moss and two luminous pathways, cinematic volumetric light" },
   { name: "AR cockpit", prompt: "A futuristic panoramic vehicle cockpit, luminous navigation HUD, realistic glass and titanium surfaces" },
+  { name: "Synesthetic portrait", prompt: "Cinematic portrait of a driver expressing serene awe, zero-shot vocal persona and 85mm cinematic depth, warm golden-hour lighting and rich skin texture" },
+  { name: "Quantum supercar", prompt: "A futuristic supercar drifting on a high-speed neon track, physical tire smoke, aerodynamic wind trails and high-contrast digital art" },
   { name: "World entrance", prompt: "A vast open gateway to a floating island world, paths branching to mysterious destinations, wide cinematic composition" },
 ];
 const LIMIT_BYTES = 5 * 1024 * 1024;
