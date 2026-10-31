@@ -123,12 +123,42 @@ function autoappLaunch(): string | null {
     return new URL("/builder", url).toString();
   } catch { return null; }
 }
+// Original Resonance-North-Star-Production.zip: its own React/Express application,
+// preserving onboarding, Pathways to Purpose, people, missions, projects, science,
+// enterprise, creator launcher, worlds and Synthia. Launch as an independently hosted service.
+const northStarPrivateUrl = process.env.SYNTHAI_RESONANCE_NORTH_STAR_URL?.trim() || "";
+const northStarPublicUrl = process.env.SYNTHAI_RESONANCE_NORTH_STAR_PUBLIC_URL?.trim() || "";
+function originalNorthStarBase(): URL | null {
+  if (!northStarPrivateUrl) return null;
+  try {
+    const url = new URL(northStarPrivateUrl);
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return null;
+    return url;
+  } catch { return null; }
+}
+function originalNorthStarLaunch(): string | null {
+  if (!northStarPublicUrl) return null;
+  try {
+    const url = new URL(northStarPublicUrl);
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return null;
+    return new URL("/", url).toString();
+  } catch { return null; }
+}
 function p2pIce(): string[] {
   return (process.env.SYNTHAI_P2P_ICE_URLS || "").split(",").map(x => x.trim()).filter(x => /^(stun|stuns):[a-zA-Z0-9_.:-]+$/.test(x)).slice(0, 6);
 }
 export function registerNorthStarRoutes(app: Express): void {
   app.get("/api/north-star/status", async (_req, res) => {
     const backend = configuredBackend();
+    const originalNorthStar = originalNorthStarBase();
+    let northstar = "unconfigured";
+    if (originalNorthStar) {
+      try {
+        const response = await fetch(new URL("/api/health", originalNorthStar), { signal: AbortSignal.timeout(3000) });
+        const data = await response.json() as { service?: string };
+        northstar = response.ok && data.service === "resonance-north-star" ? "reachable" : "unhealthy";
+      } catch { northstar = "unreachable"; }
+    }
     let autoapp = "unconfigured";
     if (backend) {
       try {
@@ -137,6 +167,7 @@ export function registerNorthStarRoutes(app: Express): void {
       } catch { autoapp = "unreachable"; }
     }
     res.json({ ok: true, ontology: { writeEnabled: ADMIN_TOKEN.length >= 24, persistent: true, addressFields: [...ONTOLOGY_FIELDS] },
+      originalNorthStar: { status: northstar, launchUrl: northstar === "reachable" ? originalNorthStarLaunch() : null },
       autoapp: { status: autoapp, launchUrl: autoapp === "reachable" ? autoappLaunch() : null },
       p2p: { mode: "browser-webrtc-manual-signaling", iceUrls: p2pIce(), remotePeersRequireNetworkPath: true },
       container: { bridgeEnabled: getContainerStatus().enabled, platform: getContainerStatus().platform },
