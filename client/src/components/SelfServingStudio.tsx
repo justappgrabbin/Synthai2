@@ -180,7 +180,7 @@ export default function SelfServingStudio() {
             {state?.assignments.map(a => <button type="button" key={a.id} onClick={() => choose(a)}
               className={"w-full rounded-md border px-3 py-2 text-left text-sm transition " + (active?.id === a.id ? "border-violet-400 bg-violet-900/40" : "border-slate-700 hover:bg-slate-800")}>
               <span className="block truncate font-medium">{a.title}</span>
-              <span className="text-xs text-slate-400">{a.lead.name} · {a.steps.filter(s => s.status === "done").length}/{a.steps.length} verified</span>
+              <span className="text-xs text-slate-400">{a.lead.name} · {a.steps.filter(s => s.status === "done").length}/{a.steps.length} marked done</span>
             </button>)}
           </div>
         </Panel>
@@ -246,7 +246,7 @@ export default function SelfServingStudio() {
             <div className="flex gap-2 flex-wrap">{domains.filter(d => d !== active.domain && !active.crew.some(c => c.domain === d)).map(domain =>
               <Button key={domain} size="sm" variant="outline" disabled={busy} onClick={() => action("recruit", { assignmentId: active.id, domain })}><Plus className="w-3 h-3 mr-1"/>{domain}</Button>)}</div>
           </Panel>
-          <Panel title="Verification checkpoints" subtitle="Running a tool supplies evidence but does not automatically pass a checkpoint.">
+          <Panel title="Evidence checkpoints" subtitle="Running a tool supplies evidence but does not automatically pass a checkpoint.">
             {active.steps.map((step, i) => <div key={step.id} className="rounded-lg border border-slate-700 p-3 space-y-2">
               <button type="button" onClick={() => { setSelectedStep(selectedStep === step.id ? "" : step.id); setProof(step.evidence || ""); }} className="w-full text-left flex items-center justify-between gap-2">
                 <span className="text-sm"><strong>{i + 1}. {step.title}</strong><span className="block text-xs text-slate-400">{step.outcome} · tool: {step.toolId}</span></span><Status status={step.status}/>
@@ -259,7 +259,7 @@ export default function SelfServingStudio() {
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" variant="outline" disabled={busy} onClick={() => action("step", { assignmentId: active.id, stepId: step.id, status: "active", evidence: proof })}>In progress</Button>
                   <Button size="sm" variant="outline" disabled={busy} onClick={() => action("step", { assignmentId: active.id, stepId: step.id, status: "blocked", evidence: proof })}>Blocked</Button>
-                  <Button size="sm" disabled={busy || !proof.trim()} onClick={() => action("step", { assignmentId: active.id, stepId: step.id, status: "done", evidence: proof })}><CheckCircle2 className="w-3 h-3 mr-1"/>Verify done</Button>
+                  <Button size="sm" disabled={busy || !proof.trim()} onClick={() => action("step", { assignmentId: active.id, stepId: step.id, status: "done", evidence: proof })}><CheckCircle2 className="w-3 h-3 mr-1"/>Mark done with evidence</Button>
                 </div>
               </>}
             </div>)}
