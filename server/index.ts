@@ -14,6 +14,7 @@ declare module 'http' {
   }
 }
 app.use(express.json({
+  limit: "9mb", // Base64 images for Morph editing; provider requests enforce a stricter limit.
   verify: (req, _res, buf) => {
     req.rawBody = buf;
   }
