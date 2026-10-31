@@ -76,7 +76,7 @@ export function beginSimlishLife(userId: string): LifeEpisode | null {
   const episode: LifeEpisode = {
     id,
     worldId: "simlish-world",
-    seed: "simlish-life:" + id,
+    seed: "simlish-life:" + (userId || "local") + ":chapter:" + (life.chapters.length + 1),
     startedAt,
   };
   life.active = episode;
