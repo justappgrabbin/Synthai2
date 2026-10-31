@@ -30,8 +30,10 @@ import ZipManager from "@/pages/ZipManager";
 import PresentationPlanner from "@/pages/PresentationPlanner";
 import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import HumanDesignStudio from "@/pages/HumanDesignStudio";
+import SimlishWorld from "@/pages/SimlishWorld";
 import SynthiaExperience from "@/pages/SynthiaExperience";
 import "@/lib/registerHumanDesignApp";
+import "@/lib/registerSimlishWorldApp";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -58,6 +60,7 @@ function Router() {
         <Route path="/presentation-planner" component={PresentationPlanner} />
         <Route path="/continuity-glyph" component={ContinuityGlyph} />
         <Route path="/human-design" component={HumanDesignStudio} />
+        <Route path="/simlish-world" component={SimlishWorld} />
         <Route path="/synthia" component={SynthiaExperience} />
         <Route component={NotFound} />
       </Switch>
