@@ -20,7 +20,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface HumanDesign {
-  type: 'Generator' | 'Manifestor' | 'Projector' | 'Reflector';
+  type: 'Generator' | 'Manifesting Generator' | 'Manifestor' | 'Projector' | 'Reflector';
   strategy: string;
   authority: string;
   profile: [number, number]; // e.g., [3, 5]
