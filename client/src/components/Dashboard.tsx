@@ -22,6 +22,7 @@ import { openFlyUp } from "@/lib/flyUps";
 import { OSSetupPanel } from "@/components/OSSetupPanel";
 import { GrimoirePanel } from "@/components/GrimoirePanel";
 import { BodyView } from "@/components/BodyView";
+import { includeNewPrograms } from "@/lib/programNavigation";
 import { CynthiaBodyLayer } from "@/components/CynthiaBodyLayer";
 
 const CORE_APPS: AppModule[] = [
@@ -142,6 +143,8 @@ type OSWidgetId = "runtime" | "proof-loop" | "recent" | "engines";
 type BodyLayer = "map" | "story";
 
 const OS_TRAY_ITEMS: TrayItem[] = [
+  { id: "worlds", label: "Worlds", icon: Globe, path: "/worlds" },
+  { id: "programs", label: "All programs", icon: FolderTree, path: "/programs" },
   { id: "ide", label: "IDE", icon: Code2, path: "/ide" },
   { id: "mesh", label: "Mesh", icon: Orbit, path: "/mesh" },
   { id: "ingest", label: "Ingest", icon: FolderTree, path: "/ingest" },
@@ -183,7 +186,7 @@ export function Dashboard() {
     return stored === "notebook" || stored === "body-world" || stored === "setup" ? stored : "overview";
   });
   const [isEditingShell, setIsEditingShell] = useState(false);
-  const [trayOrder, setTrayOrder] = useState<string[]>(() => readStoredStringArray("youniverse_os_tray_order", DEFAULT_TRAY_ORDER));
+  const [trayOrder, setTrayOrder] = useState<string[]>(() => includeNewPrograms(readStoredStringArray("youniverse_os_tray_order", DEFAULT_TRAY_ORDER), DEFAULT_TRAY_ORDER));
   const [hiddenTrayItems, setHiddenTrayItems] = useState<string[]>(() => readStoredStringArray("youniverse_os_tray_hidden", []));
   const [widgetOrder, setWidgetOrder] = useState<string[]>(() => readStoredStringArray("youniverse_os_widget_order", DEFAULT_WIDGET_ORDER));
   const [hiddenWidgets, setHiddenWidgets] = useState<string[]>(() => readStoredStringArray("youniverse_os_widget_hidden", []));
@@ -1005,3 +1008,4 @@ function PortalButton({ icon: Icon, title, description, onClick, variant = "defa
     </button>
   );
 }
+

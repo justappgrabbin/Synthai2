@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { publishMeshEvent } from "@/lib/meshEvents";
@@ -31,9 +31,17 @@ function isWorldReceipt(x: unknown): x is WorldReceipt {
  * with their original IndexedDB, world persistence, drawings and rendering.
  */
 export default function SimlishWorld() {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  const search = useSearch();
   const frame = useRef<HTMLIFrameElement>(null);
-  const [page, setPage] = useState<Page>("world");
+  const page: Page = new URLSearchParams(search).get("studio") === "1" ? "studio" : "world";
+  const setPage = (next: Page) => {
+    const params = new URLSearchParams(search);
+    if (next === "studio") params.set("studio", "1");
+    else params.delete("studio");
+    const query = params.toString();
+    navigate(location + (query ? "?" + query : ""));
+  };
   const [runtime, setRuntime] = useState<"checking"|"ready"|"missing">("checking");
   const [last, setLast] = useState<WorldReceipt|null>(null);
   const [character, setCharacter] = useState<CharacterStatus|null>(null);
@@ -121,3 +129,4 @@ export default function SimlishWorld() {
     </CardContent></Card>}
   </main>;
 }
+

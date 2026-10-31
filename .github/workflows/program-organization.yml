@@ -1,0 +1,26 @@
+name: Program organization
+on:
+  push:
+    branches: [integration/program-organization-20261031]
+  pull_request:
+    paths:
+      - "client/src/lib/programNavigation.ts"
+      - "client/src/components/GlobalNav.tsx"
+      - "client/src/components/TopNav.tsx"
+      - "client/src/pages/Programs.tsx"
+      - "client/src/App.tsx"
+      - "scripts/package-inventory.mjs"
+      - "tests/programNavigation.test.mjs"
+      - "tests/packageInventory.test.mjs"
+      - ".github/workflows/program-organization.yml"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: node --test tests/programNavigation.test.mjs tests/packageInventory.test.mjs

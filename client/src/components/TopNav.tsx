@@ -1,9 +1,13 @@
+import { useContext } from "react";
+import { WorkspaceNavigationContext } from "@/components/WorkspaceNavigationContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Code2, Gamepad2, Play, Bot, Settings, Home, Store, Brain, Rocket, Sparkles, Layers, Zap } from "lucide-react";
 
 export function TopNav() {
   const [location, setLocation] = useLocation();
+  const hosted = useContext(WorkspaceNavigationContext);
+  if (hosted) return null;
 
   const navItems = [
     { path: "/", label: "Dashboard", icon: Home },
@@ -54,3 +58,4 @@ export function TopNav() {
     </nav>
   );
 }
+

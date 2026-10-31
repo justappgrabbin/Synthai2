@@ -1095,7 +1095,8 @@ const UploadZone: React.FC = () => {
 const UnifiedInterface: React.FC = () => {
   return (
     <div style={{
-      width: "100vw", height: "100vh",
+      width: "100%", height: "calc(100dvh - var(--workspace-navigation-height, 0px) - var(--workspace-dock-height, 0px))",
+      minHeight: "360px", transform: "translateZ(0)",
       background: "#020617", color: "#e2e8f0",
       overflow: "hidden", position: "relative",
       fontFamily: "'Inter', 'SF Mono', monospace",
@@ -1113,3 +1114,4 @@ const UnifiedInterface: React.FC = () => {
 }
 
 export default UnifiedInterface
+

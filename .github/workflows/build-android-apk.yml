@@ -44,6 +44,15 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Inventory actual packaged program files
+        run: node scripts/package-inventory.mjs dist/public android/app/src/main/assets/public
+
+      - name: Upload package inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthai-package-inventory
+          path: package-inventory.json
+
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
@@ -53,3 +62,4 @@ jobs:
         with:
           name: synthai-you-n-i-verse-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
