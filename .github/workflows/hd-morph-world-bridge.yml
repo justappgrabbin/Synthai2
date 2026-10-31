@@ -1,0 +1,28 @@
+name: Human Design, Morph and Worlds integration
+on:
+  push:
+    branches:
+      - integration/hd-morph-simlish-reconciliation-20261031
+  pull_request:
+    paths:
+      - "client/src/pages/HumanDesignStudio.tsx"
+      - "client/src/lib/humanDesignMorphBridge.ts"
+      - "client/src/engine/ResonanceOrchestrator.ts"
+      - "client/src/components/SemanticUniverseCreator.tsx"
+      - "tests/humanDesignMorphBridge.test.mjs"
+      - ".github/workflows/hd-morph-world-bridge.yml"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: node --experimental-strip-types --test tests/humanDesignMorphBridge.test.mjs
+      - run: npm run check
+      - run: npm run build
