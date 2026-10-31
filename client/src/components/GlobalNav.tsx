@@ -7,6 +7,7 @@ import { openFlyUp } from "@/lib/flyUps";
 
 const NAV_ITEMS = [
   { path: "/", icon: Home, label: "Dashboard" },
+  { path: "/north-star", icon: Orbit, label: "North Star" },
   { path: "/grove-store", icon: Store, label: "Store" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/zip-manager", icon: FolderTree, label: "ZIP Studio" },
