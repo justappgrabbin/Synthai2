@@ -40,6 +40,7 @@ fs.cpSync(world,DEST,{recursive:true});
 const provider = path.join(morph,"morph-provider.mjs");
 assert(fs.existsSync(provider),"Original Simlish morph provider is absent");
 fs.copyFileSync(provider,path.join(DEST,"morph-provider.mjs"));
+fs.copyFileSync(path.join(morph,"morph-provider.test.mjs"),path.join(DEST,"morph-provider.test.mjs"));
 
 // PR #9 has the real live-world state. PR #12 has the original headless morph.
 // Preserve both instead of replacing the live world with the old static scene.
