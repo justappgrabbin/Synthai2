@@ -93,6 +93,7 @@ export default function HumanDesignStudio() {
   const transit = useMemo(() => { if (!chart) return null; const date = new Date(transitMoment); return Number.isNaN(date.getTime()) ? null : calculateTransit(date, chart, nodeType); }, [chart, transitMoment, nodeType]);
 
   const runChart = () => {
+    setMorphNotice("");
     setError(""); if (!birthDate || !birthTime || !timezone) { setError("Birth date, time, and timezone are required."); return; }
     try { const input = { name, birthDate, birthTime, timezone, nodeType }; const next = calculateHumanDesign(input); setChart(next); setSensitivity(calculateBirthTimeSensitivity(input, uncertainty)); setActiveView("chart"); }
     catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)); }
@@ -114,7 +115,7 @@ export default function HumanDesignStudio() {
       setConnectingToMorph(false);
     }
   };
-  const loadChart = (loaded: HumanDesignChart) => { setChart(loaded); setName(loaded.subject.name); setBirthDate(loaded.subject.birthDate); setBirthTime(loaded.subject.birthTime); setTimezone(loaded.subject.timezone); setSensitivity(null); };
+  const loadChart = (loaded: HumanDesignChart) => { setMorphNotice(""); setChart(loaded); setName(loaded.subject.name); setBirthDate(loaded.subject.birthDate); setBirthTime(loaded.subject.birthTime); setTimezone(loaded.subject.timezone); setSensitivity(null); };
   const views: Array<{ id: View; label: string; icon: typeof Dna }> = [{ id: "chart", label: "Chart", icon: Dna }, { id: "deep", label: "Deep Map", icon: Orbit }, { id: "activations", label: "Activations", icon: Activity }, { id: "compare", label: "Compare", icon: Users }, { id: "transits", label: "Transits", icon: Clock3 }, { id: "evidence", label: "Evidence", icon: ShieldCheck }];
 
   return (
