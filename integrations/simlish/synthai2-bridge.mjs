@@ -26,6 +26,38 @@ globalThis.addEventListener("synthai2:simlish-world-operation", event => {
 globalThis.addEventListener("message", async event => {
   if (event.origin !== sameOrigin || event.source !== parentWindow) return;
   if (event.data?.source !== "synthai2-computer-v1") return;
+  if (event.data.kind === "world.skin.apply") {
+    // Only display/theme instructions cross the boundary. No foreign scripts,
+    // game-state changes, saved photos, or personal chart content are accepted.
+    const payload = event.data.payload;
+    const validColor = value => typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value);
+    const validText = value => typeof value === "string" && value.length > 0 && value.length <= 700;
+    if (!payload || !validColor(payload.accent) || !validColor(payload.shadow) ||
+        !validText(payload.title) || !validText(payload.situation) || !validText(payload.challenge)) return;
+    const existing = document.getElementById("synthai2-iching-skin");
+    if (existing) existing.remove();
+    const style = document.createElement("style");
+    style.id = "synthai2-iching-skin";
+    style.textContent = "body{background:" + payload.shadow + "}" +
+      ".scene{background:" + payload.shadow + "ec;border-color:" + payload.accent + "aa}" +
+      ".world-proof{border-color:" + payload.accent + "aa}" +
+      ".scene .primary,.scene .active{background:" + payload.accent + "88;border-color:" + payload.accent + "}";
+    document.head.appendChild(style);
+    // Use the ORIGINAL action path. Choose Mission and chair; never simulate
+    // the completion event or modify the world engine's saved state.
+    document.querySelector('[data-mode="Mission"]')?.click();
+    const target = document.getElementById("worldTarget");
+    if (target && [...target.options].some(option => option.value === "chair")) {
+      target.value = "chair";
+      target.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    const sceneTitle = document.getElementById("scene-title");
+    const sceneCopy = document.getElementById("scene-copy");
+    if (sceneTitle) sceneTitle.textContent = payload.title;
+    if (sceneCopy) sceneCopy.textContent = payload.situation + " " + payload.challenge;
+    emit("world.skin.applied", {status:"ready"});
+    return;
+  }
   if (event.data.kind !== "character.reuse.request") return;
   // Reuse requires an explicit click in the SynthAi2 host, never silent access.
   try {
