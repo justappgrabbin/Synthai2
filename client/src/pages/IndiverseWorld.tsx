@@ -16,20 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UniverseViewer3D } from "@/components/UniverseViewer3D";
 
-type SemanticLayer = {
-  id: number;
-  name: string;
-  function: string;
-  extractedData?: string;
-};
-type SavedUniverse = {
-  id: string;
-  name: string;
-  prompt: string;
-  createdAt: string;
-  layers: SemanticLayer[];
-  seed: string;
-};
+import { readSavedWorlds, type SavedUniverse } from "@/lib/indiverseWorldStore";
+
 type Portal = {
   dimension: "Movement" | "Evolution" | "Being" | "Design" | "Space";
   label: string;
@@ -39,7 +27,6 @@ type Portal = {
   position: [number, number, number];
 };
 
-const WORLD_LIBRARY_KEY = "semantic_universes";
 const PORTALS: Portal[] = [
   {
     dimension: "Being", label: "Human Design",
@@ -67,32 +54,6 @@ const PORTALS: Portal[] = [
     path: "/game-creator", color: "#fb7185", position: [-3.5, 0.5, -1.2]
   }
 ];
-
-function readSavedUniverses(): SavedUniverse[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(WORLD_LIBRARY_KEY) || "[]");
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((world): world is SavedUniverse => {
-      if (!world || typeof world !== "object") return false;
-      const value = world as Record<string, unknown>;
-      return (
-        typeof value.id === "string" &&
-        typeof value.name === "string" &&
-        typeof value.prompt === "string" &&
-        typeof value.seed === "string" &&
-        typeof value.createdAt === "string" &&
-        Array.isArray(value.layers) &&
-        value.layers.every((layer: unknown) => {
-          if (!layer || typeof layer !== "object") return false;
-          const item = layer as Record<string, unknown>;
-          return typeof item.id === "number" && typeof item.name === "string";
-        })
-      );
-    });
-  } catch {
-    return [];
-  }
-}
 
 function PortalNode({ portal, enter }: { portal: Portal; enter: (path: string) => void }) {
   return (
@@ -138,11 +99,11 @@ function WorldMap({ enter }: { enter: (path: string) => void }) {
 
 export default function IndiverseWorld() {
   const [, navigate] = useLocation();
-  const [savedWorlds, setSavedWorlds] = useState<SavedUniverse[]>(readSavedUniverses);
+  const [savedWorlds, setSavedWorlds] = useState<SavedUniverse[]>(readSavedWorlds);
   const [playingWorld, setPlayingWorld] = useState<SavedUniverse | null>(null);
 
   useEffect(() => {
-    const reload = () => setSavedWorlds(readSavedUniverses());
+    const reload = () => setSavedWorlds(readSavedWorlds());
     window.addEventListener("storage", reload);
     window.addEventListener("focus", reload);
     return () => {
