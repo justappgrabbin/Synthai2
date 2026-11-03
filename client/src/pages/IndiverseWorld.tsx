@@ -35,7 +35,7 @@ const PORTALS: Portal[] = [
   },
   {
     dimension: "Movement", label: "Agents",
-    description: "Employ and guide functioning agents through real work",
+    description: "Configure agent identities; verified task execution is separate",
     path: "/agents", color: "#34d399", position: [3.5, 0.5, -1.2]
   },
   {
