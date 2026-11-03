@@ -9,7 +9,7 @@ This branch makes the existing YOU-N-I-VERSE the entry world of the **SynthAI2**
 | Root world at / and /world | New 3D spatial map for the canonical five dimensions (Movement, Evolution, Being, Design, Space) |
 | Human Design | Existing /human-design application, kept as the main product |
 | Synthia | Existing /synthia interface |
-| Agent employment | Existing /agents interface; no invented agent activity or success claims |
+| Agent catalog | Existing /agents configuration interface; agent records alone do not prove task execution |
 | Original Simlish world | Existing /simlish-world and its separately pinned, staged original sources |
 | Created semantic universes | Read-only integration with existing localStorage key semantic_universes; open them with the existing UniverseViewer3D |
 | World creation and housing | Existing /universe-creator and housing world IDs |
