@@ -6,7 +6,9 @@ import { Moon, Sun, MessageSquare } from "lucide-react";
 import { openFlyUp } from "@/lib/flyUps";
 
 const NAV_ITEMS = [
-  { path: "/", icon: Home, label: "Dashboard" },
+  { path: "/", icon: Orbit, label: "World" },
+  { path: "/computer", icon: Home, label: "Computer" },
+  { path: "/human-design", icon: Brain, label: "Human Design" },
   { path: "/grove-store", icon: Store, label: "Store" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/zip-manager", icon: FolderTree, label: "ZIP Studio" },
@@ -29,7 +31,8 @@ const NAV_ITEMS = [
 ];
 
 const MOBILE_DOCK_ITEMS = [
-  { path: "/", icon: Home, label: "Home" },
+  { path: "/", icon: Orbit, label: "World" },
+  { path: "/human-design", icon: Brain, label: "Design" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
   { path: "/game-creator", icon: Gamepad2, label: "Games" },
@@ -39,10 +42,6 @@ const MOBILE_DOCK_ITEMS = [
 export function GlobalNav() {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
-
-  if (location === "/") {
-    return null;
-  }
 
   return (
     <>

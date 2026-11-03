@@ -1,0 +1,39 @@
+name: YOU-N-I-VERSE root world integration
+on:
+  push:
+    branches:
+      - integration/you-n-i-verse-root-world-20261103
+  pull_request:
+    paths:
+      - 'client/src/pages/IndiverseWorld.tsx'
+      - 'client/src/lib/indiverseWorldStore.ts'
+      - 'client/src/App.tsx'
+      - 'client/src/components/GlobalNav.tsx'
+      - 'tests/indiverseWorldStore.test.mjs'
+      - '.github/workflows/you-n-i-verse-world.yml'
+permissions:
+  contents: read
+jobs:
+  world-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing dependencies
+        run: npm ci
+      - name: Validate saved-world compatibility
+        run: node --experimental-strip-types --test tests/indiverseWorldStore.test.mjs
+      - name: Build actual client and server with original Simlish source staging
+        run: npm run build
+      - name: Check new world integration for TypeScript diagnostics
+        shell: bash
+        run: |
+          npm run check > /tmp/synthai2-ts-diagnostics.txt 2>&1 || true
+          if grep -E '^(client/src/pages/IndiverseWorld\\.tsx|client/src/lib/indiverseWorldStore\\.ts|client/src/App\\.tsx|client/src/components/GlobalNav\\.tsx)\\(' /tmp/synthai2-ts-diagnostics.txt; then
+            echo "New root-world integration has TypeScript diagnostics."
+            exit 1
+          fi
+          echo "No TypeScript errors in the integration files."
