@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/human-design", icon: Brain, label: "Human Design" },
   { path: "/grove-store", icon: Store, label: "Store" },
-  { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/zip-manager", icon: FolderTree, label: "ZIP Studio" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
@@ -34,6 +33,7 @@ const NAV_ITEMS = [
 
 const MOBILE_DOCK_ITEMS = [
   { path: "/", icon: Orbit, label: "World" },
+  { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/human-design", icon: Brain, label: "Design" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
