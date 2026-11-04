@@ -128,20 +128,20 @@ export async function probeLocalModel(): Promise<LocalEngineProbe> {
   return result;
 }
 
-export async function askLocalModel(messages: ChatMsg[], { onProgress = (_: string) => {}, maxTokens = 1024 } = {}): Promise<{ text: string; via: string }> {
+export async function askLocalModel(messages: ChatMsg[], { onProgress = (_: string) => {}, maxTokens = 1024, timeoutMs = 30000, nativeStartupTimeoutMs = 120000 } = {}): Promise<{ text: string; via: string }> {
   const choice = getModelChoice();
   const m = LOCAL_MODELS[choice];
   const native = (globalThis as any).SynthiaAndroid as Native | undefined;
   const errors: string[] = [];
 
   if (native?.startLocalModel && native?.getLocalModelStatus && choice === "qwen-1.5b") {
-    try { await ensureEmbeddedModel(native, onProgress); } catch (e: any) { errors.push("bundled: " + e.message); }
+    try { await ensureEmbeddedModel(native, onProgress, nativeStartupTimeoutMs); } catch (e: any) { errors.push("bundled: " + e.message); }
   }
   const llamaBody = { model: m.ollamaTag, messages, stream: false, temperature: 0.1, max_tokens: maxTokens };
   const custom = localStorage.getItem("llama_server_url");
   for (const base of [custom, "http://127.0.0.1:19841", "http://127.0.0.1:8080"].filter(Boolean) as string[]) {
     try {
-      const r = await post(`${base}/v1/chat/completions`, llamaBody, 180000);
+      const r = await post(`${base}/v1/chat/completions`, llamaBody, timeoutMs);
       if (!r.ok) { errors.push(`${base}: HTTP ${r.status}`); continue; }
       const j = await r.json(); const text = j?.choices?.[0]?.message?.content;
       if (typeof text === "string" && text.trim()) return { text, via: `llama.cpp ${base}` };
@@ -149,7 +149,7 @@ export async function askLocalModel(messages: ChatMsg[], { onProgress = (_: stri
   }
   const ollama = localStorage.getItem("ollama_url") || "http://localhost:11434";
   try {
-    const r = await post(`${ollama}/api/chat`, { model: m.ollamaTag, messages, stream: false, options: { temperature: 0.1, num_predict: maxTokens } }, 180000);
+    const r = await post(`${ollama}/api/chat`, { model: m.ollamaTag, messages, stream: false, options: { temperature: 0.1, num_predict: maxTokens } }, timeoutMs);
     if (r.ok) { const j = await r.json(); if (j?.message?.content) return { text: j.message.content, via: `Ollama ${m.ollamaTag}` }; }
     errors.push(`ollama: HTTP ${r.status}`);
   } catch { errors.push("ollama: not running"); }
