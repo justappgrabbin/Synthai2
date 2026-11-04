@@ -26,6 +26,10 @@ interface AIBackend {
 
 const AI_BACKENDS: AIBackend[] = [
   {
+    id: "local", name: "Synthia Local", displayName: "Synthia on-device model",
+    requiresKey: false
+  },
+  {
     id: "claude",
     name: "Claude",
     displayName: "Claude (Anthropic)",
@@ -104,7 +108,7 @@ export function AIBackendSelector() {
     const savedKey = localStorage.getItem(`ai_key_${backendToLoad.id}`);
     if (savedKey) {
       setApiKey(savedKey);
-      setIsConfigured(true);
+      setIsConfigured(backendToLoad.requiresKey);
     }
     
     if (savedOllamaUrl) {
@@ -119,7 +123,7 @@ export function AIBackendSelector() {
     const savedKey = localStorage.getItem(`ai_key_${backend.id}`);
     if (savedKey) {
       setApiKey(savedKey);
-      setIsConfigured(true);
+      setIsConfigured(backend.requiresKey);
     } else {
       setApiKey("");
       setIsConfigured(false);
@@ -177,7 +181,8 @@ export function AIBackendSelector() {
         description: `${selectedBackend.name} is now configured and ready to use.`
       });
     } else if (!selectedBackend.requiresKey) {
-      setIsConfigured(true);
+      setIsConfigured(false);
+      toast({ title: "Model selected", description: "Only a successful chat test confirms the model is running. Use Model + Chat in Settings." });
     } else {
       toast({
         title: "Error",
@@ -314,7 +319,7 @@ export function AIBackendSelector() {
         </div>
       )}
 
-      {!selectedBackend.requiresKey && (
+      {!selectedBackend.requiresKey && selectedBackend.id !== "local" && (
         <div className="space-y-3">
           <div className="p-3 rounded-md bg-primary/5 border border-primary/20">
             <p className="text-xs text-muted-foreground mb-3">
@@ -350,10 +355,12 @@ export function AIBackendSelector() {
         </div>
       )}
 
+      {selectedBackend.id === "local" && <p className="text-sm text-muted-foreground">The local model is selected for general chat. Open Model + Chat in Settings to verify the embedded Android engine and send an actual test message.</p>}
+
       <div className="flex items-center gap-2 pt-2 border-t">
         <div className={`h-2 w-2 rounded-full ${isConfigured ? 'bg-green-500' : 'bg-yellow-500'}`} />
         <span className="text-xs text-muted-foreground" data-testid="text-backend-status">
-          {isConfigured ? `${selectedBackend.name} ready` : "Configuration required"}
+          {isConfigured ? `${selectedBackend.name} credentials saved (connection not guaranteed)` : selectedBackend.id === "local" ? "Selected; check device status and run chat test" : "Configuration or live test required"}
         </span>
       </div>
 
