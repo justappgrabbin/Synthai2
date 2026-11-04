@@ -50,8 +50,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       createdAt: job.createdAt,
     })) });
   });
-  app.get("/api/self-build/status", requireBuildAuth, (_req, res) => {
-    res.json({ success: true, ...buildCapability() });
+  app.get("/api/self-build/status", requireBuildAuth, async (_req, res) => {
+    res.json({ success: true, ...(await buildCapability()) });
   });
   app.get("/api/self-build/jobs", requireBuildAuth, (_req, res) => {
     res.json({ success: true, jobs: listBuildJobs() });
@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!job) return res.status(404).json({ success: false, error: "Unknown build" });
     res.json({ success: true, job });
   });
-  app.post("/api/self-build/jobs", requireBuildAuth, (req, res) => {
+  app.post("/api/self-build/jobs", requireBuildAuth, async (req, res) => {
     try {
       const input = z.object({
         prompt: z.string().trim().min(8).max(12000),
@@ -71,6 +71,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         netlifyApiKey: z.string().min(1).optional(),
         siteName: z.string().regex(/^[a-z0-9-]{3,60}$/).optional(),
       }).parse(req.body);
+      const capability = await buildCapability();
+      if (!capability.enabled) return res.status(503).json({ success: false, error: capability.detail });
       const job = submitSelfBuild(input);
       res.status(202).json({ success: true, job });
     } catch (error) {
