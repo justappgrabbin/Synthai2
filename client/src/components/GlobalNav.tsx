@@ -8,8 +8,10 @@ import { openFlyUp } from "@/lib/flyUps";
 const NAV_ITEMS = [
   { path: "/", icon: Orbit, label: "World" },
   { path: "/computer", icon: Home, label: "Computer" },
+  { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/human-design", icon: Brain, label: "Human Design" },
   { path: "/grove-store", icon: Store, label: "Store" },
+  { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/zip-manager", icon: FolderTree, label: "ZIP Studio" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
