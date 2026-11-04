@@ -133,7 +133,7 @@ export function validateBuildFiles(files: unknown): { files: BuildFile[]; issues
       } else tests.push("Node syntax: " + file.path);
     }
     if (file.path.endsWith(".html")) {
-      const inline = [...file.content.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+      const inline = Array.from(file.content.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi));
       for (let i = 0; i < inline.length; i++) {
         const script = inline[i][1].trim();
         if (!script) continue;
@@ -147,7 +147,7 @@ export function validateBuildFiles(files: unknown): { files: BuildFile[]; issues
     }
   }
   // Local resources need to exist; external dependency loading is deliberately disallowed.
-  for (const match of index.content.matchAll(/<(?:script|link)\b[^>]*(?:src|href)=["']([^"']+)["']/gi)) {
+  for (const match of Array.from(index.content.matchAll(/<(?:script|link)\b[^>]*(?:src|href)=["']([^"']+)["']/gi))) {
     const address = match[1];
     if (address.startsWith("#") || address.startsWith("data:")) continue;
     if (/^(https?:)?\/\//i.test(address)) {
