@@ -20,9 +20,67 @@ import { growthProgramEngine } from "./services/GrowthProgramEngine";
 import { getAllPrograms } from "../shared/growth-programs";
 import { z } from "zod";
 import { adaptiveStatus, startAdaptiveBuild, stopAdaptiveBuild } from "./lib/adaptiveAgentService";
+import { submitSelfBuild, getBuildJob, listBuildJobs, readBuildArtifact, buildCapability } from "./lib/selfBuildService";
+import { timingSafeEqual } from "node:crypto";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   registerMorphImageRoutes(app);
+
+  // Native Computer self-builder API. Never expose model execution to an anonymous website.
+  const requireBuildAuth = (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => {
+    const configured = process.env.SYNTHIA_BUILD_TOKEN;
+    const supplied = String(req.header("x-synthia-build-token") || "");
+    if (configured) {
+      const a = Buffer.from(configured);
+      const b = Buffer.from(supplied);
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
+        return res.status(401).json({ success: false, error: "Build token required" });
+      }
+    } else if (process.env.NODE_ENV === "production" ||
+      !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(req.socket.remoteAddress || "")) {
+      return res.status(503).json({ success: false,
+        error: "Set SYNTHIA_BUILD_TOKEN on the Computer server before remote builds" });
+    }
+    next();
+  };
+  app.get("/api/self-build/status", requireBuildAuth, (_req, res) => {
+    res.json({ success: true, ...buildCapability() });
+  });
+  app.get("/api/self-build/jobs", requireBuildAuth, (_req, res) => {
+    res.json({ success: true, jobs: listBuildJobs() });
+  });
+  app.get("/api/self-build/jobs/:id", requireBuildAuth, (req, res) => {
+    const job = getBuildJob(req.params.id);
+    if (!job) return res.status(404).json({ success: false, error: "Unknown build" });
+    res.json({ success: true, job });
+  });
+  app.post("/api/self-build/jobs", requireBuildAuth, (req, res) => {
+    try {
+      const input = z.object({
+        prompt: z.string().trim().min(8).max(12000),
+        name: z.string().trim().min(1).max(100).optional(),
+        target: z.enum(["grove", "site"]),
+        netlifyApiKey: z.string().min(1).optional(),
+        siteName: z.string().regex(/^[a-z0-9-]{3,60}$/).optional(),
+      }).parse(req.body);
+      const job = submitSelfBuild(input);
+      res.status(202).json({ success: true, job });
+    } catch (error) {
+      res.status(400).json({ success: false,
+        error: error instanceof Error ? error.message : "Build request rejected" });
+    }
+  });
+  // Published Grove files are publicly accessible, but sandboxed by CSP into an opaque origin.
+  // Existing protected Computer APIs remain inaccessible to the generated app's JS.
+  app.get("/api/self-build/artifacts/:id/:file(*)", (req, res) => {
+    const resource = readBuildArtifact(req.params.id, req.params.file);
+    if (!resource) return res.status(404).send("Build artifact not found");
+    res.setHeader("Content-Security-Policy", "sandbox allow-scripts; default-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.type(resource.mime).send(resource.content);
+  });
+
+
   // Read-only health is public. Execution is strictly limited to a local device.
   app.get("/api/adaptive-agent/status", (_req, res) => res.json(adaptiveStatus()));
   const localOnly = (req: import("express").Request, res: import("express").Response) => {
