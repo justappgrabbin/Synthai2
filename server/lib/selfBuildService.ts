@@ -167,13 +167,38 @@ function examples(): string {
     " | app: " + j.name + " | checks: " + j.tests.join("; ").slice(0, 300)).join("\n");
 }
 function modelName(): string { return process.env.SYNTHIA_BUILD_MODEL || "qwen2.5-coder:7b"; }
-export function buildCapability() {
+export async function buildCapability() {
+  // A configured model string is not a model installation. Probe real Ollama tags.
+  const endpoint = (process.env.SYNTHIA_OLLAMA_URL || "http://127.0.0.1:11434").replace(/\\/+$/, "");
+  const model = modelName();
+  let serverReachable = false;
+  let modelInstalled = false;
+  let detail = "Ollama is not reachable from the Computer backend. This is NOT an embedded Android model.";
+  try {
+    const response = await fetch(endpoint + "/api/tags", { signal: AbortSignal.timeout(3500) });
+    if (response.ok) {
+      serverReachable = true;
+      const data = await response.json() as { models?: Array<{ name?: string; model?: string }> };
+      modelInstalled = !!data.models?.some((item) => item.name === model || item.model === model);
+      detail = modelInstalled
+        ? "Configured server model is installed; generation is not yet proven. This is NOT an Android-bundled runtime."
+        : "Ollama responds but the required model " + model + " is NOT installed on that server.";
+    } else {
+      detail = "Ollama model listing failed (HTTP " + response.status + ").";
+    }
+  } catch (error) {
+    detail = "Ollama not reachable: " + (error instanceof Error ? error.message : String(error));
+  }
   return {
     provider: "ollama",
-    model: modelName(),
-    endpoint: process.env.SYNTHIA_OLLAMA_URL || "http://127.0.0.1:11434",
-    enabled: true,
-    training: "Optional real gradient training for existing TRIDENT code head; does not fine-tune Ollama",
+    model,
+    endpoint,
+    enabled: serverReachable && modelInstalled,
+    serverReachable,
+    modelInstalled,
+    onDevice: false,
+    detail,
+    training: "Optional gradient training for existing TRIDENT code head; does not fine-tune Ollama",
     verification: "Static checks only; no generated app is executed on the backend",
   };
 }
