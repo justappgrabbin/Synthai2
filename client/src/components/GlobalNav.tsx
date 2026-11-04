@@ -75,6 +75,11 @@ export function GlobalNav() {
             })}
           </div>
 
+          <Link href="/settings">
+            <Button variant={location === "/settings" ? "default" : "ghost"} size="icon" aria-label="Settings" title="Settings: model, chat, and system">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             size="icon"
