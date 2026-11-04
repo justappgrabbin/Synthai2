@@ -67,7 +67,7 @@ export function LocalModelSettings() {
     try {
       const response = await askLocalModel(
         [{ role: "user", content: "Reply with the single word READY." }],
-        { maxTokens: 24, onProgress: setProgress },
+        { maxTokens: 24, onProgress: setProgress, timeoutMs: 25000, nativeStartupTimeoutMs: 60000 },
       );
       if (!response.text.trim()) throw new Error("Model returned an empty response");
       setReply(response.text + " (served by " + response.via + ")");
