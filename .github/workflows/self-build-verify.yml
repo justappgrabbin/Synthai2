@@ -1,0 +1,35 @@
+name: Verify Synthia2 Self-Builder
+
+on:
+  push:
+    branches:
+      - integration/self-building-runtime-20261104
+  pull_request:
+    paths:
+      - "server/lib/selfBuildService.ts"
+      - "server/routes.ts"
+      - "client/src/pages/SelfBuild.tsx"
+      - "client/src/components/GlobalNav.tsx"
+      - "client/src/components/GroveStore.tsx"
+      - "tests/self-build.test.ts"
+      - ".github/workflows/self-build-verify.yml"
+  workflow_dispatch:
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - name: Check TypeScript
+        run: npm run check
+      - name: Exercise self-build validation
+        run: node --import tsx --test tests/self-build.test.ts
+      - name: Compile integrated frontend and backend
+        run: npm run build
