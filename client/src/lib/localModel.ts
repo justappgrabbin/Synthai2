@@ -47,6 +47,87 @@ async function post(url: string, body: unknown, ms: number) {
   finally { clearTimeout(t); }
 }
 
+
+export interface LocalEngineProbe {
+  choice: LocalModelChoice;
+  model: string;
+  nativeBridge: "missing" | "ready" | "starting" | "error";
+  nativeMessage: string;
+  llamaServer: string | null;
+  ollamaServer: string | null;
+  modelFound: boolean;
+  available: boolean;
+  reason: string;
+}
+
+/** Diagnostic only. A valid server response is not proof that the model can generate. */
+export async function probeLocalModel(): Promise<LocalEngineProbe> {
+  const choice = getModelChoice();
+  const m = LOCAL_MODELS[choice];
+  const result: LocalEngineProbe = {
+    choice, model: m.label, nativeBridge: "missing", nativeMessage: "Android inference bridge not detected",
+    llamaServer: null, ollamaServer: null, modelFound: false, available: false,
+    reason: "No verified local model found. A model name in Settings does not install its weights.",
+  };
+  const native = (globalThis as any).SynthiaAndroid as Native | undefined;
+  if (native?.getLocalModelStatus) {
+    try {
+      const status = JSON.parse(native.getLocalModelStatus());
+      result.nativeBridge = status.ready ? "ready" : status.ok === false ? "error" : "starting";
+      result.nativeMessage = status.error || status.phase || (status.ready ? "Native inference ready" : "Native inference not ready");
+      if (status.ready && choice === "qwen-1.5b") {
+        result.available = true; result.modelFound = true;
+        result.reason = "Android bridge reports Qwen2.5 Coder ready. Run the chat test to verify generation.";
+      }
+    } catch (e) {
+      result.nativeBridge = "error";
+      result.nativeMessage = "Native bridge returned invalid status";
+    }
+  }
+  const bases = [
+    localStorage.getItem("llama_server_url"),
+    "http://127.0.0.1:19841",
+    "http://127.0.0.1:8080",
+  ].filter(Boolean) as string[];
+  const uniqueBases = [...new Set(bases)];
+  for (const base of uniqueBases) {
+    try {
+      const r = await fetch(base.replace(/\\/+$/, "") + "/v1/models", { signal: AbortSignal.timeout(3000) });
+      if (!r.ok) continue;
+      result.llamaServer = base;
+      const data = await r.json();
+      const ids = (Array.isArray(data?.data) ? data.data : [])
+        .map((x: any) => String(x?.id || "").toLowerCase());
+      const tag = m.ollamaTag.split(":")[0].toLowerCase();
+      if (ids.some((x: string) => x === m.gguf.toLowerCase() || x.includes(tag))) {
+        result.modelFound = true; result.available = true;
+        result.reason = "llama.cpp reports a compatible model. Run the chat test to verify generation.";
+        break;
+      }
+    } catch { /* absent servers are expected */ }
+  }
+  const ollama = localStorage.getItem("ollama_url") || "http://127.0.0.1:11434";
+  try {
+    const r = await fetch(ollama.replace(/\\/+$/, "") + "/api/tags", { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      result.ollamaServer = ollama;
+      const data = await r.json();
+      const tags = (Array.isArray(data?.models) ? data.models : [])
+        .map((x: any) => String(x?.name || x?.model || "").toLowerCase());
+      if (tags.includes(m.ollamaTag.toLowerCase())) {
+        result.modelFound = true; result.available = true;
+        result.reason = "Ollama reports the selected model installed. Run chat test to verify generation.";
+      }
+    }
+  } catch { /* Ollama is optional and external, not an embedded engine */ }
+  if (!result.available) {
+    result.reason = result.nativeBridge === "missing"
+      ? "No Android model bridge detected and no selected model found on local inference servers."
+      : result.nativeMessage + ". No selected model found running.";
+  }
+  return result;
+}
+
 export async function askLocalModel(messages: ChatMsg[], { onProgress = (_: string) => {}, maxTokens = 1024 } = {}): Promise<{ text: string; via: string }> {
   const choice = getModelChoice();
   const m = LOCAL_MODELS[choice];
