@@ -18,7 +18,7 @@ type Zip = { id: string; name?: string; filename?: string };
 export function AgentFlyUp() {
   const [, navigate] = useLocation();
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Hi Alexis. I run on a local Qwen Coder on this device. Ask me anything, or tap Find entry / Run zip." },
+    { role: "assistant", content: "Synthia Agent. Local model availability has not been verified. Open Settings → Model + Chat to check the actual Android engine, then try a message." },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -62,7 +62,7 @@ export function AgentFlyUp() {
       const { text: reply, via } = await askLocalModel([{ role: "system", content: GPT_DASH_DIRECTIVE }, ...history], { onProgress: (p) => say(p) });
       say(reply + "\n\n(" + via + ")");
     } catch (e: any) {
-      say(e.message + ". On the phone this needs the bundled engine (Synthia Adaptive) or a local llama.cpp / Ollama with the model installed. Zip actions still work.");
+      say(e.message + ". Open Settings → Model + Chat for a device check and a live test. This app does not install model weights just by selecting Qwen. ZIP actions still work.");
     }
   }
 
@@ -87,7 +87,7 @@ export function AgentFlyUp() {
 
   return (
     <FlyUpScreen id="agent" testId="flyup-agent" title="Synthia Agent" icon={<Bot className="h-5 w-5" />}
-      description="Local Qwen Coder on this device · finds the zip entry, runs it">
+      description="Local-model chat (requires verified runtime) · ZIP actions">
       <div className="flex h-full flex-col">
         <div className="grid grid-cols-3 gap-2 border-b border-purple-500/30 p-3">
           {tiles.map((t) => (
