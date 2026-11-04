@@ -89,7 +89,7 @@ export async function probeLocalModel(): Promise<LocalEngineProbe> {
     "http://127.0.0.1:19841",
     "http://127.0.0.1:8080",
   ].filter(Boolean) as string[];
-  const uniqueBases = [...new Set(bases)];
+  const uniqueBases = Array.from(new Set(bases));
   for (const base of uniqueBases) {
     try {
       const r = await fetch(base.replace(/\/+$/, "") + "/v1/models", { signal: AbortSignal.timeout(3000) });
