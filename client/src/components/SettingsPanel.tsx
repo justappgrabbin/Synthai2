@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIBackendSelector } from "./AIBackendSelector";
+import { LocalModelSettings } from "./LocalModelSettings";
 import { OSSetupPanel } from "./OSSetupPanel";
 import { ProfileBuilder } from "./ProfileBuilder";
 import { ResonanceTracker } from "./ResonanceTracker";
@@ -188,15 +189,16 @@ export function SettingsPanel() {
     <div className="min-h-screen bg-background">
       <div className="p-8 max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Configuration</h1>
-          <p className="text-muted-foreground">Manage your AI backends, autonomy, and studio preferences</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+          <p className="text-muted-foreground">Model, chat test, computer, autonomy and preferences. Model status comes from actual device checks.</p>
         </div>
 
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs defaultValue="model" className="space-y-6">
           <TabsList className="flex flex-wrap h-auto w-full justify-start gap-1 p-1">
+            <TabsTrigger value="model" data-testid="tab-local-model">Model + Chat</TabsTrigger>
             <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
             <TabsTrigger value="os" data-testid="tab-os">OS Setup</TabsTrigger>
-            <TabsTrigger value="ai" data-testid="tab-ai">AI Config</TabsTrigger>
+            <TabsTrigger value="ai" data-testid="tab-ai">Other Providers</TabsTrigger>
             <TabsTrigger value="autonomy" data-testid="tab-autonomy">
               Autonomy
               {pendingCount > 0 && (
@@ -210,6 +212,10 @@ export function SettingsPanel() {
             <TabsTrigger value="addons" data-testid="tab-addons">Add-ons</TabsTrigger>
             <TabsTrigger value="about" data-testid="tab-about">About</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="model" className="space-y-6">
+            <LocalModelSettings />
+          </TabsContent>
 
           <TabsContent value="general" className="space-y-6">
             <Card>
