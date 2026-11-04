@@ -31,7 +31,7 @@ export default function SelfBuild() {
   const [trainModel, setTrainModel] = useState(true);
   const [jobs, setJobs] = useState<BuildJob[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [capability, setCapability] = useState<{ model: string; training: string; verification: string } | null>(null);
+  const [capability, setCapability] = useState<{ model: string; training: string; verification: string; enabled: boolean; onDevice: boolean; detail: string; serverReachable: boolean; modelInstalled: boolean } | null>(null);
   const [message, setMessage] = useState("");
   const [working, setWorking] = useState(false);
 
@@ -41,7 +41,7 @@ export default function SelfBuild() {
     const refresh = async () => {
       try {
         const [status, list] = await Promise.all([
-          request<{ model: string; training: string; verification: string }>("/api/self-build/status", token),
+          request<{ model: string; training: string; verification: string; enabled: boolean; onDevice: boolean; detail: string; serverReachable: boolean; modelInstalled: boolean }>("/api/self-build/status", token),
           request<{ jobs: BuildJob[] }>("/api/self-build/jobs", token),
         ]);
         if (!gone) { setCapability(status); setJobs(list.jobs); setMessage(""); }
@@ -114,15 +114,18 @@ export default function SelfBuild() {
             placeholder="Computer build token" value={token} onChange={(e) => setToken(e.target.value)} />
         </details>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={trainModel} onChange={(e) => setTrainModel(e.target.checked)} /> Train existing TRIDENT code-head weights from verified source (requires Python + PyTorch)</label>
-        <Button onClick={() => { void start(); }} disabled={working || goal.trim().length < 8 || (target === "site" && !netlifyApiKey)}
+        <Button onClick={() => { void start(); }} disabled={working || !capability?.enabled || goal.trim().length < 8 || (target === "site" && !netlifyApiKey)}
           data-testid="button-self-build">Build and verify</Button>
         <p className="text-xs text-muted-foreground">
-          Source generation requires a running Ollama server with the configured code model. This stage makes
+          Source generation currently requires a separate Ollama server with the configured code model; it does NOT run on the bundled Android model. This stage makes
           dependency-free web apps; APK packaging and native permissions are not connected here. TRIDENT training is separate from the Ollama generation model.
         </p>
       </Card>
       {capability && (
         <Card className="p-3 text-sm space-y-1">
+          <div><strong>Actual model status:</strong> {capability.enabled ? "Model found on server (generation not yet proven)" : "Not ready"}</div>
+          <div><strong>Android bundled model:</strong> {capability.onDevice ? "Yes" : "No — this builder currently requires a separate backend"}</div>
+          <div className={capability.enabled ? "" : "text-destructive"}>{capability.detail}</div>
           <div><strong>Model:</strong> {capability.model}</div>
           <div><strong>Verification:</strong> {capability.verification}</div>
           <div><strong>Training:</strong> {capability.training}</div>
