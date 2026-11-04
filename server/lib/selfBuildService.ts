@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mountApp } from "./appMountService";
 import { deployToNetlify } from "./netlifyService";
 import { publishMeshEvent } from "./meshEventStore";
@@ -20,6 +20,7 @@ export interface BuildRequest {
   target: BuildTarget;
   netlifyApiKey?: string;
   siteName?: string;
+  trainModel?: boolean;
 }
 export interface BuildJob {
   id: string;
@@ -34,7 +35,8 @@ export interface BuildJob {
   mountedAppId?: string;
   siteUrl?: string;
   model: string;
-  training: "not-run";
+  training: "not-run" | "running" | "completed" | "unavailable";
+  trainingReceipt?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -171,7 +173,7 @@ export function buildCapability() {
     model: modelName(),
     endpoint: process.env.SYNTHIA_OLLAMA_URL || "http://127.0.0.1:11434",
     enabled: true,
-    training: "Not wired: successful jobs become retrievable examples, no weights update",
+    training: "Optional real gradient training for existing TRIDENT code head; does not fine-tune Ollama",
     verification: "Static checks only; no generated app is executed on the backend",
   };
 }
@@ -184,7 +186,7 @@ async function generate(prompt: string): Promise<{ name?: string; files?: BuildF
     body: JSON.stringify({
       model: modelName(), stream: false, format: "json",
       messages: [
-        { role: "system", content: "You are the implementation worker in the existing Synthia2 Computer. Produce a genuinely interactive, complete, offline-capable, dependency-free WEB APP from the task. Return ONLY JSON {name:string,files:[{path:string,content:string}]}. Root index.html is mandatory. Optional local .js, .css, .json, .svg and .webmanifest. Build working buttons and save state to localStorage when useful. No placeholders, APIs, external scripts, package files, fake data pretending to be real, or prose outside JSON. All referenced local files must be included. You cannot claim model weight training or APK packaging." },
+        { role: "system", content: "You are the implementation worker in the existing Synthia2 Computer. Produce a genuinely interactive, complete, offline-capable, dependency-free WEB APP from the task. Return ONLY JSON {name:string,files:[{path:string,content:string}]}. Root index.html is mandatory. Optional local .js, .css, .json, .svg and .webmanifest. Build working buttons and guard storage access with try/catch because Grove uses an opaque-origin sandbox. No placeholders, APIs, external scripts, package files, fake data pretending to be real, or prose outside JSON. All referenced local files must be included. You cannot claim model weight training or APK packaging." },
         { role: "user", content: prompt },
       ],
       options: { temperature: 0.2, num_predict: 12000 },
@@ -215,6 +217,47 @@ function writeArtifact(job: BuildJob, files: BuildFile[]) {
   }, null, 2), { flag: "wx" });
   return root;
 }
+
+async function trainVerifiedModel(job: BuildJob, files: BuildFile[]): Promise<void> {
+  job.training = "running"; save(job);
+  const script = path.resolve(process.cwd(), "synthia-server", "train_verified.py");
+  const examples = files.filter((f) => /\.(html|js|css|json)$/.test(f.path))
+    .map((f) => ({ head: "code", text: f.content.slice(0, 768) }));
+  if (!fs.existsSync(script) || !examples.length) {
+    job.training = "unavailable";
+    job.trainingReceipt = { error: "Training script or verified examples unavailable" };
+    save(job); return;
+  }
+  const directory = path.join(buildRoot, "training");
+  fs.mkdirSync(directory, { recursive: true });
+  const dataset = path.join(directory, job.id + ".json");
+  const checkpoint = path.join(directory, "trident-code.pt");
+  fs.writeFileSync(dataset, JSON.stringify({ job: job.id, examples }), { flag: "wx" });
+  try {
+    const result = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      const child = spawn(process.env.SYNTHIA_TRAIN_PYTHON || "python3",
+        [script, "--dataset", dataset, "--checkpoint", checkpoint, "--epochs", "1"],
+        { cwd: path.dirname(script), env: process.env, stdio: ["ignore", "pipe", "pipe"] });
+      let stdout = ""; let stderr = "";
+      const timeout = setTimeout(() => child.kill("SIGTERM"), 120_000);
+      child.stdout.on("data", (b: Buffer) => { stdout = (stdout + String(b)).slice(-10000); });
+      child.stderr.on("data", (b: Buffer) => { stderr = (stderr + String(b)).slice(-2500); });
+      child.once("error", (error) => { clearTimeout(timeout); reject(error); });
+      child.once("close", (code) => {
+        clearTimeout(timeout);
+        if (code !== 0) return reject(new Error(stderr || "TRIDENT training exited " + code));
+        try { resolve(JSON.parse(stdout)); } catch { reject(new Error("TRIDENT training returned no receipt")); }
+      });
+    });
+    job.training = "completed";
+    job.trainingReceipt = result;
+  } catch (error) {
+    job.training = "unavailable";
+    job.trainingReceipt = { error: error instanceof Error ? error.message.slice(0, 900) : String(error) };
+  }
+  save(job);
+}
+
 async function execute(job: BuildJob, input: BuildRequest) {
   running.add(job.id);
   let repairs = "";
@@ -248,6 +291,7 @@ async function execute(job: BuildJob, input: BuildRequest) {
         const mounted = await mountApp({ name: job.name, files: validation.files, icon: "code" });
         job.mountedAppId = mounted.id;
       }
+      if (input.trainModel !== false) await trainVerifiedModel(job, validation.files);
       job.phase = "completed";
       publishMeshEvent({ source: "self-builder", type: "build.completed", topic: job.id,
         payload: { name: job.name, target: job.target, artifact: job.artifact, mountedAppId: job.mountedAppId, siteUrl: job.siteUrl } });
@@ -288,6 +332,25 @@ export function readBuildArtifact(id: string, relativePath: string): { content: 
   try {
     const stat = fs.lstatSync(target);
     if (!stat.isFile() || stat.isSymbolicLink()) return null;
-    return { content: fs.readFileSync(target), mime: MIME[ext] || "application/octet-stream" };
+
+    let content = fs.readFileSync(target);
+    if (relativePath === "index.html") {
+      // In the Grove, bundle local scripts/styles inline so the CSP sandbox can
+      // give untrusted apps an opaque origin without losing their basic UI.
+      let html = content.toString("utf8");
+      html = html.replace(/<link\b[^>]*href=["']([^"']+\.css)["'][^>]*>/gi, (tag, ref: string) => {
+        const file = path.resolve(root, ref.replace(/^\.\//, ""));
+        if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.lstatSync(file).isSymbolicLink()) return tag;
+        return "<style>" + fs.readFileSync(file, "utf8").replace(/<\/style/gi, "<\\/style") + "</style>";
+      });
+      html = html.replace(/<script\b[^>]*src=["']([^"']+\.js)["'][^>]*>\s*<\/script>/gi, (tag, ref: string) => {
+        const file = path.resolve(root, ref.replace(/^\.\//, ""));
+        if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.lstatSync(file).isSymbolicLink()) return tag;
+        return "<script>" + fs.readFileSync(file, "utf8").replace(/<\/script/gi, "<\\/script") + "</script>";
+      });
+      content = Buffer.from(html, "utf8");
+    }
+    return { content, mime: MIME[ext] || "application/octet-stream" };
+
   } catch { return null; }
 }
