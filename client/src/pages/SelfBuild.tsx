@@ -10,7 +10,7 @@ interface BuildJob {
   id: string; name: string; goal: string; target: BuildTarget;
   phase: string; attempts: number; issues: string[]; tests: string[];
   artifact?: string; siteUrl?: string; mountedAppId?: string;
-  model: string; training: string; createdAt: string;
+  model: string; training: string; trainingReceipt?: Record<string, unknown>; createdAt: string;
 }
 async function request<T>(path: string, token: string, options?: RequestInit): Promise<T> {
   const response = await fetch(path, {
@@ -28,6 +28,7 @@ export default function SelfBuild() {
   const [token, setToken] = useState(() => sessionStorage.getItem("synthia-build-token") || "");
   const [netlifyApiKey, setNetlifyApiKey] = useState("");
   const [siteName, setSiteName] = useState("");
+  const [trainModel, setTrainModel] = useState(true);
   const [jobs, setJobs] = useState<BuildJob[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [capability, setCapability] = useState<{ model: string; training: string; verification: string } | null>(null);
@@ -59,7 +60,7 @@ export default function SelfBuild() {
       const result = await request<{ job: BuildJob }>("/api/self-build/jobs", token, {
         method: "POST",
         body: JSON.stringify({
-          prompt: goal, name: name || undefined, target,
+          prompt: goal, name: name || undefined, target, trainModel,
           netlifyApiKey: target === "site" ? netlifyApiKey : undefined,
           siteName: target === "site" ? siteName || undefined : undefined,
         }),
@@ -112,11 +113,12 @@ export default function SelfBuild() {
           <Input type="password" autoComplete="off" aria-label="Computer build token"
             placeholder="Computer build token" value={token} onChange={(e) => setToken(e.target.value)} />
         </details>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={trainModel} onChange={(e) => setTrainModel(e.target.checked)} /> Train existing TRIDENT code-head weights from verified source (requires Python + PyTorch)</label>
         <Button onClick={() => { void start(); }} disabled={working || goal.trim().length < 8 || (target === "site" && !netlifyApiKey)}
           data-testid="button-self-build">Build and verify</Button>
         <p className="text-xs text-muted-foreground">
           Source generation requires a running Ollama server with the configured code model. This stage makes
-          dependency-free web apps; APK packaging, native permissions and weight training are not connected here yet.
+          dependency-free web apps; APK packaging and native permissions are not connected here. TRIDENT training is separate from the Ollama generation model.
         </p>
       </Card>
       {capability && (
@@ -141,6 +143,8 @@ export default function SelfBuild() {
             <div className="font-semibold">{chosen.name} — {chosen.phase}</div>
             <div className="text-sm">Goal: {chosen.goal}</div>
             <div className="text-sm">Attempts: {chosen.attempts} · Target: {chosen.target} · Model: {chosen.model}</div>
+            <div className="text-sm">TRIDENT training: {chosen.training}</div>
+            {chosen.trainingReceipt && <pre className="text-xs whitespace-pre-wrap break-words">{JSON.stringify(chosen.trainingReceipt, null, 2)}</pre>}
             {chosen.issues.length > 0 && (
               <div className="text-sm text-destructive">
                 <strong>Issues:</strong>
