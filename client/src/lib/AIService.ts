@@ -1,3 +1,5 @@
+import { askLocalModel } from "./localModel";
+
 /**
  * AI Service Router
  * Handles API calls to different AI backends based on user selection
@@ -16,7 +18,7 @@ interface AIResponse {
 
 export class AIService {
   private static getSelectedBackend(): string {
-    return localStorage.getItem("ai_backend") || "claude";
+    return localStorage.getItem("ai_backend") || "local";
   }
 
   private static getApiKey(backend: string): string | null {
@@ -33,6 +35,10 @@ export class AIService {
 
     try {
       switch (backend) {
+        case "local": {
+          const reply = await askLocalModel(testMessages, { maxTokens: 24 });
+          return { content: reply.text };
+        }
         case "claude":
           return await this.callClaudeWithKey(testMessages, apiKey);
         case "gpt":
@@ -65,6 +71,10 @@ export class AIService {
     
     try {
       switch (backend) {
+        case "local": {
+          const reply = await askLocalModel(messages);
+          return { content: reply.text };
+        }
         case "claude":
           return await this.callClaude(messages);
         case "gpt":
