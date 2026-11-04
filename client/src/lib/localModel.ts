@@ -92,7 +92,7 @@ export async function probeLocalModel(): Promise<LocalEngineProbe> {
   const uniqueBases = [...new Set(bases)];
   for (const base of uniqueBases) {
     try {
-      const r = await fetch(base.replace(/\\/+$/, "") + "/v1/models", { signal: AbortSignal.timeout(3000) });
+      const r = await fetch(base.replace(/\/+$/, "") + "/v1/models", { signal: AbortSignal.timeout(3000) });
       if (!r.ok) continue;
       result.llamaServer = base;
       const data = await r.json();
@@ -108,7 +108,7 @@ export async function probeLocalModel(): Promise<LocalEngineProbe> {
   }
   const ollama = localStorage.getItem("ollama_url") || "http://127.0.0.1:11434";
   try {
-    const r = await fetch(ollama.replace(/\\/+$/, "") + "/api/tags", { signal: AbortSignal.timeout(3000) });
+    const r = await fetch(ollama.replace(/\/+$/, "") + "/api/tags", { signal: AbortSignal.timeout(3000) });
     if (r.ok) {
       result.ollamaServer = ollama;
       const data = await r.json();
