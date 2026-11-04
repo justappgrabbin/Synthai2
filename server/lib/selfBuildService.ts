@@ -169,7 +169,7 @@ function examples(): string {
 function modelName(): string { return process.env.SYNTHIA_BUILD_MODEL || "qwen2.5-coder:7b"; }
 export async function buildCapability() {
   // A configured model string is not a model installation. Probe real Ollama tags.
-  const endpoint = (process.env.SYNTHIA_OLLAMA_URL || "http://127.0.0.1:11434").replace(/\\/+$/, "");
+  const endpoint = (process.env.SYNTHIA_OLLAMA_URL || "http://127.0.0.1:11434").replace(/\/+$/, "");
   const model = modelName();
   let serverReachable = false;
   let modelInstalled = false;
