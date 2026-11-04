@@ -43,6 +43,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   };
+  app.get("/api/self-build/published", (_req, res) => {
+    const published = listBuildJobs().filter((job) => job.phase === "completed" && job.target === "grove");
+    res.json({ success: true, builds: published.map((job) => ({
+      id: job.id, name: job.name, artifact: job.artifact, mountedAppId: job.mountedAppId,
+      createdAt: job.createdAt,
+    })) });
+  });
   app.get("/api/self-build/status", requireBuildAuth, (_req, res) => {
     res.json({ success: true, ...buildCapability() });
   });
