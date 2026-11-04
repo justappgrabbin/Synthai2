@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -149,6 +149,14 @@ const TEMPLATE_ITEMS: StoreItem[] = TEMPLATE_REGISTRY.map(template => ({
 const STORE_ITEMS: StoreItem[] = [...COMMUNITY_ITEMS, ...TEMPLATE_ITEMS];
 
 export function GroveStore() {
+  const [publishedBuilds, setPublishedBuilds] = useState<Array<{ id: string; name: string; artifact: string; createdAt: string }>>([]);
+  useEffect(() => {
+    let live = true;
+    fetch("/api/self-build/published").then((response) => response.json()).then((data) => {
+      if (live && Array.isArray(data.builds)) setPublishedBuilds(data.builds);
+    }).catch(() => {});
+    return () => { live = false; };
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [, setLocation] = useLocation();
@@ -241,6 +249,21 @@ export function GroveStore() {
           </div>
         </div>
 
+        {publishedBuilds.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold mb-3">Your verified Grove builds</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {publishedBuilds.filter((build) => build.name.toLowerCase().includes(searchQuery.toLowerCase())).map((build) => (
+                <Card key={build.id} className="p-4 space-y-2">
+                  <div className="font-semibold">{build.name}</div>
+                  <div className="text-xs text-muted-foreground">Source-validated build · {new Date(build.createdAt).toLocaleString()}</div>
+                  <a href={build.artifact} target="_blank" rel="noopener noreferrer"
+                    className="underline text-primary text-sm">Open real app</a>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
         {featuredItems.length > 0 && (
           <section className="mb-8">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
