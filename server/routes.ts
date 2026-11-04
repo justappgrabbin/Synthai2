@@ -67,6 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prompt: z.string().trim().min(8).max(12000),
         name: z.string().trim().min(1).max(100).optional(),
         target: z.enum(["grove", "site"]),
+        trainModel: z.boolean().optional(),
         netlifyApiKey: z.string().min(1).optional(),
         siteName: z.string().regex(/^[a-z0-9-]{3,60}$/).optional(),
       }).parse(req.body);
@@ -82,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/self-build/artifacts/:id/:file(*)", (req, res) => {
     const resource = readBuildArtifact(req.params.id, req.params.file);
     if (!resource) return res.status(404).send("Build artifact not found");
-    res.setHeader("Content-Security-Policy", "sandbox allow-scripts; default-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'");
+    res.setHeader("Content-Security-Policy", "sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: *; font-src data:; connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'");
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.type(resource.mime).send(resource.content);
   });
