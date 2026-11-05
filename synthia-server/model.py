@@ -103,6 +103,13 @@ class Trident(nn.Module):
         self.pos_enc  = PositionalEncoding(c.d_model, c.max_seq_len, c.dropout)
         self.backbone = nn.ModuleList([TransformerBlock(c.d_model, c.n_heads, c.d_ff, c.dropout) for _ in range(c.n_layers)])
         self.ln_back  = nn.LayerNorm(c.d_model)
+        # Learned Klein features are present in BOTH backbone and specialist
+        # cross-attention. This is not a cosmetic prefix or tool-name label.
+        self.klein_encoder = nn.Sequential(
+            nn.Linear(32, c.rag_dim), nn.GELU(),
+            nn.Linear(c.rag_dim, c.rag_dim), nn.LayerNorm(c.rag_dim))
+        self.klein_backbone = nn.Linear(c.rag_dim, c.d_model, bias=False)
+        self.klein_gain = nn.Parameter(torch.tensor(0.25))
         self.router   = HeadRouter(c.d_model, len(c.heads))
         self.heads    = nn.ModuleDict({n: SpecialistHead(c, n) for n in c.heads})
         self.apply(self._init)
@@ -114,18 +121,35 @@ class Trident(nn.Module):
         elif isinstance(m, nn.Embedding):
             nn.init.normal_(m.weight, 0, 0.02)
 
-    def forward(self, ids, rag=None, head=None, return_router=False):
+    def forward(self, ids, rag=None, head=None, return_router=False, klein=None):
         B, T = ids.shape
         mask = torch.triu(torch.full((T, T), float('-inf'), device=ids.device), diagonal=1)
         x    = self.pos_enc(self.embed(ids))
+        klein_embedding = None
+        if klein is not None:
+            if klein.ndim != 3 or klein.shape != (B, 8, 32):
+                raise ValueError("klein must be [batch, 8 tools, 32 features]")
+            if not torch.isfinite(klein).all():
+                raise ValueError("klein contains nonfinite features")
+            klein_embedding = self.klein_encoder(
+                klein.to(device=ids.device, dtype=x.dtype))
+            x = x + torch.tanh(self.klein_gain) * self.klein_backbone(
+                klein_embedding.mean(dim=1)).unsqueeze(1)
         for layer in self.backbone:
             x = layer(x, mask)
         x = self.ln_back(x)
         rw = self.router(x)
 
         def _rag(name):
-            if rag is None: return None
-            return rag.get(name) if isinstance(rag, dict) else rag
+            chunks = rag.get(name) if isinstance(rag, dict) else rag
+            if chunks is not None:
+                if chunks.ndim != 3 or chunks.shape[0] != B or chunks.shape[2] != self.cfg.rag_dim:
+                    raise ValueError("rag must be [batch, chunks, rag_dim]")
+                chunks = chunks.to(device=ids.device, dtype=x.dtype)
+            if klein_embedding is None:
+                return chunks
+            return (klein_embedding if chunks is None
+                    else torch.cat((chunks, klein_embedding), dim=1))
 
         if head:
             logits = self.heads[head](x, _rag(head), mask)
@@ -136,11 +160,15 @@ class Trident(nn.Module):
         return (logits, rw) if return_router else logits
 
     @torch.no_grad()
-    def generate(self, ids, max_new=64, temp=0.8, top_k=40, rag=None, head=None):
+    def generate(self, ids, max_new=64, temp=0.8, top_k=40, rag=None, head=None, klein=None):
+        if temp <= 0:
+            raise ValueError("temp must be positive")
+        if max_new < 0 or max_new > 256:
+            raise ValueError("max_new out of bounds")
         self.eval()
         for _ in range(max_new):
             ctx    = ids[:, -self.cfg.max_seq_len:]
-            logits = self.forward(ctx, rag=rag, head=head)[:, -1, :] / temp
+            logits = self.forward(ctx, rag=rag, head=head, klein=klein)[:, -1, :] / temp
             if top_k:
                 v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
                 logits[logits < v[:, -1:]] = float('-inf')

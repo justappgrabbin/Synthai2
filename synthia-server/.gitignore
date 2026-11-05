@@ -11,3 +11,6 @@ Thumbs.db
 .env
 .env.local
 node_modules/
+
+# Local approved training text and checkpoint weights
+runtime/trident-klein/

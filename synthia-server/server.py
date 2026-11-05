@@ -666,8 +666,29 @@ async def trident_generate(request: Request):
         hits=rag_search(rag_query,top_k=3,head_tag=head)
         retrieved=[h["text"][:200] for h in hits]
 
-    # Try Groq first
-    if groq_key:
+    # The default TRIDENT route now uses its actual Klein-conditioned weights.
+    # Legacy hosted/heuristic routes require an explicit provider selection.
+    provider=b.get("provider", "local-klein")
+    if provider in ("local-klein", "pytorch-trident-klein"):
+        try:
+            result=await asyncio.to_thread(
+                _get_trident_klein().generate, prompt,
+                head=head if head in ("code","math","research") else "auto",
+                max_new=min(80, max(1, max_tokens)), temperature=temp)
+            await _broadcast("trident:generate",result)
+            return JSONResponse(result)
+        except RuntimeError as error:
+            raise HTTPException(status_code=409, detail=str(error))
+        except (ValueError, TypeError) as error:
+            raise HTTPException(status_code=400, detail=str(error))
+    if provider not in ("legacy-heuristic", "groq"):
+        raise HTTPException(status_code=400, detail="Unknown TRIDENT provider")
+
+    # Explicit legacy/hosted provider. This is NOT the local trained TRIDENT.
+    if provider == "legacy-heuristic":
+        groq_key = ""
+    # Try Groq first only when explicitly requested.
+    if groq_key and provider == "groq":
         rw=router_weights(prompt); h=head or max(rw,key=rw.get)
         sys_prompt=TRIDENT_PERSONAS.get(h,TRIDENT_PERSONAS["cynthia"])
         if retrieved: sys_prompt+="\n\nContext from knowledge base:\n"+"\n".join(retrieved[:2])
@@ -1056,13 +1077,7 @@ _confidence_experience: List[Dict] = []
 
 _ingest_sources: Dict[str, Dict] = {}       # source_name → {files, file_count}
 
-_trident_model_state: Dict = {
-    "param_count": 147456,
-    "trained_epochs": 0,
-    "best_loss": None,
-    "weights_saved": False,
-    "samples": {"code":0,"math":0,"research":0}
-}
+# TRIDENT status is derived from actual torch checkpoints in trident_runtime.py.
 
 # ── SEED CODE ─────────────────────────────────────────────────────────────────
 
@@ -1674,84 +1689,80 @@ async def ingest_clear(source_name: str):
 #  TRIDENT MODEL TRAINER ROUTES
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# Real, owner-mediated TRIDENT model. The previous version simulated training
+# via sleep and fabricated losses; no such behavior remains in these routes.
+_trident_klein_runtime = None
+
+def _get_trident_klein():
+    global _trident_klein_runtime
+    if _trident_klein_runtime is None:
+        from trident_runtime import TridentKleinRuntime
+        _trident_klein_runtime = TridentKleinRuntime()
+    return _trident_klein_runtime
+
+def _trident_owner_required(request: Request):
+    import hmac
+    configured = os.environ.get("SYNTHIA_OWNER_TOKEN", "")
+    supplied = request.headers.get("x-synthia-owner-token", "")
+    if len(configured) < 32 or not hmac.compare_digest(configured, supplied):
+        raise HTTPException(status_code=403, detail="Authenticated local owner token required")
+
 @app.get("/trident/model/status")
 async def trident_model_status():
-    return JSONResponse(_trident_model_state)
+    return JSONResponse(await asyncio.to_thread(lambda: _get_trident_klein().status()))
+
+@app.post("/trident/model/understand")
+async def trident_model_understand(request: Request):
+    from trident_klein import observe
+    b = await request.json()
+    try:
+        return JSONResponse(observe(b.get("text", ""), b.get("dimension", "evolution")))
+    except (ValueError, TypeError) as error:
+        raise HTTPException(status_code=400, detail=str(error))
 
 @app.post("/trident/model/train")
 async def trident_model_train(request: Request):
+    _trident_owner_required(request)
     b = await request.json()
-    epochs = int(b.get("epochs", 20))
-    lr = float(b.get("lr", 0.003))
-    batch_size = int(b.get("batch_size", 4))
-    samples = b.get("samples", {})
-
-    # Add custom samples to RAG
-    for head, texts in samples.items():
-        for text in (texts or []):
-            if text.strip():
-                rag_add(text.strip(), source="trainer", head_tag=head)
-                _trident_model_state["samples"][head] = _trident_model_state["samples"].get(head,0) + 1
-
-    # Simulate training with SSE broadcast
-    best_loss = 1.0
-    async def run_training():
-        nonlocal best_loss
-        for epoch in range(1, epochs+1):
-            await asyncio.sleep(0.3)  # simulate epoch time
-            loss = round(best_loss * (0.85 + hash(str(epoch)) % 10 / 100), 4)
-            best_loss = min(best_loss, loss)
-            # Generate something via heuristic trident
-            gen_result = trident_heuristic(f"epoch {epoch} training", None, 20, 0.7, [])
-            await _broadcast("trident:train", {
-                "epoch": epoch, "total": epochs,
-                "loss": loss, "head": "trident",
-                "gen": gen_result["generated"][:40]
-            })
-        _trident_model_state["trained_epochs"] += epochs
-        _trident_model_state["best_loss"] = round(best_loss, 4)
-        _trident_model_state["weights_saved"] = True
-        await _broadcast("trident:train_complete", {"epochs": epochs, "best_loss": best_loss})
-
-    asyncio.create_task(run_training())
-
-    return JSONResponse({
-        "ok": True,
-        "epochs_trained": epochs,
-        "stats": {"best_loss": best_loss, "lr": lr, "batch_size": batch_size}
-    })
+    try:
+        if not isinstance(b.get("examples"), list):
+            raise ValueError("Supply examples with head, prompt, response and approved:true; unlabeled samples are not training proof")
+        result = await asyncio.to_thread(
+            _get_trident_klein().train, b["examples"],
+            epochs=b.get("epochs", 1), lr=b.get("lr", 0.0003))
+    except (ValueError, TypeError) as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    await _broadcast("trident:train_complete", {
+        "actual_gradient_steps": result["gradient_steps"], "loss": result["loss"],
+        "engine": "pytorch-trident-klein"})
+    return JSONResponse(result)
 
 @app.post("/trident/model/generate")
 async def trident_model_generate(request: Request):
     b = await request.json()
-    prompt = b.get("prompt","")
-    head = b.get("head","cynthia")
-    max_tokens = int(b.get("max_tokens", 40))
-    groq_key = b.get("groq_key","") or os.environ.get("GROQ_KEY","")
+    try:
+        result = await asyncio.to_thread(
+            _get_trident_klein().generate, b.get("prompt", ""),
+            head=b.get("head", "auto"),
+            max_new=int(b.get("max_tokens", 48)),
+            temperature=float(b.get("temperature", 0.8)))
+        return JSONResponse(result)
+    except (TypeError, ValueError) as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error))
 
-    rw = router_weights(prompt)
-    retrieved = [h["text"][:100] for h in rag_search(prompt, top_k=2)]
-
-    if groq_key:
-        sys_p = TRIDENT_PERSONAS.get(head, TRIDENT_PERSONAS["cynthia"])
-        reply = await groq_call(sys_p, [{"role":"user","content":prompt}], groq_key, max_tokens=max_tokens)
-        if reply:
-            return JSONResponse({"generated": reply, "router_weights": list(rw.values()), "tier": "groq"})
-
-    result = trident_heuristic(prompt, head, max_tokens, 0.8, retrieved)
-    return JSONResponse({
-        "generated": result["generated"],
-        "router_weights": list(rw.values()),
-        "tier": "heuristic"
-    })
+@app.get("/trident/model/remember")
+async def trident_model_remember(request: Request, q: str = "", limit: int = 20):
+    _trident_owner_required(request)
+    try:
+        return JSONResponse(_get_trident_klein().recall(q, limit))
+    except (TypeError, ValueError) as error:
+        raise HTTPException(status_code=400, detail=str(error))
 
 @app.post("/trident/model/reset")
 async def trident_model_reset(request: Request):
-    global _trident_model_state
-    _trident_model_state = {
-        "param_count": 147456, "trained_epochs": 0,
-        "best_loss": None, "weights_saved": False,
-        "samples": {"code":0,"math":0,"research":0}
-    }
-    return JSONResponse({"ok": True})
-
+    _trident_owner_required(request)
+    # The originals/weights must not be silently removed via a web request.
+    raise HTTPException(status_code=409,
+                        detail="Destructive model reset disabled. Create a separate versioned training directory.")
