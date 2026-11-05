@@ -180,6 +180,10 @@ function authorize(req: Request, res: Response): boolean {
     res.setHeader("Vary", "Origin");
   }
 
+  // CORS preflight carries no bearer token, but origin and configured secret
+  // must already pass validation before the server grants it.
+  if (req.method === "OPTIONS") return true;
+
   const header = req.header("authorization") || "";
   const supplied = header.startsWith("Bearer ") ? header.slice(7) : "";
   const a = Buffer.from(token);
@@ -200,7 +204,7 @@ export function registerMcpApps(app: Express): void {
   app.all("/mcp", async (req: Request, res: Response) => {
     if (!authorize(req, res)) return;
     if (req.method === "OPTIONS") {
-      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, MCP-Protocol-Version");
+      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, MCP-Protocol-Version");
       res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
       res.status(204).end();
       return;
