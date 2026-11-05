@@ -2,7 +2,6 @@ import type { Express, Request, Response } from "express";
 import { timingSafeEqual } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { build } from "esbuild";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
@@ -42,6 +41,7 @@ async function viewHtml(): Promise<string> {
       throw new Error("MCP App view missing. Run npm run build.");
     }
     html = await readFile(SOURCE_HTML, "utf8");
+    const { build } = await import("esbuild");
     const output = await build({
       entryPoints: [SOURCE_JS],
       bundle: true,
