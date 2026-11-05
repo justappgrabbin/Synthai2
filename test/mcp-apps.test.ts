@@ -58,6 +58,16 @@ test("MCP Apps endpoint fails closed and enforces authentication", async (t) => 
       assert.equal(response.status, 403);
     });
 
+    await t.test("approved browser preflight succeeds without bearer", async () => {
+      process.env.SYNTHIA_MCP_ALLOWED_ORIGINS = "https://trusted.example";
+      const response = await fetch(url, {
+        method: "OPTIONS",
+        headers: { Origin: "https://trusted.example", "Access-Control-Request-Method": "POST" },
+      });
+      assert.equal(response.status, 204);
+      assert.equal(response.headers.get("access-control-allow-origin"), "https://trusted.example");
+    });
+
     await t.test("preflight requires an allowed origin", async () => {
       const response = await fetch(url, {
         method: "OPTIONS",
