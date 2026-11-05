@@ -16,7 +16,8 @@
     "mobile:sync": "npm run build && npx cap sync android",
     "mobile:add": "npx cap add android",
     "mobile:apk": "npm run mobile:sync && cd android && ./gradlew assembleDebug",
-    "build:mcp-apps": "esbuild client/src/mcp-apps/console.ts --bundle --platform=browser --format=iife --target=es2020 --minify --outfile=dist/mcp-apps/console.js && node scripts/stage-mcp-apps.mjs"
+    "build:mcp-apps": "esbuild client/src/mcp-apps/console.ts --bundle --platform=browser --format=iife --target=es2020 --minify --outfile=dist/mcp-apps/console.js && node scripts/stage-mcp-apps.mjs",
+    "test:mcp-apps": "node --import tsx --test test/mcp-apps.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
