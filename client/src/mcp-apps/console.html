@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>SynthAi2 · MCP Control Center</title>
+<style>
+:root{font:14px/1.5 system-ui,Arial,sans-serif;color:#eae5de;background:#101419}
+*{box-sizing:border-box}
+body{margin:0;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+h1{font-size:18px;margin:0}p{margin:4px 0;color:#aab4bd}
+small{color:#aab4bd}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+button{background:#1c2530;border:1px solid #394758;border-radius:8px;color:#eae5de;cursor:pointer;padding:9px 12px;font:inherit}
+button[aria-pressed=true]{border-color:#9ab6cf;background:#263748}
+button:focus-visible,input:focus-visible{outline:2px solid #bbd4ea;outline-offset:2px}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+input{background:#171f28;color:#eae5de;border:1px solid #394758;border-radius:7px;padding:9px}
+#notice{color:#c5d9ea;min-height:24px;margin-bottom:10px}
+#results{display:grid;gap:12px;max-height:60vh;overflow:auto}
+article{padding:13px;background:#18212a;border:1px solid #2a3644;border-radius:10px;overflow-wrap:anywhere}
+article h2{margin:0 0 5px;font-size:14px}
+article p{margin:0;white-space:pre-wrap}
+pre{white-space:pre-wrap;word-break:break-word}
+@media(prefers-color-scheme:light){:root{color:#18202a;background:#f7f9fb}p,small{color:#4e5b69}article{background:#fff;border-color:#d2dce6}button,input{background:#fff;color:#172333;border-color:#9eb0bf}button[aria-pressed=true]{background:#e4f0fb;border-color:#547da0}#notice{color:#245071}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>SynthAi2 · MCP Control Center</h1><p>Existing services, viewed through MCP Apps</p></div>
+  <small id="connection">Connecting…</small>
+</header>
+<nav aria-label="Choose MCP App">
+<button type="button" data-kind="system" aria-pressed="true">System Overview</button>
+<button type="button" data-kind="mesh" aria-pressed="false">Mesh Events</button>
+<button type="button" data-kind="apps" aria-pressed="false">Mounted Apps</button>
+</nav>
+<div class="controls">
+<label id="limit-control" hidden>Recent events <input id="limit" type="number" min="1" max="100" value="30"></label>
+<button id="refresh" type="button">Refresh</button>
+</div>
+<div id="notice" role="status" aria-live="polite">Waiting for the MCP host…</div>
+<main id="results" aria-label="Results"></main>
+<!-- MCP_APP_SCRIPT -->
+</body>
+</html>
