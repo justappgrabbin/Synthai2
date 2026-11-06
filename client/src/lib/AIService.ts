@@ -77,6 +77,8 @@ export class AIService {
     
     try {
       switch (backend) {
+        case "cynthia":
+          return await this.callCynthia(messages);
         case "local": {
           const reply = await askLocalModel(messages);
           return { content: reply.text };
