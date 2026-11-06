@@ -32,6 +32,7 @@ import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import HumanDesignStudio from "@/pages/HumanDesignStudio";
 import SimlishWorld from "@/pages/SimlishWorld";
 import SynthiaExperience from "@/pages/SynthiaExperience";
+import CynthiaResident from "@/pages/CynthiaResident";
 import IndiverseWorld from "@/pages/IndiverseWorld";
 import SelfBuild from "@/pages/SelfBuild";
 import "@/lib/registerHumanDesignApp";
@@ -67,6 +68,7 @@ function Router() {
         <Route path="/human-design" component={HumanDesignStudio} />
         <Route path="/simlish-world" component={SimlishWorld} />
         <Route path="/synthia" component={SynthiaExperience} />
+        <Route path="/cynthia-resident" component={CynthiaResident} />
         <Route component={NotFound} />
       </Switch>
     </>
