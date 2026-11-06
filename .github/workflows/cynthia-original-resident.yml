@@ -61,6 +61,17 @@ jobs:
           name: Cynthia-Klein-Original-Trained
           path: artifacts/Cynthia-Klein-Original-Trained.zip
           if-no-files-found: error
+      - name: Package existing Computer with original trained Cynthia as one ZIP
+        run: |
+          zip -q -r artifacts/Synthai2-Computer-With-Original-Cynthia.zip . -x "./.git/*" "./node_modules/*" "./dist/*" "./artifacts/*" "./data/*" "./vendor/klein-agent/.git" "./vendor/klein-agent/.venv/*"
+          unzip -l artifacts/Synthai2-Computer-With-Original-Cynthia.zip | grep 'vendor/klein-agent/run/model.pt'
+          unzip -l artifacts/Synthai2-Computer-With-Original-Cynthia.zip | grep 'scripts/start-with-original-cynthia.sh'
+      - name: Upload complete original-Cynthia Computer source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthai2-Computer-With-Original-Cynthia
+          path: artifacts/Synthai2-Computer-With-Original-Cynthia.zip
+          if-no-files-found: error
   original-model-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 30
