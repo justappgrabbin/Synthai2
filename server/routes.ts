@@ -22,9 +22,11 @@ import { z } from "zod";
 import { adaptiveStatus, startAdaptiveBuild, stopAdaptiveBuild } from "./lib/adaptiveAgentService";
 import { submitSelfBuild, getBuildJob, listBuildJobs, readBuildArtifact, buildCapability } from "./lib/selfBuildService";
 import { timingSafeEqual } from "node:crypto";
+import { registerCynthiaResidentBridge } from "./lib/cynthiaResidentBridge";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   registerMorphImageRoutes(app);
+  registerCynthiaResidentBridge(app);
 
   // Native Computer self-builder API. Never expose model execution to an anonymous website.
   const requireBuildAuth = (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => {
