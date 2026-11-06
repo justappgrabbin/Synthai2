@@ -4,7 +4,9 @@
 set -euo pipefail
 COMPUTER_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$COMPUTER_ROOT"
-git submodule update --init --recursive
+if git -C "$COMPUTER_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git submodule update --init --recursive
+fi
 ORIGINAL="$COMPUTER_ROOT/vendor/klein-agent"
 SOURCE_COMMIT="78ea0e28c70d7a5d4c288279025a493ceccbde5d"
 CYNTHIA_DATA="${SYNTHIA_KLEIN_WORK_DIR:-$COMPUTER_ROOT/data/cynthia-resident}"
