@@ -68,6 +68,7 @@ export default function CynthiaResident() {
         <p className="text-muted-foreground">This screen connects to the original Python service. The Android APK does not contain PyTorch or the model runtime.</p>
       </div>
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+      {status && !status.authorized && !status.ownerTokenRequired && <p className="text-sm" role="alert">Remote access needs a Computer owner token. Start the Computer with scripts/start-with-original-cynthia.sh on its host.</p>}
       {status && !status.authorized && status.ownerTokenRequired && (
         <div className="flex max-w-md gap-2">
           <Input type="password" autoComplete="off" aria-label="Computer owner token" placeholder="Computer owner token"
@@ -80,9 +81,9 @@ export default function CynthiaResident() {
           className="h-[76vh] min-h-[540px] w-full rounded-lg border bg-background" />
       ) : (
         <div className="space-y-2 rounded-lg border p-4 text-sm">
-          <p>To start the original model on the same Linux/macOS host as the Computer:</p>
-          <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-muted p-3 text-xs">{'git submodule update --init --recursive\ncd vendor/klein-agent\nbash setup.sh\nbash start.sh'}</pre>
-          <p>Once it starts at 127.0.0.1:7860, return here and select Check connection. The first setup installs dependencies; the model weights are already in the pinned repository.</p>
+          <p>To start the original model and the Computer together on a Linux/macOS host:</p>
+          <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-muted p-3 text-xs">{'bash scripts/start-with-original-cynthia.sh'}</pre>
+          <p>When the original model starts, select Check connection. The launch script verifies the pinned files, installs dependencies on first use and stores your session separately.</p>
           <p>No model training or changes to its source are required to try it.</p>
         </div>
       )}
