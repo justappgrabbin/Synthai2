@@ -8,3 +8,7 @@ workspace
 work
 __pycache__/
 **/__pycache__/
+
+# Original Cynthia trained model private state and owner token
+data/cynthia-resident/
+data/cynthia-resident-owner-token

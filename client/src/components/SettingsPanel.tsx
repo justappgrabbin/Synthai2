@@ -188,11 +188,12 @@ export function SettingsPanel() {
     <div className="min-h-screen bg-background">
       <div className="p-8 max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Configuration</h1>
-          <p className="text-muted-foreground">Manage your AI backends, autonomy, and studio preferences</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+          <p className="text-muted-foreground">AI, Computer, autonomy and preferences.</p>
+          <a href="/cynthia-resident" className="underline text-sm">Open original trained Cynthia Klein and check the real model connection</a>
         </div>
 
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs defaultValue="ai" className="space-y-6">
           <TabsList className="flex flex-wrap h-auto w-full justify-start gap-1 p-1">
             <TabsTrigger value="general" data-testid="tab-general">General</TabsTrigger>
             <TabsTrigger value="os" data-testid="tab-os">OS Setup</TabsTrigger>

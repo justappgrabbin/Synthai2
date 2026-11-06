@@ -1,0 +1,3 @@
+[submodule "vendor/klein-agent"]
+	path = vendor/klein-agent
+	url = https://github.com/justappgrabbin/klein-agent.git

@@ -25,6 +25,7 @@ interface AIBackend {
 }
 
 const AI_BACKENDS: AIBackend[] = [
+  { id: "cynthia", name: "Cynthia Klein", displayName: "Cynthia — trained original", requiresKey: false },
   {
     id: "claude",
     name: "Claude",
