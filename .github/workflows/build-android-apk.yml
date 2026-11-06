@@ -1,67 +1,145 @@
-name: Build Android APK
-
+name: Build Android APK — embedded Linux Computer (ARM64)
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+      - integration/android-embedded-linux-computer-20261105
+concurrency:
+  group: synthai-linux-apk-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build-apk:
+  build-native-linux-computer:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 100
     steps:
-      - name: Checkout
+      - name: Checkout Computer and original trained Cynthia with submodules
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          cache: npm
-
-      - name: Setup Java
+          submodules: recursive
+      - name: Set up QEMU for ARM64 Linux rootfs
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build complete ARM64 guest with real Node, Python, and Cynthia weights
+        run: |
+          docker buildx build --platform linux/arm64 \
+            -f android-linux/linux/Dockerfile \
+            -t synthai2-embedded-linux:"$GITHUB_SHA" --load .
+      - name: Smoke-test ALL four services inside real ARM64 Linux container
+        run: |
+          docker run -d --rm --platform linux/arm64 \
+            --name synthai2-guest-smoke synthai2-embedded-linux:"$GITHUB_SHA"
+          trap 'docker rm -f synthai2-guest-smoke >/dev/null 2>&1 || true' EXIT
+          docker exec synthai2-guest-smoke node -e '
+          const urls=[
+            ["Computer Express","http://127.0.0.1:5000/api/health"],
+            ["Synthia Node","http://127.0.0.1:10000/health"],
+            ["Synthia Python","http://127.0.0.1:8001/health"],
+            ["Trained original Cynthia Klein","http://127.0.0.1:7860/api/status"]
+          ];
+          (async()=>{
+            const deadline=Date.now()+180000;
+            for(const [name,url] of urls){
+              let okay=false,last="";
+              while(Date.now()<deadline){
+                try {
+                  const response=await fetch(url,{signal:AbortSignal.timeout(3000)});
+                  const data=await response.text();
+                  if(response.ok){
+                    if(name.startsWith("Trained")){
+                      const obj=JSON.parse(data);
+                      if(typeof obj.checkpoint_step!=="number" || typeof obj.skill_count!=="number")
+                        throw Error("original trained checkpoint or skills missing");
+                    }
+                    console.log(name+" responds inside ARM64 guest");okay=true;break;
+                  }
+                  last=response.status+" "+data.slice(0,120);
+                }catch(e){last=String(e);}
+                await new Promise(r=>setTimeout(r,2000));
+              }
+              if(!okay)throw Error(name+" unavailable: "+last);
+            }
+            const r=await fetch("http://127.0.0.1:7860/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"What skills do you have?"})});
+            const value=await r.json();
+            if(!r.ok || typeof value.reply!=="string" || !value.reply.trim())throw Error("Trained model chat not responding");
+            console.log("Original Cynthia chat returned an actual response");
+          })().catch(e=>{console.error(e);process.exit(1);});'
+      - name: Export ARM64 guest filesystem into the APK source assets
+        run: |
+          mkdir -p android-linux/app/src/main/assets /tmp/synthai2-rootfs
+          id="$(docker create --platform linux/arm64 synthai2-embedded-linux:"$GITHUB_SHA")"
+          docker export "$id" | tar -C /tmp/synthai2-rootfs -xf -
+          docker rm "$id"
+          test -x /tmp/synthai2-rootfs/usr/local/bin/node
+          test -f /tmp/synthai2-rootfs/opt/synthai/studio/dist/index.js
+          test -f /tmp/synthai2-rootfs/opt/synthai/synthia-server/server/lite.js
+          test -f /tmp/synthai2-rootfs/opt/synthai/synthia-server/server.py
+          test -f /tmp/synthai2-rootfs/opt/synthai/klein-source/run/model.pt
+          test -f /tmp/synthai2-rootfs/opt/synthai/guest/start.mjs
+          echo "ed94061b70e07d83aab5da6a1519cc293c413d541f183eac5d95a1525574f75e  /tmp/synthai2-rootfs/opt/synthai/klein-source/run/model.pt" | sha256sum -c -
+          tar --hard-dereference -C /tmp/synthai2-rootfs -czf android-linux/app/src/main/assets/linux-rootfs.bundle .
+          printf '%s\n' "$GITHUB_SHA" > android-linux/app/src/main/assets/linux-rootfs.version
+          du -h android-linux/app/src/main/assets/linux-rootfs.bundle
+      - name: Install Java and Android SDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build web app
-        run: npm run build
-
-      - name: Add Android project
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+      - name: Install Android NDK r28
+        run: sdkmanager 'ndk;28.0.13004108'
+      - name: Compile pinned Android PRoot ARM64 implementation
+        env:
+          OPENMINIS_COMMIT: 4ef29002e88db1e20e462ec2ff46916e8a7dcb45
+          NDK_VERSION: 28.0.13004108
         run: |
-          if [ ! -d android ]; then
-            npx cap add android
-          fi
-
-      - name: Sync Capacitor
-        run: npx cap sync android
-
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug
-
-      - name: Test packaging completeness checker
-        run: node --test tests/audit-computer-apk.test.mjs
-
-      - name: Audit the built APK (web shell is NOT a complete computer)
-        run: node scripts/audit-computer-apk.mjs android/app/build/outputs/apk/debug/app-debug.apk artifacts/full-computer-apk-audit.json
-
-      - name: Upload completeness report (required for accepting builds)
+          git clone https://github.com/OpenMinis/OpenMinis.git /tmp/openminis
+          git -C /tmp/openminis checkout "$OPENMINIS_COMMIT"
+          git -C /tmp/openminis submodule update --init --recursive
+          export ANDROID_NDK_HOME="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION"
+          bash /tmp/openminis/deps/build_proot.sh
+          mkdir -p android-linux/app/src/main/jniLibs/arm64-v8a
+          cp /tmp/openminis/src/android/app/src/main/jniLibs/arm64-v8a/libproot*.so android-linux/app/src/main/jniLibs/arm64-v8a/
+          test "$(sha256sum android-linux/app/src/main/jniLibs/arm64-v8a/libproot-loader.so | cut -d' ' -f1)" = 44ef39c1e1a18c09f6e4c4b5d6f8bba82d30596598bd155ec162d05c5122ff04
+          test "$(sha256sum android-linux/app/src/main/jniLibs/arm64-v8a/libproot-loader32.so | cut -d' ' -f1)" = 25f6bd90bc5a3d3088026289a0d3eaf3e502bd2b00e5cb74fadd9791132efa34
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Compile native Android host and Linux rootfs asset
+        working-directory: android-linux
+        run: gradle --no-daemon :app:assembleDebug
+      - name: Reject backend-free APKs and verify actual embedded guest bytes
+        run: |
+          APK=android-linux/app/build/outputs/apk/debug/app-debug.apk
+          unzip -l "$APK" | tee /tmp/native-apk-tree.txt >/dev/null
+          grep -q 'assets/linux-rootfs.bundle' /tmp/native-apk-tree.txt
+          grep -q 'assets/linux-rootfs.version' /tmp/native-apk-tree.txt
+          grep -q 'lib/arm64-v8a/libproot.so' /tmp/native-apk-tree.txt
+          grep -q 'lib/arm64-v8a/libproot-loader.so' /tmp/native-apk-tree.txt
+          grep -q 'lib/arm64-v8a/libproot-loader32.so' /tmp/native-apk-tree.txt
+          unzip -p "$APK" assets/linux-rootfs.bundle | tar tzf - > /tmp/embedded-rootfs-tree.txt
+          grep -q './opt/synthai/studio/dist/index.js' /tmp/embedded-rootfs-tree.txt
+          grep -q './opt/synthai/synthia-server/server/lite.js' /tmp/embedded-rootfs-tree.txt
+          grep -q './opt/synthai/synthia-server/server.py' /tmp/embedded-rootfs-tree.txt
+          grep -q './opt/synthai/klein-source/run/model.pt' /tmp/embedded-rootfs-tree.txt
+          grep -q './opt/synthai/klein-source/run/tokenizer.json' /tmp/embedded-rootfs-tree.txt
+          sha256sum "$APK" | tee "$APK.sha256"
+      - name: Upload actual embedded Linux Computer APK with checksum
         uses: actions/upload-artifact@v4
         with:
-          name: synthai2-apk-completeness-report
-          path: artifacts/full-computer-apk-audit.json
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: synthai2-webview-preview-INCOMPLETE-computer-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Synthai2-EMBEDDED-LINUX-Computer-Cynthia-ARM64-debug-APK
+          if-no-files-found: error
+          path: |
+            android-linux/app/build/outputs/apk/debug/app-debug.apk
+            android-linux/app/build/outputs/apk/debug/app-debug.apk.sha256

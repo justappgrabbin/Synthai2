@@ -47,7 +47,7 @@ export function registerCynthiaResidentBridge(app: Express) {
     if (a.length!==b.length || !timingSafeEqual(a,b)) return res.sendStatus(401);
     const id=randomBytes(32).toString("hex");
     sessions.set(id,Date.now()+8*3600_000);
-    res.cookie(COOKIE,id,{httpOnly:true,sameSite:"strict",secure:process.env.NODE_ENV==="production",path:"/",maxAge:8*3600_000});
+    res.cookie(COOKIE,id,{httpOnly:true,sameSite:"strict",secure:process.env.NODE_ENV==="production" && process.env.SYNTHIA_PHONE_CONTAINER!=="1",path:"/",maxAge:8*3600_000});
     res.json({authorized:true});
   });
   app.all("/resident/cynthia/api/:action",gate,async(req,res)=>{
