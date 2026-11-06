@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 
-const HOST = "http://127.0.0.1:7860";
+const HOST = "http://127.0.0.1:" + (process.env.SYNTHIA_KLEIN_PORT || "7860");
 const COOKIE = "cynthia_resident";
 const sessions = new Map<string, number>();
 const endpoints = new Set(["status","skills","history","source","file","chat","action","settings","feedback","reset","rollback","train"]);
