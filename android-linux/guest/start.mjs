@@ -17,6 +17,7 @@ if(sha(path.join(source,"run/model.pt"))!==expectedModel ||
 }
 mkdirSync(data,{recursive:true});
 mkdirSync(path.join(data,"workspace"),{recursive:true});
+mkdirSync(path.join(data,"synthia"),{recursive:true});
 const modelRoot=path.join(data,"cynthia-working-copy");
 const pinFile=path.join(modelRoot,".source-pin");
 const pin="78ea0e28c70d7a5d4c288279025a493ceccbde5d";
@@ -34,6 +35,8 @@ const environment={...process.env,
   SYNTHIA_PYTHON_PORT:"8001",
   SYNTHIA_KLEIN_PORT:"7860",
   SYNTHAI_DATA_DIR:data,
+  DATA_DIR:path.join(data,"synthia"),
+  OMP_NUM_THREADS:"2",
   MESH_DATA_DIR:data,
   LINUX_CONTAINER_ENABLED:"true",
   LINUX_CONTAINER_WORKDIR:path.join(data,"workspace"),
