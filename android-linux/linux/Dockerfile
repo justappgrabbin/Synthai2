@@ -14,7 +14,7 @@ FROM python:3.12-slim-bookworm AS guest
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash ca-certificates curl libstdc++6 libgomp1 libatomic1 \
-    libglib2.0-0 libgl1 git tini \
+    libglib2.0-0 libgl1 git tini build-essential pkg-config \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=nodearm /usr/local/bin/node /usr/local/bin/node
 COPY --from=nodearm /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
@@ -56,6 +56,7 @@ RUN if [ -f skills/rea/package-lock.json ]; then cd skills/rea && npm ci --omit=
 
 WORKDIR /opt/synthai
 COPY android-linux/guest/start.mjs ./guest/start.mjs
+RUN apt-get purge -y build-essential pkg-config && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/lib/synthai /root /tmp \
     && test -f studio/dist/index.js \
     && test -f studio/dist/public/index.html \
