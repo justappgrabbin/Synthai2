@@ -1,0 +1,43 @@
+# Full Linux backend. Not a WebView-only APK.
+services:
+  computer:
+    build:
+      context: .
+      dockerfile: Dockerfile.computer
+    restart: unless-stopped
+    ports:
+      - "${STUDIO_PORT:-5000}:5000"
+      - "127.0.0.1:${SYNTHIA_PORT:-10000}:10000"
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+      SYNTHIA_NODE_PORT: "10000"
+      SYNTHIA_PYTHON_PORT: "8001"
+      SYNTHIA_KLEIN_PORT: "7860"
+      SYNTHIA_KLEIN_OWNER_TOKEN: "${SYNTHIA_KLEIN_OWNER_TOKEN:-}"
+      LINUX_CONTAINER_ENABLED: "true"
+      LINUX_CONTAINER_WORKDIR: /workspace
+      LINUX_CONTAINER_SHELL: /bin/bash
+      MESH_DATA_DIR: /workspace
+      NODE_MODE: full
+      SUPABASE_PRIMARY_URL: "${SUPABASE_PRIMARY_URL:-}"
+      SUPABASE_PRIMARY_KEY: "${SUPABASE_PRIMARY_KEY:-}"
+      SUPABASE_SECONDARY_URL: "${SUPABASE_SECONDARY_URL:-}"
+      SUPABASE_SECONDARY_KEY: "${SUPABASE_SECONDARY_KEY:-}"
+      CORS_ORIGIN: "${CORS_ORIGIN:-}"
+      GITHUB_TOKEN: "${GITHUB_TOKEN:-}"
+      GOOGLE_ACCESS_TOKEN: "${GOOGLE_ACCESS_TOKEN:-}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      KIMI_API_KEY: "${KIMI_API_KEY:-}"
+    volumes:
+      - computer-state:/app/data
+      - ./workspace:/workspace
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+volumes:
+  computer-state:
