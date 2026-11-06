@@ -74,6 +74,15 @@ const CORE_APPS: AppModule[] = [
     version: "1.0.0"
   },
   {
+    id: "cynthia-resident",
+    name: "Cynthia Klein — Trained Resident",
+    description: "Open the original model, chat, tools, feedback and rollback",
+    path: "/cynthia-resident",
+    icon: Bot,
+    type: "core",
+    version: "1.0.0"
+  },
+  {
     id: "settings",
     name: "Settings",
     description: "Configure AI backends & preferences",
