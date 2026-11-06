@@ -2,6 +2,7 @@
 # Studio, Synthia Node, Synthia Python and the original trained Klein model are in the guest.
 FROM --platform=$BUILDPLATFORM node:24-bookworm-slim AS webbuild
 WORKDIR /source
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY . .
@@ -37,7 +38,8 @@ RUN node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('package.json',
     && node -e "require('express');require('cors');require('helmet')" \
     && test -f server/lite.js && test -f server.py
 # Prevent the Synthia MCP bus from listening on the phone's public interfaces.
-RUN sed -i 's/app.listen(PORT, () => {/app.listen(PORT, "127.0.0.1", () => {/' server/lite.js
+RUN sed -i 's/app.listen(PORT, () => {/app.listen(PORT, "127.0.0.1", () => {/' server/lite.js \
+    && sed -i 's/if _onnx_session is None:/if _onnx_session is None and os.environ.get("SYNTHIA_PHONE_CONTAINER") != "1":/' server.py
 
 # PRoot is a glibc Linux environment; use ARM64 Linux wheels, not Android host wheels.
 WORKDIR /opt/synthai/klein-source
