@@ -49,6 +49,17 @@ jobs:
         run: npm run build
       - name: Check launch script syntax
         run: bash -n scripts/start-with-original-cynthia.sh
+      - name: Package original Cynthia model as a user-downloadable file
+        run: |
+          mkdir -p artifacts
+          zip -q -r artifacts/Cynthia-Klein-Original-Trained.zip vendor/klein-agent docs/CYNTHIA_KLEIN_RESIDENT.md scripts/start-with-original-cynthia.sh -x "*/.git/*" "*/.venv/*"
+          unzip -l artifacts/Cynthia-Klein-Original-Trained.zip | grep 'vendor/klein-agent/run/model.pt'
+      - name: Upload downloadable original trained model and launch source
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cynthia-Klein-Original-Trained
+          path: artifacts/Cynthia-Klein-Original-Trained.zip
+          if-no-files-found: error
   original-model-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 30
