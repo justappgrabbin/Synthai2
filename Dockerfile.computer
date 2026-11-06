@@ -1,6 +1,8 @@
 # Full Linux Computer image: existing Node + Python backend plus ORIGINAL trained Cynthia.
 # Requires: git submodule update --init --recursive before docker compose build.
 FROM node:24-alpine AS ui
+# The existing stage-simlish prebuild invokes git while building bundled worlds.
+RUN apk add --no-cache git
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
