@@ -1,0 +1,117 @@
+name: Original Cynthia Klein resident verification
+
+on:
+  pull_request:
+    paths:
+      - ".gitmodules"
+      - "vendor/klein-agent"
+      - "server/lib/cynthiaResidentBridge.ts"
+      - "server/routes.ts"
+      - "client/src/pages/CynthiaResident.tsx"
+      - "client/src/lib/AIService.ts"
+      - "client/src/components/AgentFlyUp.tsx"
+      - "scripts/start-with-original-cynthia.sh"
+      - "tests/cynthia-original-resident.test.ts"
+      - ".github/workflows/cynthia-original-resident.yml"
+  push:
+    branches:
+      - main
+      - "integration/original-cynthia-resident-20261105"
+    paths:
+      - ".gitmodules"
+      - "vendor/klein-agent"
+      - "server/lib/cynthiaResidentBridge.ts"
+      - "server/routes.ts"
+      - "client/src/pages/CynthiaResident.tsx"
+      - "client/src/lib/AIService.ts"
+      - "client/src/components/AgentFlyUp.tsx"
+      - "scripts/start-with-original-cynthia.sh"
+      - "tests/cynthia-original-resident.test.ts"
+      - ".github/workflows/cynthia-original-resident.yml"
+  workflow_dispatch:
+
+jobs:
+  preservation-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install existing Computer dependencies
+        run: npm ci
+      - name: Verify actual original checkpoint hashes, tools, and route
+        run: node --import tsx --test tests/cynthia-original-resident.test.ts
+      - name: Build existing Computer
+        run: npm run build
+      - name: Check launch script syntax
+        run: bash -n scripts/start-with-original-cynthia.sh
+      - name: Package original Cynthia model as a user-downloadable file
+        run: |
+          mkdir -p artifacts
+          zip -q -r artifacts/Cynthia-Klein-Original-Trained.zip vendor/klein-agent docs/CYNTHIA_KLEIN_RESIDENT.md scripts/start-with-original-cynthia.sh -x "*/.git/*" "*/.venv/*"
+          unzip -l artifacts/Cynthia-Klein-Original-Trained.zip | grep 'vendor/klein-agent/run/model.pt'
+      - name: Upload downloadable original trained model and launch source
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cynthia-Klein-Original-Trained
+          path: artifacts/Cynthia-Klein-Original-Trained.zip
+          if-no-files-found: error
+      - name: Package existing Computer with original trained Cynthia as one ZIP
+        run: |
+          zip -q -r artifacts/Synthai2-Computer-With-Original-Cynthia.zip . -x "./.git/*" "./node_modules/*" "./dist/*" "./artifacts/*" "./data/*" "./vendor/klein-agent/.git" "./vendor/klein-agent/.venv/*"
+          unzip -l artifacts/Synthai2-Computer-With-Original-Cynthia.zip | grep 'vendor/klein-agent/run/model.pt'
+          unzip -l artifacts/Synthai2-Computer-With-Original-Cynthia.zip | grep 'scripts/start-with-original-cynthia.sh'
+      - name: Upload complete original-Cynthia Computer source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Synthai2-Computer-With-Original-Cynthia
+          path: artifacts/Synthai2-Computer-With-Original-Cynthia.zip
+          if-no-files-found: error
+  original-model-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install original Cynthia dependencies without changing her source
+        working-directory: vendor/klein-agent
+        run: bash setup.sh
+      - name: Run original model and verify real HTTP responses
+        working-directory: vendor/klein-agent
+        run: |
+          bash start.sh > /tmp/cynthia-output.log 2>&1 &
+          MODEL_PID=$!
+          trap 'kill "$MODEL_PID" 2>/dev/null || true' EXIT
+          python3 - <<'PY'
+          import time,urllib.request,json
+          uri="http://127.0.0.1:7860"
+          for _ in range(100):
+              try:
+                  status=json.load(urllib.request.urlopen(uri+"/api/status",timeout=2))
+                  if not isinstance(status.get("checkpoint_step"),int):
+                      raise RuntimeError("Checkpoint not loaded")
+                  if not isinstance(status.get("skill_count"),int):
+                      raise RuntimeError("Klein skills unavailable")
+                  req=urllib.request.Request(uri+"/api/chat",data=json.dumps({"message":"What can you do"}).encode(),headers={"Content-Type":"application/json"},method="POST")
+                  response=json.load(urllib.request.urlopen(req,timeout=30))
+                  if not isinstance(response.get("reply"),str) or not response["reply"].strip():
+                      raise RuntimeError("Original neural conversation returned no text")
+                  print("Original trained Cynthia responded through her own API")
+                  break
+              except Exception:
+                  time.sleep(2)
+          else:
+              raise SystemExit("Original model did not start or respond")
+          PY
