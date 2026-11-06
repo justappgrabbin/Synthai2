@@ -1,0 +1,50 @@
+# Full Linux Computer image: existing Node + Python backend plus ORIGINAL trained Cynthia.
+# Requires: git submodule update --init --recursive before docker compose build.
+FROM node:24-alpine AS ui
+# The existing stage-simlish prebuild invokes git while building bundled worlds.
+RUN apk add --no-cache git
+WORKDIR /build
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY . .
+RUN npm run build
+
+FROM python:3.12-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash ca-certificates curl git supervisor gcc g++ python3-venv unzip zip \
+ && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+ && apt-get install -y --no-install-recommends nodejs \
+ && rm -rf /var/lib/apt/lists/*
+WORKDIR /app/studio
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
+COPY --from=ui /build/dist ./dist
+COPY shared ./shared
+COPY you_n_i_verse ./you_n_i_verse
+COPY synthia-server /app/synthia-server
+RUN cd /app/synthia-server && npm ci --omit=dev --ignore-scripts
+RUN pip install --no-cache-dir fastapi "uvicorn[standard]" sse-starlette httpx numpy matplotlib pydantic websockets
+# Do not modify Cynthia's original code or checkpoint.
+COPY vendor/klein-agent /app/studio/vendor/klein-agent
+RUN test -s /app/studio/vendor/klein-agent/run/model.pt \
+ && test -s /app/studio/vendor/klein-agent/run/tokenizer.json \
+ && cd /app/studio/vendor/klein-agent && bash setup.sh --check 2>/dev/null || \
+    (cd /app/studio/vendor/klein-agent && bash setup.sh)
+COPY docker/supervisord.conf /etc/supervisor/conf.d/you-n-i-verse.conf
+COPY docker/cynthia-supervisor.conf /etc/supervisor/conf.d/cynthia.conf
+COPY docker/computer-start.sh /usr/local/bin/computer-start
+RUN chmod +x /usr/local/bin/computer-start
+ENV NODE_ENV=production PORT=5000 SYNTHIA_NODE_PORT=10000 SYNTHIA_PYTHON_PORT=8001
+ENV NODE_MODE=full SYNTHIA_URL=http://127.0.0.1:8001 PYTHON_API_URL=http://127.0.0.1:8001
+ENV PYTHON_API_AUTOSTART=false LINUX_CONTAINER_ENABLED=true LINUX_CONTAINER_WORKDIR=/workspace LINUX_CONTAINER_SHELL=/bin/bash
+ENV MESH_DATA_DIR=/workspace SYNTHIA_KLEIN_PORT=7860 SYNTHIA_KLEIN_WORK_DIR=/app/data/cynthia-resident
+ENV SUPABASE_PRIMARY_URL="" SUPABASE_PRIMARY_KEY="" SUPABASE_SECONDARY_URL="" SUPABASE_SECONDARY_KEY=""
+ENV TERMINAL_TOKEN="" CORS_ORIGIN="" ANTHROPIC_API_KEY="" OPENAI_API_KEY="" GITHUB_TOKEN=""
+ENV HF_TOKEN="" TRIDENT_ONNX_ENABLED=false TRIDENT_MODEL_URL="" KIMI_API_KEY=""
+ENV GOOGLE_ACCESS_TOKEN="" GOOGLE_CLIENT_ID="" GOOGLE_CLIENT_SECRET=""
+RUN mkdir -p /workspace /app/data
+EXPOSE 5000 10000
+HEALTHCHECK --interval=30s --timeout=8s --start-period=120s --retries=3 \
+  CMD curl -fsS http://127.0.0.1:5000/api/health || exit 1
+CMD ["/usr/local/bin/computer-start"]
