@@ -175,7 +175,7 @@ export function AIBackendSelector() {
       setIsConfigured(true);
       toast({
         title: "API Key Saved",
-        description: `${selectedBackend.name} is now configured and ready to use.`
+        description: selectedBackend.id === "cynthia" ? "Selected Cynthia Klein. Open Cynthia Klein in the Computer to verify its live connection." : `${selectedBackend.name} is selected; run a live test before relying on it.`
       });
     } else if (!selectedBackend.requiresKey) {
       setIsConfigured(true);
