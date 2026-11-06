@@ -26,6 +26,10 @@ interface AIBackend {
 
 const AI_BACKENDS: AIBackend[] = [
   {
+    id: "cynthia", name: "Cynthia Klein", displayName: "Cynthia — trained original",
+    requiresKey: false
+  },
+  {
     id: "local", name: "Synthia Local", displayName: "Synthia on-device model",
     requiresKey: false
   },
@@ -355,12 +359,13 @@ export function AIBackendSelector() {
         </div>
       )}
 
+      {selectedBackend.id === "cynthia" && <p className="text-sm text-muted-foreground">Original Cynthia Klein runs from the pinned klein-agent repository on the Computer host. Open /cynthia-resident to sign in and check its real status. It is not bundled into the Android APK.</p>}
       {selectedBackend.id === "local" && <p className="text-sm text-muted-foreground">The local model is selected for general chat. Open Model + Chat in Settings to verify the embedded Android engine and send an actual test message.</p>}
 
       <div className="flex items-center gap-2 pt-2 border-t">
         <div className={`h-2 w-2 rounded-full ${isConfigured ? 'bg-green-500' : 'bg-yellow-500'}`} />
         <span className="text-xs text-muted-foreground" data-testid="text-backend-status">
-          {isConfigured ? `${selectedBackend.name} credentials saved (connection not guaranteed)` : selectedBackend.id === "local" ? "Selected; check device status and run chat test" : "Configuration or live test required"}
+          {isConfigured ? `${selectedBackend.name} credentials saved (connection not guaranteed)` : selectedBackend.id === "cynthia" ? "Selected; check original resident connection" : selectedBackend.id === "local" ? "Selected; check device status and run chat test" : "Configuration or live test required"}
         </span>
       </div>
 
