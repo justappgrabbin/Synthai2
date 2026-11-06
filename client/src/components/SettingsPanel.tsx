@@ -214,6 +214,11 @@ export function SettingsPanel() {
           </TabsList>
 
           <TabsContent value="model" className="space-y-6">
+            <div className="rounded-lg border p-4 text-sm">
+              <p className="font-medium">Cynthia Klein — original trained resident</p>
+              <p className="text-muted-foreground">Use the original model, tools, chat and feedback before making changes.</p>
+              <a href="/cynthia-resident" className="underline">Open original Cynthia and check the connection</a>
+            </div>
             <LocalModelSettings />
           </TabsContent>
 
