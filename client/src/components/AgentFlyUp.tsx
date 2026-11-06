@@ -18,7 +18,7 @@ type Zip = { id: string; name?: string; filename?: string };
 export function AgentFlyUp() {
   const [, navigate] = useLocation();
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Synthia Agent. Local model availability has not been verified. Open Settings → Model + Chat to check the actual Android engine, then try a message." },
+    { role: "assistant", content: "Original Cynthia Klein. Open Cynthia Klein in the Computer to connect to the trained model, then send a message." },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
