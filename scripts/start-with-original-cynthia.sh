@@ -10,6 +10,18 @@ SOURCE_COMMIT="78ea0e28c70d7a5d4c288279025a493ceccbde5d"
 CYNTHIA_DATA="${SYNTHIA_KLEIN_WORK_DIR:-$COMPUTER_ROOT/data/cynthia-resident}"
 CYNTHIA_PORT="${SYNTHIA_KLEIN_PORT:-7860}"
 export SYNTHIA_KLEIN_PORT="$CYNTHIA_PORT"
+# A persistent owner token lets the same Computer serve a phone over the home network.
+# It never goes into model prompts or tracked source.
+if [[ -z "${SYNTHIA_KLEIN_OWNER_TOKEN:-}" ]]; then
+  TOKEN_FILE="$COMPUTER_ROOT/data/cynthia-resident-owner-token"
+  mkdir -p "$(dirname "$TOKEN_FILE")"
+  if [[ ! -f "$TOKEN_FILE" ]]; then
+    umask 077
+    python3 -c 'import secrets,sys;open(sys.argv[1],"x").write(secrets.token_urlsafe(32))' "$TOKEN_FILE"
+  fi
+  export SYNTHIA_KLEIN_OWNER_TOKEN="$(cat "$TOKEN_FILE")"
+fi
+echo "Cynthia Computer owner token (for phone sign-in): $SYNTHIA_KLEIN_OWNER_TOKEN"
 if [[ ! -f "$ORIGINAL/run/model.pt" || ! -f "$ORIGINAL/run/tokenizer.json" ]]; then
   echo "Original trained Cynthia model or tokenizer is missing" >&2
   exit 1
