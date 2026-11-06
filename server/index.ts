@@ -78,8 +78,8 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: process.env.SYNTHIA_PHONE_CONTAINER === "1" ? "127.0.0.1" : "0.0.0.0",
+    reusePort: process.env.SYNTHIA_PHONE_CONTAINER !== "1",
   }, () => {
     log(`serving on port ${port}`);
   });
