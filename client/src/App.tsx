@@ -32,7 +32,9 @@ import ContinuityGlyph from "@/pages/ContinuityGlyph";
 import HumanDesignStudio from "@/pages/HumanDesignStudio";
 import SimlishWorld from "@/pages/SimlishWorld";
 import SynthiaExperience from "@/pages/SynthiaExperience";
+import CynthiaResident from "@/pages/CynthiaResident";
 import IndiverseWorld from "@/pages/IndiverseWorld";
+import SelfBuild from "@/pages/SelfBuild";
 import "@/lib/registerHumanDesignApp";
 import "@/lib/registerSimlishWorldApp";
 import NotFound from "@/pages/not-found";
@@ -45,6 +47,7 @@ function Router() {
         <Route path="/" component={IndiverseWorld} />
         <Route path="/world" component={IndiverseWorld} />
         <Route path="/computer" component={Dashboard} />
+        <Route path="/self-build" component={SelfBuild} />
         <Route path="/grove-store" component={GroveStore} />
         <Route path="/ide" component={DeveloperPanel} />
         <Route path="/game-creator" component={GameCreator} />
@@ -65,6 +68,7 @@ function Router() {
         <Route path="/human-design" component={HumanDesignStudio} />
         <Route path="/simlish-world" component={SimlishWorld} />
         <Route path="/synthia" component={SynthiaExperience} />
+        <Route path="/cynthia-resident" component={CynthiaResident} />
         <Route component={NotFound} />
       </Switch>
     </>

@@ -1,3 +1,5 @@
+import { askLocalModel } from "./localModel";
+
 /**
  * AI Service Router
  * Handles API calls to different AI backends based on user selection
@@ -16,7 +18,7 @@ interface AIResponse {
 
 export class AIService {
   private static getSelectedBackend(): string {
-    return localStorage.getItem("ai_backend") || "claude";
+    return localStorage.getItem("ai_backend") || "cynthia";
   }
 
   private static getApiKey(backend: string): string | null {
@@ -33,6 +35,16 @@ export class AIService {
 
     try {
       switch (backend) {
+        case "cynthia": {
+          const status = await fetch("/api/cynthia-resident/status").then(r => r.json());
+          return status.running && status.authorized
+            ? { content: "Original Cynthia model is responding." }
+            : { content: "", error: "Original Cynthia is not running or not signed in. Open Cynthia Klein in the Computer." };
+        }
+        case "local": {
+          const reply = await askLocalModel(testMessages, { maxTokens: 24 });
+          return { content: reply.text };
+        }
         case "claude":
           return await this.callClaudeWithKey(testMessages, apiKey);
         case "gpt":
@@ -65,6 +77,12 @@ export class AIService {
     
     try {
       switch (backend) {
+        case "cynthia":
+          return await this.callCynthia(messages);
+        case "local": {
+          const reply = await askLocalModel(messages);
+          return { content: reply.text };
+        }
         case "claude":
           return await this.callClaude(messages);
         case "gpt":
@@ -87,6 +105,28 @@ export class AIService {
         error: error instanceof Error ? error.message : "Unknown error occurred"
       };
     }
+  }
+
+  /** Pass the user's exact message to the original trained Cynthia chat runtime.
+   * Cynthia maintains its own conversation and learning state. No extra system prompt.
+   */
+  private static async callCynthia(messages: AIMessage[]): Promise<AIResponse> {
+    const user = [...messages].reverse().find(message => message.role === "user");
+    if (!user?.content.trim()) return { content: "", error: "No user message." };
+    const response = await fetch("/resident/cynthia/api/chat", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: user.content }),
+    });
+    if (!response.ok) {
+      return { content: "", error: response.status === 401
+        ? "Open Cynthia Klein in the Computer and sign in first."
+        : "Original Cynthia is not responding. Open Cynthia Klein in the Computer." };
+    }
+    const value = await response.json() as { reply?: unknown };
+    if (typeof value.reply !== "string") return { content: "", error: "Original model did not return a reply." };
+    return { content: value.reply };
   }
 
   /**

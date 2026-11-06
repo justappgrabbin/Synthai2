@@ -18,12 +18,13 @@ type Zip = { id: string; name?: string; filename?: string };
 export function AgentFlyUp() {
   const [, navigate] = useLocation();
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Hi Alexis. I run on a local Qwen Coder on this device. Ask me anything, or tap Find entry / Run zip." },
+    { role: "assistant", content: "Synthia Agent. Local model availability has not been verified. Open Settings → Model + Chat to check the actual Android engine, then try a message." },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [playUrl, setPlayUrl] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const [chatMode, setChatMode] = useState<"cynthia" | "other">("cynthia");
   const [choice, setChoice] = useState<LocalModelChoice>(getModelChoice());
   const [tiny, setTiny] = useState(getTinyLlamaEnabled());
 
@@ -59,10 +60,25 @@ export function AgentFlyUp() {
   async function chat(text: string) {
     const history = [...messages, { role: "user" as const, content: text }];
     try {
+      if (chatMode === "cynthia") {
+        // Send the message unchanged. Original Cynthia owns its own memory and context.
+        const response = await fetch("/resident/cynthia/api/chat", {
+          method: "POST", credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text }),
+        });
+        if (!response.ok) throw new Error(response.status === 401
+          ? "Original Cynthia requires owner sign-in. Open Cynthia Klein in the Computer"
+          : "Original Cynthia is not running. Open Cynthia Klein in the Computer to check its status");
+        const result = await response.json() as { reply?: string };
+        if (typeof result.reply !== "string") throw new Error("Original Cynthia returned no text");
+        say(result.reply);
+        return;
+      }
       const { text: reply, via } = await askLocalModel([{ role: "system", content: GPT_DASH_DIRECTIVE }, ...history], { onProgress: (p) => say(p) });
       say(reply + "\n\n(" + via + ")");
     } catch (e: any) {
-      say(e.message + ". On the phone this needs the bundled engine (Synthia Adaptive) or a local llama.cpp / Ollama with the model installed. Zip actions still work.");
+      say((e instanceof Error ? e.message : "Model unavailable") + ". The original model must be running before chat works. ZIP actions still work.");
     }
   }
 
@@ -80,6 +96,7 @@ export function AgentFlyUp() {
   }
 
   const tiles = [
+    { label: "Open original Cynthia", icon: Bot, run: () => { closeFlyUp(); navigate("/cynthia-resident"); } },
     { label: "Find zip entry", icon: Search, run: findEntry },
     { label: "Run latest zip", icon: Eye, run: runZip },
     { label: "ZIP manager / player", icon: FileArchive, run: () => { closeFlyUp(); navigate("/zip-manager"); } },
@@ -87,9 +104,9 @@ export function AgentFlyUp() {
 
   return (
     <FlyUpScreen id="agent" testId="flyup-agent" title="Synthia Agent" icon={<Bot className="h-5 w-5" />}
-      description="Local Qwen Coder on this device · finds the zip entry, runs it">
+      description="Cynthia Klein original resident · ZIP actions">
       <div className="flex h-full flex-col">
-        <div className="grid grid-cols-3 gap-2 border-b border-purple-500/30 p-3">
+        <div className="grid grid-cols-2 gap-2 border-b border-purple-500/30 p-3">
           {tiles.map((t) => (
             <Button key={t.label} size="sm" variant="outline" onClick={t.run} disabled={busy}
               className="h-auto min-h-12 justify-start gap-2 whitespace-normal text-left text-xs"
@@ -99,6 +116,15 @@ export function AgentFlyUp() {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2 border-b px-3 py-2 text-xs">
+          <label className="flex items-center gap-2">
+            Chat with
+            <select aria-label="Agent backend" value={chatMode} onChange={(e) => setChatMode(e.target.value as "cynthia" | "other")}
+              className="rounded-md border bg-background px-2 py-1">
+              <option value="cynthia">Cynthia Klein (original)</option>
+              <option value="other">Other local models</option>
+            </select>
+          </label>
+          {chatMode === "other" && <>
           <select data-testid="agent-model" value={choice} className="rounded-md border bg-background px-2 py-1"
             onChange={(e) => { const c = e.target.value as LocalModelChoice; setModelChoice(c); setChoice(c); }}>
             {(Object.keys(LOCAL_MODELS) as LocalModelChoice[]).filter((k) => k !== "tinyllama" || tiny).map((k) => (
@@ -110,6 +136,7 @@ export function AgentFlyUp() {
               onChange={(e) => { setTinyLlamaEnabled(e.target.checked); setTiny(e.target.checked); setChoice(getModelChoice()); }} />
             TinyLlama fallback
           </label>
+          </>}
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto p-4 text-sm">
           {messages.map((m, i) => (

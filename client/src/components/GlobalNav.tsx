@@ -8,6 +8,7 @@ import { openFlyUp } from "@/lib/flyUps";
 const NAV_ITEMS = [
   { path: "/", icon: Orbit, label: "World" },
   { path: "/computer", icon: Home, label: "Computer" },
+  { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/human-design", icon: Brain, label: "Human Design" },
   { path: "/grove-store", icon: Store, label: "Store" },
   { path: "/ide", icon: Code2, label: "IDE" },
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { path: "/player", icon: Play, label: "Player" },
   { path: "/agents", icon: Bot, label: "Agents" },
   { path: "/synthia", icon: Brain, label: "Synthia" },
+  { path: "/cynthia-resident", icon: Bot, label: "Cynthia Klein" },
   { path: "/simlish-world", icon: Play, label: "Simlish World" },
   { path: "/mod-manager", icon: Rocket, label: "Mods" },
   { path: "/settings", icon: Settings, label: "Settings" },
@@ -32,6 +34,7 @@ const NAV_ITEMS = [
 
 const MOBILE_DOCK_ITEMS = [
   { path: "/", icon: Orbit, label: "World" },
+  { path: "/self-build", icon: Rocket, label: "Build" },
   { path: "/human-design", icon: Brain, label: "Design" },
   { path: "/ide", icon: Code2, label: "IDE" },
   { path: "/ingest", icon: Upload, label: "Ingest" },
@@ -73,6 +76,11 @@ export function GlobalNav() {
             })}
           </div>
 
+          <Link href="/settings">
+            <Button variant={location === "/settings" ? "default" : "ghost"} size="icon" aria-label="Settings" title="Settings: model, chat, and system">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             size="icon"

@@ -1,0 +1,43 @@
+name: Verify Synthia2 Self-Builder
+
+on:
+  push:
+    branches:
+      - integration/self-building-runtime-20261104
+  pull_request:
+    paths:
+      - "server/lib/selfBuildService.ts"
+      - "client/src/lib/localModel.ts"
+      - "client/src/lib/AIService.ts"
+      - "client/src/components/LocalModelSettings.tsx"
+      - "client/src/components/SettingsPanel.tsx"
+      - "client/src/components/AgentFlyUp.tsx"
+      - "tests/local-model.test.ts"
+      - "server/routes.ts"
+      - "client/src/pages/SelfBuild.tsx"
+      - "client/src/components/GlobalNav.tsx"
+      - "client/src/components/GroveStore.tsx"
+      - "tests/self-build.test.ts"
+      - ".github/workflows/self-build-verify.yml"
+  workflow_dispatch:
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - name: Test actual model-status and routing behavior (mocked providers)
+        run: node --import tsx --test tests/local-model.test.ts
+      - name: Exercise generated-app static validation
+        run: node --import tsx --test tests/self-build.test.ts
+      - name: Compile integrated frontend and backend
+        run: npm run build
+      - name: Check TypeScript (includes existing legacy errors)
+        run: npm run check
