@@ -1,0 +1,48 @@
+name: Full Linux Computer backend
+on:
+  pull_request:
+    paths:
+      - "Dockerfile.computer"
+      - "docker-compose.computer.yml"
+      - "docker/computer-start.sh"
+      - "docker/cynthia-supervisor.conf"
+      - ".github/workflows/full-linux-computer.yml"
+  workflow_dispatch:
+jobs:
+  validate-linux-container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Validate configuration and entry point
+        run: |
+          bash -n docker/computer-start.sh
+          docker compose -f docker-compose.computer.yml config --quiet
+          test -s vendor/klein-agent/run/model.pt
+          test -s vendor/klein-agent/run/tokenizer.json
+      - name: Build real Linux Computer image including Python and original model
+        run: docker compose -f docker-compose.computer.yml build
+      - name: Start and test backend services
+        run: |
+          docker compose -f docker-compose.computer.yml up -d
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:5000/api/health && curl -fsS http://127.0.0.1:5000/api/cynthia-resident/status; then
+              break
+            fi
+            sleep 3
+          done
+          docker compose -f docker-compose.computer.yml ps
+          docker compose -f docker-compose.computer.yml exec -T computer python - <<'PY'
+          import json,urllib.request
+          status=json.load(urllib.request.urlopen("http://127.0.0.1:7860/api/status",timeout=15))
+          assert isinstance(status.get("checkpoint_step"),int),status
+          print("Original trained model process ready in Linux container")
+          PY
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.computer.yml logs --tail=150
+      - name: Stop container
+        if: always()
+        run: docker compose -f docker-compose.computer.yml down
