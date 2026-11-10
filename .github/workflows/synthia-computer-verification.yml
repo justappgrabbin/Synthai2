@@ -1,0 +1,29 @@
+name: Synthia computer integration verification
+
+on:
+  push:
+    branches:
+      - integration/synthia-autonomous-computer-20261109
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  computer-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install project dependencies
+        run: npm ci --ignore-scripts
+      - name: Workspace persistence and boundaries
+        run: npx tsx --test tests/workspace-boundaries.test.ts
+      - name: Terminal execution and timeout
+        run: npx tsx --test tests/linux-terminal.test.ts
+      - name: Application import, execution and recovery
+        run: npx tsx --test tests/app-mount-execution.test.ts
