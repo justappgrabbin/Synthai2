@@ -103,11 +103,12 @@ export function listWorkspaceFiles(dir = ".") {
   const entries = fs.existsSync(target)
     ? fs.readdirSync(target, { withFileTypes: true }).map((entry) => {
         const fullPath = path.join(target, entry.name);
-        const stats = fs.statSync(fullPath);
+        // lstat does not follow a symbolic link outside the workspace.
+        const stats = fs.lstatSync(fullPath);
         return {
           name: entry.name,
           path: path.relative(getWorkspaceRoot(), fullPath).replace(/\\/g, "/"),
-          type: entry.isDirectory() ? "directory" : "file",
+          type: entry.isSymbolicLink() ? "symlink" : entry.isDirectory() ? "directory" : "file",
           size: stats.size,
           modifiedAt: stats.mtime.toISOString(),
         };
