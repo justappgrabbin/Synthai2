@@ -112,10 +112,15 @@ export async function runContainerCommand(command: string, cwd?: string): Promis
   let stderr = "";
   let timedOut = false;
 
+  const configuredTimeout = Number(process.env.LINUX_CONTAINER_TIMEOUT_MS);
+  const timeoutMs = Number.isFinite(configuredTimeout) && configuredTimeout > 0
+    ? Math.min(configuredTimeout, 300_000)
+    : DEFAULT_TIMEOUT_MS;
   const timeout = setTimeout(() => {
     timedOut = true;
     child.kill("SIGTERM");
-  }, Number(process.env.LINUX_CONTAINER_TIMEOUT_MS || DEFAULT_TIMEOUT_MS));
+  }, timeoutMs);
+  timeout.unref();
 
   child.stdout.on("data", (chunk) => {
     stdout = clampOutput(stdout + chunk.toString());
@@ -126,7 +131,10 @@ export async function runContainerCommand(command: string, cwd?: string): Promis
   });
 
   return new Promise((resolve, reject) => {
-    child.on("error", reject);
+    child.on("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
     child.on("close", (code, signal) => {
       clearTimeout(timeout);
       resolve({
