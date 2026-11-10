@@ -47,3 +47,26 @@ test("mounted JavaScript app executes and retains run history", async (t) => {
   assert.match(result.run.stdout, /synthia-run-ok/);
   assert.ok((await getMountedAppRuns(app.id)).length >= 1);
 });
+
+test("mounted app and run history survive module reload", async (t) => {
+  if (process.platform === "win32") { t.skip("POSIX shell required"); return; }
+  process.env.LINUX_CONTAINER_ENABLED = "true";
+  const app = await mountApp({
+    name: "restart recovery",
+    files: [{ path: "main.js", content: "console.log('recovered-run')" }],
+  });
+  const first = await runMountedApp(app.id);
+  assert.equal(first.run.code, 0);
+
+  // A fresh module instance simulates service restart while keeping disk state.
+  const recovered = await import(`../server/lib/appMountService.ts?recovery=${Date.now()}`);
+  const restored = await recovered.getMountedApp(app.id);
+  assert.equal(restored.id, app.id);
+  assert.ok(restored.files.includes("main.js"));
+  const history = await recovered.getMountedAppRuns(app.id);
+  assert.equal(history.length, 1);
+  assert.equal(history[0].stdout.trim(), "recovered-run");
+  const second = await recovered.runMountedApp(app.id);
+  assert.equal(second.run.code, 0);
+  assert.equal((await recovered.getMountedAppRuns(app.id)).length, 2);
+});
