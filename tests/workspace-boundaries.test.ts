@@ -40,3 +40,16 @@ test("workspace rejects symlink escapes for reads, writes, and listings", (t) =>
   assert.throws(() => listWorkspaceFiles("external"), /symbolic links/);
   assert.equal(fs.existsSync(path.join(outside, "new.txt")), false);
 });
+
+test("workspace directory listing identifies symlinks without following targets", (t) => {
+  const target = path.join(outside, "external-file.txt");
+  fs.writeFileSync(target, "external-data");
+  const link = path.join(root, "external-file-link");
+  try { fs.symlinkSync(target, link); }
+  catch (error) { t.skip("symlinks unavailable: " + String(error)); return; }
+  const entry = listWorkspaceFiles().entries.find((item) => item.name === "external-file-link");
+  assert.ok(entry);
+  assert.equal(entry.type, "symlink");
+  assert.equal(entry.size, fs.lstatSync(link).size);
+  assert.throws(() => readWorkspaceFile("external-file-link"), /symbolic links/);
+});
