@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import os from "os";
+import fs from "fs";
 
 export interface ContainerCommandResult {
   command: string;
@@ -39,6 +40,20 @@ function resolveCwd(requestedCwd?: string) {
     throw new Error("Command cwd must stay inside the configured workspace");
   }
 
+  // Reject paths that reach outside the workspace via symlinked directories.
+  // This constrains the initial cwd, not commands executed by the shell.
+  let current = root;
+  for (const segment of path.relative(root, candidate).split(path.sep).filter(Boolean)) {
+    current = path.join(current, segment);
+    try {
+      if (fs.lstatSync(current).isSymbolicLink()) {
+        throw new Error("Command cwd cannot traverse symbolic links");
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") break;
+      throw error;
+    }
+  }
   return candidate;
 }
 
