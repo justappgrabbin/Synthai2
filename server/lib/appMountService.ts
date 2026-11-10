@@ -111,21 +111,29 @@ async function extractZip(buffer: Buffer, destination: string) {
   const zip = await JSZip.loadAsync(buffer);
   const extracted: string[] = [];
   const entries: { target: string; file: JSZip.JSZipObject; name: string }[] = [];
-  let totalBytes = 0;
+  const seen = new Set<string>();
   for (const [name, file] of Object.entries(zip.files)) {
     if (file.dir) continue;
     const target = resolveInside(destination, name);
-    const size = (file as any)._data?.uncompressedSize;
-    if (!Number.isSafeInteger(size) || size < 0) throw new Error("ZIP entry size unavailable");
-    totalBytes += size;
-    if (entries.length >= 1000 || totalBytes > 100 * 1024 * 1024) {
-      throw new Error("ZIP exceeds extraction limits");
-    }
+    if (seen.has(target)) throw new Error("Duplicate ZIP entry path");
+    seen.add(target);
+    if (entries.length >= 1000) throw new Error("ZIP exceeds extraction limits");
     entries.push({ target, file, name });
   }
-  // Validate all entry paths before extracting any file.
+
+  // Validate all paths before extracting; count decompressed bytes using
+  // the public JSZip API rather than undocumented internal metadata.
+  let totalBytes = 0;
+  const decoded: { target: string; bytes: Buffer; name: string }[] = [];
   for (const { target, file, name } of entries) {
     const bytes = await file.async("nodebuffer");
+    totalBytes += bytes.length;
+    if (totalBytes > 100 * 1024 * 1024) {
+      throw new Error("ZIP exceeds extraction limits");
+    }
+    decoded.push({ target, bytes, name });
+  }
+  for (const { target, bytes, name } of decoded) {
     await ensureDir(path.dirname(target));
     await fsp.writeFile(target, bytes, { flag: "wx" });
     extracted.push(name);
