@@ -108,6 +108,18 @@ export function Terminal({ onClose }: TerminalProps) {
     write("$ " + value, "input");
     setHistory(old => [...old, value]);
     setHistoryIndex(-1);
+    // Explicit native-shell prefix preserves existing IDE commands while
+    // allowing the real backend terminal to execute commands such as ls/pwd.
+    if (value.startsWith("os ")) {
+      const shellCommand = value.slice(3).trim();
+      if (!shellCommand) { write("Usage: os COMMAND", "error"); return; }
+      if (!container.enabled) {
+        write("Native command runtime is not connected", "error");
+        return;
+      }
+      await executeShell(shellCommand);
+      return;
+    }
     const [command, ...args] = value.split(/\s+/);
     const name = command.toLowerCase();
     const path = args[0];
@@ -128,6 +140,7 @@ export function Terminal({ onClose }: TerminalProps) {
             "  date         Current time",
             "  history      Command history",
             "  clear        Clear output",
+            "  os COMMAND   Execute directly in the connected native shell",
             "OS commands are forwarded only when an actual command backend is connected.",
             "There is no simulated Linux, network, disk, or process output.",
           ].join("\n"));
