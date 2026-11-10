@@ -45,14 +45,30 @@ function resolveAppPath(id: string) {
 }
 
 function resolveInside(root: string, filePath: string) {
-  const normalized = filePath.replace(/\\/g, "/").replace(/^\/+/, "");
-  if (!normalized || normalized.includes("../")) {
+  if (!filePath || path.posix.isAbsolute(filePath.replace(/\\/g, "/")) || path.win32.isAbsolute(filePath)) {
     throw new Error("Invalid upload path");
   }
-
-  const target = path.resolve(root, normalized);
-  if (!target.startsWith(path.resolve(root) + path.sep) && target !== path.resolve(root)) {
+  const normalized = filePath.replace(/\\/g, "/");
+  const parts = normalized.split("/");
+  if (parts.some((part) => part === ".." || part === "." || part === "")) {
+    throw new Error("Invalid upload path");
+  }
+  const absoluteRoot = path.resolve(root);
+  const target = path.resolve(absoluteRoot, normalized);
+  if (!target.startsWith(absoluteRoot + path.sep)) {
     throw new Error("Upload path must stay inside mounted app");
+  }
+  let current = absoluteRoot;
+  for (const part of parts) {
+    current = path.join(current, part);
+    try {
+      if (fs.lstatSync(current).isSymbolicLink()) {
+        throw new Error("Mounted app path cannot traverse symbolic links");
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") break;
+      throw error;
+    }
   }
   return target;
 }
@@ -94,21 +110,26 @@ async function listFiles(dir: string, base = dir, acc: string[] = []) {
 async function extractZip(buffer: Buffer, destination: string) {
   const zip = await JSZip.loadAsync(buffer);
   const extracted: string[] = [];
-  const writes: Promise<void>[] = [];
-
-  zip.forEach((relativePath, file) => {
-    if (file.dir) return;
-    const normalized = relativePath.replace(/\\/g, "/").replace(/^\/+/, "");
-    if (!normalized || normalized.includes("../")) return;
-    writes.push((async () => {
-      const target = resolveInside(destination, normalized);
-      await ensureDir(path.dirname(target));
-      await fsp.writeFile(target, await file.async("nodebuffer"));
-      extracted.push(normalized);
-    })());
-  });
-
-  await Promise.all(writes);
+  const entries: { target: string; file: JSZip.JSZipObject; name: string }[] = [];
+  let totalBytes = 0;
+  for (const [name, file] of Object.entries(zip.files)) {
+    if (file.dir) continue;
+    const target = resolveInside(destination, name);
+    const size = (file as any)._data?.uncompressedSize;
+    if (!Number.isSafeInteger(size) || size < 0) throw new Error("ZIP entry size unavailable");
+    totalBytes += size;
+    if (entries.length >= 1000 || totalBytes > 100 * 1024 * 1024) {
+      throw new Error("ZIP exceeds extraction limits");
+    }
+    entries.push({ target, file, name });
+  }
+  // Validate all entry paths before extracting any file.
+  for (const { target, file, name } of entries) {
+    const bytes = await file.async("nodebuffer");
+    await ensureDir(path.dirname(target));
+    await fsp.writeFile(target, bytes, { flag: "wx" });
+    extracted.push(name);
+  }
   return extracted;
 }
 
