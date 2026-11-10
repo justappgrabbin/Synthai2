@@ -29,6 +29,23 @@ function resolveWorkspacePath(filePath: string) {
     throw new Error("Workspace path must stay inside the configured workspace");
   }
 
+  // A lexically contained path may still escape through a symbolic link.
+  // Refuse symlink components before any read, write, or directory listing.
+  // The configured workspace root itself may be a deliberate symlink.
+  let current = root;
+  const relative = path.relative(root, target);
+  for (const part of relative.split(path.sep).filter(Boolean)) {
+    current = path.join(current, part);
+    try {
+      if (fs.lstatSync(current).isSymbolicLink()) {
+        throw new Error("Workspace paths cannot traverse symbolic links");
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") break;
+      throw error;
+    }
+  }
+
   return target;
 }
 
